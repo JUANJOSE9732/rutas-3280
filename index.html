@@ -356,10 +356,10 @@ const IV={
   {b:"Antecedentes personales",t:"ask",l:"Trombosis",q:"¿Ha tenido trombosis o coágulos en las piernas o los pulmones?",c:["Niega|Niega antecedente de trombosis venosa o embolia pulmonar.","Refiere|Refiere antecedente de trombosis: ____ en ____."],al:POS,am:"Antecedente tromboembólico: los métodos hormonales combinados están contraindicados; requiere asesoría especializada."},
   {b:"Antecedentes ginecobstétricos",t:"ask",l:"Menarquia y ciclos",q:"¿A qué edad le llegó la primera regla? ¿Le viene cada mes?",c:["Regulares|Menarquia a los __ años. Ciclos regulares cada __ días, con duración de __ días.", "Irregulares|Menarquia a los __ años. Ciclos irregulares."]},
   {b:"Antecedentes ginecobstétricos",t:"ask",l:"Fórmula obstétrica",q:"¿Cuántos embarazos ha tenido? ¿Cuántos partos, cesáreas y abortos? ¿Cuántos hijos vivos?",c:["Nuligesta|Nuligesta: G0 P0 C0 A0 V0.", "Fórmula|G__ P__ C__ A__ V__."]},
-  {b:"Antecedentes ginecobstétricos",t:"ask",l:"Último parto o cesárea",q:"¿Cuándo fue su último parto o cesárea?",c:["No aplica|No aplica (nuligesta).", "Más de 18 meses|Último parto hace más de 18 meses (____); intervalo intergenésico adecuado.", "Menos de 18 meses|Último parto hace menos de 18 meses (____); se recomienda esperar hasta completar 18 meses."],h:"Si fue hace menos de 18 meses, recomienda esperar: el intervalo mínimo es de 18 meses."},
-  {b:"Antecedentes ginecobstétricos",t:"ask",l:"Complicaciones obstétricas previas",q:"En embarazos anteriores, ¿tuvo presión alta, convulsiones, hemorragia después del parto, placenta retenida, bebés muy pequeños o muy grandes, bebés que murieron o embarazo molar?",c:["Niega|Niega complicaciones en gestaciones previas: trastornos hipertensivos, hemorragia posparto, retención placentaria, alteraciones del peso fetal, muerte perinatal o embarazo molar.", "No aplica|No aplica (nuligesta).", "Refiere|Refiere en gestación previa: ____."],al:POS,am:"Complicación obstétrica previa: aplicar el plan de la 3280 para ese antecedente (asesoría de recurrencia, evaluación de causas, parto en institución con capacidad resolutiva)."},
-  {b:"Antecedentes ginecobstétricos",t:"ask",l:"Depresión posparto previa",q:"Después de algún parto, ¿se sintió muy triste o sin ganas de nada por varias semanas?",c:["No|Niega síntomas depresivos después de partos previos.", "No aplica|No aplica (nuligesta).", "Sí|Sí refiere síntomas depresivos posparto en gestación previa."],al:SI,am:"Antecedente de depresión posparto: aplica las preguntas de tamizaje; si son positivas, ruta de salud mental."},
-  {b:"Antecedentes ginecobstétricos",t:"ask",l:"Grupo sanguíneo y Rh",q:"¿Sabe su tipo de sangre? ¿Y el de su pareja?",c:["No sabe|Desconoce su grupo sanguíneo y Rh; se solicita hemoclasificación.", "Conocido|Grupo sanguíneo ____ Rh ____. Pareja: ____."],h:"Si es Rh negativo, se analiza con la paridad y si recibió anti-D."},
+  {b:"Antecedentes ginecobstétricos",t:"ask",si:A=>!/nuligesta/i.test(A("Fórmula obstétrica")),l:"Último parto o cesárea",q:"¿Cuándo fue su último parto o cesárea?",c:["No aplica|No aplica (nuligesta).", "Más de 18 meses|Último parto hace más de 18 meses (____); intervalo intergenésico adecuado.", "Menos de 18 meses|Último parto hace menos de 18 meses (____); se recomienda esperar hasta completar 18 meses."],h:"Si fue hace menos de 18 meses, recomienda esperar: el intervalo mínimo es de 18 meses."},
+  {b:"Antecedentes ginecobstétricos",t:"ask",si:A=>!/nuligesta/i.test(A("Fórmula obstétrica")),l:"Complicaciones obstétricas previas",q:"En embarazos anteriores, ¿tuvo presión alta, convulsiones, hemorragia después del parto, placenta retenida, bebés muy pequeños o muy grandes, bebés que murieron o embarazo molar?",c:["Niega|Niega complicaciones en gestaciones previas: trastornos hipertensivos, hemorragia posparto, retención placentaria, alteraciones del peso fetal, muerte perinatal o embarazo molar.","Preeclampsia|Antecedente de preeclampsia en gestación previa (____).","Hemorragia posparto|Antecedente de hemorragia posparto en gestación previa (____).","Muerte del bebé|Antecedente de muerte perinatal: ____ (semanas o días de vida, causa si la conoce).","Bebé pequeño|Antecedente de recién nacido de bajo peso: ____ g.","Parto prematuro|Antecedente de parto pretérmino a las ____ semanas.","Abortos repetidos|Antecedente de ____ abortos.","Mola|Antecedente de embarazo molar en ____; seguimiento: ____.","Otra|Refiere en gestación previa: ____."],al:POS,am:"Complicación obstétrica previa: aplicar el plan de la 3280 para ese antecedente (asesoría de recurrencia, evaluación de causas, parto en institución con capacidad resolutiva)."},
+  {b:"Antecedentes ginecobstétricos",t:"ask",si:A=>!/nuligesta/i.test(A("Fórmula obstétrica")),l:"Depresión posparto previa",q:"Después de algún parto, ¿se sintió muy triste o sin ganas de nada por varias semanas?",c:["No|Niega síntomas depresivos después de partos previos.", "No aplica|No aplica (nuligesta).", "Sí|Sí refiere síntomas depresivos posparto en gestación previa."],al:SI,am:"Antecedente de depresión posparto: aplica las preguntas de tamizaje; si son positivas, ruta de salud mental."},
+  {b:"Antecedentes ginecobstétricos",t:"ask",l:"Grupo sanguíneo y Rh",q:"¿Sabe su tipo de sangre? ¿Y el de su pareja?",c:["No sabe|Desconoce su grupo sanguíneo y Rh; se solicita hemoclasificación.","O+|Grupo sanguíneo O Rh positivo. Pareja: ____.","O-|Grupo sanguíneo O Rh negativo. Pareja: ____.","A+|Grupo sanguíneo A Rh positivo. Pareja: ____.","A-|Grupo sanguíneo A Rh negativo. Pareja: ____.","B+|Grupo sanguíneo B Rh positivo. Pareja: ____.","B-|Grupo sanguíneo B Rh negativo. Pareja: ____.","AB+|Grupo sanguíneo AB Rh positivo. Pareja: ____.","AB-|Grupo sanguíneo AB Rh negativo. Pareja: ____."],h:"Si es Rh negativo, se analiza con la paridad y si recibió anti-D."},
   {b:"Salud sexual",t:"ask",l:"Vida sexual",q:"¿A qué edad inició relaciones? ¿Cuántas parejas ha tenido? ¿Usa condón?",c:["Pareja estable|Inicio de relaciones sexuales a los __ años. __ parejas sexuales. Pareja estable actual. No usa condón.", "Usa condón|Inicio de relaciones sexuales a los __ años. __ parejas sexuales. Usa condón."]},
   {b:"Salud sexual",t:"ask",l:"ITS",q:"¿Ha tenido flujo con mal olor, llagas en los genitales o alguna infección de transmisión sexual?",c:["Niega|Niega flujo con mal olor, úlceras genitales o antecedente de ITS.", "Refiere|Refiere ____; se brinda manejo y se ofrecen pruebas."],al:POS,am:"Antecedente o síntomas de ITS: tratar a ella y a la pareja antes del embarazo."},
   {b:"Salud sexual",t:"ask",l:"Tamizaje de cuello uterino",q:"¿Cuándo fue su última citología o prueba de VPH? ¿Qué resultado le dieron?",c:["Al día|Último tamizaje de cuello uterino (____) en ____, resultado normal.", "Nunca|Nunca se ha realizado tamizaje de cuello uterino.", "No recuerda|No recuerda fecha ni resultado del último tamizaje de cuello uterino."],h:"Rural disperso: 25–29 años citología; 30–50 Ver y Tratar; 51–65 citología o ADN-VPH."},
@@ -755,11 +755,19 @@ function renderMod(){
   if(st.tab==="base"){st.tab=S.get(key(id,"tab"))==="base"?"nota":(S.get(key(id,"tab"))||"nota");$("pane").innerHTML=`<p class="status" id="status">Tomando los datos de esta historia…</p>`;enviarBase(id);return}
   if(st.tab==="entr")paneEntr();else if(st.tab==="guia")paneGuia();else if(st.tab==="herr")paneHerr();else paneNota();
 }
+const ALC={
+ precon:{si:["Consulta preconcepcional en mujeres sin factores de riesgo (Res. 3280, 4.1.2).","Exámenes de la atención: HBsAg, glicemia, hemoclasificación, hemograma, hemoparásitos, IgG toxoplasma, rubéola y varicela, prueba treponémica rápida, urocultivo, VIH rápida con asesoría.","Tamizaje de cuello uterino (citología, ADN-VPH, Ver y Tratar si estás entrenado).","Ácido fólico 0,4 mg/día (4 mg si tuvo hijo con defecto del tubo neural).","Calcio si la ingesta es baja.","Asesoría y provisión de método anticonceptivo (criterios OMS, atención 13).","Vacunación para completar el esquema.","Educación y remisión a odontología, nutrición, psicología."],
+  no:["Cualquier factor de riesgo o enfermedad crónica: hipertensión, diabetes, epilepsia, tiroides, corazón, riñón, lupus, trombosis.","Cambio o ajuste de medicamentos (antihipertensivos, anticonvulsivantes, warfarina, otros).","Paraclínicos anormales y su tratamiento (anemia, infecciones, sífilis, hepatitis B, VIH).","Inmunoglobulina anti-D, anticoagulación, estudios de infertilidad o pérdidas repetidas."]},
+ prenatal:{si:["Primera consulta y controles de la gestante sin factores de riesgo (Res. 3280, 4.3.2), excepto las semanas 36, 38 y 40.","Exámenes de ingreso y de seguimiento del protocolo, incluidas pruebas rápidas de VIH y sífilis con asesoría.","Ácido fólico, calcio, hierro profiláctico y albendazol, según la atención.","Vacunación de la gestante.","Escala de Herrera y Hurtado, tamizajes de violencia y depresión.","Remisiones a odontología, nutrición, curso de preparación; plan de parto."],
+  no:["De inmediato: cualquier factor de riesgo biopsicosocial, enfermedad asociada o propia de la gestación, o paraclínico anormal (Res. 3280).","Controles de las semanas 36, 38 y 40.","Aspirina por riesgo de preeclampsia, inmunoglobulina anti-D, tratamientos de infecciones o anemia.","Prueba treponémica positiva: penicilina benzatínica inmediata según el protocolo de tu institución, notificar y remitir."]}
+};
+function alcHTML(id){const a=ALC[id];if(!a)return"";return `<details class="sec"><summary><span>Qué ordenas como enfermero y qué remites</span></summary><div style="padding:0 14px 14px"><p class="lab" style="margin:6px 0">Puedes hacer u ordenar</p><ul style="padding-left:20px;margin:0">${a.si.map(x=>`<li style="display:list-item">${esc(x)}</li>`).join("")}</ul><p class="lab" style="margin:10px 0 6px">Remites a medicina</p><ul style="padding-left:20px;margin:0">${a.no.map(x=>`<li style="display:list-item">${esc(x)}</li>`).join("")}</ul></div></details>`}
 function paneGuia(){
   const m=M[st.mod],id=st.mod,ck=checks(id);
   const total=m.sections.reduce((a,s)=>a+s.items.length,0),done=Object.keys(ck).length;
   $("pane").innerHTML=`
   ${m.alerts.length?`<div class="box warn"><h3>Remitir o actuar si…</h3><ul>${m.alerts.map(a=>`<li>${esc(a)}</li>`).join("")}</ul></div>`:""}
+  ${alcHTML(id)}
   <p class="note-src">Marca lo que vas haciendo (${done} de ${total}). Lo marcado se pasa a la nota.</p>
   ${m.sections.map((s,i)=>`<details class="sec" ${i<2?"open":""}><summary><span>${esc(s.t)}</span><span class="cnt">${s.items.filter((_,j)=>ck[i+"."+j]).length}/${s.items.length}</span></summary><ul class="items">${s.items.map((it,j)=>{const q=it.startsWith("Q:");const txt=q?it.slice(2):it;return `<li><input type="checkbox" id="c${i}_${j}" data-k="${i}.${j}" ${ck[i+"."+j]?"checked":""}><label for="c${i}_${j}"><span class="${q?"q":""}">${esc(txt)}</span></label></li>`}).join("")}</ul></details>`).join("")}
   <div class="btns"><button class="btn primary" id="goNota">Siguiente: Nota →</button><button class="btn" id="clrChk">Desmarcar todo</button></div>`;
@@ -929,7 +937,7 @@ function wireMic(root,ta,onChange){
 /* ---------- ENTREVISTA GUIADA ---------- */
 function ivAns(id){try{return JSON.parse(S.get(key(id,"iv"))||"{}")}catch(e){return{}}}
 function ivCompose(id){const q=ivFor(id),a=ivAns(id);let blk="",out=[];
-  q.forEach((x,i)=>{const v=(a[i]||"").trim();if(!v)return;if(x.b!==blk){blk=x.b;out.push((out.length?"\n":"")+blk.toUpperCase())}out.push("- "+x.l+": "+v)});
+  q.forEach((x,i)=>{let v=(a[i]||"").trim();if(!v&&x.si&&!ivAplica(id,i))v="No aplica.";if(!v)return;if(x.b!==blk){blk=x.b;out.push((out.length?"\n":"")+blk.toUpperCase())}out.push("- "+x.l+": "+v)});
   return out.join("\n")}
 function ivAlerts(id){const q=ivFor(id),a=ivAns(id),o=[];q.forEach((x,i)=>{const v=(a[i]||"").trim();if(v&&x.al&&x.al.test(v))o.push(x.am)});return o}
 /* ---------- ANÁLISIS: DEVOLUCIÓN Y RUTAS ---------- */
@@ -1000,7 +1008,7 @@ Devuelve:
  "rutas":[{"ruta":"nombre de la ruta o servicio (p. ej. Ruta de riesgo cardiovascular y metabólico, Ruta materno perinatal, Ruta de salud mental, Ruta de atención a víctimas de violencias, PAI, salud bucal, nutrición, remisión a medicina)","porque":"hallazgo concreto que la justifica","accion":"qué hacer exactamente","cuando":"hoy|pronto|programado"}],
  "pendientes":["actividades o exámenes de la Res. 3280 que quedaron por hacer u ordenar"],
  "alarma":["signos de alarma por los que debe volver o avisar de inmediato, en palabras sencillas"]}
-Reglas: basa todo en lo registrado; no inventes datos ni diagnósticos; si algo es dudoso, dilo en "resumen". "hoy" solo si hay riesgo inmediato. Considera la distancia: si hay que remitir, dilo con claridad.`}
+Reglas: quien atiende es un PROFESIONAL DE ENFERMERÍA, no un médico. En "accion" solo propone medicamentos, exámenes o procedimientos que enfermería puede ordenar dentro de esta atención según la Resolución 3280 (exámenes del protocolo, micronutrientes, vacunas, anticoncepción, educación, remisiones); todo diagnóstico, tratamiento, cambio de medicamentos o paraclínico anormal va como "Remitir a medicina". Basa todo en lo registrado; no inventes datos ni diagnósticos; si algo es dudoso, dilo en "resumen". "hoy" solo si hay riesgo inmediato. Considera la distancia: si hay que remitir, dilo con claridad.`}
 function anGuardar(id,r){S.set(key(id,"anal"),JSON.stringify(r))}
 function anCargar(id){try{return JSON.parse(S.get(key(id,"anal"))||"null")}catch(e){return null}}
 function anHTML(r){if(!r)return"";const rk={alto:["high","Riesgo alto"],medio:["mid","Riesgo intermedio"],bajo:["low","Riesgo bajo"]}[r.riesgo]||["low","Sin clasificar"];
@@ -1080,7 +1088,7 @@ const GUIA={
   p:["Remitir a medicina antes de buscar el embarazo.",
      "Algunos medicamentos para la presión (como enalapril o losartán) no se usan en el embarazo y el médico debe cambiarlos antes; no suspenderlos por su cuenta.",
      "Llegar al embarazo con la presión controlada.",
-     "En el embarazo tendrá más riesgo de preeclampsia: el control prenatal debe empezar temprano (allí se valora la aspirina desde la semana 12)."],
+     "En el embarazo tendrá más riesgo de preeclampsia: control prenatal temprano y valoración por medicina (la aspirina la indica medicina)."],
   r:"Antecedente de hipertensión: se remite a medicina para valoración preconcepcional y ajuste de antihipertensivos antes del embarazo; se explica riesgo de preeclampsia y necesidad de control prenatal temprano."},
  "Enfermedades|Diabetes":{t:"Diabetes: qué hacer antes del embarazo",
   p:["Remitir a medicina antes de buscar el embarazo.",
@@ -1092,7 +1100,7 @@ const GUIA={
   p:["Remitir a medicina antes de buscar el embarazo.",
      "Algunos medicamentos para las convulsiones (sobre todo el ácido valproico) pueden causar malformaciones; el médico puede cambiarlos.",
      "Nunca suspender el medicamento por su cuenta: una convulsión en el embarazo es peligrosa.",
-     "La dosis de ácido fólico la define el médico; con frecuencia se usa una dosis más alta."],
+     "La Res. 3280 indica ácido fólico 4 mg/día en epilepsia; la dosis y el cambio de anticonvulsivante los define medicina."],
   r:"Antecedente de epilepsia: se remite a medicina para revisar anticonvulsivantes y dosis de ácido fólico antes del embarazo; se explica no suspender el tratamiento."},
  "Enfermedades|Asma":{t:"Asma: qué hacer antes del embarazo",
   p:["Los inhaladores para el asma se pueden usar en el embarazo: debe seguir usándolos.",
@@ -1100,11 +1108,11 @@ const GUIA={
      "Evitar el humo de leña y el tabaco."],
   r:"Antecedente de asma: se orienta continuar tratamiento inhalado y lograr control antes del embarazo."},
  "Enfermedades|Anemia":{t:"Anemia: qué hacer antes del embarazo",
-  p:["Corregir la anemia antes del embarazo: tratamiento con hierro según el resultado del hemograma.",
+  p:["Enfermería: solicitar hemograma y gota gruesa (están en los exámenes preconcepcionales).",
+     "Si el hemograma confirma anemia, remitir a medicina para el tratamiento: es un paraclínico anormal.",
      "Alimentos con hierro: carne, pescado, hígado, huevo, fríjol y hojas verdes.",
-     "Desparasitar si corresponde y descartar malaria (gota gruesa).",
-     "Controlar con hemograma."],
-  r:"Antecedente de anemia: se solicita hemograma, se orienta tratamiento con hierro, alimentación rica en hierro, desparasitación y gota gruesa."},
+     "Corregir la anemia antes del embarazo."],
+  r:"Antecedente de anemia: se solicitan hemograma y gota gruesa; si se confirma anemia se remite a medicina para tratamiento; se orienta alimentación rica en hierro."},
  "Enfermedades|Tiroides":{t:"Tiroides: qué hacer antes del embarazo",
   p:["Remitir a medicina antes de buscar el embarazo: la tiroides debe estar controlada (TSH).",
      "Si toma levotiroxina, la dosis casi siempre se ajusta al quedar embarazada; no suspenderla."],
@@ -1157,6 +1165,55 @@ const GUIA={
  "Trombosis|Refiere":{t:"Si tuvo trombosis",
   p:["No debe usar métodos con estrógeno: inyección mensual ni pastillas combinadas. Si los usa, cambiarlos.","Puede usar DIU, implante o métodos solo de progestágeno.","Remitir a medicina antes del embarazo: el embarazo aumenta el riesgo de una nueva trombosis y puede necesitar medicamento para prevenirla."],
   r:"Antecedente de trombosis: se contraindican métodos con estrógeno y se remite a medicina para valoración preconcepcional y profilaxis."},
+ "Complicaciones obstétricas previas|Preeclampsia":{t:"Si tuvo preeclampsia",
+  p:["Tiene más riesgo de que se repita: el próximo embarazo es de riesgo.","Remitir a medicina antes del embarazo o apenas quede embarazada: la aspirina desde la semana 12 la indica medicina.","Control prenatal antes de la semana 10.","Repasar signos de alarma: dolor de cabeza fuerte, visión borrosa, hinchazón."],
+  r:"Antecedente de preeclampsia: se remite a medicina para valoración preconcepcional y del riesgo en la próxima gestación; se orienta control prenatal temprano y signos de alarma."},
+ "Complicaciones obstétricas previas|Hemorragia posparto":{t:"Si tuvo hemorragia después del parto",
+  p:["El próximo parto debe ser en hospital: dejarlo claro desde ahora en el plan de parto.","Enfermería: solicitar hemograma; si hay anemia, remitir a medicina para tratamiento.","Remitir a medicina para valoración preconcepcional del riesgo."],
+  r:"Antecedente de hemorragia posparto: se orienta parto institucional, se solicita hemograma y se remite a medicina para valoración del riesgo."},
+ "Complicaciones obstétricas previas|Muerte del bebé":{t:"Si un bebé murió antes o después de nacer",
+  p:["Preguntar con cuidado cuándo fue, en qué semana o a los cuántos días, y si sabe la causa.","Reconocer su duelo; preguntar cómo se siente con la idea de un nuevo embarazo.","Remitir a medicina: puede haber causas que se previenen (presión alta, diabetes, sífilis, infecciones).","Si hay tristeza persistente, ofrecer apoyo de psicología."],
+  r:"Antecedente de muerte perinatal: se indagan circunstancias, se brinda apoyo emocional y se remite a medicina para valoración preconcepcional."},
+ "Complicaciones obstétricas previas|Bebé pequeño":{t:"Si tuvo un bebé de bajo peso",
+  p:["Revisar su estado nutricional y alimentación; peso adecuado antes del embarazo.","Respetar el intervalo de 18 meses.","Descartar anemia, infecciones y consumo de tabaco o alcohol.","Si hubo causa médica (presión alta, otra), remitir a medicina."],
+  r:"Antecedente de recién nacido de bajo peso: se valora estado nutricional, se orienta intervalo intergenésico y control prenatal temprano."},
+ "Complicaciones obstétricas previas|Parto prematuro":{t:"Si tuvo un parto prematuro",
+  p:["Tiene más riesgo de que se repita: remitir a medicina para valoración preconcepcional.","Tratar las infecciones urinarias y vaginales antes del embarazo (urocultivo en los exámenes; tratamiento por medicina si sale positivo).","Respetar el intervalo de 18 meses y entrar temprano al control prenatal."],
+  r:"Antecedente de parto pretérmino: se remite a medicina para valoración preconcepcional; se orienta intervalo intergenésico y control prenatal temprano."},
+ "Complicaciones obstétricas previas|Abortos repetidos":{t:"Si ha tenido abortos repetidos",
+  p:["Dos o más pérdidas seguidas ameritan estudio: remitir a medicina.","Iniciar ácido fólico y planificar hasta tener la valoración, si ella lo desea.","Reconocer el duelo y preguntar cómo se siente."],
+  r:"Antecedente de pérdidas gestacionales repetidas: se remite a medicina para estudio preconcepcional."},
+ "Complicaciones obstétricas previas|Mola":{t:"Si tuvo embarazo molar",
+  p:["Preguntar si terminó el seguimiento con las pruebas de sangre (hormona del embarazo) hasta que salieron normales.","No debe embarazarse hasta que medicina dé el alta del seguimiento: mientras tanto, usar un método anticonceptivo.","Si no terminó el seguimiento, remitir a medicina."],
+  r:"Antecedente de enfermedad trofoblástica: se verifica seguimiento con hCG, se orienta anticoncepción hasta el alta médica y se remite a medicina."},
+ "Grupo sanguíneo y Rh|O-":{t:"Si es Rh negativo",
+  p:["Preguntar si ha tenido embarazos, partos o abortos antes y si después le pusieron una inyección (inmunoglobulina anti-D).",
+     "Preguntar el grupo y Rh de la pareja: si él también es Rh negativo, no hay riesgo para el bebé por esta causa.",
+     "Enfermería: solicitar la hemoclasificación si no hay un resultado confiable.",
+     "Remitir a medicina para valorar el riesgo; la inmunoglobulina anti-D y el Coombs indirecto los indica medicina.",
+     "Explicarle que en cada embarazo, aborto o sangrado debe avisar que es Rh negativo."],
+  r:"Usuaria Rh negativo: se indagan gestaciones previas, aplicación de anti-D y Rh de la pareja; se remite a medicina para valoración del riesgo de aloinmunización."},
+ "Grupo sanguíneo y Rh|A-":{t:"Si es Rh negativo",
+  p:["Preguntar si ha tenido embarazos, partos o abortos antes y si después le pusieron una inyección (inmunoglobulina anti-D).",
+     "Preguntar el grupo y Rh de la pareja: si él también es Rh negativo, no hay riesgo para el bebé por esta causa.",
+     "Enfermería: solicitar la hemoclasificación si no hay un resultado confiable.",
+     "Remitir a medicina para valorar el riesgo; la inmunoglobulina anti-D y el Coombs indirecto los indica medicina.",
+     "Explicarle que en cada embarazo, aborto o sangrado debe avisar que es Rh negativo."],
+  r:"Usuaria Rh negativo: se indagan gestaciones previas, aplicación de anti-D y Rh de la pareja; se remite a medicina para valoración del riesgo de aloinmunización."},
+ "Grupo sanguíneo y Rh|B-":{t:"Si es Rh negativo",
+  p:["Preguntar si ha tenido embarazos, partos o abortos antes y si después le pusieron una inyección (inmunoglobulina anti-D).",
+     "Preguntar el grupo y Rh de la pareja: si él también es Rh negativo, no hay riesgo para el bebé por esta causa.",
+     "Enfermería: solicitar la hemoclasificación si no hay un resultado confiable.",
+     "Remitir a medicina para valorar el riesgo; la inmunoglobulina anti-D y el Coombs indirecto los indica medicina.",
+     "Explicarle que en cada embarazo, aborto o sangrado debe avisar que es Rh negativo."],
+  r:"Usuaria Rh negativo: se indagan gestaciones previas, aplicación de anti-D y Rh de la pareja; se remite a medicina para valoración del riesgo de aloinmunización."},
+ "Grupo sanguíneo y Rh|AB-":{t:"Si es Rh negativo",
+  p:["Preguntar si ha tenido embarazos, partos o abortos antes y si después le pusieron una inyección (inmunoglobulina anti-D).",
+     "Preguntar el grupo y Rh de la pareja: si él también es Rh negativo, no hay riesgo para el bebé por esta causa.",
+     "Enfermería: solicitar la hemoclasificación si no hay un resultado confiable.",
+     "Remitir a medicina para valorar el riesgo; la inmunoglobulina anti-D y el Coombs indirecto los indica medicina.",
+     "Explicarle que en cada embarazo, aborto o sangrado debe avisar que es Rh negativo."],
+  r:"Usuaria Rh negativo: se indagan gestaciones previas, aplicación de anti-D y Rh de la pareja; se remite a medicina para valoración del riesgo de aloinmunización."},
  "Deseo de embarazo|No":{t:"La consulta pasa a asesoría anticonceptiva",
   p:["Respetar su decisión: la consulta se enfoca en planificación familiar y se omite la formulación de ácido fólico.",
      "Preguntar qué métodos conoce o ha usado, cómo le fue y cuál prefiere. La decisión es de ella; no necesita permiso de la pareja.",
