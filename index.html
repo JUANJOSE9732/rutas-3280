@@ -22,6 +22,7 @@
 <title>Dictado de Notas</title>
 <title>Dictado de Notas</title>
 <title>Dictado de Notas</title>
+<title>Dictado de Notas</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:ital,wght@0,400;0,700;1,400&family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,800&family=IBM+Plex+Mono:wght@500&display=swap">
 <style>
@@ -88,7 +89,12 @@ input,select{font:inherit;font-size:1rem;padding:10px 12px;border-radius:8px;bor
 .facts{display:flex;flex-wrap:wrap;gap:6px}
 .chip{font-family:var(--f-data);font-size:.8rem;padding:5px 9px;border-radius:999px;background:var(--accent-soft);color:var(--ink);font-variant-numeric:tabular-nums}
 .chip b{font-family:var(--f-body);font-weight:700;margin-right:4px;font-size:.78rem;color:var(--muted)}
-.tabs{display:flex;gap:4px;border-bottom:1.5px solid var(--line);overflow-x:auto;scrollbar-width:none}.tabs button{white-space:nowrap}
+.tabs{display:grid;grid-auto-flow:column;grid-auto-columns:1fr;gap:2px;border-bottom:1.5px solid var(--line)}
+.tabs button{display:flex;flex-direction:column;align-items:center;gap:4px;padding:8px 2px 10px!important;font-size:.82rem;min-width:0}
+.stepn{display:inline-grid;place-items:center;width:26px;height:26px;border-radius:50%;border:1.5px solid var(--line);font-family:var(--f-data);font-size:.8rem;background:var(--surface);color:var(--muted)}
+.tabs button[aria-selected="true"] .stepn{border-color:var(--accent);color:var(--accent);font-weight:700}
+.stepn.ok{background:var(--accent);border-color:var(--accent);color:var(--accent-ink)!important}
+.facts .chip{font-size:.74rem}
 .tabs button{border:0;background:none;color:var(--muted);padding:10px 12px;font-weight:700;border-bottom:3px solid transparent;margin-bottom:-1.5px}
 .tabs button[aria-selected="true"]{color:var(--ink);border-bottom-color:var(--accent)}
 .box{border-radius:10px;padding:12px 14px;border:1px solid}
@@ -148,6 +154,10 @@ textarea{width:100%;font:inherit;font-size:1.05rem;line-height:1.55;padding:14px
 .narow{display:flex;gap:6px;min-width:0}.narow input{flex:1 1 auto;min-width:0}
 .na{border:1.5px solid var(--line);background:var(--surface);color:var(--muted);border-radius:8px;padding:0 10px;font-size:.8rem;font-weight:700}
 .na[aria-pressed="true"]{background:var(--ink);color:var(--bg);border-color:var(--ink)}
+.navrow{display:grid;grid-template-columns:64px 1fr;gap:10px}
+.linkrow{display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap}
+.lnk{background:none;border:0;padding:6px 0;color:var(--muted);text-decoration:underline;text-underline-offset:3px;font-size:.9rem}
+#pane{display:flex;flex-direction:column;gap:16px}
 .drafts{display:flex;flex-direction:column;gap:6px}
 .drafts button{display:flex;justify-content:space-between;gap:10px;text-align:left;border:1px solid var(--warn-line);background:var(--warn-bg);color:var(--ink);border-radius:8px;padding:10px 12px}
 @media (prefers-reduced-motion:no-preference){.tile,.btn,.notes-pick button{transition:background .15s,border-color .15s,box-shadow .15s}}
@@ -341,10 +351,10 @@ const IV={
 /* Entrevista generada desde la guía del módulo cuando no hay una escrita a mano */
 const IV_CACHE={};
 function ivFor(id){if(IV[id])return IV[id];if(IV_CACHE[id])return IV_CACHE[id];const m=M[id],q=[];
-  const ASK=/preguntar|antecedentes|gestaci[oó]n actual|psicosocial|informar|confirmar|valoraci[oó]n|causales/i;
+  const ASK=/preguntar|antecedentes|gestaci[oó]n actual|psicosocial|informar|confirmar|causales|antes de inscribir/i,EXAM=/valoraci[oó]n|examinar|examen|verificar|detecci[oó]n/i;
   m.sections.forEach((s,i)=>s.items.forEach((it,j)=>{const isQ=it.startsWith("Q:"),txt=isQ?it.slice(2):it,ask=isQ||ASK.test(s.t);
     q.push({b:s.t,t:ask?"ask":"do",l:txt.length>70?txt.slice(0,67)+"…":txt,q:txt,ck:i+"."+j,
-      c:isQ?["No","Sí"]:ask?["Niega","Sí, refiere","Sin hallazgos"]:["Realizado","No realizado","No aplica"],
+      c:isQ?["No","Sí"]:ask?["Niega","Sí, refiere","Sin hallazgos"]:EXAM.test(s.t)?["Normal","Alterado","No realizado"]:["Realizado","No realizado","No aplica"],
       al:isQ?SI:undefined,am:isQ?(/golpead|forzada|humillada/i.test(txt)?"Violencia referida: activar la ruta de atención a víctimas y notificar.":"Tamizaje positivo: derivar a la ruta de salud mental."):undefined})}));
   return IV_CACHE[id]=q}
 /* ---------- Herrera y Hurtado ---------- */
@@ -572,7 +582,7 @@ function home(){
   const tile=id=>{const m=M[id];return `<button class="tile ${m.route}" data-mod="${id}" id="t-${id}">${hasDraft(id)?'<span class="dot" title="Borrador guardado"></span>':""}<b>${esc(m.title)}</b><small>${esc(m.who)}</small></button>`};
   const drafts=Object.keys(M).filter(hasDraft);
   $("app").innerHTML=`
-  <header><h1>Dictado de Notas</h1><p class="sub">Rutas de la Resolución 3280: escoge a quién vas a atender, sigue la guía y dicta la nota.</p></header>
+  <header><h1>Dictado de Notas</h1><p class="sub">Rutas de la Resolución 3280. Escoge el módulo y sigue los pasos: <b>Preguntas → Guía → Nota → Base</b>.</p></header>
   <section class="finder" aria-labelledby="fh">
     <p class="lab" id="fh">¿A quién vas a atender?</p>
     <div class="frow">
@@ -614,14 +624,15 @@ function sugerir(){
 function openMod(id){st.view="mod";st.mod=id;st.tab=S.get(key(id,"tab"))||"entr";st.note=S.get(key(id,"note"))||M[id].notes[0];if(!M[id].notes.includes(st.note))st.note=M[id].notes[0];renderMod();window.scrollTo(0,0)}
 function renderMod(){
   stopRec();const m=M[st.mod],id=st.mod;
-  const tabs=[["entr","1 · Entrevista"],["guia","2 · Guía"]].concat(m.tools?[["herr","Herramientas"]]:[]).concat([["nota","3 · Nota"],["base","4 · Base"]]);
+  const tabs=[["entr","Preguntas"],["guia","Guía"]].concat(m.tools?[["herr","Cálculos"]]:[]).concat([["nota","Nota"],["base","Base"]]);
+  const hecho={entr:Object.values(ivAns(id)).some(v=>(v||"").trim()),guia:Object.keys(checks(id)).length>0,herr:!!(S.get(key(id,"eg_fum"))||S.get(key(id,"eg_ecof"))),nota:!!S.get(key(id,"nota")),base:false};
   if(!tabs.some(t=>t[0]===st.tab))st.tab="guia";
   const routeName={rm:"Materno perinatal",rp:"Curso de vida",pc:"Procedimientos"}[m.route];
   $("app").innerHTML=`
   <div class="top"><button class="back" id="back">← Rutas</button><span class="tag ${m.route}">${routeName}</span></div>
   <header><h1>${esc(m.title)}</h1><p class="sub">${esc(m.who)}</p></header>
   ${m.facts.length?`<div class="facts">${m.facts.map(([k,v])=>`<span class="chip"><b>${esc(k)}</b>${esc(v)}</span>`).join("")}</div>`:""}
-  <div class="tabs" role="tablist">${tabs.map(([k,l])=>`<button role="tab" data-tab="${k}" aria-selected="${st.tab===k}">${l}</button>`).join("")}</div>
+  <div class="tabs" role="tablist">${tabs.map(([k,l],i)=>`<button role="tab" data-tab="${k}" aria-selected="${st.tab===k}"><span class="stepn ${hecho[k]?"ok":""}">${hecho[k]?"✓":i+1}</span><span>${l}</span></button>`).join("")}</div>
   <div id="pane"></div>`;
   $("back").onclick=home;
   document.querySelectorAll("[data-tab]").forEach(b=>b.onclick=()=>{st.tab=b.dataset.tab;if(st.tab!=="base")S.set(key(id,"tab"),st.tab);renderMod()});
@@ -635,7 +646,7 @@ function paneGuia(){
   ${m.alerts.length?`<div class="box warn"><h3>Remitir o actuar si…</h3><ul>${m.alerts.map(a=>`<li>${esc(a)}</li>`).join("")}</ul></div>`:""}
   <p class="note-src">Marca lo que vas haciendo (${done} de ${total}). Lo marcado se pasa a la nota.</p>
   ${m.sections.map((s,i)=>`<details class="sec" ${i<2?"open":""}><summary><span>${esc(s.t)}</span><span class="cnt">${s.items.filter((_,j)=>ck[i+"."+j]).length}/${s.items.length}</span></summary><ul class="items">${s.items.map((it,j)=>{const q=it.startsWith("Q:");const txt=q?it.slice(2):it;return `<li><input type="checkbox" id="c${i}_${j}" data-k="${i}.${j}" ${ck[i+"."+j]?"checked":""}><label for="c${i}_${j}"><span class="${q?"q":""}">${esc(txt)}</span></label></li>`}).join("")}</ul></details>`).join("")}
-  <div class="btns"><button class="btn primary" id="goNota">Siguiente: 3 · Nota →</button><button class="btn" id="clrChk">Desmarcar todo</button></div>`;
+  <div class="btns"><button class="btn primary" id="goNota">Siguiente: Nota →</button><button class="btn" id="clrChk">Desmarcar todo</button></div>`;
   document.querySelectorAll("[data-k]").forEach(c=>c.onchange=()=>{const o=checks(id);if(c.checked)o[c.dataset.k]=1;else delete o[c.dataset.k];S.set(key(id,"chk"),JSON.stringify(o));const det=c.closest("details");const sec=m.sections[+c.dataset.k.split(".")[0]];det.querySelector(".cnt").textContent=Object.keys(o).filter(k=>k.split(".")[0]===c.dataset.k.split(".")[0]).length+"/"+sec.items.length});
   $("goNota").onclick=()=>{st.tab="nota";S.set(key(id,"tab"),"nota");renderMod()};
   $("clrChk").onclick=()=>{S.del(key(id,"chk"));paneGuia()};
@@ -713,7 +724,7 @@ function paneEntr(){
     const al=ivAlerts(id);
     $("pane").innerHTML=`<div class="tool"><h3>Entrevista terminada</h3><p class="note-src">${answered} de ${q.length} preguntas respondidas. Las respuestas ya están en el dictado de la pestaña Nota.</p>
     ${al.length?`<div class="box warn"><h3>Revisar antes de seguir</h3><ul>${al.map(x=>`<li>${esc(x)}</li>`).join("")}</ul></div>`:""}
-    <p class="status" id="iv-st"></p><div class="btns"><button class="btn primary" id="iv-nota">Siguiente: 3 · Nota →</button><button class="btn" id="iv-base">Ir a 4 · Base</button><button class="btn" id="iv-rev">Volver a la última pregunta</button></div></div>
+    <p class="status" id="iv-st"></p><div class="btns"><button class="btn primary" id="iv-nota">Siguiente: Nota →</button><button class="btn" id="iv-base">Enviar a la base</button><button class="btn" id="iv-rev">Volver a la última pregunta</button></div></div>
     <details class="sec"><summary><span>Ver lo registrado</span></summary><pre style="white-space:pre-wrap;padding:0 14px 14px;font-family:var(--f-body);font-size:.92rem">${esc(ivCompose(id))||"(sin respuestas)"}</pre></details>`;
     $("iv-nota").onclick=()=>{st.tab="nota";S.set(key(id,"tab"),"nota");renderMod()};
     $("iv-base").onclick=()=>enviarBase(id);$("iv-rev").onclick=()=>{S.set(key(id,"ivi"),String(q.length-1));paneEntr()};return}
@@ -726,12 +737,12 @@ function paneEntr(){
     <h2 style="font-family:var(--f-body);font-size:1.25rem;line-height:1.35;font-weight:700">${esc(x.q)}</h2>
     ${x.h?`<p class="hint" style="margin:0">${esc(x.h)}</p>`:""}
     ${x.c?`<div class="sugg">${x.c.map(c=>`<button data-c="${esc(c)}">${esc(c)}</button>`).join("")}</div>`:""}
-    <label for="iv-a" class="lab" style="margin:0">Respuesta: toca una opción o dicta tú lo que ella respondió</label>
+    <label for="iv-a" class="lab" style="margin:0">${x.t==="do"?"Hallazgo: toca una opción o dicta lo que encontraste":"Respuesta: toca una opción o dicta lo que respondió"}</label>
     <textarea id="iv-a" style="min-height:120px">${esc(a[i]||"")}</textarea>
     <div id="iv-mic">${micUI()}</div>
     <div class="box warn" id="iv-al" ${al?"":"hidden"}><h3>Atención</h3><p style="margin:0" id="iv-alt">${esc(al)}</p></div>
-    <div class="btns"><button class="btn" id="iv-prev" ${i===0?"disabled":""}>← Anterior</button><button class="btn primary" id="iv-next">${i===q.length-1?"Terminar":"Siguiente →"}</button></div>
-    <div class="btns"><button class="btn" id="iv-skip">Saltar</button><button class="btn" id="iv-reset">Reiniciar entrevista</button></div>
+    <div class="navrow"><button class="btn" id="iv-prev" ${i===0?"disabled":""} aria-label="Anterior">←</button><button class="btn primary" id="iv-next">${i===q.length-1?"Terminar preguntas":"Siguiente pregunta →"}</button></div>
+    <div class="linkrow"><button class="lnk" id="iv-skip">Saltar esta pregunta</button><button class="lnk" id="iv-reset">Reiniciar preguntas</button></div>
   </div>`;
   const ta=$("iv-a");
   const save=()=>{const o=ivAns(id);o[i]=ta.value;S.set(key(id,"iv"),JSON.stringify(o));S.set(key(id,"dict"),ivCompose(id));
@@ -755,10 +766,11 @@ function paneNota(){
   <textarea id="dict" placeholder="Toca el micrófono del teclado y habla. Puedes dictar en desorden.">${esc(S.get(key(id,"dict"))||"")}</textarea>
   <div id="n-mic">${micUI()}</div>
   <p class="hint">Usa el micrófono del teclado o Dictar por voz. No dictes nombre ni documento. ${marcados(id).length?`Se incluirán ${marcados(id).length} actividades marcadas en la guía.`:""}</p></div>
-  <div class="btns"><button class="btn primary" id="go">${sample?"Organizar nota":"Armar nota sin conexión"}</button><button class="btn" id="ej">Cargar ejemplo</button><button class="btn" id="nueva">Nueva paciente</button></div>
-  <button class="btn" id="toBase" style="width:100%">Siguiente: 4 · Enviar a la base (los datos salen de esta historia) →</button>
-  <p class="hint" id="offHint" ${sample?"hidden":""}>Sin conexión la nota se arma con la plantilla, lo marcado en la guía y tu dictado. Con señal, <a href="${ARTIFACT}" target="_blank" rel="noopener" id="rev">revisa con Claude</a>: el botón copia tu dictado para pegarlo allá.</p>
   ${n.edu?`<label class="check"><input type="checkbox" id="edu" checked> Agregar bloques fijos de educación, IVE, planificación y curso</label>`:""}
+  <div class="btns"><button class="btn primary" id="go">${sample?"Organizar nota":"Armar nota sin conexión"}</button></div>
+  <div class="linkrow"><button class="lnk" id="ej">Cargar ejemplo</button><button class="lnk" id="nueva">Nueva paciente (borra este módulo)</button></div>
+  <button class="btn" id="toBase" style="width:100%">Siguiente: enviar a la base →<br><small style="font-weight:400;color:var(--muted)">los datos se toman de esta historia</small></button>
+  <p class="hint" id="offHint" ${sample?"hidden":""}>Sin conexión la nota se arma con la plantilla, lo marcado en la guía y tu dictado. Con señal, <a href="${ARTIFACT}" target="_blank" rel="noopener" id="rev">revisa con Claude</a>: el botón copia tu dictado para pegarlo allá.</p>
   <p class="status" id="status" role="status"></p>
   <section id="out" ${S.get(key(id,"nota"))?"":"hidden"} style="display:flex;flex-direction:column;gap:12px">
     <div class="out" id="calc"></div>
@@ -778,7 +790,7 @@ function paneNota(){
   $("go").onclick=organizar;$("stop").onclick=()=>ctl&&ctl.abort();$("copy").onclick=copiar;
   $("toBase").onclick=()=>enviarBase(id);
   $("ej").onclick=()=>{const exT=(st.note==="rpms"&&EX_RPMS[id])||n.ex;$("dict").value=exT;S.set(key(id,"dict"),exT);$("status").textContent="Ejemplo cargado (datos inventados). Toca Organizar nota."};
-  $("nueva").onclick=()=>{const b=$("nueva");if(b.dataset.armed!=="1"){b.dataset.armed="1";b.textContent="¿Borrar este módulo? Toca otra vez";setTimeout(()=>{if(b.isConnected){b.dataset.armed="";b.textContent="Nueva paciente"}},4000);return}
+  $("nueva").onclick=()=>{const b=$("nueva");if(b.dataset.armed!=="1"){b.dataset.armed="1";b.textContent="¿Seguro? Toca otra vez para borrar";setTimeout(()=>{if(b.isConnected){b.dataset.armed="";b.textContent="Nueva paciente (borra este módulo)"}},4000);return}
     S.keys().filter(k=>k.startsWith("dn2_"+id+"_")&&!k.endsWith("_tab")&&!k.endsWith("_note")).forEach(k=>S.del(k));paneNota();$("status").textContent="Listo para una nueva paciente."};
   $("rev").onclick=()=>{try{navigator.clipboard.writeText("Módulo: "+m.title+" · Nota: "+n.label+" · Fecha: "+($("fecha").value||hoy())+"\n\n"+$("dict").value).catch(()=>{})}catch(e){}};
 }
