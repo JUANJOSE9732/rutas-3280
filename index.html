@@ -163,9 +163,7 @@ textarea{width:100%;font:inherit;font-size:1.05rem;line-height:1.55;padding:14px
 @media (prefers-reduced-motion:no-preference){.tile,.btn,.notes-pick button{transition:background .15s,border-color .15s,box-shadow .15s}}
 </style>
 
-</head>
-<body>
-<div class="wrap" id="app"></div>
+</head><body><div class="wrap" id="app"></div>
 
 <script>
 /* ======================= CONTENIDO NORMATIVO (Res. 3280 de 2018) ======================= */
@@ -525,6 +523,28 @@ const EX_RPMS={
  juv:"Mujer de 24 años, valoración integral por enfermería. TA 110/70, FC 72. Peso 58, talla 1,56. Vida sexual activa con una pareja, planifica con inyectable trimestral. Citología hace un año normal. Pruebas rápidas de VIH y sífilis no reactivas. Niega consumo frecuente de alcohol. Sin odontología hace dos años. Remito a odontología; continúa su método.",
  adul:"Hombre de 50 años, valoración integral por enfermería. Hipertenso desde 2019, en tratamiento con losartán, refiere que no lo toma todos los días. TA 150/95, FC 78, FR 18, SpO2 96. Peso 82, talla 1,68. Niega diabetes, EPOC y cáncer. Última consulta de crónicos el 10 de marzo. Nunca le han hecho PSA ni sangre oculta. Se ordenan glicemia, perfil lipídico, creatinina, uroanálisis, PSA y sangre oculta. Canalizo a medicina general prioritaria. Seguimiento telefónico en dos semanas.",
  vej:"Mujer de 68 años, valoración integral. Diabética en control con metformina. TA 130/80, FC 74. Peso 60, talla 1,50. Se baña y viste sola; usa bastón fuera de casa. Una caída hace tres meses. Vive con su hija. Mamografía hace tres años. Se ordenan glicemia, perfil lipídico, creatinina, uroanálisis y sangre oculta. Remito a medicina por riesgo de caídas."};
+const CASO_EJ={adul:{
+ resp:["Alterado. Peso 82 kg, talla 1,68 m, perímetro abdominal 98 cm. TA 150/95, FC 78, FR 18, T 36,5, SpO2 96 %.",
+  "Normal. Niega tabaco; chicha ocasional. Niega violencias. Sin síntomas de depresión.",
+  "Normal. Pareja estable; no requiere anticoncepción.",
+  "Alterado. Hipertenso desde 2019 con losartán, no lo toma todos los días. Niega diabetes, EPOC y cáncer. Última consulta de crónicos el 10 de marzo de 2026. Se ordenan glicemia, perfil lipídico, creatinina y uroanálisis.",
+  "No aplica (hombre).","No aplica (hombre).",
+  "No realizado. Nunca le han hecho sangre oculta; se ordena hoy.",
+  "No realizado. Nunca le han hecho PSA; se ordena hoy.",
+  "Normal. Pruebas rápidas de VIH y sífilis no reactivas.",
+  "No realizado. Se ordena prueba de hepatitis C por edad.",
+  "Realizado. Se entregan preservativos.",
+  "Realizado. Td al día; influenza pendiente, remito a vacunación.",
+  "No realizado. Remito a odontología.",
+  "Realizado. Educación en adherencia al losartán, dieta baja en sal y signos de alarma de crisis hipertensiva.",
+  "No realizado. Se invita al ciclo educativo de crónicos."]}};
+function cargarCaso(id){const c=CASO_EJ[id];if(!c)return;const q=ivFor(id),a={},ck={};
+  q.forEach((x,i)=>{const v=c.resp[i]||"";a[i]=v;if(x.ck&&v)ck[x.ck]=1});
+  S.set(key(id,"iv"),JSON.stringify(a));S.set(key(id,"ivi"),String(q.length));S.set(key(id,"chk"),JSON.stringify(ck));
+  S.set(key(id,"dict"),ivCompose(id));S.set(key(id,"fecha"),hoy());S.set(key(id,"note"),M[id].notes[0]);S.set(key(id,"ejcaso"),"1");
+  const ident={};ID_KEYS.forEach(k=>{if(EJ_BASE[k])ident[k]=EJ_BASE[k]});S.set(key(id,"ident"),JSON.stringify(ident));
+  S.del(key(id,"nota"));st.note=M[id].notes[0];st.tab="nota";S.set(key(id,"tab"),"nota");renderMod();window.scrollTo(0,0);
+  setTimeout(()=>{organizar()},50)}
 /* ======================= APLICACIÓN ======================= */
 const $=id=>document.getElementById(id);
 const S={get(k){try{return localStorage.getItem(k)}catch(e){return null}},set(k,v){try{localStorage.setItem(k,v)}catch(e){}},del(k){try{localStorage.removeItem(k)}catch(e){}},keys(){try{return Object.keys(localStorage)}catch(e){return[]}}};
@@ -742,7 +762,7 @@ function paneEntr(){
     <div id="iv-mic">${micUI()}</div>
     <div class="box warn" id="iv-al" ${al?"":"hidden"}><h3>Atención</h3><p style="margin:0" id="iv-alt">${esc(al)}</p></div>
     <div class="navrow"><button class="btn" id="iv-prev" ${i===0?"disabled":""} aria-label="Anterior">←</button><button class="btn primary" id="iv-next">${i===q.length-1?"Terminar preguntas":"Siguiente pregunta →"}</button></div>
-    <div class="linkrow"><button class="lnk" id="iv-skip">Saltar esta pregunta</button><button class="lnk" id="iv-reset">Reiniciar preguntas</button></div>
+    <div class="linkrow"><button class="lnk" id="iv-skip">Saltar esta pregunta</button><button class="lnk" id="iv-reset">Reiniciar preguntas</button>${CASO_EJ[id]?'<button class="lnk" id="iv-caso">Cargar caso de ejemplo completo</button>':""}</div>
   </div>`;
   const ta=$("iv-a");
   const save=()=>{const o=ivAns(id);o[i]=ta.value;S.set(key(id,"iv"),JSON.stringify(o));S.set(key(id,"dict"),ivCompose(id));
@@ -753,6 +773,7 @@ function paneEntr(){
   const go=n=>{stopRec();save();S.set(key(id,"ivi"),String(n));paneEntr();const t=$("iv-a");if(t)t.focus();window.scrollTo(0,0)};
   $("iv-next").onclick=()=>go(i+1);$("iv-prev").onclick=()=>go(i-1);$("iv-skip").onclick=()=>{S.set(key(id,"ivi"),String(i+1));paneEntr()};
   $("iv-reset").onclick=()=>{const b=$("iv-reset");if(b.dataset.armed!=="1"){b.dataset.armed="1";b.textContent="¿Borrar respuestas? Toca otra vez";return}S.del(key(id,"iv"));S.del(key(id,"ivi"));S.del(key(id,"dict"));paneEntr()};
+  if($("iv-caso"))$("iv-caso").onclick=()=>cargarCaso(id);
   ta.focus();
 }
 function lista(m){return m.sections.map(s=>s.t+": "+s.items.map(i=>i.startsWith("Q:")?i.slice(2):i).join(" | ")).join("\n")}
@@ -927,7 +948,7 @@ const VARS=[
 const ALLF=VARS.flatMap(g=>g.f);
 const EJ_BASE={"CONSECUTIVO":"12","DIRECCION":"SECTOR LA PLAYA","NOMBRE COMPLETO":"EJEMPLO FICTICIO PÉREZ","ANTECEDENTES":"HIPERTENSIÓN ARTERIAL DIAGNOSTICADA EN 2019, EN TRATAMIENTO CON LOSARTÁN","ROL EN EL HOGAR":"JEFE DE HOGAR","FECHA NACIMIENTO":"1976-05-14","GENERO":"M","TIPO":"CC","DOCUMENTO ID.":"1000000000","EAPB NOMBRE":"MALLAMAS","RÉGIMEN":"SUBSIDIADO","CAPITADO":"SI","TELEFONO":"3000000000",
  "F.C":"78","F. R":"18","T. A":"150/95","TEM":"36.5","SPO2":"96","PESO":"82","TALLA":"1.68","RIESGO CARDIOVASCULAR":"SI",
- "HTA":"SI","HTA EN CONTROL":"NO","DIABETES":"NO","EPOC":"NO","CANCER":"NO","HIPER O HIPOTIROIDISMO":"NO","NUTRICION":"PENDIENTE","PSICOLOGIA":"N/A","DISCAPACIDAD":"NO","ASEGURAMIENTO":"ACTIVO","TIPO DE TRAMITE":"NINGUNO",
+ "HTA":"SI","HTA EN CONTROL":"NO","FECHA ULTIMA CONSULTA CRONICOS":"2026-03-10","DIABETES":"NO","EPOC":"NO","CANCER":"NO","HIPER O HIPOTIROIDISMO":"NO","NUTRICION":"PENDIENTE","PSICOLOGIA":"N/A","DISCAPACIDAD":"NO","ASEGURAMIENTO":"ACTIVO","TIPO DE TRAMITE":"NINGUNO",
  "ATENCION INTEGRAL M.GENERAL":"SI","ATENCION INTEGRAL M.GENERAL FECHA ULTIMO CONTROL":"2025-11-20","ATENCION INTEGRAL ENFERMERIA":"SI","ATENCION INTEGRAL ENFERMERIA FECHA ULTIMO CONTROL":"2026-10-08","PSA PROSTATICO":"NO","TAMIZAJE CANCER COLON Y RECTO":"NO","PLANIFICACION FAMILIAR O CONTROL":"NO","AL DIA EN ATENCIONES":"NO",
  "SERVICIOS SOCIALES":"NINGUNO","CANALIZADO A":"MEDICINA GENERAL","SE REALIZO LABORATORIOS":"NO","BRIGADA":"OCTUBRE 2026","CANALIZADO POR":"JUAN JOSE",
  "OBSERVACION":"Adultez – Valoración integral. TA 150/95 sin control.","OBSERVACION DE CANALIZACION":"HTA no controlada: valoración médica prioritaria. Pendientes PSA y sangre oculta por edad (50 años).","TIPO DE SEGUIMIENTO":"TELEFÓNICO","FECHA DE SEGUIMIENTO":"2026-10-22","OBSERVACIONES SEGUIMIENTO":"Verificar asistencia a medicina general y adherencia al losartán."};
@@ -984,13 +1005,14 @@ async function enviarBase(id){
     try{const x=await sample.json(pExtraerVars(txt,f),{cache:false});if(x&&typeof x==="object")for(const [k,v] of Object.entries(x)){const fd=ALLF.find(z=>z.k===k);if(!fd||NO_EXTRAER.includes(k)||v==null||v==="")continue;let s=String(v).trim();if(fd.o&&fd.t!=="multi"){const hit=fd.o.find(o=>o.toUpperCase()===s.toUpperCase());if(!hit)continue;s=hit}d[k]=s}}
     catch(e){msg("No se pudo usar Claude; se extrajo lo básico sin conexión.")}}
   let ident={};try{ident=JSON.parse(S.get(key(id,"ident"))||"{}")}catch(e){}
-  baseEdit=null;base(Object.assign(d,ident),{review:true,mod:id});window.scrollTo(0,0)}
+  const ej=S.get(key(id,"ejcaso"))?EJ_BASE:{};
+  baseEdit=null;base(Object.assign({},ej,d,ident),{review:true,mod:id,com:ej===EJ_BASE?"EJEMPLO":""});window.scrollTo(0,0)}
 
 function base(pref,opts){
   stopRec();st.view="base";baseOpts=opts||{};const c=conf(),q=cola();
   const rec=baseEdit?q.find(r=>r.id===baseEdit):null;
   const d=rec?rec.datos:Object.assign({},pref||{});
-  const com=rec?rec.comunidad:(S.get("dn2_ultcom")||"");
+  const com=rec?rec.comunidad:((opts&&opts.com)||S.get("dn2_ultcom")||"");
   const fld=f=>{const v=d[f.k]!=null?d[f.k]:(f.def==="hoy"?hoy():"");const id="bf_"+ALLF.indexOf(f);const attrs=`id="${id}" data-f="${esc(f.k)}"`;
     let inp;
     if(f.t==="sel")inp=`<select ${attrs}><option value=""></option>${f.o.map(o=>`<option ${o===v?"selected":""}>${esc(o)}</option>`).join("")}</select>`;
@@ -1162,7 +1184,6 @@ home();sync(false);
 (async()=>{try{sample=window.claude?await window.claude.use("sample"):null}catch(e){sample=null}
   if(sample&&st.view==="mod"&&st.tab==="nota"){const g=$("go"),h=$("offHint");if(g)g.textContent="Organizar nota";if(h)h.hidden=true}})();
 </script>
-
 <script>
 if("serviceWorker" in navigator){window.addEventListener("load",()=>{navigator.serviceWorker.register("sw.js").catch(()=>{})})}
 </script>
