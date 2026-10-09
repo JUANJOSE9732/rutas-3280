@@ -639,14 +639,14 @@ function checks(m){try{return JSON.parse(S.get(key(m,"chk"))||"{}")}catch(e){ret
 function hasDraft(m){return !!(S.get(key(m,"dict"))||S.get(key(m,"nota"))||Object.keys(checks(m)).length)}
 
 /* ---------- PANEL ---------- */
-const VERSION_APP="2026-10-09 v54";
+const VERSION_APP="2026-10-09 v55";
 function home(){
   stopRec();st.view="home";
   const rm=["precon","prenatal","parto","rn","ive"],rp=["pinf","inf","adol","juv","adul","vej"];
   const tile=id=>{const m=M[id];return `<button class="tile ${m.route}" data-mod="${id}" id="t-${id}">${hasDraft(id)?'<span class="dot" title="Borrador guardado"></span>':""}<b>${esc(m.title)}</b><small>${esc(m.who)}</small></button>`};
   const drafts=Object.keys(M).filter(hasDraft);
   $("app").innerHTML=`
-  <header><h1>Dictado de Notas</h1><p class="sub">Rutas de la Resolución 3280. Escoge el módulo y sigue los pasos: <b>Preguntas → Guía → Nota → Base</b>. La identificación se pide una sola vez, al empezar.</p></header>
+  <header><h1>Dictado de Notas</h1><p class="sub">Rutas de la Resolución 3280. Escoge el módulo y sigue los pasos: <b>Datos → Preguntas → Guía → Nota → Base</b>. La identificación se pide una sola vez, al empezar.</p></header>
   <section class="finder" aria-labelledby="fh">
     <p class="lab" id="fh">¿A quién vas a atender?</p>
     <div class="pac" id="pacsum"></div>
@@ -725,7 +725,6 @@ function home(){
   box.addEventListener("focusin",ev=>{const e=ev.target;if(e.matches("input,select")&&(e.id==="pac-com"||e.dataset.f))mostrar(e)});
   box.addEventListener("focusout",ev=>{setTimeout(()=>{if(!box.contains(document.activeElement))op.hidden=true},150)});
   box.addEventListener("change",ev=>{const e=ev.target;const k=e&&kOf(e);if(k&&(OPC[k]||k==="__com")&&e.tagName!=="SELECT")addHist(k,(e.value||"").trim().toUpperCase())});
-  if(!pac()["NOMBRE COMPLETO"])$("pac-det").open=true;
   pinta();
   window.scrollTo(0,0);
 }
@@ -746,23 +745,49 @@ function sugerir(){
 }
 
 /* ---------- MÓDULO ---------- */
-function openMod(id){st.view="mod";st.mod=id;st.tab=S.get(key(id,"tab"))||"entr";st.note=S.get(key(id,"note"))||M[id].notes[0];if(!M[id].notes.includes(st.note))st.note=M[id].notes[0];renderMod();window.scrollTo(0,0)}
+const ID_RM=["NOMBRE COMPLETO","TIPO","DOCUMENTO ID.","FECHA NACIMIENTO","GENERO","TELEFONO","ETNIA","PUEBLO","EAPB NOMBRE","RÉGIMEN"];
+function idCampos(id){return M[id].route==="rm"?ID_RM:ID_KEYS}
+function fnMal(fn,fe,id){if(!fn||fn==="N/A")return"";const e=edadDe(fn,fe||hoy());const rm=id&&M[id]&&M[id].route==="rm"&&id!=="rn";
+  return !e?"es posterior a la fecha de la consulta":e.y>110?"da más de 110 años":rm&&e.y<9?"da una edad de "+(e.y?e.y+(e.y===1?" año":" años"):e.tm+(e.tm===1?" mes":" meses"))+": no corresponde a una consulta materna":""}
+function idFalta(id){const P=pac(),f=[];if(!P.__com)f.push("Comunidad");[["NOMBRE COMPLETO","Nombre"],["TIPO","Tipo de documento"],["DOCUMENTO ID.","Número de documento"],["GENERO","Sexo"]].forEach(([k,l])=>{if(!P[k])f.push(l)});
+  const fn=P["FECHA NACIMIENTO"];if((!fn||fn==="N/A")&&!P.__edad)f.push("Fecha de nacimiento o edad");else if(fnMal(fn,S.get(key(id,"fecha")),id))f.push("Fecha de nacimiento ("+fnMal(fn,S.get(key(id,"fecha")),id)+")");return f}
+function paneId(){const id=st.mod,P=pac(),d=identDe(),ks=idCampos(id);if(M[id].route==="rm"&&id!=="rn"&&!d["GENERO"])d["GENERO"]="F";
+  const dl=k=>{const o=[...new Set(hist(k).concat(OPC[k]||[]))];return o.length?`<datalist id="dl-${k.replace(/\W/g,"")}">${o.map(v=>`<option value="${esc(v)}">`).join("")}</datalist>`:""};
+  $("pane").innerHTML=`<section class="tool"><h3>Datos de la persona</h3><p class="note-src" style="margin:0">Se llenan una sola vez y sirven para la historia, la base de datos y los demás módulos. Lo obligatorio lleva *. Toca una casilla para ver opciones.</p>
+   <div class="bgrid" id="id-f"><label class="bfl" for="id-com"><span>Comunidad o vereda *</span><input id="id-com" list="dl-__com" value="${esc(P.__com||S.get("dn2_ultcom")||"")}" placeholder="QUERARÍ">${dl("__com")}</label>
+   ${ALLF.filter(f=>ks.includes(f.k)).map(f=>campo(f,d)).join("")}
+   <label class="bfl" for="id-edad" id="id-edadw"><span>Edad en años (solo si no sabe la fecha de nacimiento)</span><input id="id-edad" type="number" inputmode="numeric" min="0" max="120" value="${esc(P.__edad||"")}"></label></div>
+   <div class="box miss" id="id-miss" hidden><h3>Falta</h3><ul></ul></div>
+   <div class="btns"><button class="btn primary" type="button" id="id-go">Guardar y seguir a las preguntas →</button></div><p class="status" id="id-st"></p></section>`;
+  const box=$("id-f");wireNA(box);
+  ["EAPB NOMBRE","PUEBLO"].forEach(k=>{const e=box.querySelector(`[data-f="${k}"]`),h=dl(k);if(e&&h){e.setAttribute("list","dl-"+k.replace(/\W/g,""));e.insertAdjacentHTML("afterend",h)}});
+  const rec=()=>{box.querySelectorAll("[data-wrap]").forEach(w=>{if(w.dataset.if)w.hidden=(box.querySelector(`[data-f="${CSS.escape(w.dataset.if)}"]`)||{}).value!==w.dataset.ifv});
+    const fn=(box.querySelector('[data-f="FECHA NACIMIENTO"]')||{}).value;$("id-edadw").hidden=!!fn};
+  box.addEventListener("change",rec);box.addEventListener("input",rec);rec();
+  $("id-go").onclick=()=>{baseOpts={mod:id};const {datos}=revisar(box,false),o=pac(),com=$("id-com").value.trim().toUpperCase(),ed=$("id-edad").value.trim();
+    ks.forEach(k=>{const v=datos[k];if(v&&!(k==="PUEBLO"&&v==="N/A"))o[k]=["NOMBRE COMPLETO","EAPB NOMBRE","PUEBLO"].includes(k)?v.toUpperCase():v;else if(!v)delete o[k]});
+    if(com){o.__com=com;S.set("dn2_ultcom",com);addHist("__com",com)}if(o["FECHA NACIMIENTO"]&&o["FECHA NACIMIENTO"]!=="N/A")delete o.__edad;else if(ed)o.__edad=ed;delete o.__sxr;
+    ["EAPB NOMBRE","PUEBLO"].forEach(k=>{if(o[k]&&o[k]!=="N/A")addHist(k,o[k])});setPac(o);
+    const f=idFalta(id);if(f.length){const mb=$("id-miss");mb.hidden=false;mb.querySelector("ul").innerHTML=f.map(x=>`<li>${esc(x)}</li>`).join("");$("id-st").textContent="";mb.scrollIntoView({block:"nearest"});return}
+    st.tab="entr";S.set(key(id,"tab"),"entr");renderMod();window.scrollTo(0,0)}}
+function openMod(id){st.view="mod";st.mod=id;st.tab=idFalta(id).length?"id":(S.get(key(id,"tab"))||"entr");st.note=S.get(key(id,"note"))||M[id].notes[0];if(!M[id].notes.includes(st.note))st.note=M[id].notes[0];renderMod();window.scrollTo(0,0)}
 function renderMod(){
   stopRec();const m=M[st.mod],id=st.mod;
-  const tabs=[["entr","Preguntas"],["guia","Guía"]].concat(m.tools?[["herr","Cálculos"]]:[]).concat([["nota","Nota"],["base","Base"]]);
-  const hecho={entr:Object.values(ivAns(id)).some(v=>(v||"").trim()),guia:Object.keys(checks(id)).length>0,herr:!!(S.get(key(id,"eg_fum"))||S.get(key(id,"eg_ecof"))),nota:!!S.get(key(id,"nota")),base:false};
+  const tabs=[["id","Datos"],["entr","Preguntas"],["guia","Guía"]].concat(m.tools?[["herr","Cálculos"]]:[]).concat([["nota","Nota"],["base","Base"]]);
+  const hecho={id:!idFalta(id).length,entr:Object.values(ivAns(id)).some(v=>(v||"").trim()),guia:Object.keys(checks(id)).length>0,herr:!!(S.get(key(id,"eg_fum"))||S.get(key(id,"eg_ecof"))),nota:!!S.get(key(id,"nota")),base:false};
   if(!tabs.some(t=>t[0]===st.tab))st.tab="guia";
   const routeName={rm:"Materno perinatal",rp:"Curso de vida",pc:"Procedimientos"}[m.route];
   $("app").innerHTML=`
   <div class="top"><button class="back" id="back">← Rutas</button><span class="tag ${m.route}">${routeName}</span></div>
   <header><h1>${esc(m.title)}</h1><p class="sub">${esc(m.who)}</p></header>
-  <div class="pacbar">${pac()["NOMBRE COMPLETO"]?`<b>${esc(pac()["NOMBRE COMPLETO"])}</b>${pacResumen().map(x=>`<span>${x}</span>`).join("")}`:"<span>Persona sin identificar</span>"}<button class="lnk" id="pac-cambiar">${pac()["NOMBRE COMPLETO"]?"Cambiar":"Identificar"}</button></div>
+  <div class="pacbar">${pac()["NOMBRE COMPLETO"]?`<b>${esc(pac()["NOMBRE COMPLETO"])}</b>${pacResumen().map(x=>`<span>${x}</span>`).join("")}`:"<span>Persona sin identificar</span>"}<button class="lnk" id="pac-cambiar">${pac()["NOMBRE COMPLETO"]?"Corregir":"Identificar"}</button></div>
   ${m.facts.length?`<div class="facts">${m.facts.map(([k,v])=>`<span class="chip"><b>${esc(k)}</b>${esc(v)}</span>`).join("")}</div>`:""}
   <div class="tabs" role="tablist">${tabs.map(([k,l],i)=>`<button role="tab" data-tab="${k}" aria-selected="${st.tab===k}"><span class="stepn ${hecho[k]?"ok":""}">${hecho[k]?"✓":i+1}</span><span>${l}</span></button>`).join("")}</div>
   <div id="pane"></div>`;
-  $("back").onclick=home;$("pac-cambiar").onclick=()=>{home();const d=$("pac-det");if(d){d.open=true;d.scrollIntoView({block:"start"})}};
-  document.querySelectorAll("[data-tab]").forEach(b=>b.onclick=()=>{st.tab=b.dataset.tab;if(st.tab!=="base")S.set(key(id,"tab"),st.tab);renderMod()});
+  $("back").onclick=home;$("pac-cambiar").onclick=()=>{st.tab="id";renderMod()};
+  document.querySelectorAll("[data-tab]").forEach(b=>b.onclick=()=>{st.tab=b.dataset.tab;if(st.tab!=="base"&&st.tab!=="id")S.set(key(id,"tab"),st.tab);renderMod()});
   if(st.tab==="base"){st.tab=S.get(key(id,"tab"))==="base"?"nota":(S.get(key(id,"tab"))||"nota");$("pane").innerHTML=`<p class="status" id="status">Tomando los datos de esta historia…</p>`;enviarBase(id);return}
+  if(st.tab==="id"){paneId();return}
   if(st.tab==="entr")paneEntr();else if(st.tab==="guia")paneGuia();else if(st.tab==="herr")paneHerr();else paneNota();
 }
 const ALC={
