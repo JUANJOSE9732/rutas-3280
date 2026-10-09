@@ -11,6 +11,7 @@
 <title>Dictado de Notas</title>
 <title>Dictado de Notas</title>
 <title>Dictado de Notas</title>
+<title>Dictado de Notas</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:ital,wght@0,400;0,700;1,400&family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,800&family=IBM+Plex+Mono:wght@500&display=swap">
 <style>
@@ -266,7 +267,13 @@ const M = {
 const POS=/^(?!\s*(niega|no\b|ninguna|ninguno|nunca|no sabe|no aplica)).+/i, SI=/^\s*s[ií]\b/i;
 const IV={
  precon:[
-  {b:"Datos generales",t:"ask",l:"Edad",q:"¿Cuántos años tiene?"},
+  {b:"Primer abordaje",t:"do",l:"Presentación",q:"Salúdala, preséntate con tu nombre y profesión, y explícale para qué es esta consulta.",c:["Presentación realizada"],h:"Ejemplo: «Esta consulta es para que, cuando usted decida embarazarse, llegue al embarazo en las mejores condiciones.»"},
+  {b:"Primer abordaje",t:"ask",l:"Idioma",q:"¿En qué idioma se siente más cómoda para hablar? ¿Quiere que alguien le ayude a traducir?",c:["Español","Prefiere su lengua","Con intérprete"],al:/lengua|int[eé]rprete|traduc/i,am:"Barrera lingüística: usa un facilitador intercultural (intérprete) y registra quién tradujo."},
+  {b:"Primer abordaje",t:"ask",l:"Acompañante",q:"¿Viene con alguien? ¿Quiere que esa persona esté con usted en la consulta?",c:["Viene sola","Con su pareja","Con un familiar","Prefiere estar sola"],h:"Las preguntas de violencia y de sexualidad se hacen con ella a solas, aunque venga acompañada."},
+  {b:"Primer abordaje",t:"do",l:"Confidencialidad y consentimiento verbal",q:"Explícale que lo que hablen es confidencial y pídele permiso para hacerle preguntas personales.",c:["Acepta","Prefiere no responder algunas preguntas"]},
+  {b:"Primer abordaje",t:"ask",l:"Motivo de consulta (en sus palabras)",q:"¿Qué la trae hoy? Cuénteme con sus palabras."},
+  {b:"Primer abordaje",t:"ask",l:"Expectativas",q:"¿Qué le gustaría saber o resolver en esta consulta?"},
+  {b:"Primer abordaje",t:"ask",l:"Medicina tradicional",q:"¿Ha hablado con el payé, el médico tradicional o la partera sobre su deseo de tener un bebé? ¿Le han hecho alguna curación o le han dado algún remedio?",c:["No","Sí"],h:"Respeta y registra la práctica. Pregunta por remedios que tome, por posibles interacciones."},
   {b:"Datos generales",t:"ask",l:"Comunidad y etnia",q:"¿De qué comunidad es y a qué pueblo pertenece?",c:["Cubeo","Desano","Tukano","Wanano","Otro"]},
   {b:"Datos generales",t:"ask",l:"Escolaridad y estado civil",q:"¿Hasta qué año estudió? ¿Vive con su pareja?",c:["Primaria incompleta","Primaria completa","Bachillerato","Unión libre","Casada","Soltera"]},
   {b:"Intención reproductiva",t:"ask",l:"Deseo de embarazo",q:"¿Usted (y su pareja) quieren tener un bebé en el próximo año?",c:["Sí","No","No sabe"],al:/^\s*(no\b|no sabe)/i,am:"Si no quiere embarazarse en el próximo año, no es consulta preconcepcional: ofrece asesoría anticonceptiva (RPMS)."},
