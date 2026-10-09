@@ -1075,7 +1075,7 @@ function paneEntr(){
     if(x.ck){const c=checks(id),v=ta.value.trim();if(v&&!/^(no realizado|no aplica)/i.test(v))c[x.ck]=1;else delete c[x.ck];S.set(key(id,"chk"),JSON.stringify(c))}
     const hit=x.al&&ta.value.trim()&&x.al.test(ta.value);$("iv-al").hidden=!hit;if(hit)$("iv-alt").textContent=x.am};
   ta.addEventListener("input",save);wireMic($("iv-mic"),ta,save);
-  const guia=()=>{const lbls=[...document.querySelectorAll("[data-c]")].filter(b=>ta.value.includes(b.dataset.c)).map(b=>b.textContent);const g=lbls.map(l=>GUIA[l]).filter(Boolean)[0],box=$("iv-g");if(!g){box.hidden=true;return}
+  const guia=()=>{const lbls=[...document.querySelectorAll("[data-c]")].filter(b=>ta.value.includes(b.dataset.c)).map(b=>b.textContent);const g=lbls.map(l=>GUIA[l]).filter(Boolean)[0],box=$("iv-g");if(!box||!ta.isConnected)return;if(!g){box.hidden=true;return}
     box.innerHTML=`<h3>${esc(g.t)}</h3><ul>${g.p.map(x=>`<li>${esc(x)}</li>`).join("")}</ul><div class="btns"><button class="btn" type="button" id="iv-gr">${ta.value.includes(g.r)?"✓ Registrado en la respuesta":"Registrar que se educó"}</button></div>`;box.hidden=false;
     $("iv-gr").onclick=()=>{if(!ta.value.includes(g.r)){ta.value=ta.value.trim()+" "+g.r;save()}$("iv-gr").textContent="✓ Registrado en la respuesta"}};
   ta.addEventListener("input",guia);setTimeout(guia,0);
