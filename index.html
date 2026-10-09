@@ -14,6 +14,7 @@
 <title>Dictado de Notas</title>
 <title>Dictado de Notas</title>
 <title>Dictado de Notas</title>
+<title>Dictado de Notas</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:ital,wght@0,400;0,700;1,400&family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,800&family=IBM+Plex+Mono:wght@500&display=swap">
 <style>
@@ -41,6 +42,7 @@
   --warn:#F2C46B; --warn-bg:#2E2512; --warn-line:#5E4A1C;
   --miss:#F2A3B0; --miss-bg:#2E1A1E; --miss-line:#5C2C35; color-scheme:dark}
 *{box-sizing:border-box}
+[hidden]{display:none!important}
 body{background:var(--bg);color:var(--ink);font-family:var(--f-body);font-size:17px;line-height:1.5}
 .wrap{max-width:720px;margin:0 auto;padding-inline:16px;padding-block:18px 72px;display:flex;flex-direction:column;gap:22px}
 h1,h2,h3{font-family:var(--f-display);margin:0;text-wrap:balance}
@@ -126,6 +128,13 @@ textarea{width:100%;font:inherit;font-size:1.05rem;line-height:1.55;padding:14px
 .micwrap{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
 .mic.on{background:var(--miss-bg);border-color:var(--miss);color:var(--miss)}
 .mic-st{font-size:.88rem;color:var(--muted);min-width:0;flex:1 1 160px}
+.bform{display:flex;flex-direction:column;gap:12px}
+.bgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(190px,1fr));gap:10px;padding:12px 14px 14px}
+.bfl{display:flex;flex-direction:column;gap:4px;font-size:.84rem;color:var(--muted);min-width:0}
+.bfl textarea{font-size:.95rem}
+.bgrid .bfl:has(textarea),.bgrid .bfl:has([data-multi]){grid-column:1/-1}
+.sugg button[aria-pressed="true"]{background:var(--accent);color:var(--accent-ink)}
+.sugg button[aria-pressed="false"]{background:var(--surface);border-color:var(--line);font-weight:400}
 .drafts{display:flex;flex-direction:column;gap:6px}
 .drafts button{display:flex;justify-content:space-between;gap:10px;text-align:left;border:1px solid var(--warn-line);background:var(--warn-bg);color:var(--ink);border-radius:8px;padding:10px 12px}
 @media (prefers-reduced-motion:no-preference){.tile,.btn,.notes-pick button{transition:background .15s,border-color .15s,box-shadow .15s}}
@@ -549,8 +558,10 @@ function home(){
   <section class="route"><div class="route-head"><h2>Ruta materno perinatal</h2><span>RIAMP</span></div><div class="tiles">${rm.map(tile).join("")}</div></section>
   <section class="route"><div class="route-head"><h2>Promoción y mantenimiento</h2><span>RPMS · cursos de vida</span></div><div class="tiles">${rp.map(tile).join("")}</div></section>
   <section class="route"><div class="route-head"><h2>Procedimientos y consejerías</h2></div><div class="tiles">${tile("proc")}</div></section>
+  <section class="route"><div class="route-head"><h2>Base de datos</h2><span>Google Sheets</span></div><div class="tiles"><button class="tile pc" id="t-base"><b>Registrar en la base</b><small id="bq">${cola().length?cola().length+" pendientes":(conf().url?"al día":"sin conectar")}</small></button></div></section>
   <p class="foot">Contenido según la Resolución 3280 de 2018, con IVE actualizada a la Sentencia C-055 de 2022 y la Resolución 051 de 2023. Las semanas de vacunas se confirman con el lineamiento PAI vigente. Lo que dictas queda solo en este celular hasta que lo borres. Organizar la nota necesita internet.</p>`;
   document.querySelectorAll("[data-mod]").forEach(b=>b.onclick=()=>openMod(b.dataset.mod));
+  $("t-base").onclick=()=>{baseEdit=null;base({});window.scrollTo(0,0)};
   ["f-edad","f-uni","f-sexo","f-est"].forEach(i=>$(i).addEventListener("input",sugerir));
   window.scrollTo(0,0);
 }
@@ -720,7 +731,7 @@ function paneNota(){
     <div class="box warn" id="alertBox" hidden><h3>Revisar antes de firmar</h3><ul id="alertas"></ul></div>
     <div class="box miss" id="missBox" hidden><h3>Faltan datos</h3><ul id="faltantes"></ul></div>
     <div><p class="lab"><label for="nota">Nota organizada (editable)</label></p><textarea id="nota">${esc(S.get(key(id,"nota"))||"")}</textarea></div>
-    <div class="btns"><button class="btn primary" id="copy">Copiar nota</button><button class="btn" id="stop" hidden>Detener</button></div>
+    <div class="btns"><button class="btn primary" id="copy">Copiar nota</button><button class="btn" id="toBase">Registrar en la base</button><button class="btn" id="stop" hidden>Detener</button></div>
   </section>`;
   if(!S.get(key(id,"nota")))$("out").hidden=true;
   document.querySelectorAll("[data-n]").forEach(b=>b.onclick=()=>{st.note=b.dataset.n;S.set(key(id,"note"),st.note);paneNota()});
@@ -731,6 +742,7 @@ function paneNota(){
   $("nota").addEventListener("input",()=>S.set(key(id,"nota"),$("nota").value));
   $("fecha").addEventListener("change",()=>S.set(key(id,"fecha"),$("fecha").value));
   $("go").onclick=organizar;$("stop").onclick=()=>ctl&&ctl.abort();$("copy").onclick=copiar;
+  $("toBase").onclick=()=>{baseEdit=null;base({FECHA:$("fecha").value||hoy(),"OBSERVACION":m.title+" – "+n.label});window.scrollTo(0,0)};
   $("ej").onclick=()=>{$("dict").value=n.ex;S.set(key(id,"dict"),n.ex);$("status").textContent="Ejemplo cargado (datos inventados). Toca Organizar nota."};
   $("nueva").onclick=()=>{const b=$("nueva");if(b.dataset.armed!=="1"){b.dataset.armed="1";b.textContent="¿Borrar este módulo? Toca otra vez";setTimeout(()=>{if(b.isConnected){b.dataset.armed="";b.textContent="Nueva paciente"}},4000);return}
     S.keys().filter(k=>k.startsWith("dn2_"+id+"_")&&!k.endsWith("_tab")&&!k.endsWith("_note")).forEach(k=>S.del(k));paneNota();$("status").textContent="Listo para una nueva paciente."};
@@ -826,8 +838,137 @@ async function organizar(){
 }
 async function copiar(){const t=$("nota").value;try{await navigator.clipboard.writeText(t);$("status").textContent="Nota copiada. Pégala en la historia clínica."}catch(e){$("nota").focus();$("nota").select();$("status").textContent="Selecciona todo y copia con el menú del teclado."}}
 
+/* ======================= BASE DE DATOS (Google Sheets) ======================= */
+/* Variables temporales tomadas de "BASE GENERAL 2026 – CON MODIFICACIONES". k = encabezado en la hoja. */
+const SN=["SI","NO"];
+const VARS=[
+ {g:"Identificación",f:[
+  {k:"CONSECUTIVO",l:"Consecutivo del hogar",t:"num"},{k:"DIRECCION",l:"Dirección o sector"},{k:"FECHA",l:"Fecha de la visita",t:"date",def:"hoy"},
+  {k:"NOMBRE COMPLETO",l:"Nombre completo",req:1},{k:"ANTECEDENTES",l:"Antecedentes",t:"area"},
+  {k:"ROL EN EL HOGAR",l:"Rol en el hogar",t:"sel",o:["JEFE DE HOGAR","CONYUGE","HIJO(A)","PADRE/MADRE","NIETO(A)","HERMANO(A)","OTRO"]},
+  {k:"FECHA NACIMIENTO",l:"Fecha de nacimiento",t:"date"},{k:"EDAD",l:"Edad",t:"auto"},{k:"AA / MM",l:"Unidad de edad",t:"auto"},
+  {k:"GENERO",l:"Sexo",t:"sel",o:["F","M"]},{k:"TIPO",l:"Tipo de documento",t:"sel",o:["CC","TI","RC","CE","PPT","PEP","MS","AS"]},
+  {k:"DOCUMENTO ID.",l:"Número de documento",req:1,t:"tel"},{k:"EAPB NOMBRE",l:"EAPB"},{k:"RÉGIMEN",l:"Régimen",t:"sel",o:["SUBSIDIADO","CONTRIBUTIVO","ESPECIAL","NO AFILIADO"]},
+  {k:"CAPITADO",l:"Capitado",t:"sel",o:SN},{k:"TELEFONO",l:"Teléfono",t:"tel"}]},
+ {g:"Signos vitales y antropometría",f:[
+  {k:"F.C",l:"FC (lpm)",t:"num"},{k:"F. R",l:"FR (rpm)",t:"num"},{k:"T. A",l:"TA (ej. 120/80)"},{k:"TEM",l:"Temperatura (°C)",t:"num"},{k:"SPO2",l:"SpO₂ (%)",t:"num"},
+  {k:"PESO",l:"Peso (kg)",t:"num"},{k:"TALLA",l:"Talla (m)",t:"num"},{k:"IMC",l:"IMC",t:"auto"},{k:"CURSO DE VIDA",l:"Curso de vida",t:"auto"},
+  {k:"RIESGO CARDIOVASCULAR",l:"Riesgo cardiovascular",t:"sel",o:SN}]},
+ {g:"Enfermedades crónicas",f:[
+  {k:"HTA",l:"Hipertensión",t:"sel",o:SN},{k:"HTA EN CONTROL",l:"HTA en control",t:"sel",o:SN,if:["HTA","SI"]},
+  {k:"DIABETES",l:"Diabetes",t:"sel",o:SN},{k:"DIABETES EN CONTROL",l:"Diabetes en control",t:"sel",o:SN,if:["DIABETES","SI"]},
+  {k:"EPOC",l:"EPOC",t:"sel",o:SN},{k:"EPOC EN CONTROL",l:"EPOC en control",t:"sel",o:SN,if:["EPOC","SI"]},
+  {k:"CANCER",l:"Cáncer",t:"sel",o:SN},
+  {k:"HIPER O HIPOTIROIDISMO",l:"Hiper o hipotiroidismo",t:"sel",o:SN},{k:"TIROIDES EN CONTROL",l:"Tiroides en control",t:"sel",o:SN,if:["HIPER O HIPOTIROIDISMO","SI"]},
+  {k:"FECHA ULTIMA CONSULTA CRONICOS",l:"Última consulta de crónicos",t:"date"},
+  {k:"NUTRICION",l:"Nutrición"},{k:"PSICOLOGIA",l:"Psicología"}]},
+ {g:"Discapacidad y aseguramiento",f:[
+  {k:"DISCAPACIDAD",l:"Discapacidad",t:"sel",o:SN},{k:"CUAL DISCAPACIDAD",l:"¿Cuál?",if:["DISCAPACIDAD","SI"]},
+  {k:"CERTIFICADO DISCAPACIDAD",l:"¿Tiene certificado?",t:"sel",o:SN,if:["DISCAPACIDAD","SI"]},
+  {k:"ASEGURAMIENTO",l:"Aseguramiento"},{k:"TIPO DE TRAMITE",l:"Tipo de trámite",t:"sel",o:["TRASLADO","ASEGURAMIENTO","PORTABILIDAD","NINGUNO"]}]},
+ {g:"Atenciones de la RPMS",f:[
+  ...[["ATENCION INTEGRAL M.GENERAL","Atención integral por medicina"],["ATENCION INTEGRAL ENFERMERIA","Atención integral por enfermería"],["PSA PROSTATICO","PSA prostático","M"],["MAMOGRAFIA","Mamografía","F"],["EXAMEN CLINICO DE MAMA","Examen clínico de mama","F"],["TAMIZAJE CANCER COLON Y RECTO","Tamizaje de cáncer de colon"],["PLANIFICACION FAMILIAR O CONTROL","Planificación familiar o control"],["CITOLOGIA","Citología","F"],["ADN VPH","ADN-VPH","F"]]
+   .flatMap(([k,l,sx])=>[{k,l,t:"sel",o:SN,sx},{k:k+" FECHA ULTIMO CONTROL",l:"Fecha del último control",t:"date",if:[k,"SI"],sx}]),
+  {k:"AL DIA EN ATENCIONES",l:"¿Al día en atenciones o gestión en salud?",t:"sel",o:SN}]},
+ {g:"Canalización y seguimiento",f:[
+  {k:"SERVICIOS SOCIALES",l:"Servicios sociales",t:"multi",o:["PLANEACION","COMISARIA","PERSONERIA","SISBEN","BOMBEROS"]},
+  {k:"CANALIZADO A",l:"Seguimiento o semaforización",t:"multi",o:["MEDICINA GENERAL","ENFERMERIA","PSICOLOGIA","VACUNACION","ODONTOLOGIA","CITOLOGIA"]},
+  {k:"SE REALIZO LABORATORIOS",l:"¿Se realizaron laboratorios o exámenes?",t:"sel",o:SN},
+  {k:"BRIGADA",l:"Brigada"},{k:"CANALIZADO POR",l:"Canalizado por"},
+  {k:"OBSERVACION",l:"Observación",t:"area"},{k:"OBSERVACION DE CANALIZACION",l:"Observación de canalización",t:"area"},
+  {k:"TIPO DE SEGUIMIENTO",l:"Tipo de seguimiento"},{k:"FECHA DE SEGUIMIENTO",l:"Fecha de seguimiento",t:"date"},{k:"OBSERVACIONES SEGUIMIENTO",l:"Observaciones del seguimiento",t:"area"}]}
+];
+const ALLF=VARS.flatMap(g=>g.f);
+function cola(){try{return JSON.parse(S.get("dn2_cola")||"[]")}catch(e){return[]}}
+function setCola(c){S.set("dn2_cola",JSON.stringify(c))}
+function conf(){try{return JSON.parse(S.get("dn2_conf")||"{}")}catch(e){return{}}}
+function uid(){return Date.now().toString(36)+"-"+Math.random().toString(36).slice(2,8)}
+function cursoVida(a){if(a==null)return"";if(a<6)return"PRIMERA INFANCIA";if(a<12)return"INFANCIA";if(a<18)return"ADOLESCENCIA";if(a<29)return"JUVENTUD";if(a<60)return"ADULTEZ";return"VEJEZ"}
+function edadDe(fn,ref){const a=pD(fn),b=pD(ref)||pD(hoy());if(!a||!b||a>b)return null;let y=b.getUTCFullYear()-a.getUTCFullYear(),m=b.getUTCMonth()-a.getUTCMonth();if(b.getUTCDate()<a.getUTCDate())m--;if(m<0){y--;m+=12}return{y,m,tm:y*12+m}}
+let baseEdit=null,syncing=false;
+
+function base(pref){
+  stopRec();st.view="base";const c=conf(),q=cola();
+  const rec=baseEdit?q.find(r=>r.id===baseEdit):null;
+  const d=rec?rec.datos:Object.assign({},pref||{});
+  const com=rec?rec.comunidad:(S.get("dn2_ultcom")||"");
+  const fld=f=>{const v=d[f.k]!=null?d[f.k]:(f.def==="hoy"?hoy():"");const id="bf_"+ALLF.indexOf(f);const attrs=`id="${id}" data-f="${esc(f.k)}"`;
+    let inp;
+    if(f.t==="sel")inp=`<select ${attrs}><option value=""></option>${f.o.map(o=>`<option ${o===v?"selected":""}>${esc(o)}</option>`).join("")}</select>`;
+    else if(f.t==="multi"){const sel=String(v||"").split(", ").filter(Boolean);inp=`<div class="sugg" ${attrs} data-multi="1">${f.o.map(o=>`<button type="button" aria-pressed="${sel.includes(o)}" data-o="${esc(o)}">${esc(o)}</button>`).join("")}</div>`}
+    else if(f.t==="area")inp=`<textarea ${attrs} style="min-height:80px">${esc(v)}</textarea>`;
+    else if(f.t==="auto")inp=`<input ${attrs} readonly value="${esc(v)}" style="background:var(--accent-soft)">`;
+    else inp=`<input ${attrs} type="${f.t==="date"?"date":f.t==="num"?"number":f.t==="tel"?"tel":"text"}" ${f.t==="num"?'step="any" inputmode="decimal"':""} value="${esc(v)}">`;
+    return `<label class="bfl" for="${id}" data-wrap="${esc(f.k)}" ${f.if?`data-if="${esc(f.if[0])}" data-ifv="${esc(f.if[1])}"`:""} ${f.sx?`data-sx="${f.sx}"`:""}><span>${esc(f.l)}${f.req?" *":""}</span>${inp}</label>`};
+  $("app").innerHTML=`
+  <div class="top"><button class="back" id="back">← Rutas</button><span class="tag pc">Base de datos</span></div>
+  <header><h1>Registro en la base</h1><p class="sub">Variables de la base general (temporales). Se envía a tu Google Sheets, una pestaña por comunidad.</p></header>
+  <div class="box ${c.url?"warn":"miss"}" id="syncBox"><h3>Envío</h3><p style="margin:0" id="syncTxt"></p>
+    <div class="btns" style="margin-top:8px"><button class="btn" id="syncNow">Enviar pendientes</button><button class="btn" id="cfgBtn">Conexión</button></div></div>
+  <section class="tool" id="cfg" hidden><h3>Conexión con Google Sheets</h3>
+    <label class="bfl" for="cf-url"><span>URL de la aplicación web (termina en /exec)</span><input id="cf-url" value="${esc(c.url||"")}" placeholder="https://script.google.com/macros/s/…/exec"></label>
+    <label class="bfl" for="cf-key"><span>Clave (la misma que pusiste en el script)</span><input id="cf-key" type="password" value="${esc(c.key||"")}" autocomplete="off"></label>
+    <label class="bfl" for="cf-who"><span>Registrado por</span><input id="cf-who" value="${esc(c.who||"")}" placeholder="Tu nombre"></label>
+    <div class="btns"><button class="btn primary" id="cf-save">Guardar conexión</button><button class="btn" id="cf-test">Probar</button></div><p class="status" id="cf-st"></p></section>
+  ${q.length?`<section><p class="lab">Pendientes por enviar (${q.length})</p><div class="drafts">${q.map(r=>`<button data-edit="${r.id}"><span>${esc((r.datos["NOMBRE COMPLETO"]||"(sin nombre)"))} · ${esc(r.comunidad)}</span><span>Editar</span></button>`).join("")}</div></section>`:""}
+  <form id="bform" class="bform" novalidate>
+    <label class="bfl" for="b-com"><span>Comunidad o vereda (pestaña de la hoja) *</span><input id="b-com" list="coms" value="${esc(com)}" placeholder="QUERARÍ"><datalist id="coms">${[...new Set(q.map(r=>r.comunidad).concat(S.get("dn2_coms")?S.get("dn2_coms").split("|"):[]))].filter(Boolean).map(x=>`<option value="${esc(x)}">`).join("")}</datalist></label>
+    ${VARS.map((g,i)=>`<details class="sec" ${i<2?"open":""}><summary><span>${esc(g.g)}</span></summary><div class="bgrid">${g.f.map(fld).join("")}</div></details>`).join("")}
+    <div class="btns"><button class="btn primary" type="submit" id="b-save">${rec?"Guardar cambios":"Guardar y enviar"}</button>${rec?`<button class="btn" type="button" id="b-del">Quitar de pendientes</button>`:""}<button class="btn" type="button" id="b-new">Formulario nuevo</button></div>
+    <p class="status" id="b-st" role="status"></p>
+  </form>`;
+  $("back").onclick=()=>{baseEdit=null;home()};
+  $("cfgBtn").onclick=()=>{$("cfg").hidden=!$("cfg").hidden};
+  $("cf-save").onclick=()=>{S.set("dn2_conf",JSON.stringify({url:$("cf-url").value.trim(),key:$("cf-key").value,who:$("cf-who").value.trim()}));$("cf-st").textContent="Conexión guardada en este celular.";syncTxt();$("syncBox").className="box warn"};
+  $("cf-test").onclick=async()=>{const u=$("cf-url").value.trim();if(!/^https:\/\/script\.google\.com\//.test(u)){$("cf-st").textContent="La URL debe empezar por https://script.google.com/";return}
+    $("cf-st").textContent="Probando…";try{const r=await fetch(u);const j=await r.json();$("cf-st").textContent=j.ok?"Conexión correcta con tu hoja.":"La hoja respondió con error."}catch(e){$("cf-st").textContent="No se pudo conectar. Revisa la URL y la señal. (Desde claude.ai no se puede: usa la versión de GitHub.)"}};
+  $("syncNow").onclick=()=>sync(true);
+  document.querySelectorAll("[data-edit]").forEach(b=>b.onclick=()=>{baseEdit=b.dataset.edit;base();window.scrollTo(0,0)});
+  $("b-new").onclick=()=>{baseEdit=null;base();window.scrollTo(0,0)};
+  if($("b-del"))$("b-del").onclick=()=>{const b=$("b-del");if(b.dataset.armed!=="1"){b.dataset.armed="1";b.textContent="¿Quitar sin enviar? Toca otra vez";return}setCola(cola().filter(r=>r.id!==baseEdit));baseEdit=null;base()};
+  document.querySelectorAll("[data-multi] button").forEach(b=>b.onclick=()=>b.setAttribute("aria-pressed",b.getAttribute("aria-pressed")!=="true"));
+  const form=$("bform");
+  const recompute=()=>{const v=k=>{const e=form.querySelector(`[data-f="${CSS.escape(k)}"]`);return e?e.value:""};const set=(k,x)=>{const e=form.querySelector(`[data-f="${CSS.escape(k)}"]`);if(e)e.value=x};
+    const ed=edadDe(v("FECHA NACIMIENTO"),v("FECHA"));
+    if(ed){if(ed.y>=1){set("EDAD",ed.y);set("AA / MM","AÑOS")}else{set("EDAD",ed.tm);set("AA / MM","MESES")}set("CURSO DE VIDA",cursoVida(ed.y))}else{set("EDAD","");set("AA / MM","");set("CURSO DE VIDA","")}
+    const p=parseFloat(v("PESO")),t=parseFloat(String(v("TALLA")).replace(",","."));const tm=t>3?t/100:t;
+    set("IMC",p>0&&tm>0.3&&tm<2.5?(p/(tm*tm)).toFixed(1):"");
+    const sx=v("GENERO");
+    form.querySelectorAll("[data-wrap]").forEach(w=>{let show=true;if(w.dataset.if&&v(w.dataset.if)!==w.dataset.ifv)show=false;if(w.dataset.sx&&sx&&w.dataset.sx!==sx)show=false;w.hidden=!show})};
+  form.addEventListener("input",recompute);form.addEventListener("change",recompute);recompute();
+  form.onsubmit=e=>{e.preventDefault();recompute();
+    const comunidad=$("b-com").value.trim().toUpperCase();const datos={};
+    if(!comunidad){$("b-st").textContent="Escribe la comunidad o vereda.";$("b-com").focus();return}
+    for(const f of ALLF){const el=form.querySelector(`[data-f="${CSS.escape(f.k)}"]`);const w=form.querySelector(`[data-wrap="${CSS.escape(f.k)}"]`);
+      let val=f.t==="multi"?[...el.querySelectorAll('[aria-pressed="true"]')].map(b=>b.dataset.o).join(", "):el.value.trim();
+      if(w&&w.hidden)val="N/A";
+      if(f.req&&!val){$("b-st").textContent="Falta: "+f.l+".";el.focus();return}
+      datos[f.k]=val}
+    const cf=conf(),id=baseEdit||uid();
+    const reg={id,comunidad,datos:Object.assign({ID_REGISTRO:id,FECHA_REGISTRO:new Date().toISOString().slice(0,16).replace("T"," "),REGISTRADO_POR:cf.who||""},datos)};
+    const q=cola().filter(r=>r.id!==id);q.push(reg);setCola(q);
+    S.set("dn2_ultcom",comunidad);const cs=new Set((S.get("dn2_coms")||"").split("|").filter(Boolean));cs.add(comunidad);S.set("dn2_coms",[...cs].join("|"));
+    baseEdit=null;base({});$("b-st").textContent="Guardado en el celular.";sync(true)};
+  syncTxt();
+}
+function syncTxt(){const el=$("syncTxt");if(!el)return;const c=conf(),n=cola().length;
+  el.textContent=!c.url?"Falta configurar la conexión con tu Google Sheets (botón Conexión). Mientras tanto los registros quedan guardados en el celular.":
+   n?`${n} registro(s) pendientes por enviar. Se envían solos cuando hay señal.`:"Todo enviado. La hoja está al día."}
+async function sync(manual){
+  const c=conf(),q=cola();if(syncing||!q.length||!c.url){syncTxt();return}
+  if(!navigator.onLine){if(manual&&$("syncTxt"))$("syncTxt").textContent=`Sin señal: ${q.length} pendiente(s) quedan guardados y se envían cuando vuelva.`;return}
+  syncing=true;if($("syncTxt"))$("syncTxt").textContent="Enviando…";
+  try{const r=await fetch(c.url,{method:"POST",headers:{"Content-Type":"text/plain;charset=utf-8"},body:JSON.stringify({clave:c.key,registros:q})});
+    const j=await r.json();
+    if(j.ok){const ok=new Set(j.ids||[]);setCola(cola().filter(x=>!ok.has(x.id)));if(st.view==="base"&&!baseEdit)base({});const s=$("b-st");if(s)s.textContent=`Enviado a la hoja (${ok.size}).`}
+    else if($("syncTxt"))$("syncTxt").textContent=j.error==="clave"?"La clave no coincide con la del script. Revísala en Conexión.":"La hoja respondió con error: "+(j.error||"");
+  }catch(e){if($("syncTxt"))$("syncTxt").textContent=`No se pudo enviar (${cola().length} pendientes). Se reintenta al volver la señal.`+(location.hostname.endsWith("claude.ai")||!window.fetch?"":"")}
+  finally{syncing=false;if(st.view==="base")syncTxt();if(st.view==="home"){const h=$("bq");if(h)h.textContent=cola().length?cola().length+" pendientes":"al día"}}
+}
+window.addEventListener("online",()=>sync(false));
+
 /* ---------- arranque ---------- */
-home();
+home();sync(false);
 (async()=>{try{sample=window.claude?await window.claude.use("sample"):null}catch(e){sample=null}
   if(sample&&st.view==="mod"&&st.tab==="nota"){const g=$("go"),h=$("offHint");if(g)g.textContent="Organizar nota";if(h)h.hidden=true}})();
 </script>
