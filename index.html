@@ -1789,8 +1789,8 @@ const VARS=[
   {k:"CERTIFICADO DISCAPACIDAD",l:"¿Tiene certificado?",t:"sel",o:SN,if:["DISCAPACIDAD","SI"]},
   {k:"ASEGURAMIENTO",l:"Aseguramiento"},{k:"TIPO DE TRAMITE",l:"Tipo de trámite",t:"sel",o:["TRASLADO","ASEGURAMIENTO","PORTABILIDAD","NINGUNO"]}]},
  {g:"Atenciones de la RPMS",f:[
-  ...[["ATENCION INTEGRAL M.GENERAL","Atención integral por medicina"],["ATENCION INTEGRAL ENFERMERIA","Atención integral por enfermería"],["PSA PROSTATICO","PSA prostático","M"],["MAMOGRAFIA","Mamografía","F"],["EXAMEN CLINICO DE MAMA","Examen clínico de mama","F"],["TAMIZAJE CANCER COLON Y RECTO","Tamizaje de cáncer de colon"],["PLANIFICACION FAMILIAR O CONTROL","Planificación familiar o control"],["CITOLOGIA","Citología","F"],["ADN VPH","ADN-VPH","F"]]
-   .flatMap(([k,l,sx])=>[{k,l,t:"sel",o:SN,sx},{k:k+" FECHA ULTIMO CONTROL",l:"Fecha del último control",t:"date",if:[k,"SI"],sx}]),
+  ...[["ATENCION INTEGRAL M.GENERAL","Atención integral por medicina"],["ATENCION INTEGRAL ENFERMERIA","Atención integral por enfermería"],["PSA PROSTATICO","PSA prostático","M",[50,75]],["MAMOGRAFIA","Mamografía","F",[50,69]],["EXAMEN CLINICO DE MAMA","Examen clínico de mama","F",[40,69]],["TAMIZAJE CANCER COLON Y RECTO","Tamizaje de cáncer de colon",undefined,[50,75]],["PLANIFICACION FAMILIAR O CONTROL","Planificación familiar o control",undefined,[10,60]],["CITOLOGIA","Citología","F",[25,65]],["ADN VPH","ADN-VPH","F",[30,65]]]
+   .flatMap(([k,l,sx,ed])=>[{k,l,t:"sel",o:SN,sx,ed},{k:k+" FECHA ULTIMO CONTROL",l:"Fecha del último control",t:"date",if:[k,"SI"],sx,ed}]),
   {k:"AL DIA EN ATENCIONES",l:"¿Al día en atenciones o gestión en salud?",t:"sel",o:SN}]},
  {g:"Canalización y seguimiento",f:[
   {k:"SERVICIOS SOCIALES",l:"Servicios sociales",t:"multi",o:["NINGUNO","PLANEACION","COMISARIA","PERSONERIA","SISBEN","BOMBEROS"]},
@@ -1801,6 +1801,7 @@ const VARS=[
   {k:"FECHA PROXIMO CONTROL",l:"Fecha del próximo control",t:"date"},{k:"MOTIVO PROXIMO CONTROL",l:"Motivo del próximo control"},{k:"TIPO DE SEGUIMIENTO",l:"Tipo de seguimiento"},{k:"FECHA DE SEGUIMIENTO",l:"Fecha de seguimiento",t:"date"},{k:"OBSERVACIONES SEGUIMIENTO",l:"Observaciones del seguimiento",t:"area"}]}
 ];
 const ALLF=VARS.flatMap(g=>g.f);
+const REQK=["NOMBRE COMPLETO","TIPO","DOCUMENTO ID.","FECHA NACIMIENTO","GENERO","FECHA"];
 const EJ_BASE={"ETNIA":"INDIGENA","PUEBLO":"CUBEO","CONSECUTIVO":"12","DIRECCION":"SECTOR LA PLAYA","NOMBRE COMPLETO":"EJEMPLO FICTICIO PÉREZ","ANTECEDENTES":"HIPERTENSIÓN ARTERIAL DIAGNOSTICADA EN 2019, EN TRATAMIENTO CON LOSARTÁN","ROL EN EL HOGAR":"JEFE DE HOGAR","FECHA NACIMIENTO":"1976-05-14","GENERO":"M","TIPO":"CC","DOCUMENTO ID.":"1000000000","EAPB NOMBRE":"MALLAMAS","RÉGIMEN":"SUBSIDIADO","CAPITADO":"SI","TELEFONO":"3000000000",
  "F.C":"78","F. R":"18","T. A":"150/95","TEM":"36.5","SPO2":"96","PESO":"82","TALLA":"1.68","RIESGO CARDIOVASCULAR":"SI",
  "HTA":"SI","HTA EN CONTROL":"NO","FECHA ULTIMA CONSULTA CRONICOS":"2026-03-10","DIABETES":"NO","EPOC":"NO","CANCER":"NO","HIPER O HIPOTIROIDISMO":"NO","NUTRICION":"PENDIENTE","PSICOLOGIA":"N/A","DISCAPACIDAD":"NO","ASEGURAMIENTO":"ACTIVO","TIPO DE TRAMITE":"NINGUNO",
@@ -1853,6 +1854,11 @@ function extraerLocal(id,txt,f){const o={},M1=(re,i=1)=>{const m=txt.match(re);r
   {const qq=ivFor(id),aa=ivAns(id),k=qq.findIndex(z=>z.l==="Próximo control"),t=k>=0?(aa[k]||""):"";
    let px=isoDeTxt(t);if(!px){const n=t.match(/en\s+(\d+|un|una|dos|tres|cuatro)\s+(semana|mes)/i);if(n){const w={un:1,una:1,dos:2,tres:3,cuatro:4}[n[1].toLowerCase()]||+n[1];const iso=d=>{const x=pD(f);x.setUTCDate(x.getUTCDate()+d);return x.toISOString().slice(0,10)};px=iso(/mes/i.test(n[2])?w*30:w*7)}}
    if(px){o["FECHA PROXIMO CONTROL"]=px;o["MOTIVO PROXIMO CONTROL"]=(m.title+": "+(/lectura/i.test(t)?"lectura de exámenes":"control")).toUpperCase()}}
+  {const qq=ivFor(id),aa=ivAns(id),A=l=>{const k=qq.findIndex(z=>z.l===l);return k>=0?(aa[k]||""):""};
+   const en=A("Enfermedades");if(/^\s*niega/i.test(en))["HTA","DIABETES","EPOC","CANCER","HIPER O HIPOTIROIDISMO"].forEach(k=>o[k]="NO");
+   else if(en){if(/hipertens/i.test(en))o["HTA"]="SI";if(/diabetes/i.test(en))o["DIABETES"]="SI";if(/tiroid/i.test(en))o["HIPER O HIPOTIROIDISMO"]="SI"}
+   const ex=A("Exámenes solicitados");if(/realizan hoy|prueba r[aá]pida/i.test(ex))o["SE REALIZO LABORATORIOS"]="SI";else if(/pendiente/i.test(ex))o["SE REALIZO LABORATORIOS"]="NO";
+   const w=conf().who;if(w&&!/^clave$/i.test(w))o["CANALIZADO POR"]=w}
   o["FECHA"]=f;o["OBSERVACION"]=m.title+" – "+N[m.notes.includes(st.note)?st.note:m.notes[0]].label;
   return o}
 function pExtraerVars(txt,f){
@@ -1885,7 +1891,7 @@ function campo(f,d){const v=d[f.k]!=null?d[f.k]:(f.def==="hoy"?hoy():"");const i
     else if(f.t==="auto")inp=`<input ${attrs} readonly value="${esc(v)}" style="background:var(--accent-soft)">`;
     else{const na=v==="N/A"&&["date","num","tel"].includes(f.t);inp=`<input ${attrs} type="${f.t==="date"?"date":f.t==="num"?"number":f.t==="tel"?"tel":"text"}" ${f.t==="num"?'step="any" inputmode="decimal"':""} value="${na?"":esc(v)}" ${na?'data-na="1" disabled':""}>`;
       if(["date","num","tel"].includes(f.t))inp=`<span class="narow">${inp}<button type="button" class="na" data-na-for="${esc(f.k)}" aria-pressed="${na}">N/A</button></span>`}
-    return `<label class="bfl" for="${id}" data-wrap="${esc(f.k)}" ${f.if?`data-if="${esc(f.if[0])}" data-ifv="${esc(f.if[1])}"`:""} ${f.sx?`data-sx="${f.sx}"`:""}><span>${esc(f.l)}${f.req?" *":""}</span>${inp}</label>`}
+    return `<label class="bfl" for="${id}" data-wrap="${esc(f.k)}" ${f.if?`data-if="${esc(f.if[0])}" data-ifv="${esc(f.if[1])}"`:""} ${f.sx?`data-sx="${f.sx}"`:""} ${f.ed?`data-ed="${f.ed.join("-")}"`:""}><span>${esc(f.l)}${REQK.includes(f.k)?" *":""}</span>${inp}</label>`}
 function wireNA(root){root.querySelectorAll("[data-na-for]").forEach(b=>b.onclick=()=>{const el=root.querySelector(`[data-f="${CSS.escape(b.dataset.naFor)}"]`);const on=b.getAttribute("aria-pressed")!=="true";b.setAttribute("aria-pressed",on);el.disabled=on;if(on){el.dataset.na="1";el.value=""}else{delete el.dataset.na;el.focus()}el.dispatchEvent(new Event("change",{bubbles:true}))});
   root.querySelectorAll("[data-multi] button").forEach(b=>b.onclick=()=>{b.setAttribute("aria-pressed",b.getAttribute("aria-pressed")!=="true");b.dispatchEvent(new Event("change",{bubbles:true}))})}
 const OPC={
@@ -1930,7 +1936,8 @@ function base(pref,opts){
     ${RV?`<section class="tool" id="b-falta"><h3 id="b-falta-h">Falta completar</h3><p class="hint" style="margin:0">No salió de la historia. Escríbelo, díctalo o toca N/A si no aplica.</p><div class="bgrid" id="b-falta-grid"></div>
       ${dictBox("Dictar lo que falta","Ej.: cédula 1 2 3 4 5, teléfono 310…, última consulta de crónicos 10 de marzo, canalizado a odontología")}</section>
       <details class="sec" id="b-idsec"><summary><span>Identificación</span><span class="cnt" id="b-idcnt"></span></summary><div class="bgrid" id="b-idgrid">${comL}${ALLF.filter(f=>ID_KEYS.includes(f.k)).map(fld).join("")}</div></details>
-      <details class="sec" id="b-hcsec" open><summary><span>Tomado de la historia: revisa</span><span class="cnt" id="b-hccnt"></span></summary><div class="bgrid" id="b-hcgrid">${ALLF.filter(f=>!ID_KEYS.includes(f.k)).map(fld).join("")}</div></details>`
+      <details class="sec" id="b-hcsec" open><summary><span>Tomado de la historia: revisa</span><span class="cnt" id="b-hccnt"></span></summary><div class="bgrid" id="b-hcgrid">${ALLF.filter(f=>!ID_KEYS.includes(f.k)).map(fld).join("")}</div></details>
+      <details class="sec" id="b-optsec"><summary><span>Otros datos de la caracterización (opcionales)</span><span class="cnt" id="b-optcnt"></span></summary><p class="hint" style="margin:0 14px 8px">No son obligatorios para esta consulta: llénalos solo si los tienes. Lo vacío llega en blanco a la hoja. Los tamizajes que no corresponden por edad o sexo ya no aparecen.</p><div class="bgrid" id="b-optgrid"></div></details>`
     :`<section class="tool" id="b-dict"><h3>Dictar en vez de escribir</h3>
       <label class="bfl" for="bd-id"><span>Identificación (se interpreta en el celular; no sale a Claude)</span>
         <textarea id="bd-id" style="min-height:70px" placeholder="Ej.: nombre María Pérez Gómez, cédula 1 2 3 4 5, mujer, nació el 3 de marzo de 1990, teléfono 310…, comunidad Querarí, jefe de hogar, EPS Mallamas subsidiado, hogar número 4"></textarea></label>
@@ -1961,12 +1968,15 @@ function base(pref,opts){
     const p=parseFloat(v("PESO")),t=parseFloat(String(v("TALLA")).replace(",","."));const tm=t>3?t/100:t;
     set("IMC",p>0&&tm>0.3&&tm<2.5?(p/(tm*tm)).toFixed(1):"");
     const sx=v("GENERO");
-    form.querySelectorAll("[data-wrap]").forEach(w=>{let show=true;if(w.dataset.if&&v(w.dataset.if)!==w.dataset.ifv)show=false;if(w.dataset.sx&&sx&&w.dataset.sx!==sx)show=false;w.hidden=!show})};
+    form.querySelectorAll("[data-wrap]").forEach(w=>{let show=true;if(w.dataset.if&&v(w.dataset.if)!==w.dataset.ifv)show=false;if(w.dataset.sx&&sx&&w.dataset.sx!==sx)show=false;if(w.dataset.ed&&ed){const[a,b]=w.dataset.ed.split("-").map(Number);if(ed.y<a||ed.y>b)show=false}w.hidden=!show})};
   form.addEventListener("input",recompute);form.addEventListener("change",recompute);recompute();
   if(RV){const {falt}=revisar(form,false),fg=$("b-falta-grid");
     if(!$("b-com").value.trim())fg.append($("b-comw"));
     falt.forEach(f=>{const w=form.querySelector(`[data-wrap="${CSS.escape(f.k)}"]`);if(w)fg.append(w)});
+    const og=$("b-optgrid"),vacio=w=>{const el=w.querySelector("[data-f]");if(!el||w.hidden)return false;if(el.dataset.multi)return!el.querySelector('[aria-pressed="true"]');return el.dataset.na!=="1"&&!el.readOnly&&!String(el.value||"").trim()};
+    [$("b-hcgrid"),$("b-idgrid")].forEach(g=>[...g.querySelectorAll("[data-wrap]")].forEach(w=>{if(vacio(w)&&!REQK.includes(w.dataset.wrap))og.append(w)}));
     const n=g=>g.querySelectorAll("[data-wrap]:not([hidden])").length+(g.contains($("b-comw"))?1:0);
+    $("b-optcnt").textContent=n(og)+" vacíos";$("b-optsec").hidden=!n(og);
     const nf=n(fg);$("b-falta-h").textContent=nf?(nf===1?"Falta 1 dato":"Faltan "+nf+" datos"):"";$("b-falta").hidden=!nf;
     $("b-idcnt").textContent=n($("b-idgrid"))+" datos";$("b-hccnt").textContent=n($("b-hcgrid"))+" datos";
     if(!nf)$("b-st").textContent="No falta nada. Revisa y toca Guardar y enviar."}
@@ -2056,7 +2066,7 @@ function revisar(form,marcar){const datos={},falt=[];if(marcar)form.querySelecto
     let val=f.t==="multi"?[...el.querySelectorAll('[aria-pressed="true"]')].map(b=>b.dataset.o).join(", "):el.dataset.na==="1"?"N/A":el.value.trim();
     const incompleta=f.t==="date"&&!val&&el.validity&&el.validity.badInput;
     if(w&&w.hidden)val="N/A";
-    if(!val&&f.t!=="auto"){falt.push(Object.assign({},f,{inc:incompleta}));if(marcar&&w){w.classList.add("falta");const det=w.closest("details");if(det)det.open=true}}
+    if(!val&&f.t!=="auto"&&REQK.includes(f.k)){falt.push(Object.assign({},f,{inc:incompleta}));if(marcar&&w){w.classList.add("falta");const det=w.closest("details");if(det)det.open=true}}
     datos[f.k]=val}
   return {datos,falt}}
 function mostrarFaltan(falt){const mb=$("b-miss");if(!mb)return;if(!falt.length){mb.hidden=true;return}mb.hidden=false;
