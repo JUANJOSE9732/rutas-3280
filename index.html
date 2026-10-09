@@ -20,6 +20,7 @@
 <title>Dictado de Notas</title>
 <title>Dictado de Notas</title>
 <title>Dictado de Notas</title>
+<title>Dictado de Notas</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:ital,wght@0,400;0,700;1,400&family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,800&family=IBM+Plex+Mono:wght@500&display=swap">
 <style>
@@ -1022,6 +1023,10 @@ function base(pref,opts){
     const sx=v("GENERO");
     form.querySelectorAll("[data-wrap]").forEach(w=>{let show=true;if(w.dataset.if&&v(w.dataset.if)!==w.dataset.ifv)show=false;if(w.dataset.sx&&sx&&w.dataset.sx!==sx)show=false;w.hidden=!show})};
   form.addEventListener("input",recompute);form.addEventListener("change",recompute);recompute();
+  const enVivo=()=>{if($("b-miss").hidden)return;const {falt}=revisar(form,false);const fk=new Set(falt.map(f=>f.k));
+    form.querySelectorAll(".falta").forEach(w=>{if(!fk.has(w.dataset.wrap))w.classList.remove("falta")});mostrarFaltan(falt);
+    if(!falt.length)$("b-st").textContent="Ya está completo. Toca Guardar y enviar."};
+  form.addEventListener("input",enVivo);form.addEventListener("change",enVivo);form.addEventListener("click",e=>{if(e.target.closest("[data-na-for],[data-multi] button"))setTimeout(enVivo,0)});
   wireMic($("bd-id-mic"),$("bd-id"));wireMic($("bd-cl-mic"),$("bd-cl"));
   $("bd-go").onclick=async()=>{const st2=$("bd-st"),idt=$("bd-id").value.trim(),cl=$("bd-cl").value.trim();stopRec();
     if(!idt&&!cl){st2.textContent="Dicta algo en alguno de los dos cuadros.";return}
@@ -1034,25 +1039,17 @@ function base(pref,opts){
       ID_KEYS.forEach(k=>delete cv[k]);n+=llenar(form,cv)}
     recompute();st2.textContent=n?`Se llenaron ${n} campo(s). Revisa los resaltados en verde.`:"No reconocí datos en lo dictado. Prueba con frases como «cédula 1234» o «hipertensa en control».";};
   form.onsubmit=e=>{e.preventDefault();recompute();
-    const comunidad=$("b-com").value.trim().toUpperCase();const datos={};
+    const comunidad=$("b-com").value.trim().toUpperCase();
     if(!comunidad){$("b-st").textContent="Escribe la comunidad o vereda.";$("b-com").focus();return}
-    const falt=[];form.querySelectorAll(".falta").forEach(x=>x.classList.remove("falta"));
-    for(const f of ALLF){const el=form.querySelector(`[data-f="${CSS.escape(f.k)}"]`);const w=form.querySelector(`[data-wrap="${CSS.escape(f.k)}"]`);
-      let val=f.t==="multi"?[...el.querySelectorAll('[aria-pressed="true"]')].map(b=>b.dataset.o).join(", "):el.dataset.na==="1"?"N/A":el.value.trim();
-      if(w&&w.hidden)val="N/A";
-      if(!val&&f.t!=="auto"){falt.push(f);if(w){w.classList.add("falta");const det=w.closest("details");if(det)det.open=true}}
-      datos[f.k]=val}
-    const mb=$("b-miss");
-    if(falt.length){mb.hidden=false;mb.querySelector("ul").innerHTML=falt.map(f=>`<li>${esc(f.l)}${f.k!==f.l?` <span class="note-src">(${esc(f.k)})</span>`:""}</li>`).join("");
-      mb.querySelector("h3").textContent=`No se puede enviar: faltan ${falt.length} dato(s) de la tabla de variables`;
-      $("b-st").textContent="Completa los campos marcados en rojo. Si de verdad no aplica, usa N/A.";mb.scrollIntoView({behavior:"smooth",block:"start"});return}
-    mb.hidden=true;
+    const {datos,falt}=revisar(form,true);
+    if(falt.length){mostrarFaltan(falt);$("b-st").textContent="Completa los campos marcados en rojo. Si de verdad no aplica, usa N/A.";$("b-miss").scrollIntoView({behavior:"smooth",block:"start"});return}
+    $("b-miss").hidden=true;
     const cf=conf(),id=baseEdit||uid();
     const reg={id,comunidad,datos:Object.assign({ID_REGISTRO:id,FECHA_REGISTRO:new Date().toISOString().slice(0,16).replace("T"," "),REGISTRADO_POR:cf.who||""},datos)};
     const q=cola().filter(r=>r.id!==id);q.push(reg);setCola(q);
     if(baseOpts.mod){const ident={};ID_KEYS.forEach(k=>{if(datos[k]&&datos[k]!=="N/A")ident[k]=datos[k]});S.set(key(baseOpts.mod,"ident"),JSON.stringify(ident))}
     S.set("dn2_ultcom",comunidad);const cs=new Set((S.get("dn2_coms")||"").split("|").filter(Boolean));cs.add(comunidad);S.set("dn2_coms",[...cs].join("|"));
-    baseEdit=null;base({});$("b-st").textContent="Guardado en el celular.";sync(true)};
+    baseEdit=null;base({});$("b-st").textContent=conf().url?"Guardado. Enviando a la hoja…":"Guardado en el celular como pendiente. Para que llegue a la hoja falta configurar la Conexión (botón arriba).";sync(true)};
   syncTxt();
 }
 /* ---------- dictado de variables ---------- */
@@ -1102,6 +1099,17 @@ function llenar(form,vals){let n=0;for(const [k,v0] of Object.entries(vals||{}))
     else{if(el.dataset.na){delete el.dataset.na;el.disabled=false;const b=form.querySelector(`[data-na-for="${CSS.escape(k)}"]`);if(b)b.setAttribute("aria-pressed","false")}el.value=v}
     const w=form.querySelector(`[data-wrap="${CSS.escape(k)}"]`);if(w){w.classList.remove("falta");w.classList.add("lleno");const det=w.closest("details");if(det)det.open=true}n++}
   return n}
+function revisar(form,marcar){const datos={},falt=[];if(marcar)form.querySelectorAll(".falta").forEach(x=>x.classList.remove("falta"));
+  for(const f of ALLF){const el=form.querySelector(`[data-f="${CSS.escape(f.k)}"]`);const w=form.querySelector(`[data-wrap="${CSS.escape(f.k)}"]`);if(!el)continue;
+    let val=f.t==="multi"?[...el.querySelectorAll('[aria-pressed="true"]')].map(b=>b.dataset.o).join(", "):el.dataset.na==="1"?"N/A":el.value.trim();
+    const incompleta=f.t==="date"&&!val&&el.validity&&el.validity.badInput;
+    if(w&&w.hidden)val="N/A";
+    if(!val&&f.t!=="auto"){falt.push(Object.assign({},f,{inc:incompleta}));if(marcar&&w){w.classList.add("falta");const det=w.closest("details");if(det)det.open=true}}
+    datos[f.k]=val}
+  return {datos,falt}}
+function mostrarFaltan(falt){const mb=$("b-miss");if(!mb)return;if(!falt.length){mb.hidden=true;return}mb.hidden=false;
+  mb.querySelector("h3").textContent=`No se puede enviar: ${falt.length===1?"falta 1 dato":"faltan "+falt.length+" datos"} de la tabla de variables`;
+  mb.querySelector("ul").innerHTML=falt.map(f=>`<li>${esc(f.l)}${f.inc?" — <b>la fecha está incompleta</b> (día, mes y año)":""} <span class="note-src">(${esc(f.k)})</span></li>`).join("")}
 function syncTxt(){const el=$("syncTxt");if(!el)return;const c=conf(),n=cola().length;
   el.textContent=!c.url?"Falta configurar la conexión con tu Google Sheets (botón Conexión). Mientras tanto los registros quedan guardados en el celular.":
    n?`${n} registro(s) pendientes por enviar. Se envían solos cuando hay señal.`:"Todo enviado. La hoja está al día."}
