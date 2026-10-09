@@ -1399,27 +1399,33 @@ const GUIA={
 function ivAplica(id,n){const q=ivFor(id),x=q[n];if(!x||!x.si)return true;const a=ivAns(id);const A=l=>{const k=q.findIndex(z=>z.l===l);return k<0?"":(a[k]||"").trim()};try{return x.si(A)}catch(e){return true}}
 /* ---------- casillas numéricas (signos vitales, antropometría) ---------- */
 const CAMPOS={
- vitales:[{k:"tas",l:"TA sistólica",u:"mmHg",ph:"120"},{k:"tad",l:"TA diastólica",u:"mmHg",ph:"80"},{k:"fc",l:"Frec. cardiaca",u:"lpm",ph:"78"},{k:"fr",l:"Frec. respiratoria",u:"rpm",ph:"18"},{k:"t",l:"Temperatura",u:"°C",ph:"36,5"},{k:"spo2",l:"Saturación O₂",u:"%",ph:"97"}],
- antropo:[{k:"peso",l:"Peso",u:"kg",ph:"58"},{k:"talla",l:"Talla",u:"m o cm",ph:"1,55"},{k:"imc",l:"IMC",u:"kg/m²",auto:1}]};
+ vitales:[{k:"tas",l:"TA sistólica",u:"mmHg",ph:"120",n:"Normal 90 a 139"},{k:"tad",l:"TA diastólica",u:"mmHg",ph:"80",n:"Normal 60 a 89"},{k:"fc",l:"Frec. cardiaca",u:"lpm",ph:"78",n:"Normal 60 a 100"},{k:"fr",l:"Frec. respiratoria",u:"rpm",ph:"18",n:"Normal 12 a 20"},{k:"t",l:"Temperatura",u:"°C",ph:"36,5",n:"Normal 36 a 37,5"},{k:"spo2",l:"Saturación O₂",u:"%",ph:"97",n:"Normal 95 o más"}],
+ antropo:[{k:"peso",l:"Peso",u:"kg",ph:"58",n:""},{k:"talla",l:"Talla",u:"m o cm",ph:"1,55",n:"Acepta 1,55 o 155"},{k:"imc",l:"IMC",u:"kg/m²",auto:1,n:"Ideal para embarazo: menos de 25"}]};
 const nv=v=>{const n=parseFloat(String(v||"").replace(",","."));return isFinite(n)?n:null};
 const coma=n=>String(n).replace(".",",");
-function cvCalc(tipo,v){const o={},al=[];
+function cvCalc(tipo,v){const o={},al=[],m={};
   if(tipo==="vitales"){const s=nv(v.tas),d=nv(v.tad),fc=nv(v.fc),fr=nv(v.fr),t=nv(v.t),sp=nv(v.spo2);
-    if(s&&d){o.tas=o.tad=(s>=160||d>=110)?"alto":(s>=140||d>=90)?"alto":(s<90||d<60)?"bajo":"";
+    if(s&&d){m.tas=m.tad=(s>=160||d>=110)?"Muy alta: remitir hoy":(s>=140||d>=90)?"Alta: repetir en reposo; si sigue, remitir":(s<90||d<60)?"Baja: preguntar por mareo o desmayo":"Normal";o.tas=o.tad=(s>=160||d>=110)?"alto":(s>=140||d>=90)?"alto":(s<90||d<60)?"bajo":"";
       if(s>=160||d>=110)al.push("Presión muy alta (≥160/110): remitir hoy a medicina.");else if(s>=140||d>=90)al.push("Presión alta (≥140/90): repetir la toma en reposo; si se confirma, remitir a medicina.");else if(s<90||d<60)al.push("Presión baja: valorar síntomas (mareo, desmayo).")}
+    if(fc)m.fc=fc>100?"Alta: valorar fiebre, anemia, deshidratación":fc<60?"Baja: valorar síntomas":"Normal";
+    if(fr)m.fr=fr>20?"Alta: valorar dificultad respiratoria":fr<12?"Baja":"Normal";
+    if(t)m.t=t>=38?"Fiebre: buscar la causa, gota gruesa, remitir":t>37.5?"Febrícula: repetir y vigilar":t<35.5?"Baja: repetir la toma":"Normal";
+    if(sp)m.spo2=sp<92?"Baja: remitir a medicina":sp<95?"Límite: vigilar y repetir":"Normal";
     if(fc){if(fc>100){o.fc="alto";al.push("Frecuencia cardiaca alta (>100): valorar fiebre, anemia, deshidratación.")}else if(fc<60){o.fc="bajo";al.push("Frecuencia cardiaca baja (<60): valorar síntomas.")}}
     if(fr&&(fr>20||fr<12)){o.fr="alto";al.push(fr>20?"Frecuencia respiratoria alta (>20).":"Frecuencia respiratoria baja (<12).")}
     if(t){if(t>=38){o.t="alto";al.push("Fiebre (≥38 °C): buscar la causa; en zona endémica, gota gruesa; remitir a medicina.")}else if(t<35.5){o.t="bajo";al.push("Temperatura baja: repetir la toma.")}}
     if(sp){if(sp<92){o.spo2="bajo";al.push("Saturación menor de 92 %: remitir a medicina.")}else if(sp<95){o.spo2="bajo";al.push("Saturación entre 92 y 94 %: vigilar y repetir.")}}
     const P=[];if(s&&d)P.push("TA "+s+"/"+d+" mmHg");if(fc)P.push("FC "+fc+" lpm");if(fr)P.push("FR "+fr+" rpm");if(t)P.push("T "+coma(t)+" °C");if(sp)P.push("SpO2 "+sp+" %");
-    return {txt:P.length?P.join(", ")+".":"",flag:o,al}}
+    return {txt:P.length?P.join(", ")+".":"",flag:o,al,m}}
   const p=nv(v.peso);let ta=nv(v.talla);if(ta&&ta>3)ta=ta/100;let imc=null,cat="";
   if(p&&ta&&ta>0.8&&ta<2.3){imc=Math.round(p/(ta*ta)*10)/10;cat=imc<18.5?"bajo peso":imc<25?"normal":imc<30?"sobrepeso":imc<35?"obesidad":"obesidad grado II o más";
     if(imc<18.5){o.imc="bajo";al.push("Bajo peso (IMC < 18,5): valoración nutricional; descartar anemia y parasitosis.")}
     else if(imc>35){o.imc="alto";al.push("IMC mayor de 35: evaluación nutricional y metabólica (Res. 3280); remitir a medicina.")}
     else if(imc>=25){o.imc="alto";al.push("IMC de 25 o más: el ideal para embarazarse es menor de 25; consejería en alimentación y actividad física.")}}
+  if(imc)m.imc=imc<18.5?"Bajo peso: valoración nutricional":imc<25?"Normal":imc<30?"Sobrepeso: consejería":imc<=35?"Obesidad: consejería y control":"Obesidad severa: remitir (Res. 3280)";
+  if(nv(v.talla)&&!(ta>0.8&&ta<2.3))m.talla="Revisa la talla";
   const P=[];if(p)P.push("Peso "+coma(p)+" kg");if(ta)P.push("talla "+coma(Math.round(ta*100)/100)+" m");if(imc)P.push("IMC "+coma(imc)+" ("+cat+")");
-  return {txt:P.length?P.join(", ")+".":"",flag:o,al,imc}}
+  return {txt:P.length?P.join(", ")+".":"",flag:o,al,imc,m}}
 function cvDesdeTexto(tipo,t){const o={};if(!t)return o;const v=extraerVitales(t);
   if(tipo==="vitales"){if(v["T. A"]){const [a,b]=v["T. A"].split("/");o.tas=a;o.tad=b}if(v["F.C"])o.fc=v["F.C"];if(v["F. R"])o.fr=v["F. R"];if(v["SPO2"])o.spo2=v["SPO2"];
     const te=t.match(/(?:temperatura|temp|\bT)\D{0,8}(3\d(?:[.,]\d)?)/i);if(te)o.t=te[1]}
@@ -1453,8 +1459,8 @@ function paneEntr(){
     ${x.c?`<div class="sugg">${x.c.map(c=>{const [l,t]=c.split("|");return `<button data-c="${esc(t||l)}" title="${esc(t||l)}">${esc(l)}</button>`}).join("")}</div>`:""}
     ${x.dyn&&x.dyn(l=>{const k=q.findIndex(z=>z.l===l);return k<0?"":(a[k]||"")})?`<div class="box miss"><h3>Atención</h3><p style="margin:0">${esc(x.dyn(l=>{const k=q.findIndex(z=>z.l===l);return k<0?"":(a[k]||"")}))}</p></div>`:""}
     <div class="guia" id="iv-g" hidden></div>
-    ${x.campos?`<div class="pgrid" id="cv">${CAMPOS[x.campos].map(c=>`<label class="bfl"><span>${esc(c.l)} (${esc(c.u)})</span><input data-cv="${c.k}" inputmode="decimal" placeholder="${esc(c.ph||"")}" ${c.auto?'readonly style="background:var(--accent-soft)"':""}></label>`).join("")}</div>
-      <div class="box warn" id="cv-al" hidden><h3>Revisar</h3><ul style="margin:0;padding-left:20px"></ul></div>`:""}
+    ${x.campos?`<div class="pgrid" id="cv">${CAMPOS[x.campos].map(c=>`<label class="bfl"><span>${esc(c.l)} (${esc(c.u)})</span><input data-cv="${c.k}" inputmode="decimal" placeholder="${esc(c.ph||"")}" ${c.auto?'readonly style="background:var(--accent-soft)"':""}><small data-cvm="${c.k}" data-n="${esc(c.n||"")}" style="font-size:.74rem;line-height:1.3;min-height:1.3em;color:var(--muted)">${esc(c.n||"")}</small></label>`).join("")}</div>
+      <div class="box warn" id="cv-al" hidden><h3>Qué hacer</h3><ul style="margin:0;padding-left:20px"></ul></div>`:""}
     <label for="iv-a" class="lab" style="margin:0">${x.campos?"Observaciones, o dicta los valores (por ejemplo: «tensión 120 sobre 80, frecuencia cardiaca 78, temperatura 36,5»)":x.t==="do"?"Hallazgo: toca una opción o dicta lo que encontraste":"Respuesta: toca una opción o dicta lo que respondió"}</label>
     <textarea id="iv-a" style="min-height:${x.campos?70:120}px">${esc(x.campos?(S.get(key(id,"cvo"+i))||""):(a[i]||""))}</textarea>
     <div id="iv-mic">${micUI()}</div>
@@ -1463,8 +1469,9 @@ function paneEntr(){
     <div class="linkrow"><button class="lnk" id="iv-skip">Saltar esta pregunta</button><button class="lnk" id="iv-reset">Reiniciar preguntas</button>${CASO_EJ[id]?'<button class="lnk" id="iv-caso">Cargar caso de ejemplo completo</button>':""}</div>
   </div>`;
   const ta=$("iv-a");let cv={};try{cv=JSON.parse(S.get(key(id,"cv"+i))||"{}")}catch(e){}
-  const cvPinta=()=>{if(!x.campos)return;const r=cvCalc(x.campos,cv);document.querySelectorAll("[data-cv]").forEach(e=>{const k=e.dataset.cv;if(CAMPOS[x.campos].find(c=>c.k===k).auto){e.value=r.imc?coma(r.imc):""}else if(document.activeElement!==e)e.value=cv[k]||"";e.style.borderColor=r.flag[k]?"var(--miss)":"";e.style.borderWidth=r.flag[k]?"2px":""});
-    const b=$("cv-al");b.hidden=!r.al.length;b.querySelector("ul").innerHTML=r.al.map(z=>`<li>${esc(z)}</li>`).join("");return r};
+  const cvPinta=()=>{if(!x.campos)return;const r=cvCalc(x.campos,cv);document.querySelectorAll("[data-cv]").forEach(e=>{const k=e.dataset.cv;if(CAMPOS[x.campos].find(c=>c.k===k).auto){e.value=r.imc?coma(r.imc):""}else if(document.activeElement!==e)e.value=cv[k]||"";e.style.borderColor=r.flag[k]?"var(--miss)":"";e.style.borderWidth=r.flag[k]?"2px":"";
+      const sm=document.querySelector(`[data-cvm="${k}"]`);if(sm){const t=r.m&&r.m[k];sm.textContent=t||sm.dataset.n;sm.style.color=!t?"var(--muted)":t==="Normal"?"var(--accent)":"var(--miss)";sm.style.fontWeight=t?"700":"400"}});
+    const b=$("cv-al");b.hidden=true;b.querySelector("ul").innerHTML=r.al.map(z=>`<li>${esc(z)}</li>`).join("");return r};
   const valor=()=>x.campos?[cvCalc(x.campos,cv).txt,cvObs(ta.value)].filter(Boolean).join(" "):ta.value;
   const save=()=>{const o=ivAns(id);if(x.campos){S.set(key(id,"cv"+i),JSON.stringify(cv));S.set(key(id,"cvo"+i),ta.value)}o[i]=valor();S.set(key(id,"iv"),JSON.stringify(o));S.del(key(id,"anal"));S.set(key(id,"dict"),ivCompose(id));
     if(x.ck){const c=checks(id),v=valor().trim();if(v&&!/^(no realizado|no aplica)/i.test(v))c[x.ck]=1;else delete c[x.ck];S.set(key(id,"chk"),JSON.stringify(c))}
