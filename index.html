@@ -198,6 +198,8 @@ textarea{width:100%;font:inherit;font-size:1.05rem;line-height:1.55;padding:14px
 .linkrow{display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap}
 .lnk{background:none;border:0;padding:6px 0;color:var(--muted);text-decoration:underline;text-underline-offset:3px;font-size:.9rem}
 #pane{display:flex;flex-direction:column;gap:16px}
+.sem{display:inline-block;width:11px;height:11px;border-radius:50%;margin:0 4px 0 8px;vertical-align:-1px;background:#bbb}.sem.r{background:#c0392b}.sem.a{background:#e0a100}.sem.v{background:#2e8b57}
+.agl{display:flex;flex-direction:column;gap:6px;margin-top:8px}.agi{display:flex;gap:8px;align-items:center;border:1px solid var(--line,#ddd);border-radius:8px;padding:8px 10px}.agi .sem{margin:0;flex:none;width:14px;height:14px}.agi small{display:block;color:var(--muted)}
 .drafts{display:flex;flex-direction:column;gap:6px}
 .drafts button{display:flex;justify-content:space-between;gap:10px;text-align:left;border:1px solid var(--warn-line);background:var(--warn-bg);color:var(--ink);border-radius:8px;padding:10px 12px}
 @media (prefers-reduced-motion:no-preference){.tile,.btn,.notes-pick button{transition:background .15s,border-color .15s,box-shadow .15s}}
@@ -381,7 +383,7 @@ const IV={
   {b:"Plan",t:"do",ref:"Res. 3280 · 4.1, p. 245 y 4.1.4: asesoría y provisión de método anticonceptivo.",l:"Anticoncepción hasta decidir",q:"Método anticonceptivo mientras se prepara.",c:["Continúa|Continúa con su método anticonceptivo actual hasta decidir el embarazo.", "Inicia|Inicia método anticonceptivo ____ hasta decidir el embarazo.", "Busca embarazo|Suspende anticoncepción para buscar el embarazo."]},
   {b:"Plan",t:"do",ref:"Res. 3280 · 4.1.6.4–4.1.6.5, p. 248: odontología, nutrición, psicología, trabajo social, especialistas.",conducta:1,l:"Remisiones",q:"¿A dónde remitiste?",c:["Vacunación|Se remite a vacunación.", "Odontología|Se remite a odontología.", "Nutrición|Se remite a nutrición.", "Psicología|Se remite a psicología.", "Medicina|Se remite a medicina.", "Ginecobstetricia|Se remite a ginecobstetricia.", "Ninguna|No requiere remisiones."]},
   {b:"Plan",t:"do",ref:"Res. 3280 · 4.1.6.6, p. 249: información en salud, derechos reproductivos e IVE.",l:"Información brindada",q:"Antes de cerrar, explícale estos temas (Res. 3280, 4.1.6.6). Toca los que hablaste.",h:"Toca cada tema para ver qué decirle. «Todos los temas» registra los de la norma en una sola frase.",c:["Todos los temas|Se brinda información en salud según Res. 3280: planeación de la familia y espaciamiento de los hijos (intervalo mínimo de 18 meses), prevención de la gestación no deseada, recomendaciones nutricionales, estado de vacunación, importancia del control prenatal temprano, detección de factores de riesgo cardiometabólicos, derechos sexuales y reproductivos, derecho a la IVE y signos de alarma.","Planeación y espaciamiento|Se informa sobre planeación de la familia y espaciamiento de los hijos, con intervalo intergenésico mínimo de 18 meses.","Nutrición|Se brindan recomendaciones nutricionales.","Vacunas|Se informa sobre el estado de vacunación y la importancia de completar el esquema antes del embarazo.","Control prenatal temprano|Se recomienda acudir a control prenatal antes de la semana 10 al confirmar el embarazo.","Riesgo cardiometabólico|Se informa sobre detección temprana de factores de riesgo cardiometabólicos.","Derechos e IVE|Se informa sobre derechos sexuales y reproductivos y el derecho a la IVE (Sentencia C-055 de 2022).","Riesgo por edad|Se informa sobre el riesgo de aneuploidías y cromosomopatías asociado a la edad materna y las opciones de tamizaje en caso de gestación.","Signos de alarma|Se explican signos de alarma."]},
-  {b:"Plan",t:"do",ref:"Res. 3280 · 4.1.5, p. 246 (mínimo una consulta inicial y un control) y 4.1.6.6, p. 249.",l:"Próximo control",q:"Fecha del control para leer los exámenes.",c:["Un mes|Control en un mes para lectura de exámenes.","Próxima brigada|Control en la próxima brigada para lectura de exámenes.","Fecha|Control el ____ para lectura de exámenes (Res. 3280: mínimo una consulta de control)."]}
+  {b:"Plan",t:"do",ref:"Res. 3280 · 4.1.5, p. 246 (mínimo una consulta inicial y un control) y 4.1.6.5, p. 249 (el control lee los exámenes).",l:"Próximo control",q:"¿Cuándo es el control para leer los exámenes?",h:"Toca una opción: la fecha se calcula sola desde la fecha de la consulta. Con «Próxima brigada» o «Otra fecha» escríbela así: 15/11/2026. Esa fecha pasa a la base y al semáforo de controles.",c:["En 2 semanas|Control el {+14} para lectura e interpretación de exámenes.","En 1 mes|Control el {+30} para lectura e interpretación de exámenes.","Próxima brigada|Control en la próxima brigada, el ____, para lectura e interpretación de exámenes.","Otra fecha|Control el ____ para lectura e interpretación de exámenes."]}
  ]
 };
 
@@ -595,6 +597,8 @@ function hoy(){const d=new Date();return d.getFullYear()+"-"+String(d.getMonth()
 
 /* ---------- cálculos ---------- */
 const DAY=86400000;
+function fMas(iso,n){const d=pD(iso)||pD(hoy());d.setUTCDate(d.getUTCDate()+n);return String(d.getUTCDate()).padStart(2,"0")+"/"+String(d.getUTCMonth()+1).padStart(2,"0")+"/"+d.getUTCFullYear()}
+function isoDeTxt(t){const m=String(t||"").match(/\b(\d{1,2})\/(\d{1,2})\/(\d{4})\b/);if(!m)return"";const v=m[3]+"-"+m[2].padStart(2,"0")+"-"+m[1].padStart(2,"0");return pD(v)?v:""}
 function pD(s){if(!s||!/^\d{4}-\d{2}-\d{2}$/.test(s))return null;const[a,b,c]=s.split("-").map(Number);return new Date(Date.UTC(a,b-1,c))}
 function fmt(d){return String(d.getUTCDate()).padStart(2,"0")+"/"+String(d.getUTCMonth()+1).padStart(2,"0")+"/"+d.getUTCFullYear()}
 function egT(n){return Math.floor(n/7)+" semanas y "+(n%7)+" días"}
@@ -674,6 +678,7 @@ function home(){
     <div class="sugg" id="sugg"><p>Escribe la edad para ver qué le corresponde.</p></div>
   </section>
   ${drafts.length?`<section><p class="lab">Borradores guardados</p><div class="drafts">${drafts.map(d=>`<button data-mod="${d}"><span>${esc(M[d].title)}</span><span>Continuar →</span></button>`).join("")}</div></section>`:""}
+  ${agendaHTML()}
   <section class="route"><div class="route-head"><h2>Ruta materno perinatal</h2><span>RIAMP</span></div><div class="tiles">${rm.map(tile).join("")}</div></section>
   <section class="route"><div class="route-head"><h2>Promoción y mantenimiento</h2><span>RPMS · cursos de vida</span></div><div class="tiles">${rp.map(tile).join("")}</div></section>
   <section class="route"><div class="route-head"><h2>Procedimientos y consejerías</h2></div><div class="tiles">${tile("proc")}</div></section>
@@ -681,6 +686,7 @@ function home(){
   <p class="foot">Contenido según la Resolución 3280 de 2018, con IVE actualizada a la Sentencia C-055 de 2022 y la Resolución 051 de 2023. Las semanas de vacunas se confirman con el lineamiento PAI vigente. Lo que dictas queda solo en este celular hasta que lo borres. Organizar la nota necesita internet.</p>`;
   document.querySelectorAll("[data-mod]").forEach(b=>b.onclick=()=>openMod(b.dataset.mod));
   $("t-base").onclick=()=>{baseEdit=null;base({});window.scrollTo(0,0)};
+  document.querySelectorAll("[data-ag]").forEach(b=>b.onclick=()=>{if(b.dataset.armed!=="1"){b.dataset.armed="1";b.textContent="¿Seguro? Toca otra vez";return}setAgenda(agenda().map(x=>x.id===b.dataset.ag?Object.assign(x,{ok:hoy()}):x));home()});
   ["f-edad","f-uni","f-sexo","f-est"].forEach(i=>$(i).addEventListener("input",sugerir));
   const box=$("pac-f");wireNA(box);
   const pinta=()=>{const P=pac(),nm=P["NOMBRE COMPLETO"];
@@ -1045,7 +1051,9 @@ async function analizar(id){const st2=$("an-st");let r=null;
   if(!r){r=anLocal(id);st2.textContent=sample?"No se pudo usar Claude; se analizó con reglas básicas.":""}else st2.textContent="";
   anGuardar(id,r);$("an-out").innerHTML=anHTML(r);anWire(id);hcRefresh(id)}
 /* guías cortas para responderle en el momento, según la opción escogida */
+const GUIA_CTRL={t:"Periodicidad del control preconcepcional",p:["La norma pide como mínimo una consulta inicial y un control (Res. 3280, 4.1.5, p. 246). No fija un intervalo exacto.","El control sirve para leer e interpretar los exámenes de la primera consulta (4.1.6.5, p. 249). Por eso la fecha depende de cuándo lleguen los resultados.","Sugerido: entre 2 y 4 semanas. Si las muestras salen a Mitú o no hay laboratorio, cítala para la próxima brigada.","No esperes la fecha si llega un resultado alterado (VIH, sífilis o hepatitis B reactivos, glicemia alta o hemoglobina baja): búscala antes y remite a medicina.","Si tiene una enfermedad crónica, además del control con enfermería necesita control médico según su condición.","Después del control: si sigue buscando el embarazo, continúa el ácido fólico y, al confirmarlo, ingresa a control prenatal antes de la semana 10. Si decide aplazarlo, pasa a planificación familiar.","Dile la fecha, que traiga el carné de vacunas y los resultados que le entreguen, y que avise si no puede venir."],r:"Control para lectura e interpretación de exámenes."};
 const GUIA={
+ "Próximo control|En 2 semanas":GUIA_CTRL,"Próximo control|En 1 mes":GUIA_CTRL,"Próximo control|Próxima brigada":GUIA_CTRL,"Próximo control|Otra fecha":GUIA_CTRL,
  "Expectativas|Dudas de fertilidad":{t:"Para responderle: dudas sobre fertilidad",
   p:["Es normal que tarde: de cada 10 parejas sin planificar, unas 8 logran el embarazo en el primer año y 9 en dos años.",
      "Consultar si no lo ha logrado después de 12 meses de relaciones sin planificar (6 meses si ella tiene 35 años o más). Antes, si no le viene la regla, le viene muy irregular, tuvo infecciones en la pelvis u operaciones, o la pareja tiene algún problema conocido.",
@@ -1554,7 +1562,7 @@ function paneEntr(){
     <h2 style="font-family:var(--f-body);font-size:1.25rem;line-height:1.35;font-weight:700">${esc(x.q)}</h2>
     ${x.ref?`<p class="ref" style="margin:-4px 0 0;text-align:right;font-size:.74rem;color:var(--muted);font-style:italic">${/^No |no textual/i.test(x.ref)?"":"Norma: "}${esc(x.ref)}</p>`:""}
     ${x.h?`<p class="hint" style="margin:0">${esc(x.h)}</p>`:""}
-    ${x.c?`<div class="sugg">${x.c.map(c=>{const [l,t]=c.split("|");return `<button data-c="${esc(t||l)}" title="${esc(t||l)}">${esc(l)}</button>`}).join("")}</div>`:""}
+    ${x.c?`<div class="sugg">${x.c.map(c=>{let [l,t]=c.split("|");if(t)t=t.replace(/\{\+(\d+)\}/g,(_,n)=>fMas(S.get(key(id,"fecha"))||hoy(),+n));return `<button data-c="${esc(t||l)}" title="${esc(t||l)}">${esc(l)}</button>`}).join("")}</div>`:""}
     ${x.dyn&&x.dyn(l=>{const k=q.findIndex(z=>z.l===l);return k<0?"":(a[k]||"")})?`<div class="box miss"><h3>Atención</h3><p style="margin:0">${esc(x.dyn(l=>{const k=q.findIndex(z=>z.l===l);return k<0?"":(a[k]||"")}))}</p></div>`:""}
     ${x.conducta?`<div class="guia" id="cd"></div>`:""}
     <div class="guia" id="iv-g" hidden></div>
@@ -1789,7 +1797,7 @@ const VARS=[
   {k:"SE REALIZO LABORATORIOS",l:"¿Se realizaron laboratorios o exámenes?",t:"sel",o:SN},
   {k:"BRIGADA",l:"Brigada"},{k:"CANALIZADO POR",l:"Canalizado por"},
   {k:"OBSERVACION",l:"Observación",t:"area"},{k:"OBSERVACION DE CANALIZACION",l:"Observación de canalización",t:"area"},
-  {k:"TIPO DE SEGUIMIENTO",l:"Tipo de seguimiento"},{k:"FECHA DE SEGUIMIENTO",l:"Fecha de seguimiento",t:"date"},{k:"OBSERVACIONES SEGUIMIENTO",l:"Observaciones del seguimiento",t:"area"}]}
+  {k:"FECHA PROXIMO CONTROL",l:"Fecha del próximo control",t:"date"},{k:"MOTIVO PROXIMO CONTROL",l:"Motivo del próximo control"},{k:"TIPO DE SEGUIMIENTO",l:"Tipo de seguimiento"},{k:"FECHA DE SEGUIMIENTO",l:"Fecha de seguimiento",t:"date"},{k:"OBSERVACIONES SEGUIMIENTO",l:"Observaciones del seguimiento",t:"area"}]}
 ];
 const ALLF=VARS.flatMap(g=>g.f);
 const EJ_BASE={"ETNIA":"INDIGENA","PUEBLO":"CUBEO","CONSECUTIVO":"12","DIRECCION":"SECTOR LA PLAYA","NOMBRE COMPLETO":"EJEMPLO FICTICIO PÉREZ","ANTECEDENTES":"HIPERTENSIÓN ARTERIAL DIAGNOSTICADA EN 2019, EN TRATAMIENTO CON LOSARTÁN","ROL EN EL HOGAR":"JEFE DE HOGAR","FECHA NACIMIENTO":"1976-05-14","GENERO":"M","TIPO":"CC","DOCUMENTO ID.":"1000000000","EAPB NOMBRE":"MALLAMAS","RÉGIMEN":"SUBSIDIADO","CAPITADO":"SI","TELEFONO":"3000000000",
@@ -1799,6 +1807,18 @@ const EJ_BASE={"ETNIA":"INDIGENA","PUEBLO":"CUBEO","CONSECUTIVO":"12","DIRECCION
  "SERVICIOS SOCIALES":"NINGUNO","CANALIZADO A":"MEDICINA GENERAL","SE REALIZO LABORATORIOS":"NO","BRIGADA":"OCTUBRE 2026","CANALIZADO POR":"JUAN JOSE",
  "OBSERVACION":"Adultez – Valoración integral. TA 150/95 sin control.","OBSERVACION DE CANALIZACION":"HTA no controlada: valoración médica prioritaria. Pendientes PSA y sangre oculta por edad (50 años).","TIPO DE SEGUIMIENTO":"TELEFÓNICO","FECHA DE SEGUIMIENTO":"2026-10-22","OBSERVACIONES SEGUIMIENTO":"Verificar asistencia a medicina general y adherencia al losartán."};
 
+function agenda(){try{return JSON.parse(S.get("dn2_agenda")||"[]")}catch(e){return[]}}
+function setAgenda(a){S.set("dn2_agenda",JSON.stringify(a))}
+function agendaGuardar(id,com,d){let a=agenda().filter(x=>x.id!==id);const doc=d["DOCUMENTO ID."]&&d["DOCUMENTO ID."]!=="N/A"?d["DOCUMENTO ID."]:"",fe=d["FECHA"]||hoy();
+  if(doc)a.forEach(x=>{if(!x.ok&&x.doc===doc&&x.fecha<fe)x.ok=fe});
+  const px=d["FECHA PROXIMO CONTROL"];if(px&&px!=="N/A")a.push({id,doc,nom:d["NOMBRE COMPLETO"]||"",tel:d["TELEFONO"]&&d["TELEFONO"]!=="N/A"?d["TELEFONO"]:"",com,fecha:fe,prox:px,mot:d["MOTIVO PROXIMO CONTROL"]||""});
+  setAgenda(a)}
+function semaforo(px){const h=pD(hoy()),p=pD(px);if(!p)return null;const dd=Math.round((p-h)/864e5);return dd<0?{c:"r",t:"Vencido hace "+(-dd)+" día"+(dd===-1?"":"s")}:dd<=7?{c:"a",t:dd===0?"Es hoy":"Faltan "+dd+" día"+(dd===1?"":"s")}:{c:"v",t:"Faltan "+dd+" días"}}
+function agendaHTML(){const a=agenda().filter(x=>!x.ok).sort((x,y)=>x.prox<y.prox?-1:1);if(!a.length)return"";
+  const sm=a.map(x=>semaforo(x.prox)),n=c=>sm.filter(z=>z&&z.c===c).length,ff=s=>s.split("-").reverse().join("/");
+  return `<section class="route" id="agenda"><div class="route-head"><h2>Próximos controles</h2><span><b class="sem r"></b>${n("r")} vencidos · <b class="sem a"></b>${n("a")} esta semana · <b class="sem v"></b>${n("v")} al día</span></div>
+  <details class="pdet" ${n("r")||n("a")?"open":""}><summary class="note-src" style="cursor:pointer">Ver la lista (${a.length})</summary><div class="agl">${a.map((x,i)=>`<div class="agi"><b class="sem ${sm[i]?sm[i].c:""}"></b><div style="flex:1;min-width:0"><b>${esc(x.nom||x.doc||"Sin nombre")}</b><small>${esc([x.com,x.mot].filter(Boolean).join(" · "))}</small><small>${esc(ff(x.prox))} — ${sm[i]?esc(sm[i].t):""}${x.tel?` · <a href="tel:${esc(x.tel)}">${esc(x.tel)}</a>`:""}</small></div><button class="btn" type="button" data-ag="${esc(x.id)}" style="flex:none;padding:6px 10px;font-size:.8rem">Ya vino</button></div>`).join("")}</div>
+  <p class="note-src" style="margin:6px 0 0">Verde: faltan más de 7 días. Amarillo: es esta semana. Rojo: ya pasó la fecha y no ha vuelto. Sale de la lista sola cuando registras una consulta nueva con el mismo documento, o al tocar «Ya vino».</p></details></section>`}
 function cola(){try{return JSON.parse(S.get("dn2_cola")||"[]")}catch(e){return[]}}
 function setCola(c){S.set("dn2_cola",JSON.stringify(c))}
 function conf(){try{return JSON.parse(S.get("dn2_conf")||"{}")}catch(e){return{}}}
@@ -1807,7 +1827,7 @@ function cursoVida(a){if(a==null)return"";if(a<6)return"PRIMERA INFANCIA";if(a<1
 function edadDe(fn,ref){const a=pD(fn),b=pD(ref)||pD(hoy());if(!a||!b||a>b)return null;let y=b.getUTCFullYear()-a.getUTCFullYear(),m=b.getUTCMonth()-a.getUTCMonth();if(b.getUTCDate()<a.getUTCDate())m--;if(m<0){y--;m+=12}return{y,m,tm:y*12+m}}
 let baseEdit=null,syncing=false,baseOpts={};
 const ID_KEYS=["ETNIA","PUEBLO","NOMBRE COMPLETO","TIPO","DOCUMENTO ID.","FECHA NACIMIENTO","GENERO","TELEFONO","DIRECCION","CONSECUTIVO","ROL EN EL HOGAR","EAPB NOMBRE","RÉGIMEN","CAPITADO"];
-const NO_EXTRAER=["ETNIA","PUEBLO","NOMBRE COMPLETO","TIPO","DOCUMENTO ID.","TELEFONO","DIRECCION","CONSECUTIVO","IMC","CURSO DE VIDA","AA / MM","FECHA NACIMIENTO"];
+const NO_EXTRAER=["FECHA PROXIMO CONTROL","MOTIVO PROXIMO CONTROL","ETNIA","PUEBLO","NOMBRE COMPLETO","TIPO","DOCUMENTO ID.","TELEFONO","DIRECCION","CONSECUTIVO","IMC","CURSO DE VIDA","AA / MM","FECHA NACIMIENTO"];
 
 /* ---------- extraer variables de la historia ya registrada ---------- */
 function fuenteHC(id){const p=[],ivt=ivCompose(id);
@@ -1829,6 +1849,9 @@ function extraerLocal(id,txt,f){const o={},M1=(re,i=1)=>{const m=txt.match(re);r
   if(m.route==="rm")o["GENERO"]="F";
   if(m.route==="rp"){o["ATENCION INTEGRAL ENFERMERIA"]="SI";o["ATENCION INTEGRAL ENFERMERIA FECHA ULTIMO CONTROL"]=f}
   if(/m[eé]todo|planific|implante|inyectable|DIU|anticonc/i.test(txt)&&["precon","parto","adol","juv","adul"].includes(id)){o["PLANIFICACION FAMILIAR O CONTROL"]="SI";o["PLANIFICACION FAMILIAR O CONTROL FECHA ULTIMO CONTROL"]=f}
+  {const qq=ivFor(id),aa=ivAns(id),k=qq.findIndex(z=>z.l==="Próximo control"),t=k>=0?(aa[k]||""):"";
+   let px=isoDeTxt(t);if(!px){const n=t.match(/en\s+(\d+|un|una|dos|tres|cuatro)\s+(semana|mes)/i);if(n){const w={un:1,una:1,dos:2,tres:3,cuatro:4}[n[1].toLowerCase()]||+n[1];const iso=d=>{const x=pD(f);x.setUTCDate(x.getUTCDate()+d);return x.toISOString().slice(0,10)};px=iso(/mes/i.test(n[2])?w*30:w*7)}}
+   if(px){o["FECHA PROXIMO CONTROL"]=px;o["MOTIVO PROXIMO CONTROL"]=(m.title+": "+(/lectura/i.test(t)?"lectura de exámenes":"control")).toUpperCase()}}
   o["FECHA"]=f;o["OBSERVACION"]=m.title+" – "+N[m.notes.includes(st.note)?st.note:m.notes[0]].label;
   return o}
 function pExtraerVars(txt,f){
@@ -1971,7 +1994,7 @@ function base(pref,opts){
     if(!id){const doc=datos["DOCUMENTO ID."],fe=datos["FECHA"];const same=cola().find(r=>doc&&doc!=="N/A"&&r.datos["DOCUMENTO ID."]===doc&&r.datos["FECHA"]===fe);if(same)id=same.id}
     id=id||uid();if(MD)S.set(key(MD,"regid"),id);
     const reg={id,comunidad,datos:Object.assign({ID_REGISTRO:id,FECHA_REGISTRO:new Date().toISOString().slice(0,16).replace("T"," "),REGISTRADO_POR:cf.who||""},datos)};
-    const q=cola().filter(r=>r.id!==id);q.push(reg);setCola(q);
+    const q=cola().filter(r=>r.id!==id);q.push(reg);setCola(q);agendaGuardar(id,comunidad,datos);
     if(baseOpts.mod){const ident={};ID_KEYS.forEach(k=>{if(datos[k]&&datos[k]!=="N/A")ident[k]=datos[k]});ident.__com=comunidad;setPac(ident)}
     S.set("dn2_ultcom",comunidad);const cs=new Set((S.get("dn2_coms")||"").split("|").filter(Boolean));cs.add(comunidad);S.set("dn2_coms",[...cs].join("|"));
     baseEdit=null;base({});$("syncTxt").textContent=conf().url?"Guardado. Enviando a la hoja…":"Guardado en el celular como pendiente. Para que llegue a la hoja falta configurar la Conexión.";sync(true)};
