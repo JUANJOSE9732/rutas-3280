@@ -978,8 +978,8 @@ function anGuardar(id,r){S.set(key(id,"anal"),JSON.stringify(r))}
 function anCargar(id){try{return JSON.parse(S.get(key(id,"anal"))||"null")}catch(e){return null}}
 function anHTML(r){if(!r)return"";const rk={alto:["high","Riesgo alto"],medio:["mid","Riesgo intermedio"],bajo:["low","Riesgo bajo"]}[r.riesgo]||["low","Sin clasificar"];
   return `<div class="an-sec"><div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap"><span class="pill ${rk[0]}">${rk[1]}</span>${r.resumen?`<span class="note-src">${esc(r.resumen)}</span>`:""}</div>
-  <h4>Devolución para la persona</h4><div class="an-dev" id="an-dev">${esc(r.devolucion||"")}</div>
-  <div class="btns"><button class="btn" type="button" id="an-leer">Leer en voz alta</button><button class="btn" type="button" id="an-copy">Copiar</button></div>
+  <h4>Guía para tu devolución (solo para ti)</h4><div class="an-dev" id="an-dev">${esc(r.devolucion||"")}</div>
+  <div class="btns"><button class="btn" type="button" id="an-copy">Copiar</button></div>
   ${r.rutas&&r.rutas.length?`<h4>Rutas a seguir</h4>${r.rutas.map(x=>`<div class="an-ruta"><span class="an-when ${esc(x.cuando||"programado")}">${esc({hoy:"Hoy",pronto:"Pronto",programado:"Programar"}[x.cuando]||x.cuando||"")}</span><b>${esc(x.ruta)}</b><span>${esc(x.accion||"")}</span><small>Por qué: ${esc(x.porque||"")}</small></div>`).join("")}`:`<h4>Rutas a seguir</h4><p class="note-src" style="margin:0">No se identificaron rutas adicionales.</p>`}
   ${r.pendientes&&r.pendientes.length?`<h4>Pendientes de la Res. 3280</h4><ul style="margin:0;padding-left:20px">${r.pendientes.map(x=>`<li>${esc(x)}</li>`).join("")}</ul>`:""}
   ${r.alarma&&r.alarma.length?`<h4>Signos de alarma para explicarle</h4><ul style="margin:0;padding-left:20px">${r.alarma.map(x=>`<li>${esc(x)}</li>`).join("")}</ul>`:""}
@@ -987,7 +987,6 @@ function anHTML(r){if(!r)return"";const rk={alto:["high","Riesgo alto"],medio:["
   <p class="note-src" style="margin:0">${r.fuente==="claude"?"Análisis hecho por Claude":"Análisis sin conexión, con reglas básicas"}. Es una ayuda: la decisión clínica es tuya.</p></div>`}
 function anWire(id){const r=anCargar(id);if(!r)return;
   $("an-copy").onclick=()=>{try{navigator.clipboard.writeText(r.devolucion)}catch(e){}$("an-st").textContent="Devolución copiada."};
-  $("an-leer").onclick=()=>{if(!window.speechSynthesis){$("an-st").textContent="Este celular no puede leer en voz alta.";return}stopRec();speechSynthesis.cancel();const u=new SpeechSynthesisUtterance(r.devolucion);u.lang="es-CO";u.rate=.92;speechSynthesis.speak(u)};
   $("an-plan").onclick=()=>{const t=["PLAN Y RUTAS"].concat((r.rutas||[]).map(x=>`- ${x.ruta}: ${x.accion} (${({hoy:"hoy",pronto:"pronto",programado:"programar"})[x.cuando]||x.cuando}).`)).concat(r.pendientes&&r.pendientes.length?["Pendientes: "+r.pendientes.join("; ")+"."]:[]).concat(["Se brinda devolución a la persona en lenguaje sencillo y se explican signos de alarma: "+(r.alarma||[]).join(", ").toLowerCase()+"."]).join("\n");
     const d=S.get(key(id,"dict"))||"";S.set(key(id,"dict"),d.replace(/\n*PLAN Y RUTAS[\s\S]*$/,"")+"\n\n"+t);$("an-st").textContent="Agregado al resumen de la consulta. Se incluirá al organizar la nota."}}
 async function analizar(id){const st2=$("an-st");let r=null;
@@ -1004,7 +1003,7 @@ function paneEntr(){
     $("pane").innerHTML=`<div class="tool"><h3>Entrevista terminada</h3><p class="note-src">${answered} de ${q.length} preguntas respondidas. Las respuestas ya están en el dictado de la pestaña Nota.</p>
     ${al.length?`<div class="box warn"><h3>Revisar antes de seguir</h3><ul>${al.map(x=>`<li>${esc(x)}</li>`).join("")}</ul></div>`:""}
     <p class="status" id="iv-st"></p><div class="btns"><button class="btn primary" id="iv-nota">Siguiente: Guía →</button><button class="btn" id="iv-rev">Volver a la última pregunta</button></div></div>
-    <section class="tool" id="an"><h3>Análisis: devolución y rutas</h3><p class="note-src" style="margin:0">Revisa todo lo registrado y propone qué decirle a la persona y qué rutas seguir.</p>
+    <section class="tool" id="an"><h3>Análisis: devolución y rutas</h3><p class="note-src" style="margin:0">Revisa todo lo registrado y te propone, por escrito, los puntos para tu devolución y las rutas a seguir.</p>
       <button class="btn ${anCargar(id)?"":"primary"}" id="an-go" style="flex:none">${anCargar(id)?"Volver a analizar":sample?"Analizar la consulta":"Analizar (sin conexión)"}</button><p class="status" id="an-st"></p>
       <div id="an-out">${anHTML(anCargar(id))}</div></section>
     <details class="sec"><summary><span>Ver lo registrado</span></summary><pre style="white-space:pre-wrap;padding:0 14px 14px;font-family:var(--f-body);font-size:.92rem">${esc(ivCompose(id))||"(sin respuestas)"}</pre></details>`;
