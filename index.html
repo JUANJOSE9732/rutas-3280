@@ -18,6 +18,7 @@
 <title>Dictado de Notas</title>
 <title>Dictado de Notas</title>
 <title>Dictado de Notas</title>
+<title>Dictado de Notas</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:ital,wght@0,400;0,700;1,400&family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,800&family=IBM+Plex+Mono:wght@500&display=swap">
 <style>
@@ -660,9 +661,9 @@ function marcados(id){const m=M[id],ck=checks(id),o=[];m.sections.forEach((s,i)=
 /* ---------- ESCUCHA CONTINUA (Web Speech API) ---------- */
 const SR=window.SpeechRecognition||window.webkitSpeechRecognition;
 let REC=null,recOn=false;
-function stopRec(){recOn=false;if(REC){try{REC.stop()}catch(e){}}REC=null;document.querySelectorAll(".mic").forEach(b=>{b.textContent="Escuchar a la usuaria";b.classList.remove("on")})}
-function micUI(){return SR?`<div class="micwrap"><button type="button" class="btn mic">Escuchar a la usuaria</button><span class="mic-st"></span></div>
- <div class="box warn mic-ok" hidden><h3>Antes de escuchar su voz</h3><p style="margin:0 0 8px">Pídele permiso para transcribir lo que diga. El audio se procesa en los servidores de Google para convertirlo en texto y necesita internet. Solo entiende español.</p><div class="btns"><button type="button" class="btn primary mic-yes">Ella aceptó</button><button type="button" class="btn mic-no">No aceptó</button></div></div>`:""}
+function stopRec(){recOn=false;if(REC){try{REC.stop()}catch(e){}}REC=null;document.querySelectorAll(".mic").forEach(b=>{b.textContent="Dictar por voz";b.classList.remove("on")})}
+function micUI(self){return SR?`<div class="micwrap" ${self?'data-self="1"':""}><button type="button" class="btn mic">Dictar por voz</button><span class="mic-st"></span></div>
+ <div class="box warn mic-ok" hidden><h3>¿Quién va a hablar?</h3><p style="margin:0 0 8px">Si dictas tú, empieza de una vez. Si va a hablar ella, pídele permiso para transcribir lo que diga. El audio se procesa en los servidores de Google para convertirlo en texto y necesita internet. Solo entiende español.</p><div class="btns"><button type="button" class="btn primary mic-me">Hablo yo</button><button type="button" class="btn mic-yes">Ella aceptó</button><button type="button" class="btn mic-no">No aceptó</button></div></div>`:""}
 function wireMic(root,ta,onChange){
   if(!SR)return;const b=root.querySelector(".mic"),s=root.querySelector(".mic-st"),ok=root.querySelector(".mic-ok");
   const start=()=>{stopRec();const r=new SR();REC=r;recOn=true;r.lang="es-CO";r.continuous=true;r.interimResults=true;
@@ -670,9 +671,11 @@ function wireMic(root,ta,onChange){
     r.onresult=e=>{let fin="",tmp="";for(let k=e.resultIndex;k<e.results.length;k++){const t=e.results[k][0].transcript;if(e.results[k].isFinal)fin+=t;else tmp+=t}
       if(fin){base=(base?base+" ":"")+fin.trim();ta.value=base;onChange&&onChange()}s.textContent=tmp?"… "+tmp:"Escuchando"};
     r.onerror=e=>{if(e.error==="not-allowed"||e.error==="service-not-allowed"){recOn=false;s.textContent="El micrófono no está permitido aquí. Usa la versión instalada desde GitHub y acepta el permiso del micrófono."}else if(e.error==="network"){recOn=false;s.textContent="Sin internet no se puede transcribir. Dicta con el teclado o toca una opción."}else if(e.error==="no-speech"){s.textContent="No se oye nada. Acerca el celular a quien habla."}};
-    r.onend=()=>{if(recOn&&REC===r){try{base=ta.value.trim();r.start()}catch(e){}}else{b.textContent="Escuchar a la usuaria";b.classList.remove("on");if(!/permitido|internet/.test(s.textContent))s.textContent=""}};
+    r.onend=()=>{if(recOn&&REC===r){try{base=ta.value.trim();r.start()}catch(e){}}else{b.textContent="Dictar por voz";b.classList.remove("on");if(!/permitido|internet/.test(s.textContent))s.textContent=""}};
     try{r.start();b.textContent="■ Detener";b.classList.add("on");s.textContent="Escuchando"}catch(e){s.textContent="No se pudo iniciar el micrófono."}};
-  b.onclick=()=>{if(recOn){stopRec();return}if(S.get(key(st.mod,"vozok"))){start();return}ok.hidden=false};
+  const self=root.querySelector(".micwrap")&&root.querySelector(".micwrap").dataset.self;
+  b.onclick=()=>{if(recOn){stopRec();return}if(self||S.get(key(st.mod,"vozok"))){start();return}ok.hidden=false};
+  root.querySelector(".mic-me").onclick=()=>{ok.hidden=true;start()};
   root.querySelector(".mic-yes").onclick=()=>{S.set(key(st.mod,"vozok"),"1");ok.hidden=true;start()};
   root.querySelector(".mic-no").onclick=()=>{ok.hidden=true;s.textContent="Sin permiso: dicta tú el resumen de su respuesta."};
 }
@@ -973,10 +976,10 @@ function base(pref,opts){
     <section class="tool" id="b-dict"><h3>Dictar en vez de escribir</h3>
       <label class="bfl" for="bd-id"><span>Identificación (se interpreta en el celular; no sale a Claude)</span>
         <textarea id="bd-id" style="min-height:70px" placeholder="Ej.: nombre María Pérez Gómez, cédula 1 2 3 4 5, mujer, nació el 3 de marzo de 1990, teléfono 310…, comunidad Querarí, jefe de hogar, EPS Mallamas subsidiado, hogar número 4"></textarea></label>
-      <div id="bd-id-mic">${micUI()}</div>
+      <div id="bd-id-mic">${micUI(1)}</div>
       <label class="bfl" for="bd-cl"><span>Datos clínicos, atenciones y seguimiento</span>
         <textarea id="bd-cl" style="min-height:90px" placeholder="Ej.: hipertensa en control, no diabetes, no EPOC, última consulta de crónicos 20 de agosto, citología hace un año, canalizada a odontología y vacunación, sin servicios sociales, brigada de octubre"></textarea></label>
-      <div id="bd-cl-mic">${micUI()}</div>
+      <div id="bd-cl-mic">${micUI(1)}</div>
       <div class="btns"><button type="button" class="btn primary" id="bd-go">Llenar campos con lo dictado</button></div>
       <p class="status" id="bd-st"></p>
     </section>
