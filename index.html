@@ -1021,7 +1021,7 @@ async function analizar(id){const st2=$("an-st");let r=null;
   anGuardar(id,r);$("an-out").innerHTML=anHTML(r);anWire(id)}
 /* guías cortas para responderle en el momento, según la opción escogida */
 const GUIA={
- "Dudas de fertilidad":{t:"Para responderle: dudas sobre fertilidad",
+ "Expectativas|Dudas de fertilidad":{t:"Para responderle: dudas sobre fertilidad",
   p:["Es normal que tarde: de cada 10 parejas sin planificar, unas 8 logran el embarazo en el primer año y 9 en dos años.",
      "Consultar si no lo ha logrado después de 12 meses de relaciones sin planificar (6 meses si ella tiene 35 años o más). Antes, si no le viene la regla, le viene muy irregular, tuvo infecciones en la pelvis u operaciones, o la pareja tiene algún problema conocido.",
      "Días fértiles: los de la mitad del ciclo. En ciclos de 28 días, más o menos entre el día 10 y el 16 contando desde el primer día de la regla. Basta tener relaciones cada 2 o 3 días durante todo el mes; no hace falta calcular exacto.",
@@ -1030,14 +1030,41 @@ const GUIA={
      "Ayudan: peso adecuado, no fumar ni tomar alcohol, tratar las infecciones y empezar el ácido fólico desde ya.",
      "Si cumple el tiempo o tiene algún factor: remitir a medicina para estudio de la pareja."],
   r:"Se brinda educación sobre tiempo esperado para lograr el embarazo, días fértiles, retorno de la fertilidad según el método previo, factor masculino y criterios de consulta por infertilidad."},
- "Quiere embarazarse":{t:"Para responderle: cómo prepararse para el embarazo",
+ "Expectativas|Quiere embarazarse":{t:"Para responderle: cómo prepararse para el embarazo",
   p:["Empezar ácido fólico desde ahora, al menos 3 meses antes de quedar embarazada.",
      "Completar las vacunas antes del embarazo.",
      "Llegar con buen peso, sin tabaco ni alcohol (tampoco chicha fuerte), y tratar infecciones y anemia.",
      "Si tuvo un parto o cesárea, esperar al menos 18 meses antes del siguiente embarazo.",
      "Mientras se prepara, seguir planificando si aún no es el momento.",
      "Cuando le falte la regla, venir pronto al control prenatal (antes de la semana 10)."],
-  r:"Se brinda educación sobre preparación para el embarazo: ácido fólico, vacunación, peso adecuado, evitar tabaco y alcohol, intervalo intergenésico y control prenatal temprano."}
+  r:"Se brinda educación sobre preparación para el embarazo: ácido fólico, vacunación, peso adecuado, evitar tabaco y alcohol, intervalo intergenésico y control prenatal temprano."},
+ "Medicina tradicional|No":{t:"Para responderle: si no ha consultado la medicina tradicional",
+  p:["Respetar su decisión, sin empujarla a consultar.",
+     "Contarle que, si ella quiere, puede consultar también a su sabedor o partera: la atención tradicional y la del puesto de salud se pueden complementar.",
+     "Pedirle que, si más adelante le dan algún remedio o curación, nos cuente, para revisar juntos que no afecte el embarazo."],
+  r:"Se informa que la atención tradicional y la del servicio de salud pueden complementarse; se le pide informar cualquier remedio o curación que reciba."},
+ "Medicina tradicional|Payé":{t:"Para responderle: si consultó al payé o sabedor",
+  p:["Reconocer y valorar la consulta con el payé; no desautorizarlo.",
+     "Preguntar qué le recomendó: curaciones, rezos, dietas o alimentos que debe evitar.",
+     "Si la dieta le quita alimentos importantes (pescado, carne, huevo), buscar con ella alternativas que el payé acepte, sin contradecirlo de frente.",
+     "Explicar que el ácido fólico, las vacunas y los controles no interfieren con sus curaciones; las dos atenciones pueden ir juntas.",
+     "Si ella quiere, el payé o un familiar puede acompañarla a los controles.",
+     "Acordar que nos cuente si le dan algo para tomar."],
+  r:"Se respeta y reconoce la consulta con el médico tradicional; se indagan sus recomendaciones y se concerta la atención complementaria con el servicio de salud."},
+ "Medicina tradicional|Partera":{t:"Para responderle: si consultó a la partera",
+  p:["Reconocer el papel de la partera en la comunidad.",
+     "Preguntar si la partera la va a acompañar en el embarazo y el parto.",
+     "Invitar a la partera a los controles, si la usuaria lo desea.",
+     "Explicar que cuando quede embarazada debe venir pronto al control (antes de la semana 10) y que el plan de parto se hace también con la partera.",
+     "Repasar con ella, y si es posible con la partera, los signos de alarma por los que deben venir de inmediato."],
+  r:"Se reconoce el acompañamiento de la partera; se invita a vincularla a los controles y al plan de parto, y se explican signos de alarma."},
+ "Medicina tradicional|Remedio de plantas":{t:"Para responderle: si toma remedios de plantas",
+  p:["Preguntar el nombre de la planta, para qué la toma, cómo la prepara, cuánta y cada cuánto.",
+     "No prohibir de entrada: si es para algo sencillo y no hay señales de riesgo, puede seguir y se registra.",
+     "Explicar que algunas plantas pueden producir sangrado, contracciones o afectar al bebé, sobre todo las que se usan para \"bajar la regla\", para purgar o para abortar: si busca embarazo, es mejor no tomarlas.",
+     "Si no se sabe qué efecto tiene la planta, anotarla y consultarla con medicina antes de que quede embarazada.",
+     "Pedirle que nos cuente si empieza a tomar otra."],
+  r:"Se indaga sobre el uso de plantas medicinales (nombre, uso, preparación y frecuencia); se orienta sobre plantas que pueden afectar la gestación y se le pide informar cualquier remedio nuevo."}
 };
 function paneEntr(){
   const id=st.mod,q=ivFor(id),a=ivAns(id),i0=S.get(key(id,"ivi"));let i=Math.max(0,+(i0||0));if(i>=q.length)i=q.length;
@@ -1075,9 +1102,9 @@ function paneEntr(){
     if(x.ck){const c=checks(id),v=ta.value.trim();if(v&&!/^(no realizado|no aplica)/i.test(v))c[x.ck]=1;else delete c[x.ck];S.set(key(id,"chk"),JSON.stringify(c))}
     const hit=x.al&&ta.value.trim()&&x.al.test(ta.value);$("iv-al").hidden=!hit;if(hit)$("iv-alt").textContent=x.am};
   ta.addEventListener("input",save);wireMic($("iv-mic"),ta,save);
-  const guia=()=>{const lbls=[...document.querySelectorAll("[data-c]")].filter(b=>ta.value.includes(b.dataset.c)).map(b=>b.textContent);const g=lbls.map(l=>GUIA[l]).filter(Boolean)[0],box=$("iv-g");if(!box||!ta.isConnected)return;if(!g){box.hidden=true;return}
-    box.innerHTML=`<h3>${esc(g.t)}</h3><ul>${g.p.map(x=>`<li>${esc(x)}</li>`).join("")}</ul><div class="btns"><button class="btn" type="button" id="iv-gr">${ta.value.includes(g.r)?"✓ Registrado en la respuesta":"Registrar que se educó"}</button></div>`;box.hidden=false;
-    $("iv-gr").onclick=()=>{if(!ta.value.includes(g.r)){ta.value=ta.value.trim()+" "+g.r;save()}$("iv-gr").textContent="✓ Registrado en la respuesta"}};
+  const guia=()=>{const box=$("iv-g");if(!box||!ta.isConnected)return;const lbls=[...document.querySelectorAll("[data-c]")].filter(b=>ta.value.includes(b.dataset.c)).map(b=>b.textContent);const G=[...new Set(lbls.map(l=>GUIA[x.l+"|"+l]||GUIA[l]).filter(Boolean))];if(!G.length){box.hidden=true;box.innerHTML="";return}
+    box.innerHTML=G.map((g,n)=>`<h3>${esc(g.t)}</h3><ul>${g.p.map(z=>`<li>${esc(z)}</li>`).join("")}</ul><div class="btns"><button class="btn" type="button" data-gr="${n}">${ta.value.includes(g.r)?"✓ Registrado en la respuesta":"Registrar que se educó"}</button></div>`).join('<hr style="border:0;border-top:1px solid var(--line);margin:6px 0">');box.hidden=false;
+    box.querySelectorAll("[data-gr]").forEach(bt=>bt.onclick=()=>{const g=G[+bt.dataset.gr];if(!ta.value.includes(g.r)){ta.value=ta.value.trim()+" "+g.r;save()}bt.textContent="✓ Registrado en la respuesta"})};
   ta.addEventListener("input",guia);setTimeout(guia,0);
   document.querySelectorAll("[data-c]").forEach(b=>b.addEventListener("click",()=>setTimeout(guia,0)));
   document.querySelectorAll("[data-c]").forEach(b=>b.onclick=()=>{const c=b.dataset.c,v=ta.value.trim();ta.value=v?(/[.;:]$/.test(v)?v+" ":v+". ")+c:c;save();ta.focus();const m=/_+/.exec(c);if(m){const off=ta.value.length-c.length+m.index;ta.setSelectionRange(off,off+m[0].length)}});
