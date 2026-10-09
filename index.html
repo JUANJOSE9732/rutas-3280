@@ -639,7 +639,7 @@ function checks(m){try{return JSON.parse(S.get(key(m,"chk"))||"{}")}catch(e){ret
 function hasDraft(m){return !!(S.get(key(m,"dict"))||S.get(key(m,"nota"))||Object.keys(checks(m)).length)}
 
 /* ---------- PANEL ---------- */
-const VERSION_APP="2026-10-09 v55";
+const VERSION_APP="2026-10-09 v56";
 function home(){
   stopRec();st.view="home";
   const rm=["precon","prenatal","parto","rn","ive"],rp=["pinf","inf","adol","juv","adul","vej"];
@@ -680,6 +680,7 @@ function home(){
   </section>
   ${drafts.length?`<section><p class="lab">Borradores guardados</p><div class="drafts">${drafts.map(d=>`<button data-mod="${d}"><span>${esc(M[d].title)}</span><span>Continuar →</span></button>`).join("")}</div></section>`:""}
   ${agendaHTML()}
+  <section class="route"><div class="route-head"><h2>Pacientes</h2><span>${Object.keys(pacientes()).length} registrados</span></div><div class="tiles"><button class="tile pc" id="t-pacs"><b>Ver pacientes</b><small>Historial, próximos controles y pendientes de cada persona</small></button></div></section>
   <section class="route"><div class="route-head"><h2>Ruta materno perinatal</h2><span>RIAMP</span></div><div class="tiles">${rm.map(tile).join("")}</div></section>
   <section class="route"><div class="route-head"><h2>Promoción y mantenimiento</h2><span>RPMS · cursos de vida</span></div><div class="tiles">${rp.map(tile).join("")}</div></section>
   <section class="route"><div class="route-head"><h2>Procedimientos y consejerías</h2></div><div class="tiles">${tile("proc")}</div></section>
@@ -687,7 +688,7 @@ function home(){
   <p class="foot" id="verlbl">Versión ${VERSION_APP}</p>
   <p class="foot">Contenido según la Resolución 3280 de 2018, con IVE actualizada a la Sentencia C-055 de 2022 y la Resolución 051 de 2023. Las semanas de vacunas se confirman con el lineamiento PAI vigente. Lo que dictas queda solo en este celular hasta que lo borres. Organizar la nota necesita internet.</p>`;
   document.querySelectorAll("[data-mod]").forEach(b=>b.onclick=()=>openMod(b.dataset.mod));
-  $("t-base").onclick=()=>{baseEdit=null;base({});window.scrollTo(0,0)};
+  $("t-base").onclick=()=>{baseEdit=null;base({});window.scrollTo(0,0)};$("t-pacs").onclick=verPacientes;
   document.querySelectorAll("[data-ag]").forEach(b=>b.onclick=()=>{if(b.dataset.armed!=="1"){b.dataset.armed="1";b.textContent="¿Seguro? Toca otra vez";return}setAgenda(agenda().map(x=>x.id===b.dataset.ag?Object.assign(x,{ok:hoy()}):x));home()});
   ["f-edad","f-uni","f-sexo","f-est"].forEach(i=>$(i).addEventListener("input",sugerir));
   const rapido=()=>{const P=pac(),v=parseFloat($("f-edad").value),u=$("f-uni").value;if(Number.isFinite(v)&&u==="a")P.__edad=String(v);else delete P.__edad;if(!P["GENERO"]||P.__sxr)Object.assign(P,{GENERO:$("f-sexo").value==="m"?"M":"F",__sxr:1});setPac(P)};
@@ -1574,6 +1575,7 @@ const colsDe=()=>["ID_REGISTRO","FECHA_REGISTRO","REGISTRADO_POR"].concat(ALLF.m
 function semTxt(d,todos){const px=d["FECHA PROXIMO CONTROL"];if(!px||px==="N/A")return"";const doc=d["DOCUMENTO ID."];if(doc&&doc!=="N/A"&&todos.some(r=>r.datos["DOCUMENTO ID."]===doc&&(r.datos["FECHA"]||"")>(d["FECHA"]||"")))return"CUMPLIDO";const sm=semaforo(px);return!sm?"":sm.c==="r"?"VENCIDO":sm.c==="a"?"PRÓXIMO":"AL DÍA"}
 async function exportarExcel(){const COLS=colsDe(),t=registrosTodos();if(!t.length)return"vacio";const por={};t.forEach(r=>{(por[r.comunidad||"SIN COMUNIDAD"]=por[r.comunidad||"SIN COMUNIDAD"]||[]).push(r)});
   const hojas=Object.keys(por).sort().map(c=>({nombre:c,filas:[COLS].concat(por[c].sort((a,b)=>(a.datos.FECHA||"")<(b.datos.FECHA||"")?-1:1).map(r=>COLS.map(k=>k==="SEMAFORO PROXIMO CONTROL"?semTxt(r.datos,t):(r.datos[k]==null?"":r.datos[k]))))}));
+  const ps=Object.values(pacientes()).sort((a,b)=>a.n-b.n);if(ps.length)hojas.unshift({nombre:"PACIENTES",filas:[["CONSECUTIVO PACIENTE","NOMBRE COMPLETO","TIPO","DOCUMENTO ID.","GENERO","EDAD","COMUNIDAD","TELEFONO","N° ATENCIONES","PRIMERA ATENCION","ULTIMA ATENCION","ULTIMO MODULO","PROXIMO CONTROL","SEMAFORO","PENDIENTES"]].concat(ps.map(x=>{const I=x.ident,u=x.aten[x.aten.length-1]||{},e=estadoP(x);return[x.n,I["NOMBRE COMPLETO"]||"",I["TIPO"]||"",I["DOCUMENTO ID."]||"",I["GENERO"]||"",edadP(x)??"",I.__com||"",I["TELEFONO"]||"",x.aten.length,(x.aten[0]||{}).fecha||"",u.fecha||"",u.title||"",e?e.px:"",e?(e.c==="r"?"VENCIDO":e.c==="a"?"PRÓXIMO":"AL DÍA"):"",x.pend.filter(z=>!z.ok).map(z=>z.t).join("; ")]}))});
   return guardarArchivo("Rutas3280_registros_"+hoy()+".xlsx",xlsxDe(hojas))}
 async function hcWord(id){const S2=hcSecciones(id),P=pac(),m=M[id],f=S.get(key(id,"fecha"))||hoy();
   const bl=hcDocx(m.title+" — "+f.split("-").reverse().join("/"),S2);
@@ -1874,6 +1876,66 @@ function agendaHTML(){const a=agenda().filter(x=>!x.ok).sort((x,y)=>x.prox<y.pro
   return `<section class="route" id="agenda"><div class="route-head"><h2>Próximos controles</h2><span><b class="sem r"></b>${n("r")} vencidos · <b class="sem a"></b>${n("a")} esta semana · <b class="sem v"></b>${n("v")} al día</span></div>
   <details class="pdet" ${n("r")||n("a")?"open":""}><summary class="note-src" style="cursor:pointer">Ver la lista (${a.length})</summary><div class="agl">${a.map((x,i)=>`<div class="agi"><b class="sem ${sm[i]?sm[i].c:""}"></b><div style="flex:1;min-width:0"><b>${esc(x.nom||x.doc||"Sin nombre")}</b><small>${esc([x.com,x.mot].filter(Boolean).join(" · "))}</small><small>${esc(ff(x.prox))} — ${sm[i]?esc(sm[i].t):""}${x.tel?` · <a href="tel:${esc(x.tel)}">${esc(x.tel)}</a>`:""}</small></div><button class="btn" type="button" data-ag="${esc(x.id)}" style="flex:none;padding:6px 10px;font-size:.8rem">Ya vino</button></div>`).join("")}</div>
   <p class="note-src" style="margin:6px 0 0">Verde: faltan más de 7 días. Amarillo: es esta semana. Rojo: ya pasó la fecha y no ha vuelto. Sale de la lista sola cuando registras una consulta nueva con el mismo documento, o al tocar «Ya vino».</p></details></section>`}
+
+/* ---------- registro de pacientes ---------- */
+function pacientes(){try{return JSON.parse(S.get("dn2_pacientes")||"{}")}catch(e){return{}}}
+function setPacientes(o){S.set("dn2_pacientes",JSON.stringify(o))}
+function pkey(P){const d=P["DOCUMENTO ID."];return d&&d!=="N/A"?(P["TIPO"]||"")+":"+d:"N:"+String(P["NOMBRE COMPLETO"]||"").trim().toUpperCase()}
+function edadP(x){const e=edadDe(x.ident["FECHA NACIMIENTO"]);return e?e.y:(x.ident.__edad?+x.ident.__edad:null)}
+function rutasPara(anos,sx){if(anos==null)return[];const o=[];if(anos<6)o.push("pinf");else if(anos<12)o.push("inf");else if(anos<18)o.push("adol");else if(anos<29)o.push("juv");else if(anos<60)o.push("adul");else o.push("vej");if(sx==="F"&&anos>=10&&anos<55)o.unshift("precon","prenatal");return o}
+function pacienteAtencion(mod,com,d,regid){const ps=pacientes(),ident={};ID_KEYS.forEach(k=>{if(d[k]&&d[k]!=="N/A")ident[k]=d[k]});if(!ident["NOMBRE COMPLETO"]&&!ident["DOCUMENTO ID."])return;
+  ident.__com=com;if(!ident["FECHA NACIMIENTO"]&&d["EDAD"]&&d["AA / MM"]==="AÑOS")ident.__edad=String(d["EDAD"]);
+  const k=pkey(ident);let x=ps[k];if(!x){const n=Object.values(ps).reduce((m,y)=>Math.max(m,y.n||0),0)+1;x=ps[k]={n,creado:hoy(),ident:{},aten:[],pend:[]}}
+  Object.assign(x.ident,ident);const fe=d["FECHA"]||hoy();
+  const nota=mod?(S.get(key(mod,"nota"))||ivCompose(mod)||""):(d["OBSERVACION"]||"");
+  const a={regid,fecha:fe,mod:mod||"",title:mod?M[mod].title:"Registro sin consulta",nota:String(nota).slice(0,4000),prox:d["FECHA PROXIMO CONTROL"]&&d["FECHA PROXIMO CONTROL"]!=="N/A"?d["FECHA PROXIMO CONTROL"]:"",mot:d["MOTIVO PROXIMO CONTROL"]||""};
+  x.aten=x.aten.filter(z=>z.regid!==regid).concat([a]).sort((p,q)=>p.fecha<q.fecha?-1:1);
+  const nuevo=t=>{if(!x.pend.some(z=>!z.ok&&z.t===t))x.pend.push({id:uid(),t,desde:fe,ok:""})};
+  if(mod){const qq=ivFor(mod),aa=ivAns(mod),A=l=>{const i=qq.findIndex(z=>z.l===l);return i>=0?(aa[i]||""):""};
+    if(/pendiente/i.test(A("Exámenes solicitados")))nuevo("Tomar los exámenes pendientes ("+M[mod].title.toLowerCase()+")");
+    if(/positiva|reactiv/i.test(A("Exámenes solicitados")))nuevo("Seguir resultado reactivo o positivo con medicina");}
+  String(d["CANALIZADO A"]||"").split(", ").filter(v=>v&&v!=="NINGUNO").forEach(v=>nuevo("Verificar que asistió a "+v.toLowerCase()));
+  if(d["SE REALIZO LABORATORIOS"]==="NO"&&mod&&!x.pend.some(z=>!z.ok&&/exámenes/.test(z.t)))nuevo("Tomar los exámenes ordenados ("+M[mod].title.toLowerCase()+")");
+  setPacientes(ps);return x}
+function estadoP(x){const u=x.aten[x.aten.length-1];if(!u)return null;const px=[...x.aten].reverse().find(a=>a.prox);if(!px)return null;const cumplido=x.aten.some(a=>a.fecha>px.fecha);if(cumplido)return null;return Object.assign({px:px.prox,mot:px.mot},semaforo(px.prox)||{})}
+function verPacientes(){stopRec();st.view="pacs";const ps=Object.entries(pacientes()).sort((a,b)=>(a[1].n||0)-(b[1].n||0)),ff=s=>s?s.split("-").reverse().join("/"):"";
+  $("app").innerHTML=`<div class="top"><button class="back" id="back">← Rutas</button><span class="tag pc">Pacientes</span></div>
+  <header><h1>Pacientes</h1><p class="sub">${ps.length} registrados en este celular. Cada consulta enviada a la base se guarda aquí con su nota, su próximo control y sus pendientes.</p></header>
+  <input id="ps-q" placeholder="Buscar por nombre, documento o comunidad" style="margin-bottom:10px">
+  <div class="btns" style="margin-bottom:10px"><button class="btn" id="ps-all">Todos</button><button class="btn" id="ps-ctl">Con control vencido o esta semana</button><button class="btn" id="ps-pen">Con pendientes</button></div>
+  <div class="agl" id="ps-l"></div>`;
+  let filtro="";const pinta=()=>{const q=$("ps-q").value.trim().toUpperCase();
+    $("ps-l").innerHTML=ps.filter(([k,x])=>{const I=x.ident,txt=[I["NOMBRE COMPLETO"],I["DOCUMENTO ID."],I.__com,"#"+x.n].join(" ").toUpperCase();if(q&&!txt.includes(q))return false;const e=estadoP(x);if(filtro==="ctl"&&!(e&&(e.c==="r"||e.c==="a")))return false;if(filtro==="pen"&&!x.pend.some(z=>!z.ok))return false;return true})
+    .map(([k,x])=>{const I=x.ident,e=estadoP(x),u=x.aten[x.aten.length-1],np=x.pend.filter(z=>!z.ok).length,ed=edadP(x);
+      return `<button class="agi" data-pk="${esc(k)}" style="text-align:left;background:var(--card,#fff)"><b class="sem ${e?e.c:""}"></b><div style="flex:1;min-width:0"><b>#${x.n} · ${esc(I["NOMBRE COMPLETO"]||"(sin nombre)")}</b><small>${esc([I["TIPO"]&&I["DOCUMENTO ID."]?I["TIPO"]+" "+I["DOCUMENTO ID."]:"",I["GENERO"]==="F"?"mujer":I["GENERO"]==="M"?"hombre":"",ed!=null?ed+" años":"",I.__com].filter(Boolean).join(" · "))}</small><small>${x.aten.length} ${x.aten.length===1?"atención":"atenciones"}${u?" · última "+esc(ff(u.fecha))+" ("+esc(u.title)+")":""}${e?" · próximo "+esc(ff(e.px))+" — "+esc(e.t):""}${np?" · <b>"+np+" pendiente"+(np===1?"":"s")+"</b>":""}</small></div></button>`}).join("")||`<p class="note-src">No hay pacientes con ese filtro.</p>`;
+    document.querySelectorAll("[data-pk]").forEach(b=>b.onclick=()=>verPaciente(b.dataset.pk))};
+  $("ps-q").oninput=pinta;$("ps-all").onclick=()=>{filtro="";pinta()};$("ps-ctl").onclick=()=>{filtro="ctl";pinta()};$("ps-pen").onclick=()=>{filtro="pen";pinta()};
+  $("back").onclick=home;pinta();window.scrollTo(0,0)}
+function verPaciente(k){const ps=pacientes(),x=ps[k];if(!x)return verPacientes();st.view="pac";const I=x.ident,ff=s=>s?s.split("-").reverse().join("/"):"",e=estadoP(x),ed=edadP(x);
+  const dias=x.aten.length>1?Math.round((pD(x.aten[x.aten.length-1].fecha)-pD(x.aten[0].fecha))/864e5/(x.aten.length-1)):null;
+  const rut=rutasPara(ed,I["GENERO"]);
+  $("app").innerHTML=`<div class="top"><button class="back" id="back">← Pacientes</button><span class="tag pc">#${x.n}</span></div>
+  <header><h1>${esc(I["NOMBRE COMPLETO"]||"(sin nombre)")}</h1><p class="sub">${esc([I["TIPO"]&&I["DOCUMENTO ID."]?I["TIPO"]+" "+I["DOCUMENTO ID."]:"",I["GENERO"]==="F"?"Mujer":I["GENERO"]==="M"?"Hombre":"",ed!=null?ed+" años":"",I.__com,I["TELEFONO"]?"Tel. "+I["TELEFONO"]:"",I["PUEBLO"]||I["ETNIA"]||"",I["EAPB NOMBRE"]||""].filter(Boolean).join(" · "))}</p></header>
+  <div class="btns"><button class="btn primary" id="pk-at">Atender ahora</button></div>
+  ${rut.length?`<p class="note-src" style="margin:8px 0 0">Le corresponde según edad y sexo: ${rut.map(r=>esc(M[r].title)).join(", ")}${I["GENERO"]==="F"&&ed>=10&&ed<55?" (preconcepcional o prenatal solo si aplica)":""}.</p>`:""}
+  <section class="tool"><h3>Próximo control</h3>${e?`<p style="margin:0"><b class="sem ${e.c}"></b> ${esc(ff(e.px))} — ${esc(e.t)}${e.mot?" · "+esc(e.mot.toLowerCase()):""}</p>`:`<p class="note-src" style="margin:0">Sin control pendiente.</p>`}
+   <p class="note-src" style="margin:6px 0 0">${x.aten.length} ${x.aten.length===1?"atención":"atenciones"} desde ${esc(ff(x.aten[0]?x.aten[0].fecha:x.creado))}${dias!=null?" · en promedio cada "+dias+" días":""}.</p></section>
+  <section class="tool"><h3>Pendientes</h3><div id="pk-pen">${x.pend.length?x.pend.map(z=>`<label style="display:flex;gap:10px;align-items:flex-start;margin:4px 0;${z.ok?"opacity:.55;text-decoration:line-through":""}"><input type="checkbox" style="width:20px;height:20px;flex:none;margin-top:2px" data-pz="${z.id}" ${z.ok?"checked":""}><span>${esc(z.t)} <small class="note-src">(desde ${esc(ff(z.desde))}${z.ok?", hecho "+esc(ff(z.ok)):""})</small></span></label>`).join(""):`<p class="note-src" style="margin:0">No tiene pendientes.</p>`}</div>
+   <div class="pdrow" style="margin-top:8px"><input id="pk-np" placeholder="Agregar pendiente: ej. traer carné de vacunas"><button class="btn" id="pk-add" style="flex:none">Agregar</button></div></section>
+  <section class="tool"><h3>Historial</h3>${x.aten.length?[...x.aten].reverse().map(a=>`<details class="sec"><summary><span>${esc(ff(a.fecha))} · ${esc(a.title)}${a.prox?" · próximo "+esc(ff(a.prox)):""}</span></summary><pre style="white-space:pre-wrap;padding:0 14px 12px;margin:0;font-family:var(--f-body);font-size:.88rem">${esc(a.nota||"(sin nota)")}</pre></details>`).join(""):`<p class="note-src" style="margin:0">Sin atenciones.</p>`}
+   <details class="sec" id="pk-ant"><summary><span>Agregar una atención anterior (de otra historia)</span></summary><div class="bgrid" style="padding:0 14px 14px">
+    <label class="bfl"><span>Fecha</span><input type="date" id="pa-f"></label>
+    <label class="bfl"><span>Atención</span><select id="pa-m"><option value="">Otra</option>${Object.keys(M).map(m=>`<option value="${m}">${esc(M[m].title)}</option>`).join("")}</select></label>
+    <label class="bfl" style="grid-column:1/-1"><span>Resumen (lo importante de esa historia)</span><textarea id="pa-n" style="min-height:70px"></textarea></label>
+    <label class="bfl"><span>Próximo control que quedó</span><input type="date" id="pa-p"></label>
+    <div class="btns" style="grid-column:1/-1"><button class="btn" id="pa-go">Guardar atención anterior</button></div><p class="status" id="pa-st" style="grid-column:1/-1"></p></div></details></section>`;
+  $("back").onclick=verPacientes;
+  $("pk-at").onclick=()=>{const o=Object.assign({},I),cur=pac();if((cur["NOMBRE COMPLETO"]||cur["DOCUMENTO ID."])&&pkey(cur)!==k)S.keys().filter(z=>/^dn2_[a-z]+_/.test(z)&&Object.keys(M).includes(z.split("_")[1])&&!z.endsWith("_note")).forEach(z=>S.del(z));setPac(o);home();const t=$("sugg");if(t)t.scrollIntoView({block:"center"})};
+  document.querySelectorAll("[data-pz]").forEach(c=>c.onchange=()=>{const ps2=pacientes(),y=ps2[k];y.pend.forEach(z=>{if(z.id===c.dataset.pz)z.ok=c.checked?hoy():""});setPacientes(ps2);verPaciente(k)});
+  $("pk-add").onclick=()=>{const t=$("pk-np").value.trim();if(!t)return;const ps2=pacientes();ps2[k].pend.push({id:uid(),t,desde:hoy(),ok:""});setPacientes(ps2);verPaciente(k)};
+  $("pa-go").onclick=()=>{const f=$("pa-f").value;if(!f){$("pa-st").textContent="Escribe la fecha de esa atención.";return}const m=$("pa-m").value,ps2=pacientes(),y=ps2[k];
+    y.aten.push({regid:"ant-"+uid(),fecha:f,mod:m,title:(m?M[m].title:"Atención")+" (historia anterior)",nota:$("pa-n").value.trim(),prox:$("pa-p").value||"",mot:m?M[m].title.toUpperCase()+": CONTROL":""});y.aten.sort((p,q)=>p.fecha<q.fecha?-1:1);setPacientes(ps2);verPaciente(k)};
+  window.scrollTo(0,0)}
 function cola(){try{return JSON.parse(S.get("dn2_cola")||"[]")}catch(e){return[]}}
 function setCola(c){S.set("dn2_cola",JSON.stringify(c))}
 function conf(){try{return JSON.parse(S.get("dn2_conf")||"{}")}catch(e){return{}}}
@@ -2064,7 +2126,7 @@ function base(pref,opts){
     if(!id){const doc=datos["DOCUMENTO ID."],fe=datos["FECHA"];const same=cola().find(r=>doc&&doc!=="N/A"&&r.datos["DOCUMENTO ID."]===doc&&r.datos["FECHA"]===fe);if(same)id=same.id}
     id=id||uid();if(MD)S.set(key(MD,"regid"),id);
     const reg={id,comunidad,datos:Object.assign({ID_REGISTRO:id,FECHA_REGISTRO:new Date().toISOString().slice(0,16).replace("T"," "),REGISTRADO_POR:cf.who||""},datos)};
-    const q=cola().filter(r=>r.id!==id);q.push(reg);setCola(q);archivoGuardar(reg);agendaGuardar(id,comunidad,datos);
+    const q=cola().filter(r=>r.id!==id);q.push(reg);setCola(q);archivoGuardar(reg);agendaGuardar(id,comunidad,datos);pacienteAtencion(MD||"",comunidad,datos,id);
     if(baseOpts.mod){const ident={};ID_KEYS.forEach(k=>{if(datos[k]&&datos[k]!=="N/A")ident[k]=datos[k]});ident.__com=comunidad;if(!ident["FECHA NACIMIENTO"]&&datos["EDAD"]&&datos["AA / MM"]==="AÑOS")ident.__edad=String(datos["EDAD"]);setPac(ident)}
     S.set("dn2_ultcom",comunidad);const cs=new Set((S.get("dn2_coms")||"").split("|").filter(Boolean));cs.add(comunidad);S.set("dn2_coms",[...cs].join("|"));
     baseEdit=null;base({});$("syncTxt").textContent=conf().url?"Guardado. Enviando a la hoja…":"Guardado en el celular como pendiente. Para que llegue a la hoja falta configurar la Conexión.";sync(true)};
