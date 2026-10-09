@@ -15,6 +15,7 @@
 <title>Dictado de Notas</title>
 <title>Dictado de Notas</title>
 <title>Dictado de Notas</title>
+<title>Dictado de Notas</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:ital,wght@0,400;0,700;1,400&family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,800&family=IBM+Plex+Mono:wght@500&display=swap">
 <style>
@@ -681,10 +682,10 @@ function paneEntr(){
     const al=ivAlerts(id);
     $("pane").innerHTML=`<div class="tool"><h3>Entrevista terminada</h3><p class="note-src">${answered} de ${q.length} preguntas respondidas. Las respuestas ya están en el dictado de la pestaña Nota.</p>
     ${al.length?`<div class="box warn"><h3>Revisar antes de seguir</h3><ul>${al.map(x=>`<li>${esc(x)}</li>`).join("")}</ul></div>`:""}
-    <div class="btns"><button class="btn primary" id="iv-nota">Ir a la nota</button><button class="btn" id="iv-rev">Volver a la última pregunta</button></div></div>
+    <p class="status" id="iv-st"></p><div class="btns"><button class="btn primary" id="iv-nota">Ir a la nota</button><button class="btn" id="iv-base">Enviar datos a la base</button><button class="btn" id="iv-rev">Volver a la última pregunta</button></div></div>
     <details class="sec"><summary><span>Ver lo registrado</span></summary><pre style="white-space:pre-wrap;padding:0 14px 14px;font-family:var(--f-body);font-size:.92rem">${esc(ivCompose(id))||"(sin respuestas)"}</pre></details>`;
     $("iv-nota").onclick=()=>{st.tab="nota";S.set(key(id,"tab"),"nota");renderMod()};
-    $("iv-rev").onclick=()=>{S.set(key(id,"ivi"),String(q.length-1));paneEntr()};return}
+    $("iv-base").onclick=()=>enviarBase(id);$("iv-rev").onclick=()=>{S.set(key(id,"ivi"),String(q.length-1));paneEntr()};return}
   const x=q[i],pct=Math.round(i/q.length*100),al=(a[i]&&x.al&&x.al.test(a[i]))?x.am:"";
   $("pane").innerHTML=`
   <div class="tool" style="gap:14px">
@@ -723,6 +724,7 @@ function paneNota(){
   <div id="n-mic">${micUI()}</div>
   <p class="hint">Usa el micrófono del teclado o el botón Escuchar. No dictes nombre ni documento. ${marcados(id).length?`Se incluirán ${marcados(id).length} actividades marcadas en la guía.`:""}</p></div>
   <div class="btns"><button class="btn primary" id="go">${sample?"Organizar nota":"Armar nota sin conexión"}</button><button class="btn" id="ej">Cargar ejemplo</button><button class="btn" id="nueva">Nueva paciente</button></div>
+  <button class="btn" id="toBase" style="width:100%">Enviar datos a la base (se toman de esta historia)</button>
   <p class="hint" id="offHint" ${sample?"hidden":""}>Sin conexión la nota se arma con la plantilla, lo marcado en la guía y tu dictado. Con señal, <a href="${ARTIFACT}" target="_blank" rel="noopener" id="rev">revisa con Claude</a>: el botón copia tu dictado para pegarlo allá.</p>
   ${n.edu?`<label class="check"><input type="checkbox" id="edu" checked> Agregar bloques fijos de educación, IVE, planificación y curso</label>`:""}
   <p class="status" id="status" role="status"></p>
@@ -731,7 +733,7 @@ function paneNota(){
     <div class="box warn" id="alertBox" hidden><h3>Revisar antes de firmar</h3><ul id="alertas"></ul></div>
     <div class="box miss" id="missBox" hidden><h3>Faltan datos</h3><ul id="faltantes"></ul></div>
     <div><p class="lab"><label for="nota">Nota organizada (editable)</label></p><textarea id="nota">${esc(S.get(key(id,"nota"))||"")}</textarea></div>
-    <div class="btns"><button class="btn primary" id="copy">Copiar nota</button><button class="btn" id="toBase">Registrar en la base</button><button class="btn" id="stop" hidden>Detener</button></div>
+    <div class="btns"><button class="btn primary" id="copy">Copiar nota</button><button class="btn" id="stop" hidden>Detener</button></div>
   </section>`;
   if(!S.get(key(id,"nota")))$("out").hidden=true;
   document.querySelectorAll("[data-n]").forEach(b=>b.onclick=()=>{st.note=b.dataset.n;S.set(key(id,"note"),st.note);paneNota()});
@@ -742,7 +744,7 @@ function paneNota(){
   $("nota").addEventListener("input",()=>S.set(key(id,"nota"),$("nota").value));
   $("fecha").addEventListener("change",()=>S.set(key(id,"fecha"),$("fecha").value));
   $("go").onclick=organizar;$("stop").onclick=()=>ctl&&ctl.abort();$("copy").onclick=copiar;
-  $("toBase").onclick=()=>{baseEdit=null;base({FECHA:$("fecha").value||hoy(),"OBSERVACION":m.title+" – "+n.label});window.scrollTo(0,0)};
+  $("toBase").onclick=()=>enviarBase(id);
   $("ej").onclick=()=>{$("dict").value=n.ex;S.set(key(id,"dict"),n.ex);$("status").textContent="Ejemplo cargado (datos inventados). Toca Organizar nota."};
   $("nueva").onclick=()=>{const b=$("nueva");if(b.dataset.armed!=="1"){b.dataset.armed="1";b.textContent="¿Borrar este módulo? Toca otra vez";setTimeout(()=>{if(b.isConnected){b.dataset.armed="";b.textContent="Nueva paciente"}},4000);return}
     S.keys().filter(k=>k.startsWith("dn2_"+id+"_")&&!k.endsWith("_tab")&&!k.endsWith("_note")).forEach(k=>S.del(k));paneNota();$("status").textContent="Listo para una nueva paciente."};
@@ -885,10 +887,56 @@ function conf(){try{return JSON.parse(S.get("dn2_conf")||"{}")}catch(e){return{}
 function uid(){return Date.now().toString(36)+"-"+Math.random().toString(36).slice(2,8)}
 function cursoVida(a){if(a==null)return"";if(a<6)return"PRIMERA INFANCIA";if(a<12)return"INFANCIA";if(a<18)return"ADOLESCENCIA";if(a<29)return"JUVENTUD";if(a<60)return"ADULTEZ";return"VEJEZ"}
 function edadDe(fn,ref){const a=pD(fn),b=pD(ref)||pD(hoy());if(!a||!b||a>b)return null;let y=b.getUTCFullYear()-a.getUTCFullYear(),m=b.getUTCMonth()-a.getUTCMonth();if(b.getUTCDate()<a.getUTCDate())m--;if(m<0){y--;m+=12}return{y,m,tm:y*12+m}}
-let baseEdit=null,syncing=false;
+let baseEdit=null,syncing=false,baseOpts={};
+const ID_KEYS=["NOMBRE COMPLETO","TIPO","DOCUMENTO ID.","FECHA NACIMIENTO","GENERO","TELEFONO","DIRECCION","CONSECUTIVO","ROL EN EL HOGAR","EAPB NOMBRE","RÉGIMEN","CAPITADO"];
+const NO_EXTRAER=["NOMBRE COMPLETO","TIPO","DOCUMENTO ID.","TELEFONO","DIRECCION","CONSECUTIVO","IMC","CURSO DE VIDA","AA / MM","FECHA NACIMIENTO"];
 
-function base(pref){
-  stopRec();st.view="base";const c=conf(),q=cola();
+/* ---------- extraer variables de la historia ya registrada ---------- */
+function fuenteHC(id){const p=[],ivt=IV[id]?ivCompose(id):"";
+  if(ivt)p.push("ENTREVISTA:\n"+ivt);const d=S.get(key(id,"dict"));if(d&&d!==ivt)p.push("DICTADO:\n"+d);
+  const n=S.get(key(id,"nota"));if(n)p.push("NOTA:\n"+n);const mk=marcados(id);if(mk.length)p.push("ACTIVIDADES MARCADAS EN LA GUÍA:\n"+mk.join("\n"));
+  const hh=hhResumen(id);if(hh)p.push(hh);
+  const g=k=>S.get(key(id,"eg_"+k))||"";if(g("talla")||g("pact"))p.push("HERRAMIENTAS: talla "+g("talla")+" m, peso actual "+g("pact")+" kg, peso inicial "+g("ppre")+" kg, FUM "+g("fum"));
+  return p.join("\n\n")}
+function extraerLocal(id,txt,f){const o={},M1=(re,i=1)=>{const m=txt.match(re);return m?m[i]:null},num=s=>s==null?null:String(s).replace(",",".");
+  const ta=txt.match(/\b(?:TA|T\.\s?A\.?|tensi[oó]n(?:\s+arterial)?)\D{0,6}(\d{2,3})\s*\/\s*(\d{2,3})/i);if(ta)o["T. A"]=ta[1]+"/"+ta[2];
+  const fc=M1(/\b(?:FC|F\.\s?C\.?|frecuencia\s+card[ií]aca)\D{0,6}(\d{2,3})\b/i);if(fc)o["F.C"]=fc;
+  const fr=M1(/\b(?:FR|F\.\s?R\.?|frecuencia\s+respiratoria)\D{0,6}(\d{1,2})\b/i);if(fr)o["F. R"]=fr;
+  const sp=M1(/\b(?:SpO2|SpO₂|SO2|saturaci[oó]n)\D{0,6}(\d{2,3})\b/i);if(sp)o["SPO2"]=sp;
+  const te=M1(/\b(?:T|temp(?:eratura)?)\s*[:=]?\s*(3\d(?:[.,]\d)?)\b/i);if(te)o["TEM"]=num(te);
+  const pe=M1(/peso(?:\s+actual)?\D{0,10}(\d{1,3}(?:[.,]\d)?)\s*(?:kg|kilo)/i)||M1(/peso(?:\s+actual)?\s*[:=]?\s*(\d{1,3}(?:[.,]\d)?)/i);if(pe)o["PESO"]=num(pe);
+  const t1=txt.match(/talla\D{0,6}(\d)\s*con\s*(\d{2})/i),t2=M1(/talla\D{0,6}(\d(?:[.,]\d{1,2})?|\d{3})\b/i);if(t1)o["TALLA"]=t1[1]+"."+t1[2];else if(t2)o["TALLA"]=num(t2);
+  const ed=M1(/(\d{1,3})\s*años/i);if(ed)o["EDAD"]=ed;
+  const m=M[id];
+  if(m.route==="rm")o["GENERO"]="F";
+  if(m.route==="rp"){o["ATENCION INTEGRAL ENFERMERIA"]="SI";o["ATENCION INTEGRAL ENFERMERIA FECHA ULTIMO CONTROL"]=f}
+  if(/m[eé]todo|planific|implante|inyectable|DIU|anticonc/i.test(txt)&&["precon","parto","adol","juv","adul"].includes(id)){o["PLANIFICACION FAMILIAR O CONTROL"]="SI";o["PLANIFICACION FAMILIAR O CONTROL FECHA ULTIMO CONTROL"]=f}
+  o["FECHA"]=f;o["OBSERVACION"]=m.title+" – "+N[m.notes.includes(st.note)?st.note:m.notes[0]].label;
+  return o}
+function pExtraerVars(txt,f){
+  const lst=ALLF.filter(x=>!NO_EXTRAER.includes(x.k)).map(x=>`"${x.k}": ${x.l}${x.o?(x.t==="multi"?" — lista separada por coma, de: ":" — exactamente una de: ")+x.o.join(" | "):x.t==="date"?" — fecha AAAA-MM-DD":x.t==="num"||x.t==="auto"?" — número":""}`).join("\n");
+  return `Extrae de esta historia clínica de enfermería (Colombia) los valores para una base de datos de caracterización. Fecha de la consulta: ${f}.
+Responde SOLO un objeto JSON con las claves que tengan un valor EXPLÍCITO en el texto; omite las demás. No infieras ni inventes: si dice "niega hipertensión", HTA es "NO"; si no la menciona, omite HTA.
+Fechas en AAAA-MM-DD; una atención realizada hoy lleva la fecha de la consulta. SI/NO en mayúsculas. EDAD en años cumplidos.
+
+CAMPOS:
+${lst}
+
+HISTORIA:
+"""${txt.slice(0,20000)}"""`}
+async function enviarBase(id){
+  const msg=t=>{const s=$("status")||$("iv-st");if(s)s.textContent=t};
+  const f=($("fecha")&&$("fecha").value)||S.get(key(id,"fecha"))||hoy(),txt=fuenteHC(id);
+  if(!txt.trim()){msg("Primero registra la consulta (entrevista, dictado o nota): de ahí salen los datos.");return}
+  let d=extraerLocal(id,txt,f);
+  if(sample){msg("Extrayendo los datos de la historia…");
+    try{const x=await sample.json(pExtraerVars(txt,f),{cache:false});if(x&&typeof x==="object")for(const [k,v] of Object.entries(x)){const fd=ALLF.find(z=>z.k===k);if(!fd||NO_EXTRAER.includes(k)||v==null||v==="")continue;let s=String(v).trim();if(fd.o&&fd.t!=="multi"){const hit=fd.o.find(o=>o.toUpperCase()===s.toUpperCase());if(!hit)continue;s=hit}d[k]=s}}
+    catch(e){msg("No se pudo usar Claude; se extrajo lo básico sin conexión.")}}
+  let ident={};try{ident=JSON.parse(S.get(key(id,"ident"))||"{}")}catch(e){}
+  baseEdit=null;base(Object.assign(d,ident),{review:true,mod:id});window.scrollTo(0,0)}
+
+function base(pref,opts){
+  stopRec();st.view="base";baseOpts=opts||{};const c=conf(),q=cola();
   const rec=baseEdit?q.find(r=>r.id===baseEdit):null;
   const d=rec?rec.datos:Object.assign({},pref||{});
   const com=rec?rec.comunidad:(S.get("dn2_ultcom")||"");
@@ -913,7 +961,11 @@ function base(pref){
   ${q.length?`<section><p class="lab">Pendientes por enviar (${q.length})</p><div class="drafts">${q.map(r=>`<button data-edit="${r.id}"><span>${esc((r.datos["NOMBRE COMPLETO"]||"(sin nombre)"))} · ${esc(r.comunidad)}</span><span>Editar</span></button>`).join("")}</div></section>`:""}
   <form id="bform" class="bform" novalidate>
     <label class="bfl" for="b-com"><span>Comunidad o vereda (pestaña de la hoja) *</span><input id="b-com" list="coms" value="${esc(com)}" placeholder="QUERARÍ"><datalist id="coms">${[...new Set(q.map(r=>r.comunidad).concat(S.get("dn2_coms")?S.get("dn2_coms").split("|"):[]))].filter(Boolean).map(x=>`<option value="${esc(x)}">`).join("")}</datalist></label>
-    ${VARS.map((g,i)=>`<details class="sec" ${i<2?"open":""}><summary><span>${esc(g.g)}</span></summary><div class="bgrid">${g.f.map(fld).join("")}</div></details>`).join("")}
+    ${baseOpts.review?(()=>{const has=f=>!ID_KEYS.includes(f.k)&&((d[f.k]!=null&&d[f.k]!=="")||f.t==="auto");const ext=ALLF.filter(has),rest=ALLF.filter(f=>!ID_KEYS.includes(f.k)&&!has(f));
+      return `<details class="sec" open><summary><span>Identificación (se escribe una vez por paciente; no pasa por Claude)</span></summary><div class="bgrid">${ALLF.filter(f=>ID_KEYS.includes(f.k)).map(fld).join("")}</div></details>
+      <details class="sec" open><summary><span>Tomado de la historia: revisa</span><span class="cnt">${ext.filter(f=>f.t!=="auto").length} datos</span></summary><div class="bgrid">${ext.map(fld).join("")}</div></details>
+      <details class="sec"><summary><span>Otras variables (solo si hace falta)</span><span class="cnt">${rest.length}</span></summary><div class="bgrid">${rest.map(fld).join("")}</div></details>`})()
+    :VARS.map((g,i)=>`<details class="sec" ${i<2?"open":""}><summary><span>${esc(g.g)}</span></summary><div class="bgrid">${g.f.map(fld).join("")}</div></details>`).join("")}
     <div class="btns"><button class="btn primary" type="submit" id="b-save">${rec?"Guardar cambios":"Guardar y enviar"}</button>${rec?`<button class="btn" type="button" id="b-del">Quitar de pendientes</button>`:""}<button class="btn" type="button" id="b-new">Formulario nuevo</button></div>
     <p class="status" id="b-st" role="status"></p>
   </form>`;
@@ -930,7 +982,8 @@ function base(pref){
   const form=$("bform");
   const recompute=()=>{const v=k=>{const e=form.querySelector(`[data-f="${CSS.escape(k)}"]`);return e?e.value:""};const set=(k,x)=>{const e=form.querySelector(`[data-f="${CSS.escape(k)}"]`);if(e)e.value=x};
     const ed=edadDe(v("FECHA NACIMIENTO"),v("FECHA"));
-    if(ed){if(ed.y>=1){set("EDAD",ed.y);set("AA / MM","AÑOS")}else{set("EDAD",ed.tm);set("AA / MM","MESES")}set("CURSO DE VIDA",cursoVida(ed.y))}else{set("EDAD","");set("AA / MM","");set("CURSO DE VIDA","")}
+    if(ed){if(ed.y>=1){set("EDAD",ed.y);set("AA / MM","AÑOS")}else{set("EDAD",ed.tm);set("AA / MM","MESES")}set("CURSO DE VIDA",cursoVida(ed.y))}
+    else{const e0=parseFloat(v("EDAD"));if(e0>=0&&!v("FECHA NACIMIENTO")){set("AA / MM","AÑOS");set("CURSO DE VIDA",cursoVida(e0))}else{set("EDAD","");set("AA / MM","");set("CURSO DE VIDA","")}}
     const p=parseFloat(v("PESO")),t=parseFloat(String(v("TALLA")).replace(",","."));const tm=t>3?t/100:t;
     set("IMC",p>0&&tm>0.3&&tm<2.5?(p/(tm*tm)).toFixed(1):"");
     const sx=v("GENERO");
@@ -947,6 +1000,7 @@ function base(pref){
     const cf=conf(),id=baseEdit||uid();
     const reg={id,comunidad,datos:Object.assign({ID_REGISTRO:id,FECHA_REGISTRO:new Date().toISOString().slice(0,16).replace("T"," "),REGISTRADO_POR:cf.who||""},datos)};
     const q=cola().filter(r=>r.id!==id);q.push(reg);setCola(q);
+    if(baseOpts.mod){const ident={};ID_KEYS.forEach(k=>{if(datos[k]&&datos[k]!=="N/A")ident[k]=datos[k]});S.set(key(baseOpts.mod,"ident"),JSON.stringify(ident))}
     S.set("dn2_ultcom",comunidad);const cs=new Set((S.get("dn2_coms")||"").split("|").filter(Boolean));cs.add(comunidad);S.set("dn2_coms",[...cs].join("|"));
     baseEdit=null;base({});$("b-st").textContent="Guardado en el celular.";sync(true)};
   syncTxt();
