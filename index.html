@@ -639,6 +639,7 @@ function checks(m){try{return JSON.parse(S.get(key(m,"chk"))||"{}")}catch(e){ret
 function hasDraft(m){return !!(S.get(key(m,"dict"))||S.get(key(m,"nota"))||Object.keys(checks(m)).length)}
 
 /* ---------- PANEL ---------- */
+const VERSION_APP="2026-10-09 v54";
 function home(){
   stopRec();st.view="home";
   const rm=["precon","prenatal","parto","rn","ive"],rp=["pinf","inf","adol","juv","adul","vej"];
@@ -683,6 +684,7 @@ function home(){
   <section class="route"><div class="route-head"><h2>Promoción y mantenimiento</h2><span>RPMS · cursos de vida</span></div><div class="tiles">${rp.map(tile).join("")}</div></section>
   <section class="route"><div class="route-head"><h2>Procedimientos y consejerías</h2></div><div class="tiles">${tile("proc")}</div></section>
   <section class="route"><div class="route-head"><h2>Base de datos</h2><span>Google Sheets</span></div><div class="tiles"><button class="tile pc" id="t-base"><b>Pendientes y conexión</b><small id="bq">${cola().length?cola().length+" pendientes":(conf().url?"al día":"sin conectar")}</small></button></div></section>
+  <p class="foot" id="verlbl">Versión ${VERSION_APP}</p>
   <p class="foot">Contenido según la Resolución 3280 de 2018, con IVE actualizada a la Sentencia C-055 de 2022 y la Resolución 051 de 2023. Las semanas de vacunas se confirman con el lineamiento PAI vigente. Lo que dictas queda solo en este celular hasta que lo borres. Organizar la nota necesita internet.</p>`;
   document.querySelectorAll("[data-mod]").forEach(b=>b.onclick=()=>openMod(b.dataset.mod));
   $("t-base").onclick=()=>{baseEdit=null;base({});window.scrollTo(0,0)};
@@ -1999,7 +2001,7 @@ function base(pref,opts){
   form.addEventListener("input",recompute);form.addEventListener("change",recompute);recompute();
   if(RV){const {falt}=revisar(form,false),fg=$("b-falta-grid");
     if(!$("b-com").value.trim())fg.append($("b-comw"));
-    falt.forEach(f=>{const w=form.querySelector(`[data-wrap="${CSS.escape(f.k)}"]`);if(w)fg.append(w)});
+    falt.forEach(f=>{const w=form.querySelector(`[data-wrap="${CSS.escape(f.k)}"]`);if(w){fg.append(w);if(f.mal&&!w.querySelector(".malnota")){const n=document.createElement("small");n.className="malnota";n.style.cssText="color:var(--miss);font-weight:700";n.textContent="Revisa: "+f.mal+".";w.append(n)}}});
     const og=$("b-optgrid"),vacio=w=>{const el=w.querySelector("[data-f]");if(!el||w.hidden)return false;if(el.dataset.multi)return!el.querySelector('[aria-pressed="true"]');return el.dataset.na!=="1"&&!el.readOnly&&!String(el.value||"").trim()};
     const REL=relDe(MD);
     [$("b-hcgrid"),$("b-idgrid")].forEach(g=>[...g.querySelectorAll("[data-wrap]")].forEach(w=>{const k=w.dataset.wrap;if(REQK.includes(k))return;if(REL?!REL.includes(k):vacio(w))og.append(w)}));
@@ -2100,11 +2102,14 @@ function revisar(form,marcar){const datos={},falt=[];if(marcar)form.querySelecto
     if(w&&w.hidden)val="N/A";
     const edOk=f.k==="FECHA NACIMIENTO"&&(form.querySelector('[data-f="EDAD"]')||{}).value;
     if(!val&&f.t!=="auto"&&REQK.includes(f.k)&&!edOk){falt.push(Object.assign({},f,{inc:incompleta}));if(marcar&&w){w.classList.add("falta");const det=w.closest("details");if(det)det.open=true}}
+    if(f.k==="FECHA NACIMIENTO"&&val&&val!=="N/A"){const fe=(form.querySelector('[data-f="FECHA"]')||{}).value||hoy(),e=edadDe(val,fe),rm=baseOpts&&baseOpts.mod&&M[baseOpts.mod]&&M[baseOpts.mod].route==="rm"&&baseOpts.mod!=="rn";
+      const mal=!e?"es posterior a la fecha de la consulta":e.y>110?"da más de 110 años":rm&&e.y<9?"da una edad de "+(e.y?e.y+(e.y===1?" año":" años"):e.tm+(e.tm===1?" mes":" meses"))+": no corresponde a una consulta materna":"";
+      if(mal){falt.push(Object.assign({},f,{mal}));if(marcar&&w)w.classList.add("falta")}}
     datos[f.k]=val}
   return {datos,falt}}
 function mostrarFaltan(falt){const mb=$("b-miss");if(!mb)return;if(!falt.length){mb.hidden=true;return}mb.hidden=false;
   mb.querySelector("h3").textContent=`No se puede enviar: ${falt.length===1?"falta 1 dato":"faltan "+falt.length+" datos"} de la tabla de variables`;
-  mb.querySelector("ul").innerHTML=falt.map(f=>`<li>${esc(f.l)}${f.inc?" — <b>la fecha está incompleta</b> (día, mes y año)":""} <span class="note-src">(${esc(f.k)})</span></li>`).join("")}
+  mb.querySelector("ul").innerHTML=falt.map(f=>`<li>${esc(f.l)}${f.inc?" — <b>la fecha está incompleta</b> (día, mes y año)":""}${f.mal?" — <b>revisa: "+esc(f.mal)+"</b>":""} <span class="note-src">(${esc(f.k)})</span></li>`).join("")}
 function syncTxt(){const el=$("syncTxt");if(!el)return;const c=conf(),n=cola().length;
   el.textContent=!c.url?"Falta configurar la conexión con tu Google Sheets (botón Conexión). Mientras tanto los registros quedan guardados en el celular.":
    n?`${n} registro(s) pendientes por enviar. Se envían solos cuando hay señal.`:"Todo enviado. La hoja está al día."}
@@ -2127,7 +2132,11 @@ home();sync(false);
   if(sample&&st.view==="mod"&&st.tab==="nota"){const g=$("go"),h=$("offHint");if(g)g.textContent="Organizar nota";if(h)h.hidden=true}})();
 </script>
 <script>
-if("serviceWorker" in navigator){window.addEventListener("load",()=>{navigator.serviceWorker.register("sw.js").catch(()=>{})})}
+if("serviceWorker" in navigator){window.addEventListener("load",()=>{navigator.serviceWorker.register("sw.js").then(reg=>{reg.update();setInterval(()=>reg.update(),30*60*1000)}).catch(()=>{})});
+  let recargado=false;navigator.serviceWorker.addEventListener("controllerchange",()=>{if(recargado)return;recargado=true;
+    const ocupado=document.activeElement&&/INPUT|TEXTAREA|SELECT/.test(document.activeElement.tagName);
+    if(!ocupado&&typeof st!=="undefined"&&st.view==="home"){location.reload();return}
+    const b=document.createElement("button");b.textContent="Hay una versión nueva de la app · toca aquí para actualizar (no se pierde nada)";b.style.cssText="position:fixed;left:12px;right:12px;bottom:12px;z-index:99;padding:14px;border-radius:10px;border:0;background:#1d6b52;color:#fff;font-weight:700;font-size:1rem";b.onclick=()=>location.reload();document.body.append(b)})}
 </script>
 </body>
 </html>
