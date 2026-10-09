@@ -10,6 +10,7 @@
 <style>:root{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}body{margin:0}[hidden]{display:none!important}</style>
 <title>Dictado de Notas</title>
 <title>Dictado de Notas</title>
+<title>Dictado de Notas</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:ital,wght@0,400;0,700;1,400&family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,800&family=IBM+Plex+Mono:wght@500&display=swap">
 <style>
@@ -259,6 +260,50 @@ const M = {
   facts:[],alerts:["Prueba rápida de VIH reactiva no es diagnóstico: segunda prueba, confirmación, remisión y notificación"],
   sections:[{t:"Antes de registrar",items:["Consentimiento informado firmado cuando aplica","Asesoría pre y post prueba en VIH","Método anticonceptivo siguiente al retirar un implante"]}],
   notes:["vih","lact","impl"]}
+};
+
+/* ---------- Entrevistas guiadas (t:"ask" se le pregunta; t:"do" lo registra el profesional) ---------- */
+const POS=/^(?!\s*(niega|no\b|ninguna|ninguno|nunca|no sabe|no aplica)).+/i, SI=/^\s*s[ií]\b/i;
+const IV={
+ precon:[
+  {b:"Datos generales",t:"ask",l:"Edad",q:"¿Cuántos años tiene?"},
+  {b:"Datos generales",t:"ask",l:"Comunidad y etnia",q:"¿De qué comunidad es y a qué pueblo pertenece?",c:["Cubeo","Desano","Tukano","Wanano","Otro"]},
+  {b:"Datos generales",t:"ask",l:"Escolaridad y estado civil",q:"¿Hasta qué año estudió? ¿Vive con su pareja?",c:["Primaria incompleta","Primaria completa","Bachillerato","Unión libre","Casada","Soltera"]},
+  {b:"Intención reproductiva",t:"ask",l:"Deseo de embarazo",q:"¿Usted (y su pareja) quieren tener un bebé en el próximo año?",c:["Sí","No","No sabe"],al:/^\s*(no\b|no sabe)/i,am:"Si no quiere embarazarse en el próximo año, no es consulta preconcepcional: ofrece asesoría anticonceptiva (RPMS)."},
+  {b:"Intención reproductiva",t:"ask",l:"Método anticonceptivo actual",q:"¿Está planificando ahora? ¿Con qué método y desde cuándo?",c:["Ninguno","Inyectable mensual","Inyectable trimestral","Implante","DIU","Pastillas","Condón"]},
+  {b:"Antecedentes personales",t:"ask",l:"Enfermedades",q:"¿Algún médico le ha dicho que tiene azúcar alta, presión alta, tiroides, convulsiones, asma, problemas de riñón o de corazón, lupus, anemia o tuberculosis?",c:["Niega"],al:POS,am:"Enfermedad crónica: remitir a especialista para control antes del embarazo y mantener anticoncepción hasta que esté controlada."},
+  {b:"Antecedentes personales",t:"ask",l:"Medicamentos y remedios",q:"¿Toma algún medicamento, remedio tradicional o producto para bajar de peso?",c:["Niega"]},
+  {b:"Antecedentes personales",t:"ask",l:"Cirugías y alergias",q:"¿La han operado? ¿Es alérgica a algún medicamento?",c:["Niega cirugías","Niega alergias"]},
+  {b:"Antecedentes personales",t:"ask",l:"Trombosis",q:"¿Ha tenido trombosis o coágulos en las piernas o los pulmones?",c:["Niega"],al:POS,am:"Antecedente tromboembólico: los métodos hormonales combinados están contraindicados; requiere asesoría especializada."},
+  {b:"Antecedentes ginecobstétricos",t:"ask",l:"Menarquia y ciclos",q:"¿A qué edad le llegó la primera regla? ¿Le viene cada mes?",c:["Ciclos regulares","Ciclos irregulares"]},
+  {b:"Antecedentes ginecobstétricos",t:"ask",l:"Fórmula obstétrica",q:"¿Cuántos embarazos ha tenido? ¿Cuántos partos, cesáreas y abortos? ¿Cuántos hijos vivos?",c:["Nuligesta"]},
+  {b:"Antecedentes ginecobstétricos",t:"ask",l:"Último parto o cesárea",q:"¿Cuándo fue su último parto o cesárea?",c:["No aplica"],h:"Si fue hace menos de 18 meses, recomienda esperar: el intervalo mínimo es de 18 meses."},
+  {b:"Antecedentes ginecobstétricos",t:"ask",l:"Complicaciones obstétricas previas",q:"En embarazos anteriores, ¿tuvo presión alta, convulsiones, hemorragia después del parto, placenta retenida, bebés muy pequeños o muy grandes, bebés que murieron o embarazo molar?",c:["Niega"],al:POS,am:"Complicación obstétrica previa: aplicar el plan de la 3280 para ese antecedente (asesoría de recurrencia, evaluación de causas, parto en institución con capacidad resolutiva)."},
+  {b:"Antecedentes ginecobstétricos",t:"ask",l:"Depresión posparto previa",q:"Después de algún parto, ¿se sintió muy triste o sin ganas de nada por varias semanas?",c:["No","Sí"],al:SI,am:"Antecedente de depresión posparto: aplica las preguntas de tamizaje; si son positivas, ruta de salud mental."},
+  {b:"Antecedentes ginecobstétricos",t:"ask",l:"Grupo sanguíneo y Rh",q:"¿Sabe su tipo de sangre? ¿Y el de su pareja?",c:["No sabe"],h:"Si es Rh negativo, se analiza con la paridad y si recibió anti-D."},
+  {b:"Salud sexual",t:"ask",l:"Vida sexual",q:"¿A qué edad inició relaciones? ¿Cuántas parejas ha tenido? ¿Usa condón?"},
+  {b:"Salud sexual",t:"ask",l:"ITS",q:"¿Ha tenido flujo con mal olor, llagas en los genitales o alguna infección de transmisión sexual?",c:["Niega"],al:POS,am:"Antecedente o síntomas de ITS: tratar a ella y a la pareja antes del embarazo."},
+  {b:"Salud sexual",t:"ask",l:"Tamizaje de cuello uterino",q:"¿Cuándo fue su última citología o prueba de VPH? ¿Qué resultado le dieron?",c:["Nunca","No recuerda"],h:"Rural disperso: 25–29 años citología; 30–50 Ver y Tratar; 51–65 citología o ADN-VPH."},
+  {b:"Antecedentes familiares",t:"ask",l:"Antecedentes genéticos y familiares",q:"¿En su familia o la de su pareja hay enfermedades que se heredan, bebés con malformaciones o hemofilia?",c:["Niega"],al:POS,am:"Antecedente genético o familiar: remitir a ginecobstetricia."},
+  {b:"Hábitos",t:"ask",l:"Alimentación",q:"¿Qué comió ayer desde que se levantó hasta que se acostó?",h:"Recordatorio de 24 horas. Orienta alimentos con vitamina A (chontaduro, ahuyama, plátano maduro, mango, huevo)."},
+  {b:"Hábitos",t:"ask",l:"Tabaco, alcohol y sustancias",q:"¿Fuma? ¿Toma chicha, guarapo o licor? ¿Consume otras sustancias?",c:["Niega"],al:POS,am:"Consumo de alcohol o sustancias: intervención breve y seguimiento."},
+  {b:"Hábitos",t:"ask",l:"Actividad física, sueño y estrés",q:"¿Qué actividad física hace? ¿Cómo duerme? ¿Se siente preocupada o estresada?"},
+  {b:"Psicosocial",t:"ask",l:"Familia y apoyo",q:"¿Con quién vive? ¿Quién la apoya cuando lo necesita?"},
+  {b:"Psicosocial",t:"ask",l:"Violencias",q:"¿Alguien la ha humillado, amenazado, golpeado o forzado a tener relaciones?",c:["Niega","Sí"],al:/^\s*s[ií]\b/i,am:"Violencia referida: activar la ruta de atención a víctimas de violencia y notificar."},
+  {b:"Psicosocial",t:"ask",l:"Tamizaje de depresión 1",q:"Durante el último mes, ¿se ha preocupado porque con frecuencia se sentía triste, deprimida o sin esperanza?",c:["No","Sí"],al:SI,am:"Tamizaje de depresión positivo: derivar a la ruta de salud mental."},
+  {b:"Psicosocial",t:"ask",l:"Tamizaje de depresión 2",q:"Durante el último mes, ¿se ha preocupado porque con frecuencia sentía poco interés por realizar actividades y además no sentía que le proporcionaran placer?",c:["No","Sí"],al:SI,am:"Tamizaje de depresión positivo: derivar a la ruta de salud mental."},
+  {b:"Vacunación",t:"ask",l:"Esquema de vacunación",q:"¿Tiene el carné de vacunas? Revísalo con ella.",c:["Completo","Incompleto","Sin carné"],h:"El esquema debe quedar completo al menos 3 meses antes del embarazo.",al:/incompleto|sin carn/i,am:"Remitir a vacunación y esperar 3 meses tras completar el esquema."},
+  {b:"Examen físico",t:"do",l:"Signos vitales",q:"Registra TA, FC, FR y temperatura."},
+  {b:"Examen físico",t:"do",l:"Antropometría",q:"Peso, talla e IMC.",h:"IMC ideal para embarazarse: menos de 25. Si es mayor de 35, evaluación nutricional y metabólica."},
+  {b:"Examen físico",t:"do",l:"Examen por sistemas",q:"Examen cefalocaudal, incluida la cavidad bucal.",c:["Sin hallazgos patológicos"]},
+  {b:"Examen físico",t:"do",l:"Valoración ginecológica",q:"Valoración ginecológica con especuloscopia.",c:["Sin hallazgos patológicos"],h:"Si hay signos de carcinoma invasor: colposcopia y biopsia en máximo 1 semana."},
+  {b:"Plan",t:"do",l:"Exámenes solicitados",q:"¿Qué exámenes ordenaste?",c:["Paquete preconcepcional completo","Gota gruesa","Tamizaje de cuello uterino"],h:"HBsAg, glicemia, hemoclasificación, hemograma, gota gruesa, IgG toxoplasma, rubéola y varicela, treponémica, urocultivo, VIH con asesoría, cuello uterino."},
+  {b:"Plan",t:"do",l:"Ácido fólico",q:"Formulación de ácido fólico.",c:["0,4 mg/día","4 mg/día por antecedente de defecto del tubo neural"],h:"Al menos 3 meses antes del embarazo."},
+  {b:"Plan",t:"do",l:"Anticoncepción hasta decidir",q:"Método anticonceptivo mientras se prepara.",c:["Continúa su método","Inicia método"]},
+  {b:"Plan",t:"do",l:"Remisiones",q:"¿A dónde remitiste?",c:["Vacunación","Odontología","Nutrición","Psicología","Medicina","Ginecobstetricia","Ninguna"]},
+  {b:"Plan",t:"do",l:"Información brindada",q:"Educación y derechos.",c:["Intervalo de 18 meses","Derechos reproductivos e IVE","Signos de alarma","Control prenatal temprano"]},
+  {b:"Plan",t:"do",l:"Próximo control",q:"Fecha del control para leer los exámenes."}
+ ]
 };
 
 /* ---------- Herrera y Hurtado ---------- */
@@ -516,10 +561,10 @@ function sugerir(){
 }
 
 /* ---------- MÓDULO ---------- */
-function openMod(id){st.view="mod";st.mod=id;st.tab=S.get(key(id,"tab"))||"guia";st.note=S.get(key(id,"note"))||M[id].notes[0];if(!M[id].notes.includes(st.note))st.note=M[id].notes[0];renderMod();window.scrollTo(0,0)}
+function openMod(id){st.view="mod";st.mod=id;st.tab=S.get(key(id,"tab"))||(IV[id]?"entr":"guia");st.note=S.get(key(id,"note"))||M[id].notes[0];if(!M[id].notes.includes(st.note))st.note=M[id].notes[0];renderMod();window.scrollTo(0,0)}
 function renderMod(){
   const m=M[st.mod],id=st.mod;
-  const tabs=[["guia","Guía"]].concat(m.tools?[["herr","Herramientas"]]:[]).concat([["nota","Nota"]]);
+  const tabs=(IV[id]?[["entr","Entrevista"]]:[]).concat([["guia","Guía"]]).concat(m.tools?[["herr","Herramientas"]]:[]).concat([["nota","Nota"]]);
   if(!tabs.some(t=>t[0]===st.tab))st.tab="guia";
   const routeName={rm:"Materno perinatal",rp:"Curso de vida",pc:"Procedimientos"}[m.route];
   $("app").innerHTML=`
@@ -530,7 +575,7 @@ function renderMod(){
   <div id="pane"></div>`;
   $("back").onclick=home;
   document.querySelectorAll("[data-tab]").forEach(b=>b.onclick=()=>{st.tab=b.dataset.tab;S.set(key(id,"tab"),st.tab);renderMod()});
-  if(st.tab==="guia")paneGuia();else if(st.tab==="herr")paneHerr();else paneNota();
+  if(st.tab==="entr")paneEntr();else if(st.tab==="guia")paneGuia();else if(st.tab==="herr")paneHerr();else paneNota();
 }
 function paneGuia(){
   const m=M[st.mod],id=st.mod,ck=checks(id);
@@ -582,6 +627,48 @@ function paneHerr(){
 }
 function hhResumen(id){let hh={};try{hh=JSON.parse(S.get(key(id,"hh"))||"{}")}catch(e){}const ks=Object.keys(hh);if(!ks.length)return"";let s=0;const it=ks.map(k=>{s+=HH[+k][1];return HH[+k][0]+" ("+HH[+k][1]+")"});return "Escala de Herrera y Hurtado aplicada: "+s+(s===1?" punto (":" puntos (")+(s>=3?"alto riesgo":"bajo riesgo")+"). Factores: "+it.join("; ")}
 function marcados(id){const m=M[id],ck=checks(id),o=[];m.sections.forEach((s,i)=>s.items.forEach((it,j)=>{if(ck[i+"."+j])o.push(s.t+": "+(it.startsWith("Q:")?"Pregunta realizada – "+it.slice(2):it))}));return o}
+/* ---------- ENTREVISTA GUIADA ---------- */
+function ivAns(id){try{return JSON.parse(S.get(key(id,"iv"))||"{}")}catch(e){return{}}}
+function ivCompose(id){const q=IV[id],a=ivAns(id);let blk="",out=[];
+  q.forEach((x,i)=>{const v=(a[i]||"").trim();if(!v)return;if(x.b!==blk){blk=x.b;out.push((out.length?"\n":"")+blk.toUpperCase())}out.push("- "+x.l+": "+v)});
+  return out.join("\n")}
+function ivAlerts(id){const q=IV[id],a=ivAns(id),o=[];q.forEach((x,i)=>{const v=(a[i]||"").trim();if(v&&x.al&&x.al.test(v))o.push(x.am)});return o}
+function paneEntr(){
+  const id=st.mod,q=IV[id],a=ivAns(id);let i=+(S.get(key(id,"ivi"))||0);if(i>=q.length)i=q.length;
+  const answered=q.filter((_,k)=>(a[k]||"").trim()).length;
+  if(i>=q.length){
+    const al=ivAlerts(id);
+    $("pane").innerHTML=`<div class="tool"><h3>Entrevista terminada</h3><p class="note-src">${answered} de ${q.length} preguntas respondidas. Las respuestas ya están en el dictado de la pestaña Nota.</p>
+    ${al.length?`<div class="box warn"><h3>Revisar antes de seguir</h3><ul>${al.map(x=>`<li>${esc(x)}</li>`).join("")}</ul></div>`:""}
+    <div class="btns"><button class="btn primary" id="iv-nota">Ir a la nota</button><button class="btn" id="iv-rev">Volver a la última pregunta</button></div></div>
+    <details class="sec"><summary><span>Ver lo registrado</span></summary><pre style="white-space:pre-wrap;padding:0 14px 14px;font-family:var(--f-body);font-size:.92rem">${esc(ivCompose(id))||"(sin respuestas)"}</pre></details>`;
+    $("iv-nota").onclick=()=>{st.tab="nota";S.set(key(id,"tab"),"nota");renderMod()};
+    $("iv-rev").onclick=()=>{S.set(key(id,"ivi"),String(q.length-1));paneEntr()};return}
+  const x=q[i],pct=Math.round(i/q.length*100),al=(a[i]&&x.al&&x.al.test(a[i]))?x.am:"";
+  $("pane").innerHTML=`
+  <div class="tool" style="gap:14px">
+    <div style="display:flex;justify-content:space-between;gap:8px;align-items:baseline;flex-wrap:wrap"><span class="tag ${x.t==="do"?"pc":"rm"}">${esc(x.b)}</span><span class="note-src">Pregunta ${i+1} de ${q.length}</span></div>
+    <div style="height:6px;background:var(--accent-soft);border-radius:99px"><div style="height:6px;width:${pct}%;background:var(--accent);border-radius:99px"></div></div>
+    <p class="lab" style="margin:0">${x.t==="do"?"Registra tú":"Pregúntale"}</p>
+    <h2 style="font-family:var(--f-body);font-size:1.25rem;line-height:1.35;font-weight:700">${esc(x.q)}</h2>
+    ${x.h?`<p class="hint" style="margin:0">${esc(x.h)}</p>`:""}
+    ${x.c?`<div class="sugg">${x.c.map(c=>`<button data-c="${esc(c)}">${esc(c)}</button>`).join("")}</div>`:""}
+    <label for="iv-a" class="lab" style="margin:0">Respuesta (dicta con el micrófono del teclado)</label>
+    <textarea id="iv-a" style="min-height:120px">${esc(a[i]||"")}</textarea>
+    <div class="box warn" id="iv-al" ${al?"":"hidden"}><h3>Atención</h3><p style="margin:0" id="iv-alt">${esc(al)}</p></div>
+    <div class="btns"><button class="btn" id="iv-prev" ${i===0?"disabled":""}>← Anterior</button><button class="btn primary" id="iv-next">${i===q.length-1?"Terminar":"Siguiente →"}</button></div>
+    <div class="btns"><button class="btn" id="iv-skip">Saltar</button><button class="btn" id="iv-reset">Reiniciar entrevista</button></div>
+  </div>`;
+  const ta=$("iv-a");
+  const save=()=>{const o=ivAns(id);o[i]=ta.value;S.set(key(id,"iv"),JSON.stringify(o));S.set(key(id,"dict"),ivCompose(id));
+    const hit=x.al&&ta.value.trim()&&x.al.test(ta.value);$("iv-al").hidden=!hit;if(hit)$("iv-alt").textContent=x.am};
+  ta.addEventListener("input",save);
+  document.querySelectorAll("[data-c]").forEach(b=>b.onclick=()=>{const c=b.dataset.c;ta.value=ta.value.trim()?ta.value.trim()+". "+c:c;save();ta.focus()});
+  const go=n=>{save();S.set(key(id,"ivi"),String(n));paneEntr();const t=$("iv-a");if(t)t.focus();window.scrollTo(0,0)};
+  $("iv-next").onclick=()=>go(i+1);$("iv-prev").onclick=()=>go(i-1);$("iv-skip").onclick=()=>{S.set(key(id,"ivi"),String(i+1));paneEntr()};
+  $("iv-reset").onclick=()=>{const b=$("iv-reset");if(b.dataset.armed!=="1"){b.dataset.armed="1";b.textContent="¿Borrar respuestas? Toca otra vez";return}S.del(key(id,"iv"));S.del(key(id,"ivi"));S.del(key(id,"dict"));paneEntr()};
+  ta.focus();
+}
 function lista(m){return m.sections.map(s=>s.t+": "+s.items.map(i=>i.startsWith("Q:")?i.slice(2):i).join(" | ")).join("\n")}
 
 function paneNota(){
