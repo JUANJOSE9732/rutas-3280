@@ -151,6 +151,20 @@ textarea{width:100%;font:inherit;font-size:1.05rem;line-height:1.55;padding:14px
 .falta input,.falta select,.falta textarea,.falta [data-multi]{border-color:var(--miss)!important;box-shadow:0 0 0 2px var(--miss-bg)}
 .falta>span:first-child{color:var(--miss);font-weight:700}
 .lleno input,.lleno select,.lleno [data-multi]{border-color:var(--accent)!important;box-shadow:0 0 0 2px var(--accent-soft)}
+.pgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(135px,1fr));gap:8px 10px}
+.pgrid input,.pgrid select{width:100%;min-width:0}.pgrid .bfl>span:first-child{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.pgrid .bfl{font-size:.74rem;gap:2px}
+.pgrid input,.pgrid select{padding:6px 8px!important;font-size:.92rem!important;min-height:36px!important}
+.pgrid .na{padding:0 6px;font-size:.68rem}
+.pdet{border:1px solid var(--line);border-radius:10px;padding:8px 10px}
+.pdet>summary{cursor:pointer;font-size:.86rem;font-weight:700;color:var(--muted)}
+.pdet[open]>summary{margin-bottom:8px}
+.pdrow{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin:6px 0}
+.pdrow .micwrap{margin:0}
+.pac{display:flex;flex-wrap:wrap;gap:4px 10px;align-items:baseline;font-size:.9rem;color:var(--muted)}
+.pac b{color:var(--ink);font-size:1rem}
+.pacbar{display:flex;flex-wrap:wrap;gap:4px 10px;align-items:baseline;background:var(--accent-soft);border-radius:10px;padding:8px 12px;font-size:.88rem;color:var(--muted);margin-bottom:10px}
+.pacbar b{color:var(--ink)}
 .narow{display:flex;gap:6px;min-width:0}.narow input{flex:1 1 auto;min-width:0}
 .na{border:1.5px solid var(--line);background:var(--surface);color:var(--muted);border-radius:8px;padding:0 10px;font-size:.8rem;font-weight:700}
 .na[aria-pressed="true"]{background:var(--ink);color:var(--bg);border-color:var(--ink)}
@@ -307,7 +321,6 @@ const IV={
   {b:"Primer abordaje",t:"do",l:"Confidencialidad y consentimiento verbal",q:"Explícale que lo que hablen es confidencial y pídele permiso para hacerle preguntas personales.",c:["Acepta","Prefiere no responder algunas preguntas"]},
   {b:"Primer abordaje",t:"ask",l:"Expectativas",q:"¿Qué le gustaría saber o resolver en esta consulta?"},
   {b:"Primer abordaje",t:"ask",l:"Medicina tradicional",q:"¿Ha hablado con el payé, el médico tradicional o la partera sobre su deseo de tener un bebé? ¿Le han hecho alguna curación o le han dado algún remedio?",c:["No","Sí"],h:"Respeta y registra la práctica. Pregunta por remedios que tome, por posibles interacciones."},
-  {b:"Datos generales",t:"ask",l:"Comunidad y etnia",q:"¿De qué comunidad es y a qué pueblo pertenece?",c:["Cubeo","Desano","Tukano","Wanano","Otro"]},
   {b:"Datos generales",t:"ask",l:"Escolaridad y estado civil",q:"¿Hasta qué año estudió? ¿Vive con su pareja?",c:["Primaria incompleta","Primaria completa","Bachillerato","Unión libre","Casada","Soltera"]},
   {b:"Intención reproductiva",t:"ask",l:"Deseo de embarazo",q:"¿Usted (y su pareja) quieren tener un bebé en el próximo año?",c:["Sí","No","No sabe"],al:/^\s*(no\b|no sabe)/i,am:"Si no quiere embarazarse en el próximo año, no es consulta preconcepcional: ofrece asesoría anticonceptiva (RPMS)."},
   {b:"Intención reproductiva",t:"ask",l:"Método anticonceptivo actual",q:"¿Está planificando ahora? ¿Con qué método y desde cuándo?",c:["Ninguno","Inyectable mensual","Inyectable trimestral","Implante","DIU","Pastillas","Condón"]},
@@ -542,7 +555,7 @@ function cargarCaso(id){const c=CASO_EJ[id];if(!c)return;const q=ivFor(id),a={},
   q.forEach((x,i)=>{const v=c.resp[i]||"";a[i]=v;if(x.ck&&v)ck[x.ck]=1});
   S.set(key(id,"iv"),JSON.stringify(a));S.set(key(id,"ivi"),String(q.length));S.set(key(id,"chk"),JSON.stringify(ck));
   S.set(key(id,"dict"),ivCompose(id));S.set(key(id,"fecha"),hoy());S.set(key(id,"note"),M[id].notes[0]);S.set(key(id,"ejcaso"),"1");
-  const ident={};ID_KEYS.forEach(k=>{if(EJ_BASE[k])ident[k]=EJ_BASE[k]});S.set(key(id,"ident"),JSON.stringify(ident));S.set(key(id,"com"),"EJEMPLO");S.del(key(id,"regid"));
+  const ident={__com:"EJEMPLO"};ID_KEYS.forEach(k=>{if(EJ_BASE[k])ident[k]=EJ_BASE[k]});setPac(ident);S.del(key(id,"regid"));
   S.del(key(id,"nota"));st.note=M[id].notes[0];st.tab="nota";S.set(key(id,"tab"),"nota");renderMod();window.scrollTo(0,0);
   setTimeout(()=>{organizar()},50)}
 /* ======================= APLICACIÓN ======================= */
@@ -605,6 +618,13 @@ function home(){
   <header><h1>Dictado de Notas</h1><p class="sub">Rutas de la Resolución 3280. Escoge el módulo y sigue los pasos: <b>Preguntas → Guía → Nota → Base</b>. La identificación se pide una sola vez, al empezar.</p></header>
   <section class="finder" aria-labelledby="fh">
     <p class="lab" id="fh">¿A quién vas a atender?</p>
+    <div class="pac" id="pacsum"></div>
+    <details class="pdet" id="pac-det"><summary id="pac-sumt"></summary>
+      <textarea id="pac-dic" rows="2" style="min-height:52px" placeholder="Dicta: nombre…, cédula…, nació el…, mujer, teléfono…, comunidad…, indígena cubeo, jefe de hogar, EPS… subsidiado, hogar número…"></textarea>
+      <div class="pdrow"><div id="pac-mic">${micUI(1)}</div><button class="btn" type="button" id="pac-go">Llenar con lo dictado</button><span class="note-src" id="pac-st"></span></div>
+      <div class="pgrid" id="pac-f"><label class="bfl" for="pac-com"><span>Comunidad o vereda</span><input id="pac-com" value="${esc(pacCom())}" placeholder="QUERARÍ"></label>${ALLF.filter(f=>ID_KEYS.includes(f.k)).map(f=>campo(f,identDe())).join("")}</div>
+      <p class="note-src" style="margin:8px 0 0">Se escribe una sola vez y sirve para todos los módulos. Va solo a la base de datos: no pasa por Claude ni entra en la nota (la nota solo usa edad, sexo, comunidad y etnia).</p>
+    </details>
     <div class="frow">
       <label for="f-edad">Edad<input id="f-edad" type="number" inputmode="numeric" min="0" placeholder="24"></label>
       <label for="f-uni">Unidad<select id="f-uni"><option value="a">años</option><option value="m">meses</option><option value="d">días</option></select></label>
@@ -622,6 +642,23 @@ function home(){
   document.querySelectorAll("[data-mod]").forEach(b=>b.onclick=()=>openMod(b.dataset.mod));
   $("t-base").onclick=()=>{baseEdit=null;base({});window.scrollTo(0,0)};
   ["f-edad","f-uni","f-sexo","f-est"].forEach(i=>$(i).addEventListener("input",sugerir));
+  const box=$("pac-f");wireNA(box);
+  const pinta=()=>{const P=pac(),nm=P["NOMBRE COMPLETO"];
+    $("pacsum").innerHTML=nm?`<b>${esc(nm)}</b>${pacResumen().map(x=>`<span>${x}</span>`).join("")}<button class="lnk" id="pac-new" type="button">Nueva persona</button>`:"";
+    $("pac-sumt").textContent=nm?"Ver o corregir sus datos":"Identificación y ubicación";
+    if($("pac-new"))$("pac-new").onclick=()=>{const b=$("pac-new");if(b.dataset.armed!=="1"){b.dataset.armed="1";b.textContent="¿Borrar esta persona y sus borradores? Toca otra vez";return}
+      S.del("dn2_pac");S.keys().filter(k=>/^dn2_[a-z]+_/.test(k)&&Object.keys(M).includes(k.split("_")[1])&&!k.endsWith("_note")).forEach(k=>S.del(k));home();$("pac-det").open=true};
+    const e=edadDe(P["FECHA NACIMIENTO"]);if(e){if(e.y>=1){$("f-edad").value=e.y;$("f-uni").value="a"}else{$("f-edad").value=e.tm;$("f-uni").value="m"}}
+    if(P["GENERO"])$("f-sexo").value=P["GENERO"]==="F"?"f":"m";
+    const conocido=!!(e&&P["GENERO"]);["f-edad","f-uni","f-sexo"].forEach(i=>$(i).closest("label").hidden=conocido);sugerir()};
+  const save=()=>{const {datos}=revisar(box,false),o={};ID_KEYS.forEach(k=>{if(datos[k]&&!(k==="PUEBLO"&&datos[k]==="N/A"))o[k]=datos[k]});const c=$("pac-com").value.trim().toUpperCase();if(c)o.__com=c;setPac(o);pinta()};
+  box.addEventListener("input",save);box.addEventListener("change",save);
+  const recomp=()=>{const sx=(box.querySelector('[data-f="ETNIA"]')||{}).value;box.querySelectorAll("[data-wrap]").forEach(w=>{if(w.dataset.if)w.hidden=(box.querySelector(`[data-f="${CSS.escape(w.dataset.if)}"]`)||{}).value!==w.dataset.ifv})};
+  box.addEventListener("change",recomp);recomp();
+  wireMic($("pac-mic"),$("pac-dic"));
+  $("pac-go").onclick=()=>{stopRec();const v=parseIdent($("pac-dic").value);if(v.__com){$("pac-com").value=v.__com;delete v.__com}const n=llenar(box,v);recomp();save();$("pac-st").textContent=n?`Se llenaron ${n} dato(s).`:"No reconocí datos. Prueba «cédula 1234, nació el 3 de marzo de 1990»."};
+  if(!pac()["NOMBRE COMPLETO"])$("pac-det").open=true;
+  pinta();
   window.scrollTo(0,0);
 }
 function sugerir(){
@@ -650,11 +687,12 @@ function renderMod(){
   const routeName={rm:"Materno perinatal",rp:"Curso de vida",pc:"Procedimientos"}[m.route];
   $("app").innerHTML=`
   <div class="top"><button class="back" id="back">← Rutas</button><span class="tag ${m.route}">${routeName}</span></div>
-  <header><h1>${esc(m.title)}</h1><p class="sub">${esc(m.who)}${identDe(id)["NOMBRE COMPLETO"]?` · <b>${esc(identDe(id)["NOMBRE COMPLETO"])}</b>`:""}</p></header>
+  <header><h1>${esc(m.title)}</h1><p class="sub">${esc(m.who)}</p></header>
+  <div class="pacbar">${pac()["NOMBRE COMPLETO"]?`<b>${esc(pac()["NOMBRE COMPLETO"])}</b>${pacResumen().map(x=>`<span>${x}</span>`).join("")}`:"<span>Persona sin identificar</span>"}<button class="lnk" id="pac-cambiar">${pac()["NOMBRE COMPLETO"]?"Cambiar":"Identificar"}</button></div>
   ${m.facts.length?`<div class="facts">${m.facts.map(([k,v])=>`<span class="chip"><b>${esc(k)}</b>${esc(v)}</span>`).join("")}</div>`:""}
   <div class="tabs" role="tablist">${tabs.map(([k,l],i)=>`<button role="tab" data-tab="${k}" aria-selected="${st.tab===k}"><span class="stepn ${hecho[k]?"ok":""}">${hecho[k]?"✓":i+1}</span><span>${l}</span></button>`).join("")}</div>
   <div id="pane"></div>`;
-  $("back").onclick=home;
+  $("back").onclick=home;$("pac-cambiar").onclick=()=>{home();const d=$("pac-det");if(d){d.open=true;d.scrollIntoView({block:"start"})}};
   document.querySelectorAll("[data-tab]").forEach(b=>b.onclick=()=>{st.tab=b.dataset.tab;if(st.tab!=="base")S.set(key(id,"tab"),st.tab);renderMod()});
   if(st.tab==="base"){st.tab=S.get(key(id,"tab"))==="base"?"nota":(S.get(key(id,"tab"))||"nota");$("pane").innerHTML=`<p class="status" id="status">Tomando los datos de esta historia…</p>`;enviarBase(id);return}
   if(st.tab==="entr")paneEntr();else if(st.tab==="guia")paneGuia();else if(st.tab==="herr")paneHerr();else paneNota();
@@ -737,30 +775,8 @@ function ivCompose(id){const q=ivFor(id),a=ivAns(id);let blk="",out=[];
   q.forEach((x,i)=>{const v=(a[i]||"").trim();if(!v)return;if(x.b!==blk){blk=x.b;out.push((out.length?"\n":"")+blk.toUpperCase())}out.push("- "+x.l+": "+v)});
   return out.join("\n")}
 function ivAlerts(id){const q=ivFor(id),a=ivAns(id),o=[];q.forEach((x,i)=>{const v=(a[i]||"").trim();if(v&&x.al&&x.al.test(v))o.push(x.am)});return o}
-function paneIdent(){
-  const id=st.mod,d=identDe(id),com=S.get(key(id,"com"))||"";
-  $("pane").innerHTML=`<div class="tool" style="gap:14px" id="idf">
-    <div style="display:flex;justify-content:space-between;gap:8px;align-items:baseline;flex-wrap:wrap"><span class="tag pc">Paciente</span><span class="note-src">Antes de las preguntas</span></div>
-    <h2 style="font-family:var(--f-body);font-size:1.25rem;line-height:1.35;font-weight:700">¿A quién atiendes?</h2>
-    <p class="hint" style="margin:0">Se registra una sola vez y va solo a la base de datos. No pasa por Claude ni entra en la nota. Puedes dejarlo para el final.</p>
-    <label class="bfl" for="id-dic"><span>Dicta o escribe los datos</span><textarea id="id-dic" style="min-height:70px" placeholder="Ej.: nombre María Pérez Gómez, cédula 1 2 3 4 5, mujer, nació el 3 de marzo de 1990, teléfono 310…, comunidad Querarí, jefe de hogar, EPS Mallamas subsidiado, hogar número 4"></textarea></label>
-    <div id="id-mic">${micUI(1)}</div>
-    <div class="btns"><button class="btn" type="button" id="id-go">Llenar con lo dictado</button></div><p class="status" id="id-st"></p>
-    <label class="bfl" for="id-com"><span>Comunidad o vereda</span><input id="id-com" value="${esc(com)}" placeholder="QUERARÍ"></label>
-    <div class="bgrid">${ALLF.filter(f=>ID_KEYS.includes(f.k)).map(f=>campo(f,d)).join("")}</div>
-    <div class="btns"><button class="btn primary" type="button" id="id-next">Empezar preguntas →</button></div>
-    ${CASO_EJ[id]?'<div class="linkrow"><button class="lnk" id="iv-caso">Cargar caso de ejemplo completo</button></div>':""}
-  </div>`;
-  const box=$("idf");wireNA(box);
-  const save=()=>{const {datos}=revisar(box,false),o={};ID_KEYS.forEach(k=>{if(datos[k])o[k]=datos[k]});S.set(key(id,"ident"),JSON.stringify(o));S.set(key(id,"com"),$("id-com").value.trim().toUpperCase())};
-  box.addEventListener("input",save);box.addEventListener("change",save);
-  wireMic($("id-mic"),$("id-dic"));
-  $("id-go").onclick=()=>{stopRec();const v=parseIdent($("id-dic").value);if(v.__com){$("id-com").value=v.__com;delete v.__com}const n=llenar(box,v);save();$("id-st").textContent=n?`Se llenaron ${n} dato(s). Revísalos.`:"No reconocí datos. Prueba con «cédula 1234», «nació el 3 de marzo de 1990»."};
-  $("id-next").onclick=()=>{stopRec();save();S.set(key(id,"ivi"),"0");renderMod();window.scrollTo(0,0)};
-  if($("iv-caso"))$("iv-caso").onclick=()=>cargarCaso(id);
-}
 function paneEntr(){
-  const id=st.mod,q=ivFor(id),a=ivAns(id),i0=S.get(key(id,"ivi"));let i=i0==null?-1:+i0;if(i<0){paneIdent();return}if(i>=q.length)i=q.length;
+  const id=st.mod,q=ivFor(id),a=ivAns(id),i0=S.get(key(id,"ivi"));let i=Math.max(0,+(i0||0));if(i>=q.length)i=q.length;
   const answered=q.filter((_,k)=>(a[k]||"").trim()).length;
   if(i>=q.length){
     const al=ivAlerts(id);
@@ -782,8 +798,8 @@ function paneEntr(){
     <textarea id="iv-a" style="min-height:120px">${esc(a[i]||"")}</textarea>
     <div id="iv-mic">${micUI()}</div>
     <div class="box warn" id="iv-al" ${al?"":"hidden"}><h3>Atención</h3><p style="margin:0" id="iv-alt">${esc(al)}</p></div>
-    <div class="navrow"><button class="btn" id="iv-prev" aria-label="Anterior">←</button><button class="btn primary" id="iv-next">${i===q.length-1?"Terminar preguntas":"Siguiente pregunta →"}</button></div>
-    <div class="linkrow"><button class="lnk" id="iv-skip">Saltar esta pregunta</button><button class="lnk" id="iv-reset">Reiniciar preguntas</button></div>
+    <div class="navrow"><button class="btn" id="iv-prev" ${i===0?"disabled":""} aria-label="Anterior">←</button><button class="btn primary" id="iv-next">${i===q.length-1?"Terminar preguntas":"Siguiente pregunta →"}</button></div>
+    <div class="linkrow"><button class="lnk" id="iv-skip">Saltar esta pregunta</button><button class="lnk" id="iv-reset">Reiniciar preguntas</button>${CASO_EJ[id]?'<button class="lnk" id="iv-caso">Cargar caso de ejemplo completo</button>':""}</div>
   </div>`;
   const ta=$("iv-a");
   const save=()=>{const o=ivAns(id);o[i]=ta.value;S.set(key(id,"iv"),JSON.stringify(o));S.set(key(id,"dict"),ivCompose(id));
@@ -794,6 +810,7 @@ function paneEntr(){
   const go=n=>{stopRec();save();S.set(key(id,"ivi"),String(n));paneEntr();const t=$("iv-a");if(t)t.focus();window.scrollTo(0,0)};
   $("iv-next").onclick=()=>go(i+1);$("iv-prev").onclick=()=>go(i-1);$("iv-skip").onclick=()=>{S.set(key(id,"ivi"),String(i+1));paneEntr()};
   $("iv-reset").onclick=()=>{const b=$("iv-reset");if(b.dataset.armed!=="1"){b.dataset.armed="1";b.textContent="¿Borrar respuestas? Toca otra vez";return}S.del(key(id,"iv"));S.del(key(id,"ivi"));S.del(key(id,"dict"));paneEntr()};
+  if($("iv-caso"))$("iv-caso").onclick=()=>cargarCaso(id);
   ta.focus();
 }
 function lista(m){return m.sections.map(s=>s.t+": "+s.items.map(i=>i.startsWith("Q:")?i.slice(2):i).join(" | ")).join("\n")}
@@ -824,7 +841,7 @@ function paneNota(){
   document.querySelectorAll("[data-n]").forEach(b=>b.onclick=()=>{st.note=b.dataset.n;S.set(key(id,"note"),st.note);paneNota()});
   listaUI($("faltantes"),$("missBox"),S.get(key(id,"falt")));listaUI($("alertas"),$("alertBox"),S.get(key(id,"alert")));
   try{const c=JSON.parse(S.get(key(id,"calc"))||"null");if(c)$("calc").innerHTML=chipsCalc(calcular(c.x,c.fecha))}catch(e){}
-  let t;$("dict").addEventListener("input",()=>{clearTimeout(t);t=setTimeout(()=>S.set(key(id,"dict"),$("dict").value),400)});
+  $("dict").addEventListener("input",()=>S.set(key(id,"dict"),$("dict").value));
   wireMic($("n-mic"),$("dict"),()=>S.set(key(id,"dict"),$("dict").value));
   $("nota").addEventListener("input",()=>S.set(key(id,"nota"),$("nota").value));
   $("fecha").addEventListener("change",()=>S.set(key(id,"fecha"),$("fecha").value));
@@ -837,7 +854,7 @@ function paneNota(){
 }
 function armarLocal(){
   const id=st.mod,m=M[id],n=N[st.note],f=$("fecha").value||hoy(),d=$("dict").value.trim(),ck=checks(id);
-  const L=[n.label.toUpperCase(),"Fecha: "+f.split("-").reverse().join("/"),""];
+  const L=[n.label.toUpperCase(),"Fecha: "+f.split("-").reverse().join("/")];if(perfilNota(f))L.push("Persona: "+perfilNota(f));L.push("");
   if(id==="prenatal"){
     const g=k=>S.get(key(id,"eg_"+k))||"";
     const r=calcular({fum:g("fum"),fum_confiable:!S.get(key(id,"eg_nofum")),eco_fecha:g("ecof"),eco_semanas:g("ecos")===""?null:g("ecos"),eco_dias:g("ecod"),talla_m:g("talla"),peso_kg:g("pact"),peso_pre_kg:g("ppre")},f);
@@ -875,7 +892,7 @@ return `Eres un asistente de documentación clínica para un enfermero profesion
 
 MÓDULO: ${m.title} (${m.who})
 TIPO DE NOTA: ${n.label}
-FECHA DE LA CONSULTA: ${f}
+FECHA DE LA CONSULTA: ${f}${perfilNota(f)?"\nPERSONA (sin datos de identificación): "+perfilNota(f):""}
 
 ESTRUCTURA DE LA NOTA:
 ${n.structure}
@@ -936,7 +953,8 @@ const VARS=[
   {k:"FECHA NACIMIENTO",l:"Fecha de nacimiento",t:"date"},{k:"EDAD",l:"Edad",t:"auto"},{k:"AA / MM",l:"Unidad de edad",t:"auto"},
   {k:"GENERO",l:"Sexo",t:"sel",o:["F","M"]},{k:"TIPO",l:"Tipo de documento",t:"sel",o:["CC","TI","RC","CE","PPT","PEP","MS","AS"]},
   {k:"DOCUMENTO ID.",l:"Número de documento",req:1,t:"tel"},{k:"EAPB NOMBRE",l:"EAPB"},{k:"RÉGIMEN",l:"Régimen",t:"sel",o:["SUBSIDIADO","CONTRIBUTIVO","ESPECIAL","NO AFILIADO"]},
-  {k:"CAPITADO",l:"Capitado",t:"sel",o:SN},{k:"TELEFONO",l:"Teléfono",t:"tel"}]},
+  {k:"CAPITADO",l:"Capitado",t:"sel",o:SN},{k:"TELEFONO",l:"Teléfono",t:"tel"},
+  {k:"ETNIA",l:"Pertenencia étnica",t:"sel",o:["INDIGENA","AFROCOLOMBIANO","RAIZAL","PALENQUERO","ROM","NINGUNA"]},{k:"PUEBLO",l:"Pueblo indígena",if:["ETNIA","INDIGENA"]}]},
  {g:"Signos vitales y antropometría",f:[
   {k:"F.C",l:"FC (lpm)",t:"num"},{k:"F. R",l:"FR (rpm)",t:"num"},{k:"T. A",l:"TA (ej. 120/80)"},{k:"TEM",l:"Temperatura (°C)",t:"num"},{k:"SPO2",l:"SpO₂ (%)",t:"num"},
   {k:"PESO",l:"Peso (kg)",t:"num"},{k:"TALLA",l:"Talla (m)",t:"num"},{k:"IMC",l:"IMC",t:"auto"},{k:"CURSO DE VIDA",l:"Curso de vida",t:"auto"},
@@ -966,7 +984,7 @@ const VARS=[
   {k:"TIPO DE SEGUIMIENTO",l:"Tipo de seguimiento"},{k:"FECHA DE SEGUIMIENTO",l:"Fecha de seguimiento",t:"date"},{k:"OBSERVACIONES SEGUIMIENTO",l:"Observaciones del seguimiento",t:"area"}]}
 ];
 const ALLF=VARS.flatMap(g=>g.f);
-const EJ_BASE={"CONSECUTIVO":"12","DIRECCION":"SECTOR LA PLAYA","NOMBRE COMPLETO":"EJEMPLO FICTICIO PÉREZ","ANTECEDENTES":"HIPERTENSIÓN ARTERIAL DIAGNOSTICADA EN 2019, EN TRATAMIENTO CON LOSARTÁN","ROL EN EL HOGAR":"JEFE DE HOGAR","FECHA NACIMIENTO":"1976-05-14","GENERO":"M","TIPO":"CC","DOCUMENTO ID.":"1000000000","EAPB NOMBRE":"MALLAMAS","RÉGIMEN":"SUBSIDIADO","CAPITADO":"SI","TELEFONO":"3000000000",
+const EJ_BASE={"ETNIA":"INDIGENA","PUEBLO":"CUBEO","CONSECUTIVO":"12","DIRECCION":"SECTOR LA PLAYA","NOMBRE COMPLETO":"EJEMPLO FICTICIO PÉREZ","ANTECEDENTES":"HIPERTENSIÓN ARTERIAL DIAGNOSTICADA EN 2019, EN TRATAMIENTO CON LOSARTÁN","ROL EN EL HOGAR":"JEFE DE HOGAR","FECHA NACIMIENTO":"1976-05-14","GENERO":"M","TIPO":"CC","DOCUMENTO ID.":"1000000000","EAPB NOMBRE":"MALLAMAS","RÉGIMEN":"SUBSIDIADO","CAPITADO":"SI","TELEFONO":"3000000000",
  "F.C":"78","F. R":"18","T. A":"150/95","TEM":"36.5","SPO2":"96","PESO":"82","TALLA":"1.68","RIESGO CARDIOVASCULAR":"SI",
  "HTA":"SI","HTA EN CONTROL":"NO","FECHA ULTIMA CONSULTA CRONICOS":"2026-03-10","DIABETES":"NO","EPOC":"NO","CANCER":"NO","HIPER O HIPOTIROIDISMO":"NO","NUTRICION":"PENDIENTE","PSICOLOGIA":"N/A","DISCAPACIDAD":"NO","ASEGURAMIENTO":"ACTIVO","TIPO DE TRAMITE":"NINGUNO",
  "ATENCION INTEGRAL M.GENERAL":"SI","ATENCION INTEGRAL M.GENERAL FECHA ULTIMO CONTROL":"2025-11-20","ATENCION INTEGRAL ENFERMERIA":"SI","ATENCION INTEGRAL ENFERMERIA FECHA ULTIMO CONTROL":"2026-10-08","PSA PROSTATICO":"NO","TAMIZAJE CANCER COLON Y RECTO":"NO","PLANIFICACION FAMILIAR O CONTROL":"NO","AL DIA EN ATENCIONES":"NO",
@@ -980,8 +998,8 @@ function uid(){return Date.now().toString(36)+"-"+Math.random().toString(36).sli
 function cursoVida(a){if(a==null)return"";if(a<6)return"PRIMERA INFANCIA";if(a<12)return"INFANCIA";if(a<18)return"ADOLESCENCIA";if(a<29)return"JUVENTUD";if(a<60)return"ADULTEZ";return"VEJEZ"}
 function edadDe(fn,ref){const a=pD(fn),b=pD(ref)||pD(hoy());if(!a||!b||a>b)return null;let y=b.getUTCFullYear()-a.getUTCFullYear(),m=b.getUTCMonth()-a.getUTCMonth();if(b.getUTCDate()<a.getUTCDate())m--;if(m<0){y--;m+=12}return{y,m,tm:y*12+m}}
 let baseEdit=null,syncing=false,baseOpts={};
-const ID_KEYS=["NOMBRE COMPLETO","TIPO","DOCUMENTO ID.","FECHA NACIMIENTO","GENERO","TELEFONO","DIRECCION","CONSECUTIVO","ROL EN EL HOGAR","EAPB NOMBRE","RÉGIMEN","CAPITADO"];
-const NO_EXTRAER=["NOMBRE COMPLETO","TIPO","DOCUMENTO ID.","TELEFONO","DIRECCION","CONSECUTIVO","IMC","CURSO DE VIDA","AA / MM","FECHA NACIMIENTO"];
+const ID_KEYS=["ETNIA","PUEBLO","NOMBRE COMPLETO","TIPO","DOCUMENTO ID.","FECHA NACIMIENTO","GENERO","TELEFONO","DIRECCION","CONSECUTIVO","ROL EN EL HOGAR","EAPB NOMBRE","RÉGIMEN","CAPITADO"];
+const NO_EXTRAER=["ETNIA","PUEBLO","NOMBRE COMPLETO","TIPO","DOCUMENTO ID.","TELEFONO","DIRECCION","CONSECUTIVO","IMC","CURSO DE VIDA","AA / MM","FECHA NACIMIENTO"];
 
 /* ---------- extraer variables de la historia ya registrada ---------- */
 function fuenteHC(id){const p=[],ivt=ivCompose(id);
@@ -1024,8 +1042,8 @@ async function enviarBase(id){
   if(sample){msg("Extrayendo los datos de la historia…");
     try{const x=await sample.json(pExtraerVars(txt,f),{cache:false});if(x&&typeof x==="object")for(const [k,v] of Object.entries(x)){const fd=ALLF.find(z=>z.k===k);if(!fd||NO_EXTRAER.includes(k)||v==null||v==="")continue;let s=String(v).trim();if(fd.o&&fd.t!=="multi"){const hit=fd.o.find(o=>o.toUpperCase()===s.toUpperCase());if(!hit)continue;s=hit}d[k]=s}}
     catch(e){msg("No se pudo usar Claude; se extrajo lo básico sin conexión.")}}
-  const ident=identDe(id),ej=S.get(key(id,"ejcaso"))?EJ_BASE:{};
-  baseEdit=null;base(Object.assign({},ej,d,ident),{review:true,mod:id,com:S.get(key(id,"com"))||(ej===EJ_BASE?"EJEMPLO":"")});window.scrollTo(0,0)}
+  const ident=identDe(),ej=S.get(key(id,"ejcaso"))?EJ_BASE:{};
+  baseEdit=null;base(Object.assign({},ej,d,ident),{review:true,mod:id,com:pacCom()||(ej===EJ_BASE?"EJEMPLO":"")});window.scrollTo(0,0)}
 
 function campo(f,d){const v=d[f.k]!=null?d[f.k]:(f.def==="hoy"?hoy():"");const id="bf_"+ALLF.indexOf(f);const attrs=`id="${id}" data-f="${esc(f.k)}"`;
     let inp;
@@ -1038,7 +1056,13 @@ function campo(f,d){const v=d[f.k]!=null?d[f.k]:(f.def==="hoy"?hoy():"");const i
     return `<label class="bfl" for="${id}" data-wrap="${esc(f.k)}" ${f.if?`data-if="${esc(f.if[0])}" data-ifv="${esc(f.if[1])}"`:""} ${f.sx?`data-sx="${f.sx}"`:""}><span>${esc(f.l)}${f.req?" *":""}</span>${inp}</label>`}
 function wireNA(root){root.querySelectorAll("[data-na-for]").forEach(b=>b.onclick=()=>{const el=root.querySelector(`[data-f="${CSS.escape(b.dataset.naFor)}"]`);const on=b.getAttribute("aria-pressed")!=="true";b.setAttribute("aria-pressed",on);el.disabled=on;if(on){el.dataset.na="1";el.value=""}else{delete el.dataset.na;el.focus()}el.dispatchEvent(new Event("change",{bubbles:true}))});
   root.querySelectorAll("[data-multi] button").forEach(b=>b.onclick=()=>{b.setAttribute("aria-pressed",b.getAttribute("aria-pressed")!=="true");b.dispatchEvent(new Event("change",{bubbles:true}))})}
-function identDe(id){try{return JSON.parse(S.get(key(id,"ident"))||"{}")}catch(e){return{}}}
+function pac(){try{return JSON.parse(S.get("dn2_pac")||"{}")}catch(e){return{}}}
+function setPac(o){S.set("dn2_pac",JSON.stringify(o))}
+function identDe(){const o=Object.assign({},pac());delete o.__com;return o}
+function pacCom(){return pac().__com||""}
+function pacEdad(ref){const P=pac(),e=edadDe(P["FECHA NACIMIENTO"],ref);return e?(e.y>=1?e.y+" años":e.tm+" meses"):""}
+function pacResumen(){const P=pac(),b=[];if(P["TIPO"]||P["DOCUMENTO ID."])b.push(esc((P["TIPO"]||"")+" "+(P["DOCUMENTO ID."]||"")));const e=pacEdad();if(e)b.push(e);if(P["GENERO"])b.push(P["GENERO"]==="F"?"mujer":"hombre");if(P.__com)b.push(esc(P.__com));if(P["ETNIA"])b.push(esc(P["PUEBLO"]||P["ETNIA"].toLowerCase()));return b}
+function perfilNota(f){const P=pac(),b=[];const e=pacEdad(f);if(e)b.push(e);if(P["GENERO"])b.push(P["GENERO"]==="F"?"mujer":"hombre");if(P.__com)b.push("comunidad "+P.__com);if(P["ETNIA"])b.push(P["ETNIA"]==="INDIGENA"?"indígena"+(P["PUEBLO"]?" "+P["PUEBLO"].toLowerCase():""):P["ETNIA"].toLowerCase());if(P["ROL EN EL HOGAR"])b.push(P["ROL EN EL HOGAR"].toLowerCase());return b.join(", ")}
 function base(pref,opts){
   stopRec();st.view="base";baseOpts=opts||{};const c=conf(),q=cola();
   const rec=baseEdit?q.find(r=>r.id===baseEdit):null;
@@ -1132,7 +1156,7 @@ function base(pref,opts){
     id=id||uid();if(MD)S.set(key(MD,"regid"),id);
     const reg={id,comunidad,datos:Object.assign({ID_REGISTRO:id,FECHA_REGISTRO:new Date().toISOString().slice(0,16).replace("T"," "),REGISTRADO_POR:cf.who||""},datos)};
     const q=cola().filter(r=>r.id!==id);q.push(reg);setCola(q);
-    if(baseOpts.mod){const ident={};ID_KEYS.forEach(k=>{if(datos[k]&&datos[k]!=="N/A")ident[k]=datos[k]});S.set(key(baseOpts.mod,"ident"),JSON.stringify(ident));S.set(key(baseOpts.mod,"com"),comunidad)}
+    if(baseOpts.mod){const ident={};ID_KEYS.forEach(k=>{if(datos[k]&&datos[k]!=="N/A")ident[k]=datos[k]});ident.__com=comunidad;setPac(ident)}
     S.set("dn2_ultcom",comunidad);const cs=new Set((S.get("dn2_coms")||"").split("|").filter(Boolean));cs.add(comunidad);S.set("dn2_coms",[...cs].join("|"));
     baseEdit=null;base({});$("syncTxt").textContent=conf().url?"Guardado. Enviando a la hoja…":"Guardado en el celular como pendiente. Para que llegue a la hoja falta configurar la Conexión.";sync(true)};
   syncTxt();
@@ -1156,6 +1180,9 @@ function parseIdent(t){const o={};if(!t)return o;const g=re=>{const m=t.match(re
   const eps=g(new RegExp("(?:eps|eapb)\\s*[:,]?\\s*([a-záéíóúñ ]+?)"+STOP,"i"));if(eps)o["EAPB NOMBRE"]=eps.toUpperCase();
   if(/subsidiad/i.test(t))o["RÉGIMEN"]="SUBSIDIADO";else if(/contributiv/i.test(t))o["RÉGIMEN"]="CONTRIBUTIVO";
   if(/no\s+capitad/i.test(t))o["CAPITADO"]="NO";else if(/capitad/i.test(t))o["CAPITADO"]="SI";
+  const pu=t.match(/\b(cubeo|kubeo|desano|tukano|tucano|wanano|guanano|piratapuyo|tuyuca|siriano|barasana|carapana|tatuyo|curripaco|puinave|nukak|yurut[ií]|bara|makuna|macuna|taiwano)\b/i);
+  if(/ind[ií]gena/i.test(t)||pu){o["ETNIA"]="INDIGENA";if(pu)o["PUEBLO"]=pu[1].toUpperCase().replace("TUCANO","TUKANO").replace("KUBEO","CUBEO")}
+  else if(/afro|negr[oa]\b/i.test(t))o["ETNIA"]="AFROCOLOMBIANO";else if(/ninguna etnia|sin etnia|mestiz/i.test(t))o["ETNIA"]="NINGUNA";
   const hog=g(/(?:hogar|consecutivo|familia)\s*(?:n[uú]mero|#|no\.?)?\s*(\d+)/i);if(hog)o["CONSECUTIVO"]=hog;
   return o}
 function extraerVitales(txt){const o={},M1=re=>{const m=txt.match(re);return m?m[1]:null},num=s=>String(s).replace(",",".");
