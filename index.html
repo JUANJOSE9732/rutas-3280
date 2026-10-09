@@ -16,6 +16,7 @@
 <title>Dictado de Notas</title>
 <title>Dictado de Notas</title>
 <title>Dictado de Notas</title>
+<title>Dictado de Notas</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:ital,wght@0,400;0,700;1,400&family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,800&family=IBM+Plex+Mono:wght@500&display=swap">
 <style>
@@ -136,6 +137,11 @@ textarea{width:100%;font:inherit;font-size:1.05rem;line-height:1.55;padding:14px
 .bgrid .bfl:has(textarea),.bgrid .bfl:has([data-multi]){grid-column:1/-1}
 .sugg button[aria-pressed="true"]{background:var(--accent);color:var(--accent-ink)}
 .sugg button[aria-pressed="false"]{background:var(--surface);border-color:var(--line);font-weight:400}
+.falta input,.falta select,.falta textarea,.falta [data-multi]{border-color:var(--miss)!important;box-shadow:0 0 0 2px var(--miss-bg)}
+.falta>span:first-child{color:var(--miss);font-weight:700}
+.narow{display:flex;gap:6px;min-width:0}.narow input{flex:1 1 auto;min-width:0}
+.na{border:1.5px solid var(--line);background:var(--surface);color:var(--muted);border-radius:8px;padding:0 10px;font-size:.8rem;font-weight:700}
+.na[aria-pressed="true"]{background:var(--ink);color:var(--bg);border-color:var(--ink)}
 .drafts{display:flex;flex-direction:column;gap:6px}
 .drafts button{display:flex;justify-content:space-between;gap:10px;text-align:left;border:1px solid var(--warn-line);background:var(--warn-bg);color:var(--ink);border-radius:8px;padding:10px 12px}
 @media (prefers-reduced-motion:no-preference){.tile,.btn,.notes-pick button{transition:background .15s,border-color .15s,box-shadow .15s}}
@@ -873,8 +879,8 @@ const VARS=[
    .flatMap(([k,l,sx])=>[{k,l,t:"sel",o:SN,sx},{k:k+" FECHA ULTIMO CONTROL",l:"Fecha del último control",t:"date",if:[k,"SI"],sx}]),
   {k:"AL DIA EN ATENCIONES",l:"¿Al día en atenciones o gestión en salud?",t:"sel",o:SN}]},
  {g:"Canalización y seguimiento",f:[
-  {k:"SERVICIOS SOCIALES",l:"Servicios sociales",t:"multi",o:["PLANEACION","COMISARIA","PERSONERIA","SISBEN","BOMBEROS"]},
-  {k:"CANALIZADO A",l:"Seguimiento o semaforización",t:"multi",o:["MEDICINA GENERAL","ENFERMERIA","PSICOLOGIA","VACUNACION","ODONTOLOGIA","CITOLOGIA"]},
+  {k:"SERVICIOS SOCIALES",l:"Servicios sociales",t:"multi",o:["NINGUNO","PLANEACION","COMISARIA","PERSONERIA","SISBEN","BOMBEROS"]},
+  {k:"CANALIZADO A",l:"Seguimiento o semaforización",t:"multi",o:["NINGUNO","MEDICINA GENERAL","ENFERMERIA","PSICOLOGIA","VACUNACION","ODONTOLOGIA","CITOLOGIA"]},
   {k:"SE REALIZO LABORATORIOS",l:"¿Se realizaron laboratorios o exámenes?",t:"sel",o:SN},
   {k:"BRIGADA",l:"Brigada"},{k:"CANALIZADO POR",l:"Canalizado por"},
   {k:"OBSERVACION",l:"Observación",t:"area"},{k:"OBSERVACION DE CANALIZACION",l:"Observación de canalización",t:"area"},
@@ -946,7 +952,8 @@ function base(pref,opts){
     else if(f.t==="multi"){const sel=String(v||"").split(", ").filter(Boolean);inp=`<div class="sugg" ${attrs} data-multi="1">${f.o.map(o=>`<button type="button" aria-pressed="${sel.includes(o)}" data-o="${esc(o)}">${esc(o)}</button>`).join("")}</div>`}
     else if(f.t==="area")inp=`<textarea ${attrs} style="min-height:80px">${esc(v)}</textarea>`;
     else if(f.t==="auto")inp=`<input ${attrs} readonly value="${esc(v)}" style="background:var(--accent-soft)">`;
-    else inp=`<input ${attrs} type="${f.t==="date"?"date":f.t==="num"?"number":f.t==="tel"?"tel":"text"}" ${f.t==="num"?'step="any" inputmode="decimal"':""} value="${esc(v)}">`;
+    else{const na=v==="N/A"&&["date","num","tel"].includes(f.t);inp=`<input ${attrs} type="${f.t==="date"?"date":f.t==="num"?"number":f.t==="tel"?"tel":"text"}" ${f.t==="num"?'step="any" inputmode="decimal"':""} value="${na?"":esc(v)}" ${na?'data-na="1" disabled':""}>`;
+      if(["date","num","tel"].includes(f.t))inp=`<span class="narow">${inp}<button type="button" class="na" data-na-for="${esc(f.k)}" aria-pressed="${na}">N/A</button></span>`}
     return `<label class="bfl" for="${id}" data-wrap="${esc(f.k)}" ${f.if?`data-if="${esc(f.if[0])}" data-ifv="${esc(f.if[1])}"`:""} ${f.sx?`data-sx="${f.sx}"`:""}><span>${esc(f.l)}${f.req?" *":""}</span>${inp}</label>`};
   $("app").innerHTML=`
   <div class="top"><button class="back" id="back">← Rutas</button><span class="tag pc">Base de datos</span></div>
@@ -960,6 +967,7 @@ function base(pref,opts){
     <div class="btns"><button class="btn primary" id="cf-save">Guardar conexión</button><button class="btn" id="cf-test">Probar</button></div><p class="status" id="cf-st"></p></section>
   ${q.length?`<section><p class="lab">Pendientes por enviar (${q.length})</p><div class="drafts">${q.map(r=>`<button data-edit="${r.id}"><span>${esc((r.datos["NOMBRE COMPLETO"]||"(sin nombre)"))} · ${esc(r.comunidad)}</span><span>Editar</span></button>`).join("")}</div></section>`:""}
   <form id="bform" class="bform" novalidate>
+    <div class="box miss" id="b-miss" hidden><h3></h3><ul></ul></div>
     <label class="bfl" for="b-com"><span>Comunidad o vereda (pestaña de la hoja) *</span><input id="b-com" list="coms" value="${esc(com)}" placeholder="QUERARÍ"><datalist id="coms">${[...new Set(q.map(r=>r.comunidad).concat(S.get("dn2_coms")?S.get("dn2_coms").split("|"):[]))].filter(Boolean).map(x=>`<option value="${esc(x)}">`).join("")}</datalist></label>
     ${baseOpts.review?(()=>{const has=f=>!ID_KEYS.includes(f.k)&&((d[f.k]!=null&&d[f.k]!=="")||f.t==="auto");const ext=ALLF.filter(has),rest=ALLF.filter(f=>!ID_KEYS.includes(f.k)&&!has(f));
       return `<details class="sec" open><summary><span>Identificación (se escribe una vez por paciente; no pasa por Claude)</span></summary><div class="bgrid">${ALLF.filter(f=>ID_KEYS.includes(f.k)).map(fld).join("")}</div></details>
@@ -978,6 +986,7 @@ function base(pref,opts){
   document.querySelectorAll("[data-edit]").forEach(b=>b.onclick=()=>{baseEdit=b.dataset.edit;base();window.scrollTo(0,0)});
   $("b-new").onclick=()=>{baseEdit=null;base();window.scrollTo(0,0)};
   if($("b-del"))$("b-del").onclick=()=>{const b=$("b-del");if(b.dataset.armed!=="1"){b.dataset.armed="1";b.textContent="¿Quitar sin enviar? Toca otra vez";return}setCola(cola().filter(r=>r.id!==baseEdit));baseEdit=null;base()};
+  document.querySelectorAll("[data-na-for]").forEach(b=>b.onclick=()=>{const el=$("bform").querySelector(`[data-f="${CSS.escape(b.dataset.naFor)}"]`);const on=b.getAttribute("aria-pressed")!=="true";b.setAttribute("aria-pressed",on);el.disabled=on;if(on){el.dataset.na="1";el.value=""}else{delete el.dataset.na;el.focus()}});
   document.querySelectorAll("[data-multi] button").forEach(b=>b.onclick=()=>b.setAttribute("aria-pressed",b.getAttribute("aria-pressed")!=="true"));
   const form=$("bform");
   const recompute=()=>{const v=k=>{const e=form.querySelector(`[data-f="${CSS.escape(k)}"]`);return e?e.value:""};const set=(k,x)=>{const e=form.querySelector(`[data-f="${CSS.escape(k)}"]`);if(e)e.value=x};
@@ -992,11 +1001,17 @@ function base(pref,opts){
   form.onsubmit=e=>{e.preventDefault();recompute();
     const comunidad=$("b-com").value.trim().toUpperCase();const datos={};
     if(!comunidad){$("b-st").textContent="Escribe la comunidad o vereda.";$("b-com").focus();return}
+    const falt=[];form.querySelectorAll(".falta").forEach(x=>x.classList.remove("falta"));
     for(const f of ALLF){const el=form.querySelector(`[data-f="${CSS.escape(f.k)}"]`);const w=form.querySelector(`[data-wrap="${CSS.escape(f.k)}"]`);
-      let val=f.t==="multi"?[...el.querySelectorAll('[aria-pressed="true"]')].map(b=>b.dataset.o).join(", "):el.value.trim();
+      let val=f.t==="multi"?[...el.querySelectorAll('[aria-pressed="true"]')].map(b=>b.dataset.o).join(", "):el.dataset.na==="1"?"N/A":el.value.trim();
       if(w&&w.hidden)val="N/A";
-      if(f.req&&!val){$("b-st").textContent="Falta: "+f.l+".";el.focus();return}
+      if(!val&&f.t!=="auto"){falt.push(f);if(w){w.classList.add("falta");const det=w.closest("details");if(det)det.open=true}}
       datos[f.k]=val}
+    const mb=$("b-miss");
+    if(falt.length){mb.hidden=false;mb.querySelector("ul").innerHTML=falt.map(f=>`<li>${esc(f.l)}${f.k!==f.l?` <span class="note-src">(${esc(f.k)})</span>`:""}</li>`).join("");
+      mb.querySelector("h3").textContent=`No se puede enviar: faltan ${falt.length} dato(s) de la tabla de variables`;
+      $("b-st").textContent="Completa los campos marcados en rojo. Si de verdad no aplica, usa N/A.";mb.scrollIntoView({behavior:"smooth",block:"start"});return}
+    mb.hidden=true;
     const cf=conf(),id=baseEdit||uid();
     const reg={id,comunidad,datos:Object.assign({ID_REGISTRO:id,FECHA_REGISTRO:new Date().toISOString().slice(0,16).replace("T"," "),REGISTRADO_POR:cf.who||""},datos)};
     const q=cola().filter(r=>r.id!==id);q.push(reg);setCola(q);
