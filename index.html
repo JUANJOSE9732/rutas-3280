@@ -17,6 +17,7 @@
 <title>Dictado de Notas</title>
 <title>Dictado de Notas</title>
 <title>Dictado de Notas</title>
+<title>Dictado de Notas</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:ital,wght@0,400;0,700;1,400&family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,800&family=IBM+Plex+Mono:wght@500&display=swap">
 <style>
@@ -139,6 +140,7 @@ textarea{width:100%;font:inherit;font-size:1.05rem;line-height:1.55;padding:14px
 .sugg button[aria-pressed="false"]{background:var(--surface);border-color:var(--line);font-weight:400}
 .falta input,.falta select,.falta textarea,.falta [data-multi]{border-color:var(--miss)!important;box-shadow:0 0 0 2px var(--miss-bg)}
 .falta>span:first-child{color:var(--miss);font-weight:700}
+.lleno input,.lleno select,.lleno [data-multi]{border-color:var(--accent)!important;box-shadow:0 0 0 2px var(--accent-soft)}
 .narow{display:flex;gap:6px;min-width:0}.narow input{flex:1 1 auto;min-width:0}
 .na{border:1.5px solid var(--line);background:var(--surface);color:var(--muted);border-radius:8px;padding:0 10px;font-size:.8rem;font-weight:700}
 .na[aria-pressed="true"]{background:var(--ink);color:var(--bg);border-color:var(--ink)}
@@ -968,6 +970,16 @@ function base(pref,opts){
   ${q.length?`<section><p class="lab">Pendientes por enviar (${q.length})</p><div class="drafts">${q.map(r=>`<button data-edit="${r.id}"><span>${esc((r.datos["NOMBRE COMPLETO"]||"(sin nombre)"))} · ${esc(r.comunidad)}</span><span>Editar</span></button>`).join("")}</div></section>`:""}
   <form id="bform" class="bform" novalidate>
     <div class="box miss" id="b-miss" hidden><h3></h3><ul></ul></div>
+    <section class="tool" id="b-dict"><h3>Dictar en vez de escribir</h3>
+      <label class="bfl" for="bd-id"><span>Identificación (se interpreta en el celular; no sale a Claude)</span>
+        <textarea id="bd-id" style="min-height:70px" placeholder="Ej.: nombre María Pérez Gómez, cédula 1 2 3 4 5, mujer, nació el 3 de marzo de 1990, teléfono 310…, comunidad Querarí, jefe de hogar, EPS Mallamas subsidiado, hogar número 4"></textarea></label>
+      <div id="bd-id-mic">${micUI()}</div>
+      <label class="bfl" for="bd-cl"><span>Datos clínicos, atenciones y seguimiento</span>
+        <textarea id="bd-cl" style="min-height:90px" placeholder="Ej.: hipertensa en control, no diabetes, no EPOC, última consulta de crónicos 20 de agosto, citología hace un año, canalizada a odontología y vacunación, sin servicios sociales, brigada de octubre"></textarea></label>
+      <div id="bd-cl-mic">${micUI()}</div>
+      <div class="btns"><button type="button" class="btn primary" id="bd-go">Llenar campos con lo dictado</button></div>
+      <p class="status" id="bd-st"></p>
+    </section>
     <label class="bfl" for="b-com"><span>Comunidad o vereda (pestaña de la hoja) *</span><input id="b-com" list="coms" value="${esc(com)}" placeholder="QUERARÍ"><datalist id="coms">${[...new Set(q.map(r=>r.comunidad).concat(S.get("dn2_coms")?S.get("dn2_coms").split("|"):[]))].filter(Boolean).map(x=>`<option value="${esc(x)}">`).join("")}</datalist></label>
     ${baseOpts.review?(()=>{const has=f=>!ID_KEYS.includes(f.k)&&((d[f.k]!=null&&d[f.k]!=="")||f.t==="auto");const ext=ALLF.filter(has),rest=ALLF.filter(f=>!ID_KEYS.includes(f.k)&&!has(f));
       return `<details class="sec" open><summary><span>Identificación (se escribe una vez por paciente; no pasa por Claude)</span></summary><div class="bgrid">${ALLF.filter(f=>ID_KEYS.includes(f.k)).map(fld).join("")}</div></details>
@@ -998,6 +1010,17 @@ function base(pref,opts){
     const sx=v("GENERO");
     form.querySelectorAll("[data-wrap]").forEach(w=>{let show=true;if(w.dataset.if&&v(w.dataset.if)!==w.dataset.ifv)show=false;if(w.dataset.sx&&sx&&w.dataset.sx!==sx)show=false;w.hidden=!show})};
   form.addEventListener("input",recompute);form.addEventListener("change",recompute);recompute();
+  wireMic($("bd-id-mic"),$("bd-id"));wireMic($("bd-cl-mic"),$("bd-cl"));
+  $("bd-go").onclick=async()=>{const st2=$("bd-st"),idt=$("bd-id").value.trim(),cl=$("bd-cl").value.trim();stopRec();
+    if(!idt&&!cl){st2.textContent="Dicta algo en alguno de los dos cuadros.";return}
+    let n=0;const idv=parseIdent(idt);
+    if(idv.__com){$("b-com").value=idv.__com;n++;delete idv.__com}
+    n+=llenar(form,idv);
+    if(cl){let cv={};const fv=(form.querySelector('[data-f="FECHA"]')||{}).value||hoy();
+      if(sample){st2.textContent="Interpretando lo dictado…";try{const x=await sample.json(pExtraerVars(cl,fv),{cache:false});if(x&&typeof x==="object")cv=x}catch(e){cv=parseClinLocal(cl,fv)}}
+      else cv=parseClinLocal(cl,fv);
+      ID_KEYS.forEach(k=>delete cv[k]);n+=llenar(form,cv)}
+    recompute();st2.textContent=n?`Se llenaron ${n} campo(s). Revisa los resaltados en verde.`:"No reconocí datos en lo dictado. Prueba con frases como «cédula 1234» o «hipertensa en control».";};
   form.onsubmit=e=>{e.preventDefault();recompute();
     const comunidad=$("b-com").value.trim().toUpperCase();const datos={};
     if(!comunidad){$("b-st").textContent="Escribe la comunidad o vereda.";$("b-com").focus();return}
@@ -1020,6 +1043,53 @@ function base(pref,opts){
     baseEdit=null;base({});$("b-st").textContent="Guardado en el celular.";sync(true)};
   syncTxt();
 }
+/* ---------- dictado de variables ---------- */
+const MESES=["enero","febrero","marzo","abril","mayo","junio","julio","agosto","septiembre","octubre","noviembre","diciembre"];
+function fechaTxt(s){if(!s)return null;let m=s.match(/(\d{1,2})\s*(?:\/|-|de)\s*(\d{1,2}|[a-zá-ú]+)\s*(?:\/|-|de|del)\s*(\d{2,4})/i);if(!m)return null;
+  let d=+m[1],mo=/^\d+$/.test(m[2])?+m[2]:MESES.indexOf(m[2].toLowerCase().replace("setiembre","septiembre"))+1,y=+m[3];if(y<100)y+=y>30?1900:2000;if(!mo||mo>12||d>31)return null;
+  return y+"-"+String(mo).padStart(2,"0")+"-"+String(d).padStart(2,"0")}
+const STOP="(?=,|;|\\.(?:\\s|$)|\\s(?:c[eé]dula|documento|tarjeta|registro|pasaporte|tel[eé]fono|celular|naci[oó]|nacida|nacido|fecha|direcci[oó]n|vereda|comunidad|mujer|hombre|sexo|jefe|c[oó]nyuge|hij[oa]|eps|eapb|subsidiad|contributiv|hogar|consecutivo)|$)";
+function parseIdent(t){const o={};if(!t)return o;const g=re=>{const m=t.match(re);return m?m[1].trim():null},dig=s=>s.replace(/\D/g,"");
+  const nom=g(new RegExp("nombre(?:\\s+completo)?(?:\\s+es)?\\s*[:,]?\\s*([a-záéíóúñü' ]{3,}?)"+STOP,"i"));if(nom)o["NOMBRE COMPLETO"]=nom.toUpperCase();
+  const dm=t.match(/(c[eé]dula de extranjer[ií]a|c[eé]dula|tarjeta de identidad|registro civil|pasaporte|permiso de protecci[oó]n|PPT|CC|TI|RC|CE)\D{0,14}([\d][\d .]{3,16})/i);
+  if(dm){const ty=dm[1].toLowerCase();o["TIPO"]=/extranjer|^ce$/.test(ty)?"CE":/c[eé]dula|^cc$/.test(ty)?"CC":/tarjeta|^ti$/.test(ty)?"TI":/registro|^rc$/.test(ty)?"RC":/ppt|protecci/.test(ty)?"PPT":"PEP";o["DOCUMENTO ID."]=dig(dm[2])}
+  const tel=g(/(?:tel[eé]fono|celular|cel)\D{0,8}([\d][\d ]{6,14})/i);if(tel)o["TELEFONO"]=dig(tel);
+  const fn=t.match(/naci(?:[oó]|da|do)(?:\s+el)?\s+([^,;]+)/i);const f1=fn&&fechaTxt(fn[1]);if(f1)o["FECHA NACIMIENTO"]=f1;
+  if(/\b(mujer|femenin[oa])\b/i.test(t))o["GENERO"]="F";else if(/\b(hombre|masculin[oa])\b/i.test(t))o["GENERO"]="M";
+  const dir=g(new RegExp("direcci[oó]n\\s*[:,]?\\s*(.+?)"+STOP,"i"));if(dir)o["DIRECCION"]=dir.toUpperCase();
+  const com=g(new RegExp("(?:vereda|comunidad)\\s*[:,]?\\s*([a-záéíóúñ0-9 ]+?)"+STOP,"i"));if(com)o.__com=com.toUpperCase();
+  const rol=g(/\b(jefe de hogar|c[oó]nyuge|hij[oa]|madre|padre|niet[oa]|herman[oa])\b/i);if(rol){const r=rol.toLowerCase();o["ROL EN EL HOGAR"]=/jefe/.test(r)?"JEFE DE HOGAR":/nyuge/.test(r)?"CONYUGE":/hij/.test(r)?"HIJO(A)":/madre|padre/.test(r)?"PADRE/MADRE":/niet/.test(r)?"NIETO(A)":"HERMANO(A)"}
+  const eps=g(new RegExp("(?:eps|eapb)\\s*[:,]?\\s*([a-záéíóúñ ]+?)"+STOP,"i"));if(eps)o["EAPB NOMBRE"]=eps.toUpperCase();
+  if(/subsidiad/i.test(t))o["RÉGIMEN"]="SUBSIDIADO";else if(/contributiv/i.test(t))o["RÉGIMEN"]="CONTRIBUTIVO";
+  if(/no\s+capitad/i.test(t))o["CAPITADO"]="NO";else if(/capitad/i.test(t))o["CAPITADO"]="SI";
+  const hog=g(/(?:hogar|consecutivo|familia)\s*(?:n[uú]mero|#|no\.?)?\s*(\d+)/i);if(hog)o["CONSECUTIVO"]=hog;
+  return o}
+function extraerVitales(txt){const o={},M1=re=>{const m=txt.match(re);return m?m[1]:null},num=s=>String(s).replace(",",".");
+  const ta=txt.match(/\b(?:TA|T\.\s?A\.?|tensi[oó]n(?:\s+arterial)?)\D{0,6}(\d{2,3})\s*(?:\/|sobre)\s*(\d{2,3})/i);if(ta)o["T. A"]=ta[1]+"/"+ta[2];
+  const fc=M1(/\b(?:FC|frecuencia\s+card[ií]aca)\D{0,6}(\d{2,3})\b/i);if(fc)o["F.C"]=fc;
+  const fr=M1(/\b(?:FR|frecuencia\s+respiratoria)\D{0,6}(\d{1,2})\b/i);if(fr)o["F. R"]=fr;
+  const sp=M1(/\b(?:SpO2|saturaci[oó]n)\D{0,6}(\d{2,3})\b/i);if(sp)o["SPO2"]=sp;
+  const pe=M1(/peso\D{0,8}(\d{1,3}(?:[.,]\d)?)/i);if(pe)o["PESO"]=num(pe);
+  const t1=txt.match(/talla\D{0,6}(\d)\s*con\s*(\d{2})/i),t2=M1(/talla\D{0,6}(\d(?:[.,]\d{1,2})?|\d{3})\b/i);if(t1)o["TALLA"]=t1[1]+"."+t1[2];else if(t2)o["TALLA"]=num(t2);
+  return o}
+function parseClinLocal(t,f){const o={};const neg=re=>{const m=t.match(new RegExp("(\\b(?:no|niega|sin)\\b[^,.;]{0,15})?("+re+")","i"));return m?(m[1]?"NO":"SI"):null};
+  [["HTA","hipertens|\\bHTA\\b"],["DIABETES","diab[eé]t"],["EPOC","\\bEPOC\\b"],["CANCER","c[aá]ncer"],["HIPER O HIPOTIROIDISMO","tiroid"],["DISCAPACIDAD","discapacid"],["RIESGO CARDIOVASCULAR","riesgo cardiovascular"]].forEach(([k,re])=>{const v=neg(re);if(v)o[k]=v});
+  const ctl=(k,re)=>{if(o[k]==="SI"){const m=t.match(new RegExp("(?:"+re+")[^,.;]{0,25}?(no\\s+)?(?:est[aá]\\s+)?en\\s+control","i"));if(m)o[k+" EN CONTROL"]=m[1]?"NO":"SI"}};
+  ctl("HTA","hipertens|HTA");ctl("DIABETES","diab[eé]t");ctl("EPOC","EPOC");
+  if(o["HIPER O HIPOTIROIDISMO"]==="SI"){const m=t.match(/tiroid[^,.;]{0,25}?(no\s+)?en\s+control/i);if(m)o["TIROIDES EN CONTROL"]=m[1]?"NO":"SI"}
+  const plain=t.normalize("NFD").replace(/[̀-ͯ]/g,"");
+  const can=plain.match(/canalizad[oa]\s+a\s+([^.;]+)/i);if(can){const map={"MEDICINA GENERAL":/medicin/i,"ENFERMERIA":/enfermer/i,"PSICOLOGIA":/psicolog/i,"VACUNACION":/vacun/i,"ODONTOLOGIA":/odonto/i,"CITOLOGIA":/citolog/i};const sel=Object.keys(map).filter(k=>map[k].test(can[1]));if(sel.length)o["CANALIZADO A"]=sel.join(", ")}
+  if(/sin\s+servicios\s+sociales|no\s+(?:requiere|necesita)\s+servicios\s+sociales/i.test(plain))o["SERVICIOS SOCIALES"]="NINGUNO";
+  const br=t.match(/brigada\s+([^,.;]+)/i);if(br)o["BRIGADA"]=br[1].trim().toUpperCase();
+  const uc=t.match(/[uú]ltima\s+consulta\s+(?:de\s+)?cr[oó]nicos?\s+(?:el\s+)?([^,;]+)/i);if(uc){const s=uc[1]+(/\d{4}/.test(uc[1])?"":" de "+f.slice(0,4));const ucf=fechaTxt(s);if(ucf)o["FECHA ULTIMA CONSULTA CRONICOS"]=ucf}
+  return Object.assign(o,extraerVitales(t))}
+function llenar(form,vals){let n=0;for(const [k,v0] of Object.entries(vals||{})){if(v0==null||v0==="")continue;const f=ALLF.find(z=>z.k===k);if(!f||f.t==="auto")continue;
+    const el=form.querySelector(`[data-f="${CSS.escape(k)}"]`);if(!el)continue;let v=String(v0).trim();
+    if(f.t==="multi"){const set=v.toUpperCase().split(/\s*,\s*/);let any=false;el.querySelectorAll("button").forEach(b=>{const on=set.includes(b.dataset.o);b.setAttribute("aria-pressed",on);any=any||on});if(!any)continue}
+    else if(f.t==="sel"){const hit=f.o.find(o=>o.toUpperCase()===v.toUpperCase());if(!hit)continue;el.value=hit}
+    else{if(el.dataset.na){delete el.dataset.na;el.disabled=false;const b=form.querySelector(`[data-na-for="${CSS.escape(k)}"]`);if(b)b.setAttribute("aria-pressed","false")}el.value=v}
+    const w=form.querySelector(`[data-wrap="${CSS.escape(k)}"]`);if(w){w.classList.remove("falta");w.classList.add("lleno");const det=w.closest("details");if(det)det.open=true}n++}
+  return n}
 function syncTxt(){const el=$("syncTxt");if(!el)return;const c=conf(),n=cola().length;
   el.textContent=!c.url?"Falta configurar la conexión con tu Google Sheets (botón Conexión). Mientras tanto los registros quedan guardados en el celular.":
    n?`${n} registro(s) pendientes por enviar. Se envían solos cuando hay señal.`:"Todo enviado. La hoja está al día."}
