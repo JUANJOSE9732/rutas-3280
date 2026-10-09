@@ -19,6 +19,7 @@
 <title>Dictado de Notas</title>
 <title>Dictado de Notas</title>
 <title>Dictado de Notas</title>
+<title>Dictado de Notas</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:ital,wght@0,400;0,700;1,400&family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,800&family=IBM+Plex+Mono:wght@500&display=swap">
 <style>
@@ -892,6 +893,13 @@ const VARS=[
   {k:"TIPO DE SEGUIMIENTO",l:"Tipo de seguimiento"},{k:"FECHA DE SEGUIMIENTO",l:"Fecha de seguimiento",t:"date"},{k:"OBSERVACIONES SEGUIMIENTO",l:"Observaciones del seguimiento",t:"area"}]}
 ];
 const ALLF=VARS.flatMap(g=>g.f);
+const EJ_BASE={"CONSECUTIVO":"12","DIRECCION":"SECTOR LA PLAYA","NOMBRE COMPLETO":"EJEMPLO FICTICIO PÉREZ","ANTECEDENTES":"HIPERTENSIÓN ARTERIAL DIAGNOSTICADA EN 2019, EN TRATAMIENTO CON LOSARTÁN","ROL EN EL HOGAR":"JEFE DE HOGAR","FECHA NACIMIENTO":"1976-05-14","GENERO":"M","TIPO":"CC","DOCUMENTO ID.":"1000000000","EAPB NOMBRE":"MALLAMAS","RÉGIMEN":"SUBSIDIADO","CAPITADO":"SI","TELEFONO":"3000000000",
+ "F.C":"78","F. R":"18","T. A":"150/95","TEM":"36.5","SPO2":"96","PESO":"82","TALLA":"1.68","RIESGO CARDIOVASCULAR":"SI",
+ "HTA":"SI","HTA EN CONTROL":"NO","DIABETES":"NO","EPOC":"NO","CANCER":"NO","HIPER O HIPOTIROIDISMO":"NO","NUTRICION":"PENDIENTE","PSICOLOGIA":"N/A","DISCAPACIDAD":"NO","ASEGURAMIENTO":"ACTIVO","TIPO DE TRAMITE":"NINGUNO",
+ "ATENCION INTEGRAL M.GENERAL":"SI","ATENCION INTEGRAL M.GENERAL FECHA ULTIMO CONTROL":"2025-11-20","ATENCION INTEGRAL ENFERMERIA":"SI","ATENCION INTEGRAL ENFERMERIA FECHA ULTIMO CONTROL":"2026-10-08","PSA PROSTATICO":"NO","TAMIZAJE CANCER COLON Y RECTO":"NO","PLANIFICACION FAMILIAR O CONTROL":"NO","AL DIA EN ATENCIONES":"NO",
+ "SERVICIOS SOCIALES":"NINGUNO","CANALIZADO A":"MEDICINA GENERAL","SE REALIZO LABORATORIOS":"NO","BRIGADA":"OCTUBRE 2026","CANALIZADO POR":"JUAN JOSE",
+ "OBSERVACION":"Adultez – Valoración integral. TA 150/95 sin control.","OBSERVACION DE CANALIZACION":"HTA no controlada: valoración médica prioritaria. Pendientes PSA y sangre oculta por edad (50 años).","TIPO DE SEGUIMIENTO":"TELEFÓNICO","FECHA DE SEGUIMIENTO":"2026-10-22","OBSERVACIONES SEGUIMIENTO":"Verificar asistencia a medicina general y adherencia al losartán."};
+
 function cola(){try{return JSON.parse(S.get("dn2_cola")||"[]")}catch(e){return[]}}
 function setCola(c){S.set("dn2_cola",JSON.stringify(c))}
 function conf(){try{return JSON.parse(S.get("dn2_conf")||"{}")}catch(e){return{}}}
@@ -989,7 +997,7 @@ function base(pref,opts){
       <details class="sec" open><summary><span>Tomado de la historia: revisa</span><span class="cnt">${ext.filter(f=>f.t!=="auto").length} datos</span></summary><div class="bgrid">${ext.map(fld).join("")}</div></details>
       <details class="sec"><summary><span>Otras variables (solo si hace falta)</span><span class="cnt">${rest.length}</span></summary><div class="bgrid">${rest.map(fld).join("")}</div></details>`})()
     :VARS.map((g,i)=>`<details class="sec" ${i<2?"open":""}><summary><span>${esc(g.g)}</span></summary><div class="bgrid">${g.f.map(fld).join("")}</div></details>`).join("")}
-    <div class="btns"><button class="btn primary" type="submit" id="b-save">${rec?"Guardar cambios":"Guardar y enviar"}</button>${rec?`<button class="btn" type="button" id="b-del">Quitar de pendientes</button>`:""}<button class="btn" type="button" id="b-new">Formulario nuevo</button></div>
+    <div class="btns"><button class="btn primary" type="submit" id="b-save">${rec?"Guardar cambios":"Guardar y enviar"}</button>${rec?`<button class="btn" type="button" id="b-del">Quitar de pendientes</button>`:""}<button class="btn" type="button" id="b-new">Formulario nuevo</button><button class="btn" type="button" id="b-ej">Cargar ejemplo (ficticio)</button></div>
     <p class="status" id="b-st" role="status"></p>
   </form>`;
   $("back").onclick=()=>{baseEdit=null;home()};
@@ -1000,6 +1008,7 @@ function base(pref,opts){
   $("syncNow").onclick=()=>sync(true);
   document.querySelectorAll("[data-edit]").forEach(b=>b.onclick=()=>{baseEdit=b.dataset.edit;base();window.scrollTo(0,0)});
   $("b-new").onclick=()=>{baseEdit=null;base();window.scrollTo(0,0)};
+  $("b-ej").onclick=()=>{baseEdit=null;base({});const f=$("bform");$("b-com").value="EJEMPLO";llenar(f,EJ_BASE);f.dispatchEvent(new Event("change"));$("b-st").textContent="Ejemplo ficticio cargado: adulto de 50 años hipertenso. Toca Guardar y enviar para ver qué falta.";window.scrollTo(0,0)};
   if($("b-del"))$("b-del").onclick=()=>{const b=$("b-del");if(b.dataset.armed!=="1"){b.dataset.armed="1";b.textContent="¿Quitar sin enviar? Toca otra vez";return}setCola(cola().filter(r=>r.id!==baseEdit));baseEdit=null;base()};
   document.querySelectorAll("[data-na-for]").forEach(b=>b.onclick=()=>{const el=$("bform").querySelector(`[data-f="${CSS.escape(b.dataset.naFor)}"]`);const on=b.getAttribute("aria-pressed")!=="true";b.setAttribute("aria-pressed",on);el.disabled=on;if(on){el.dataset.na="1";el.value=""}else{delete el.dataset.na;el.focus()}});
   document.querySelectorAll("[data-multi] button").forEach(b=>b.onclick=()=>b.setAttribute("aria-pressed",b.getAttribute("aria-pressed")!=="true"));
