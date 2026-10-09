@@ -131,6 +131,14 @@ textarea{width:100%;font:inherit;font-size:1.05rem;line-height:1.55;padding:14px
 .risk{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
 .score{font-family:var(--f-data);font-size:1.6rem;font-variant-numeric:tabular-nums}
 .pill{padding:5px 12px;border-radius:999px;font-weight:700;font-size:.88rem}
+.pill.mid{background:var(--warn-bg);color:var(--warn)}
+.an-sec{display:flex;flex-direction:column;gap:6px}
+.an-sec h4{margin:6px 0 0;font-size:.78rem;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
+.an-dev{background:var(--accent-soft);border-radius:10px;padding:12px 14px;font-size:1.02rem;line-height:1.55;white-space:pre-wrap}
+.an-ruta{border:1px solid var(--line);border-radius:10px;padding:10px 12px;display:flex;flex-direction:column;gap:2px}
+.an-ruta b{font-size:.98rem}.an-ruta small{color:var(--muted)}
+.an-when{align-self:flex-start;font-size:.72rem;font-weight:700;border-radius:999px;padding:2px 10px;text-transform:uppercase;letter-spacing:.05em}
+.an-when.hoy{background:var(--miss-bg);color:var(--miss)}.an-when.pronto{background:var(--warn-bg);color:var(--warn)}.an-when.programado{background:var(--accent-soft);color:var(--accent)}
 .pill.low{background:var(--accent-soft);color:var(--accent)} .pill.high{background:var(--miss-bg);color:var(--miss)}
 .hh{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:2px}
 .hh li{display:flex;gap:10px;align-items:center;padding:5px 2px}
@@ -900,6 +908,94 @@ function ivCompose(id){const q=ivFor(id),a=ivAns(id);let blk="",out=[];
   q.forEach((x,i)=>{const v=(a[i]||"").trim();if(!v)return;if(x.b!==blk){blk=x.b;out.push((out.length?"\n":"")+blk.toUpperCase())}out.push("- "+x.l+": "+v)});
   return out.join("\n")}
 function ivAlerts(id){const q=ivFor(id),a=ivAns(id),o=[];q.forEach((x,i)=>{const v=(a[i]||"").trim();if(v&&x.al&&x.al.test(v))o.push(x.am)});return o}
+/* ---------- ANÁLISIS: DEVOLUCIÓN Y RUTAS ---------- */
+const ALARMA={
+ prenatal:["Sangrado por la vagina","Salida de líquido","Dolor de cabeza fuerte, ver luces o visión borrosa","Hinchazón de cara, manos o pies","Fiebre","El bebé se mueve menos","Dolor fuerte de barriga o contracciones antes de tiempo"],
+ parto:["Sangrado abundante","Fiebre","Dolor de cabeza fuerte o visión borrosa","Mal olor en el flujo","Dolor o calor en un seno","Tristeza profunda o ganas de hacerse daño"],
+ rn:["No quiere comer o vomita todo","Fiebre o está muy frío","Respira rápido o se le hunde el pecho","Piel o ojos amarillos","Ombligo rojo, con pus o mal olor","Convulsiones o está muy dormido"],
+ pinf:["No puede comer ni beber","Vomita todo","Convulsiones","Respira rápido o con dificultad","Diarrea con sangre o muchos días","Está muy dormido o no despierta bien"],
+ inf:["Fiebre de más de dos días","Respira rápido o con dificultad","Vomita todo","Diarrea con sangre","Dolor fuerte que no cede"],
+ ive:["Sangrado que empapa más de dos toallas por hora","Fiebre","Dolor fuerte que no cede","Flujo con mal olor","Mareo o desmayo"],
+ gen:["Dolor en el pecho","Dificultad para respirar","Fiebre alta","Desmayo","Sangrado que no para"]};
+const ALARMA_HTA=["Dolor de cabeza muy fuerte","Dolor en el pecho","Visión borrosa","Debilidad o adormecimiento de un lado del cuerpo","Dificultad para hablar"];
+function anLocal(id){const m=M[id],f=S.get(key(id,"fecha"))||hoy(),txt=[ivCompose(id),S.get(key(id,"dict"))||""].join("\n"),x=plano(txt);
+  const v=extraerLocal(id,txt,f),R=[],H=[],D=[],PEN=[];let al=(ALARMA[id]||ALARMA[m.route==="rm"?"prenatal":"gen"]).slice();
+  const ruta=(ruta,porque,accion,cuando,dev)=>{R.push({ruta,porque,accion,cuando});if(dev)D.push(dev)};
+  const gest=["prenatal","parto"].includes(id);
+  if(v["T. A"]){const [ps,pd]=v["T. A"].split("/").map(Number);
+    if(gest&&(ps>=140||pd>=90))ruta("Remisión hoy: trastorno hipertensivo del embarazo","TA "+v["T. A"]+" en gestación","Remitir para valoración médica y laboratorios el mismo día","hoy","Su presión está alta y en el embarazo eso puede ser peligroso; necesita que la vea el médico hoy.");
+    else if(ps>=180||pd>=110){ruta("Valoración médica inmediata (crisis hipertensiva)","TA "+v["T. A"],"Repetir la toma en 5 minutos; si sigue igual o hay síntomas, remitir de inmediato","hoy","Su presión está muy alta; necesita valoración médica hoy mismo.");al=ALARMA_HTA.concat(al)}
+    else if(ps>=140||pd>=90){ruta("Ruta de riesgo cardiovascular y metabólico (programa de crónicos)","TA "+v["T. A"],"Cita con medicina; confirmar con otras dos tomas; revisar tratamiento y adherencia","pronto","Su presión está más alta de lo normal. Comer con poca sal y venir a los controles le ayuda a bajarla.");al=ALARMA_HTA.concat(al)}
+    H.push("TA "+v["T. A"])}
+  if(v["SPO2"]&&+v["SPO2"]<92)ruta("Valoración médica prioritaria","Saturación "+v["SPO2"]+" %","Valorar dificultad respiratoria; remitir si no mejora","hoy","El oxígeno en la sangre está bajo; necesita valoración médica hoy.");
+  if(v["TEM"]&&+v["TEM"]>=38)ruta("Valoración médica: fiebre","Temperatura "+v["TEM"]+" °C","Buscar foco; descartar malaria o dengue según la zona","pronto","Tiene fiebre; vamos a buscar la causa.");
+  const p=+v["PESO"],t=+v["TALLA"]>3?+v["TALLA"]/100:+v["TALLA"],ed=edadDe(pac()["FECHA NACIMIENTO"],f);
+  if(p>0&&t>0.5&&!gest&&(!ed||ed.y>=18)){const imc=p/(t*t);H.push("IMC "+imc.toFixed(1));
+    if(imc<18.5)ruta("Valoración nutricional","IMC "+imc.toFixed(1)+" (bajo peso)","Evaluar alimentación y causas; seguimiento de peso","pronto","Está por debajo del peso adecuado; vamos a revisar su alimentación.");
+    else if(imc>=30)ruta("Valoración nutricional y actividad física","IMC "+imc.toFixed(1)+" (obesidad)","Consejería en alimentación y actividad física; tamizaje metabólico","programado","Su peso está por encima de lo recomendado; bajar un poco ayuda a su corazón y su presión.");
+    else if(imc>=25)ruta("Consejería en alimentación y actividad física","IMC "+imc.toFixed(1)+" (sobrepeso)","Educación en hábitos; control de peso en la próxima valoración","programado","Tiene algo de sobrepeso; caminar a diario y comer menos sal, azúcar y fritos le ayuda.")}
+  ivAlerts(id).forEach(a=>{if(/violencia/i.test(a))ruta("Ruta de atención integral a víctimas de violencias","Violencia referida en la entrevista","Atención en salud, notificación obligatoria (SIVIGILA) y activación de protección","hoy","Lo que nos contó es importante y no es su culpa. Aquí la vamos a apoyar y a orientar.");
+    else if(/mental/i.test(a))ruta("Ruta de salud mental","Tamizaje positivo en la entrevista","Valoración por psicología o medicina; plan de apoyo","pronto","Lo que siente también es parte de su salud; vamos a buscarle apoyo.")});
+  if(/(no (lo |la |los )?toma|no adher|no .{0,20}todos los dias|irregular)/.test(x)&&/(losartan|enalapril|metformina|medicament|tratamiento|tableta|pasta)/.test(x))ruta("Adherencia al tratamiento","No toma el medicamento todos los días","Educación en adherencia; revisar barreras (acceso, efectos, horarios)","pronto","El medicamento funciona solo si se toma todos los días, aunque se sienta bien.");
+  if(/(fuma|tabaco|cigarr)/.test(x)&&!/(niega|no) (tabaco|fuma)/.test(x))ruta("Consejería para dejar de fumar","Consumo de tabaco","Intervención breve para cesación","programado","Dejar de fumar es lo mejor que puede hacer por su salud.");
+  if(/vacun[^\n]{0,60}(pendiente|incomplet|falta|no tiene|remit)|(influenza|td|vph|fiebre amarilla)[^\n]{0,20}pendiente/.test(x))ruta("Vacunación (PAI)","Esquema pendiente","Aplicar o remitir a vacunación","pronto","Le falta una vacuna; se la podemos poner o la remitimos.");
+  if(/odontolog/.test(x))ruta("Salud bucal","Remisión registrada en la entrevista","Cita con odontología","programado","Lo remitimos a odontología para revisar sus dientes.");
+  if(id==="precon"&&/(desea|quiere|busca)[^\n]{0,20}embaraz/.test(x))ruta("Preparación para el embarazo","Desea embarazo","Ácido fólico desde ya, exámenes preconcepcionales y control en 3 a 6 meses","programado","Para prepararse para el embarazo, tome el ácido fólico todos los días desde ahora.");
+  if(!["prenatal","parto","ive"].includes(id)&&/(atraso|retraso)[^\n]{0,20}(mestru|regla)|posible embarazo|prueba de embarazo positiva/.test(x))ruta("Ruta materno perinatal","Posible embarazo","Prueba de embarazo y, si es positiva, inscripción a control prenatal","pronto","Puede estar embarazada; hagamos la prueba para empezar los controles a tiempo.");
+  if(id==="prenatal"){let hh={};try{hh=JSON.parse(S.get(key(id,"hh"))||"{}")}catch(e){}let sc=0;Object.keys(hh).forEach(k=>sc+=HH[+k][1]);if(sc>=3)ruta("Control prenatal de alto riesgo","Herrera y Hurtado "+sc+" puntos","Remitir a medicina y ginecobstetricia; plan de parto institucional","pronto","Su embarazo necesita más cuidado; la vamos a remitir con el médico y el especialista.")}
+  const q=ivFor(id),a=ivAns(id);q.forEach((z,i)=>{const r=(a[i]||"").trim();if(/^no realizado/i.test(r))PEN.push(z.l+(r.replace(/^no realizado\.?\s*/i,"")?" — "+r.replace(/^no realizado\.?\s*/i,""):""))});
+  const ck=checks(id);m.sections.forEach((sct,i)=>sct.items.forEach((it,j)=>{if(!ck[i+"."+j]&&PEN.length<12)PEN.push(sct.t+": "+(it.startsWith("Q:")?it.slice(2):it))}));
+  const riesgo=R.some(r=>r.cuando==="hoy")?"alto":R.some(r=>r.cuando==="pronto")?"medio":"bajo";
+  const quien=m.title.toLowerCase();
+  const dev=[`Hoy le hicimos la valoración de ${quien}.`].concat(D.length?D:["Lo que revisamos hoy está bien. Siga cuidándose como lo viene haciendo."]).concat(PEN.length?["Quedan algunos exámenes o actividades pendientes; le diremos cuándo hacerlos."]:[]).concat(["Vuelva o avise de inmediato si tiene: "+[...new Set(al)].slice(0,5).join("; ").toLowerCase()+"."]).join("\n\n");
+  return {riesgo,resumen:H.length?H.join(" · "):"",devolucion:dev,rutas:R,pendientes:[...new Set(PEN)],alarma:[...new Set(al)].slice(0,6),fuente:"plantilla"}}
+function pAnalisis(id){const m=M[id],f=S.get(key(id,"fecha"))||hoy(),hh=id==="prenatal"?hhResumen(id):"";
+return `Eres un apoyo clínico para un enfermero profesional de atención primaria rural en el Vaupés, Colombia (población mayoritariamente indígena; comunidades lejanas, sin médico permanente). Analiza la consulta y responde SOLO un objeto JSON.
+
+MÓDULO: ${m.title} (${m.who}) — Resolución 3280 de 2018
+FECHA: ${f}
+PERSONA: ${perfilNota(f)||"sin datos"}
+${hh}
+
+ENTREVISTA Y DICTADO:
+"""${(ivCompose(id)+"\n"+(S.get(key(id,"dict"))||"")).slice(0,12000)}"""
+
+ACTIVIDADES MARCADAS EN LA GUÍA:
+${marcados(id).join("\n")||"(ninguna)"}
+
+LISTA DEL MÓDULO (Res. 3280):
+${lista(m)}
+
+Devuelve:
+{"riesgo":"bajo|medio|alto",
+ "resumen":"1 a 2 frases para el enfermero con los hallazgos clave (cifras incluidas)",
+ "devolucion":"lo que el enfermero le dirá a la persona: español sencillo, frases cortas, de usted, sin tecnicismos, respetuoso de su cultura y de la medicina tradicional; qué se encontró, qué se va a hacer y qué debe hacer ella o él en casa. 4 a 8 frases. Sin cifras que no entienda.",
+ "rutas":[{"ruta":"nombre de la ruta o servicio (p. ej. Ruta de riesgo cardiovascular y metabólico, Ruta materno perinatal, Ruta de salud mental, Ruta de atención a víctimas de violencias, PAI, salud bucal, nutrición, remisión a medicina)","porque":"hallazgo concreto que la justifica","accion":"qué hacer exactamente","cuando":"hoy|pronto|programado"}],
+ "pendientes":["actividades o exámenes de la Res. 3280 que quedaron por hacer u ordenar"],
+ "alarma":["signos de alarma por los que debe volver o avisar de inmediato, en palabras sencillas"]}
+Reglas: basa todo en lo registrado; no inventes datos ni diagnósticos; si algo es dudoso, dilo en "resumen". "hoy" solo si hay riesgo inmediato. Considera la distancia: si hay que remitir, dilo con claridad.`}
+function anGuardar(id,r){S.set(key(id,"anal"),JSON.stringify(r))}
+function anCargar(id){try{return JSON.parse(S.get(key(id,"anal"))||"null")}catch(e){return null}}
+function anHTML(r){if(!r)return"";const rk={alto:["high","Riesgo alto"],medio:["mid","Riesgo intermedio"],bajo:["low","Riesgo bajo"]}[r.riesgo]||["low","Sin clasificar"];
+  return `<div class="an-sec"><div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap"><span class="pill ${rk[0]}">${rk[1]}</span>${r.resumen?`<span class="note-src">${esc(r.resumen)}</span>`:""}</div>
+  <h4>Devolución para la persona</h4><div class="an-dev" id="an-dev">${esc(r.devolucion||"")}</div>
+  <div class="btns"><button class="btn" type="button" id="an-leer">Leer en voz alta</button><button class="btn" type="button" id="an-copy">Copiar</button></div>
+  ${r.rutas&&r.rutas.length?`<h4>Rutas a seguir</h4>${r.rutas.map(x=>`<div class="an-ruta"><span class="an-when ${esc(x.cuando||"programado")}">${esc({hoy:"Hoy",pronto:"Pronto",programado:"Programar"}[x.cuando]||x.cuando||"")}</span><b>${esc(x.ruta)}</b><span>${esc(x.accion||"")}</span><small>Por qué: ${esc(x.porque||"")}</small></div>`).join("")}`:`<h4>Rutas a seguir</h4><p class="note-src" style="margin:0">No se identificaron rutas adicionales.</p>`}
+  ${r.pendientes&&r.pendientes.length?`<h4>Pendientes de la Res. 3280</h4><ul style="margin:0;padding-left:20px">${r.pendientes.map(x=>`<li>${esc(x)}</li>`).join("")}</ul>`:""}
+  ${r.alarma&&r.alarma.length?`<h4>Signos de alarma para explicarle</h4><ul style="margin:0;padding-left:20px">${r.alarma.map(x=>`<li>${esc(x)}</li>`).join("")}</ul>`:""}
+  <div class="btns"><button class="btn primary" type="button" id="an-plan">Agregar al plan de la nota</button></div>
+  <p class="note-src" style="margin:0">${r.fuente==="claude"?"Análisis hecho por Claude":"Análisis sin conexión, con reglas básicas"}. Es una ayuda: la decisión clínica es tuya.</p></div>`}
+function anWire(id){const r=anCargar(id);if(!r)return;
+  $("an-copy").onclick=()=>{try{navigator.clipboard.writeText(r.devolucion)}catch(e){}$("an-st").textContent="Devolución copiada."};
+  $("an-leer").onclick=()=>{if(!window.speechSynthesis){$("an-st").textContent="Este celular no puede leer en voz alta.";return}stopRec();speechSynthesis.cancel();const u=new SpeechSynthesisUtterance(r.devolucion);u.lang="es-CO";u.rate=.92;speechSynthesis.speak(u)};
+  $("an-plan").onclick=()=>{const t=["PLAN Y RUTAS"].concat((r.rutas||[]).map(x=>`- ${x.ruta}: ${x.accion} (${({hoy:"hoy",pronto:"pronto",programado:"programar"})[x.cuando]||x.cuando}).`)).concat(r.pendientes&&r.pendientes.length?["Pendientes: "+r.pendientes.join("; ")+"."]:[]).concat(["Se brinda devolución a la persona en lenguaje sencillo y se explican signos de alarma: "+(r.alarma||[]).join(", ").toLowerCase()+"."]).join("\n");
+    const d=S.get(key(id,"dict"))||"";S.set(key(id,"dict"),d.replace(/\n*PLAN Y RUTAS[\s\S]*$/,"")+"\n\n"+t);$("an-st").textContent="Agregado al resumen de la consulta. Se incluirá al organizar la nota."}}
+async function analizar(id){const st2=$("an-st");let r=null;
+  if(sample){st2.textContent="Analizando con Claude… (puede tardar unos segundos)";
+    try{const x=await sample.json(pAnalisis(id),{cache:false});if(x&&typeof x==="object"&&x.devolucion){r={riesgo:["bajo","medio","alto"].includes(x.riesgo)?x.riesgo:"",resumen:String(x.resumen||""),devolucion:String(x.devolucion),rutas:Array.isArray(x.rutas)?x.rutas.filter(z=>z&&z.ruta).map(z=>({ruta:String(z.ruta),porque:String(z.porque||""),accion:String(z.accion||""),cuando:["hoy","pronto","programado"].includes(z.cuando)?z.cuando:"programado"})):[],pendientes:Array.isArray(x.pendientes)?x.pendientes.map(String):[],alarma:Array.isArray(x.alarma)?x.alarma.map(String):[],fuente:"claude"}}}
+    catch(e){}}
+  if(!r){r=anLocal(id);st2.textContent=sample?"No se pudo usar Claude; se analizó con reglas básicas.":""}else st2.textContent="";
+  anGuardar(id,r);$("an-out").innerHTML=anHTML(r);anWire(id)}
 function paneEntr(){
   const id=st.mod,q=ivFor(id),a=ivAns(id),i0=S.get(key(id,"ivi"));let i=Math.max(0,+(i0||0));if(i>=q.length)i=q.length;
   const answered=q.filter((_,k)=>(a[k]||"").trim()).length;
@@ -908,8 +1004,12 @@ function paneEntr(){
     $("pane").innerHTML=`<div class="tool"><h3>Entrevista terminada</h3><p class="note-src">${answered} de ${q.length} preguntas respondidas. Las respuestas ya están en el dictado de la pestaña Nota.</p>
     ${al.length?`<div class="box warn"><h3>Revisar antes de seguir</h3><ul>${al.map(x=>`<li>${esc(x)}</li>`).join("")}</ul></div>`:""}
     <p class="status" id="iv-st"></p><div class="btns"><button class="btn primary" id="iv-nota">Siguiente: Guía →</button><button class="btn" id="iv-rev">Volver a la última pregunta</button></div></div>
+    <section class="tool" id="an"><h3>Análisis: devolución y rutas</h3><p class="note-src" style="margin:0">Revisa todo lo registrado y propone qué decirle a la persona y qué rutas seguir.</p>
+      <button class="btn ${anCargar(id)?"":"primary"}" id="an-go" style="flex:none">${anCargar(id)?"Volver a analizar":sample?"Analizar la consulta":"Analizar (sin conexión)"}</button><p class="status" id="an-st"></p>
+      <div id="an-out">${anHTML(anCargar(id))}</div></section>
     <details class="sec"><summary><span>Ver lo registrado</span></summary><pre style="white-space:pre-wrap;padding:0 14px 14px;font-family:var(--f-body);font-size:.92rem">${esc(ivCompose(id))||"(sin respuestas)"}</pre></details>`;
-    $("iv-nota").onclick=()=>{st.tab="guia";S.set(key(id,"tab"),"guia");renderMod()};$("iv-rev").onclick=()=>{S.set(key(id,"ivi"),String(q.length-1));paneEntr()};return}
+    $("iv-nota").onclick=()=>{st.tab="guia";S.set(key(id,"tab"),"guia");renderMod()};
+    $("an-go").onclick=()=>analizar(id);anWire(id);$("iv-rev").onclick=()=>{S.set(key(id,"ivi"),String(q.length-1));paneEntr()};return}
   const x=q[i],pct=Math.round(i/q.length*100),al=(a[i]&&x.al&&x.al.test(a[i]))?x.am:"";
   $("pane").innerHTML=`
   <div class="tool" style="gap:14px">
@@ -927,7 +1027,7 @@ function paneEntr(){
     <div class="linkrow"><button class="lnk" id="iv-skip">Saltar esta pregunta</button><button class="lnk" id="iv-reset">Reiniciar preguntas</button>${CASO_EJ[id]?'<button class="lnk" id="iv-caso">Cargar caso de ejemplo completo</button>':""}</div>
   </div>`;
   const ta=$("iv-a");
-  const save=()=>{const o=ivAns(id);o[i]=ta.value;S.set(key(id,"iv"),JSON.stringify(o));S.set(key(id,"dict"),ivCompose(id));
+  const save=()=>{const o=ivAns(id);o[i]=ta.value;S.set(key(id,"iv"),JSON.stringify(o));S.del(key(id,"anal"));S.set(key(id,"dict"),ivCompose(id));
     if(x.ck){const c=checks(id),v=ta.value.trim();if(v&&!/^(no realizado|no aplica)/i.test(v))c[x.ck]=1;else delete c[x.ck];S.set(key(id,"chk"),JSON.stringify(c))}
     const hit=x.al&&ta.value.trim()&&x.al.test(ta.value);$("iv-al").hidden=!hit;if(hit)$("iv-alt").textContent=x.am};
   ta.addEventListener("input",save);wireMic($("iv-mic"),ta,save);
