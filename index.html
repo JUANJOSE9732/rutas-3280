@@ -13,6 +13,7 @@
 <title>Dictado de Notas</title>
 <title>Dictado de Notas</title>
 <title>Dictado de Notas</title>
+<title>Dictado de Notas</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:ital,wght@0,400;0,700;1,400&family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,800&family=IBM+Plex+Mono:wght@500&display=swap">
 <style>
@@ -122,6 +123,9 @@ textarea{width:100%;font:inherit;font-size:1.05rem;line-height:1.55;padding:14px
 .hh .pts{margin-left:auto;font-family:var(--f-data);font-size:.82rem;color:var(--muted)}
 .hh .grp{font-size:.74rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);padding-top:10px}
 .foot{font-size:.84rem;color:var(--muted);border-top:1px solid var(--line);padding-top:14px}
+.micwrap{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.mic.on{background:var(--miss-bg);border-color:var(--miss);color:var(--miss)}
+.mic-st{font-size:.88rem;color:var(--muted);min-width:0;flex:1 1 160px}
 .drafts{display:flex;flex-direction:column;gap:6px}
 .drafts button{display:flex;justify-content:space-between;gap:10px;text-align:left;border:1px solid var(--warn-line);background:var(--warn-bg);color:var(--ink);border-radius:8px;padding:10px 12px}
 @media (prefers-reduced-motion:no-preference){.tile,.btn,.notes-pick button{transition:background .15s,border-color .15s,box-shadow .15s}}
@@ -525,7 +529,7 @@ function hasDraft(m){return !!(S.get(key(m,"dict"))||S.get(key(m,"nota"))||Objec
 
 /* ---------- PANEL ---------- */
 function home(){
-  st.view="home";
+  stopRec();st.view="home";
   const rm=["precon","prenatal","parto","rn","ive"],rp=["pinf","inf","adol","juv","adul","vej"];
   const tile=id=>{const m=M[id];return `<button class="tile ${m.route}" data-mod="${id}" id="t-${id}">${hasDraft(id)?'<span class="dot" title="Borrador guardado"></span>':""}<b>${esc(m.title)}</b><small>${esc(m.who)}</small></button>`};
   const drafts=Object.keys(M).filter(hasDraft);
@@ -569,7 +573,7 @@ function sugerir(){
 /* ---------- MÓDULO ---------- */
 function openMod(id){st.view="mod";st.mod=id;st.tab=S.get(key(id,"tab"))||(IV[id]?"entr":"guia");st.note=S.get(key(id,"note"))||M[id].notes[0];if(!M[id].notes.includes(st.note))st.note=M[id].notes[0];renderMod();window.scrollTo(0,0)}
 function renderMod(){
-  const m=M[st.mod],id=st.mod;
+  stopRec();const m=M[st.mod],id=st.mod;
   const tabs=(IV[id]?[["entr","Entrevista"]]:[]).concat([["guia","Guía"]]).concat(m.tools?[["herr","Herramientas"]]:[]).concat([["nota","Nota"]]);
   if(!tabs.some(t=>t[0]===st.tab))st.tab="guia";
   const routeName={rm:"Materno perinatal",rp:"Curso de vida",pc:"Procedimientos"}[m.route];
@@ -633,6 +637,26 @@ function paneHerr(){
 }
 function hhResumen(id){let hh={};try{hh=JSON.parse(S.get(key(id,"hh"))||"{}")}catch(e){}const ks=Object.keys(hh);if(!ks.length)return"";let s=0;const it=ks.map(k=>{s+=HH[+k][1];return HH[+k][0]+" ("+HH[+k][1]+")"});return "Escala de Herrera y Hurtado aplicada: "+s+(s===1?" punto (":" puntos (")+(s>=3?"alto riesgo":"bajo riesgo")+"). Factores: "+it.join("; ")}
 function marcados(id){const m=M[id],ck=checks(id),o=[];m.sections.forEach((s,i)=>s.items.forEach((it,j)=>{if(ck[i+"."+j])o.push(s.t+": "+(it.startsWith("Q:")?"Pregunta realizada – "+it.slice(2):it))}));return o}
+/* ---------- ESCUCHA CONTINUA (Web Speech API) ---------- */
+const SR=window.SpeechRecognition||window.webkitSpeechRecognition;
+let REC=null,recOn=false;
+function stopRec(){recOn=false;if(REC){try{REC.stop()}catch(e){}}REC=null;document.querySelectorAll(".mic").forEach(b=>{b.textContent="Escuchar a la usuaria";b.classList.remove("on")})}
+function micUI(){return SR?`<div class="micwrap"><button type="button" class="btn mic">Escuchar a la usuaria</button><span class="mic-st"></span></div>
+ <div class="box warn mic-ok" hidden><h3>Antes de escuchar su voz</h3><p style="margin:0 0 8px">Pídele permiso para transcribir lo que diga. El audio se procesa en los servidores de Google para convertirlo en texto y necesita internet. Solo entiende español.</p><div class="btns"><button type="button" class="btn primary mic-yes">Ella aceptó</button><button type="button" class="btn mic-no">No aceptó</button></div></div>`:""}
+function wireMic(root,ta,onChange){
+  if(!SR)return;const b=root.querySelector(".mic"),s=root.querySelector(".mic-st"),ok=root.querySelector(".mic-ok");
+  const start=()=>{stopRec();const r=new SR();REC=r;recOn=true;r.lang="es-CO";r.continuous=true;r.interimResults=true;
+    let base=ta.value.trim();
+    r.onresult=e=>{let fin="",tmp="";for(let k=e.resultIndex;k<e.results.length;k++){const t=e.results[k][0].transcript;if(e.results[k].isFinal)fin+=t;else tmp+=t}
+      if(fin){base=(base?base+" ":"")+fin.trim();ta.value=base;onChange&&onChange()}s.textContent=tmp?"… "+tmp:"Escuchando"};
+    r.onerror=e=>{if(e.error==="not-allowed"||e.error==="service-not-allowed"){recOn=false;s.textContent="El micrófono no está permitido aquí. Usa la versión instalada desde GitHub y acepta el permiso del micrófono."}else if(e.error==="network"){recOn=false;s.textContent="Sin internet no se puede transcribir. Dicta con el teclado o toca una opción."}else if(e.error==="no-speech"){s.textContent="No se oye nada. Acerca el celular a quien habla."}};
+    r.onend=()=>{if(recOn&&REC===r){try{base=ta.value.trim();r.start()}catch(e){}}else{b.textContent="Escuchar a la usuaria";b.classList.remove("on");if(!/permitido|internet/.test(s.textContent))s.textContent=""}};
+    try{r.start();b.textContent="■ Detener";b.classList.add("on");s.textContent="Escuchando"}catch(e){s.textContent="No se pudo iniciar el micrófono."}};
+  b.onclick=()=>{if(recOn){stopRec();return}if(S.get(key(st.mod,"vozok"))){start();return}ok.hidden=false};
+  root.querySelector(".mic-yes").onclick=()=>{S.set(key(st.mod,"vozok"),"1");ok.hidden=true;start()};
+  root.querySelector(".mic-no").onclick=()=>{ok.hidden=true;s.textContent="Sin permiso: dicta tú el resumen de su respuesta."};
+}
+
 /* ---------- ENTREVISTA GUIADA ---------- */
 function ivAns(id){try{return JSON.parse(S.get(key(id,"iv"))||"{}")}catch(e){return{}}}
 function ivCompose(id){const q=IV[id],a=ivAns(id);let blk="",out=[];
@@ -661,6 +685,7 @@ function paneEntr(){
     ${x.c?`<div class="sugg">${x.c.map(c=>`<button data-c="${esc(c)}">${esc(c)}</button>`).join("")}</div>`:""}
     <label for="iv-a" class="lab" style="margin:0">Respuesta: toca una opción o dicta tú lo que ella respondió</label>
     <textarea id="iv-a" style="min-height:120px">${esc(a[i]||"")}</textarea>
+    <div id="iv-mic">${micUI()}</div>
     <div class="box warn" id="iv-al" ${al?"":"hidden"}><h3>Atención</h3><p style="margin:0" id="iv-alt">${esc(al)}</p></div>
     <div class="btns"><button class="btn" id="iv-prev" ${i===0?"disabled":""}>← Anterior</button><button class="btn primary" id="iv-next">${i===q.length-1?"Terminar":"Siguiente →"}</button></div>
     <div class="btns"><button class="btn" id="iv-skip">Saltar</button><button class="btn" id="iv-reset">Reiniciar entrevista</button></div>
@@ -668,9 +693,9 @@ function paneEntr(){
   const ta=$("iv-a");
   const save=()=>{const o=ivAns(id);o[i]=ta.value;S.set(key(id,"iv"),JSON.stringify(o));S.set(key(id,"dict"),ivCompose(id));
     const hit=x.al&&ta.value.trim()&&x.al.test(ta.value);$("iv-al").hidden=!hit;if(hit)$("iv-alt").textContent=x.am};
-  ta.addEventListener("input",save);
+  ta.addEventListener("input",save);wireMic($("iv-mic"),ta,save);
   document.querySelectorAll("[data-c]").forEach(b=>b.onclick=()=>{const c=b.dataset.c;ta.value=ta.value.trim()?ta.value.trim()+". "+c:c;save();ta.focus()});
-  const go=n=>{save();S.set(key(id,"ivi"),String(n));paneEntr();const t=$("iv-a");if(t)t.focus();window.scrollTo(0,0)};
+  const go=n=>{stopRec();save();S.set(key(id,"ivi"),String(n));paneEntr();const t=$("iv-a");if(t)t.focus();window.scrollTo(0,0)};
   $("iv-next").onclick=()=>go(i+1);$("iv-prev").onclick=()=>go(i-1);$("iv-skip").onclick=()=>{S.set(key(id,"ivi"),String(i+1));paneEntr()};
   $("iv-reset").onclick=()=>{const b=$("iv-reset");if(b.dataset.armed!=="1"){b.dataset.armed="1";b.textContent="¿Borrar respuestas? Toca otra vez";return}S.del(key(id,"iv"));S.del(key(id,"ivi"));S.del(key(id,"dict"));paneEntr()};
   ta.focus();
@@ -684,7 +709,8 @@ function paneNota(){
   <div class="frow"><label for="fecha">Fecha de la consulta<input type="date" id="fecha" value="${esc(S.get(key(id,"fecha"))||hoy())}"></label></div>
   <div><p class="lab"><label for="dict">Tu dictado</label></p>
   <textarea id="dict" placeholder="Toca el micrófono del teclado y habla. Puedes dictar en desorden.">${esc(S.get(key(id,"dict"))||"")}</textarea>
-  <p class="hint">Usa el micrófono del teclado del celular. No dictes nombre ni documento. ${marcados(id).length?`Se incluirán ${marcados(id).length} actividades marcadas en la guía.`:""}</p></div>
+  <div id="n-mic">${micUI()}</div>
+  <p class="hint">Usa el micrófono del teclado o el botón Escuchar. No dictes nombre ni documento. ${marcados(id).length?`Se incluirán ${marcados(id).length} actividades marcadas en la guía.`:""}</p></div>
   <div class="btns"><button class="btn primary" id="go">${sample?"Organizar nota":"Armar nota sin conexión"}</button><button class="btn" id="ej">Cargar ejemplo</button><button class="btn" id="nueva">Nueva paciente</button></div>
   <p class="hint" id="offHint" ${sample?"hidden":""}>Sin conexión la nota se arma con la plantilla, lo marcado en la guía y tu dictado. Con señal, <a href="${ARTIFACT}" target="_blank" rel="noopener" id="rev">revisa con Claude</a>: el botón copia tu dictado para pegarlo allá.</p>
   ${n.edu?`<label class="check"><input type="checkbox" id="edu" checked> Agregar bloques fijos de educación, IVE, planificación y curso</label>`:""}
@@ -701,6 +727,7 @@ function paneNota(){
   listaUI($("faltantes"),$("missBox"),S.get(key(id,"falt")));listaUI($("alertas"),$("alertBox"),S.get(key(id,"alert")));
   try{const c=JSON.parse(S.get(key(id,"calc"))||"null");if(c)$("calc").innerHTML=chipsCalc(calcular(c.x,c.fecha))}catch(e){}
   let t;$("dict").addEventListener("input",()=>{clearTimeout(t);t=setTimeout(()=>S.set(key(id,"dict"),$("dict").value),400)});
+  wireMic($("n-mic"),$("dict"),()=>S.set(key(id,"dict"),$("dict").value));
   $("nota").addEventListener("input",()=>S.set(key(id,"nota"),$("nota").value));
   $("fecha").addEventListener("change",()=>S.set(key(id,"fecha"),$("fecha").value));
   $("go").onclick=organizar;$("stop").onclick=()=>ctl&&ctl.abort();$("copy").onclick=copiar;
