@@ -377,7 +377,7 @@ const IV={
   {b:"Examen físico",t:"do",l:"Examen por sistemas",q:"Examen cefalocaudal, incluida la cavidad bucal.",c:["Normal|Buen estado general. Examen cefalocaudal sin hallazgos patológicos; cavidad bucal sin alteraciones.", "Hallazgos|Examen físico con hallazgos: ____."]},
   {b:"Examen físico",t:"do",l:"Valoración ginecológica",q:"Valoración ginecológica con especuloscopia.",c:["Normal|Valoración ginecológica con especuloscopia: genitales externos normales, cuello sano, sin lesiones ni flujo patológico.", "Hallazgos|Valoración ginecológica con hallazgos: ____.", "No realizada|No se realiza valoración ginecológica por ____."],h:"Si hay signos de carcinoma invasor: colposcopia y biopsia en máximo 1 semana."},
   {b:"Plan",t:"do",l:"Exámenes solicitados",q:"¿Qué exámenes ordenaste?",c:["Paquete completo|Se solicitan exámenes preconcepcionales: hemograma, hemoclasificación, glicemia, HBsAg, prueba treponémica, VIH con asesoría, IgG toxoplasma, rubéola y varicela, urocultivo y gota gruesa.", "Cuello uterino|Se realiza u ordena tamizaje de cuello uterino según la edad."],h:"HBsAg, glicemia, hemoclasificación, hemograma, gota gruesa, IgG toxoplasma, rubéola y varicela, treponémica, urocultivo, VIH con asesoría, cuello uterino."},
-  {b:"Plan",t:"do",l:"Ácido fólico",q:"Formulación de ácido fólico.",c:["0,4 mg/día|Se formula ácido fólico 0,4 mg/día vía oral desde ahora y al menos 3 meses antes del embarazo.", "4 mg/día|Se formula ácido fólico 4 mg/día vía oral por antecedente de defecto del tubo neural."],h:"Al menos 3 meses antes del embarazo."},
+  {b:"Plan",t:"do",si:A=>!/^no desea|^no:/i.test(A("Deseo de embarazo")),l:"Ácido fólico",q:"Formulación de ácido fólico.",c:["0,4 mg/día|Se formula ácido fólico 0,4 mg/día vía oral desde ahora y al menos 3 meses antes del embarazo.", "4 mg/día|Se formula ácido fólico 4 mg/día vía oral por antecedente de defecto del tubo neural."],h:"Al menos 3 meses antes del embarazo."},
   {b:"Plan",t:"do",l:"Anticoncepción hasta decidir",q:"Método anticonceptivo mientras se prepara.",c:["Continúa|Continúa con su método anticonceptivo actual hasta decidir el embarazo.", "Inicia|Inicia método anticonceptivo ____ hasta decidir el embarazo.", "Busca embarazo|Suspende anticoncepción para buscar el embarazo."]},
   {b:"Plan",t:"do",l:"Remisiones",q:"¿A dónde remitiste?",c:["Vacunación|Se remite a vacunación.", "Odontología|Se remite a odontología.", "Nutrición|Se remite a nutrición.", "Psicología|Se remite a psicología.", "Medicina|Se remite a medicina.", "Ginecobstetricia|Se remite a ginecobstetricia.", "Ninguna|No requiere remisiones."]},
   {b:"Plan",t:"do",l:"Información brindada",q:"Educación y derechos.",c:["Intervalo 18 meses|Se informa sobre el intervalo intergenésico mínimo de 18 meses.", "Derechos e IVE|Se informa sobre derechos sexuales y reproductivos, incluido el derecho a la IVE.", "Signos de alarma|Se explican signos de alarma.", "Control prenatal temprano|Se recomienda acudir a control prenatal antes de la semana 10 al confirmar el embarazo."]},
@@ -1072,8 +1072,65 @@ const GUIA={
      "Explicar que algunas plantas pueden producir sangrado, contracciones o afectar al bebé, sobre todo las que se usan para \"bajar la regla\", para purgar o para abortar: si busca embarazo, es mejor no tomarlas.",
      "Si no se sabe qué efecto tiene la planta, anotarla y consultarla con medicina antes de que quede embarazada.",
      "Pedirle que nos cuente si empieza a tomar otra."],
-  r:"Se indaga sobre el uso de plantas medicinales (nombre, uso, preparación y frecuencia); se orienta sobre plantas que pueden afectar la gestación y se le pide informar cualquier remedio nuevo."}
+  r:"Se indaga sobre el uso de plantas medicinales (nombre, uso, preparación y frecuencia); se orienta sobre plantas que pueden afectar la gestación y se le pide informar cualquier remedio nuevo."},
+ "Deseo de embarazo|No":{t:"La consulta pasa a asesoría anticonceptiva",
+  p:["Respetar su decisión: la consulta se enfoca en planificación familiar y se omite la formulación de ácido fólico.",
+     "Preguntar qué métodos conoce o ha usado, cómo le fue y cuál prefiere. La decisión es de ella; no necesita permiso de la pareja.",
+     "Opciones: implante (3 a 5 años según el tipo) y DIU (hasta 10 años) son los más efectivos; luego la inyección trimestral o mensual y las pastillas; el condón.",
+     "El condón además protege de infecciones de transmisión sexual: lo ideal es usarlo junto con otro método.",
+     "Puede cambiar o retirar el método cuando quiera; si después desea un embarazo, vuelve a la consulta preconcepcional.",
+     "Si tuvo relaciones sin protección en los últimos días, ofrecer anticoncepción de emergencia (mejor en las primeras 72 horas)."],
+  r:"No desea embarazo: se brinda asesoría en anticoncepción (opciones disponibles, eficacia, doble protección con condón, derecho a elegir y cambiar de método, anticoncepción de emergencia)."},
+ "Deseo de embarazo|Solo ella":{t:"Para responderle: si la pareja no ha decidido",
+  p:["La decisión sobre su cuerpo es de ella; respetarla.",
+     "Si ella quiere, invitar a la pareja a la próxima consulta para hablar del embarazo, de su salud (pruebas de infecciones, vacunas) y del apoyo que ella necesitará.",
+     "Preguntar con tacto si se siente presionada para embarazarse o para no hacerlo, o si hay conflictos en casa por este tema."],
+  r:"Se invita a vincular a la pareja en la próxima consulta, respetando la decisión de la usuaria; se indaga presión o conflicto relacionado con la reproducción."},
+ "Deseo de embarazo|No sabe":{t:"Para responderle: si aún no ha decidido",
+  p:["Es normal no estar segura; no tiene que decidir hoy.",
+     "Mientras decide, seguir planificando con el método que prefiera.",
+     "Si cree que lo querrá en el próximo año, puede empezar ya el ácido fólico: no le hace daño.",
+     "Cuando decida, puede volver a esta consulta."],
+  r:"Usuaria indecisa frente al embarazo: se orienta continuar anticoncepción hasta decidir y se ofrece retomar la consulta preconcepcional cuando lo desee."},
+ "Método anticonceptivo actual|Ninguno":{t:"Para responderle: sin método",
+  p:["Si quiere embarazarse: lo ideal es prepararse primero (ácido fólico 3 meses antes, vacunas, exámenes).",
+     "Si no quiere embarazarse aún: ofrecer un método hoy mismo.",
+     "Recordar el condón para prevenir infecciones de transmisión sexual."],
+  r:"Sin método anticonceptivo: se orienta sobre preparación preconcepcional y se ofrece anticoncepción mientras decide."},
+ "Método anticonceptivo actual|Inyectable mensual":{t:"Para responderle: inyección mensual",
+  p:["Cuando decida buscar el embarazo, simplemente no se pone la siguiente inyección.",
+     "La fertilidad vuelve en pocos meses (casi siempre de 1 a 3).",
+     "Lo ideal es seguir con la inyección hasta completar 3 meses de ácido fólico."],
+  r:"Se orienta sobre suspensión del inyectable mensual y retorno de la fertilidad en 1 a 3 meses."},
+ "Método anticonceptivo actual|Inyectable trimestral":{t:"Para responderle: inyección de cada 3 meses",
+  p:["Cuando decida buscar el embarazo, no se pone la siguiente inyección.",
+     "Con este método la fertilidad tarda más en volver: en promedio unos 10 meses desde la última inyección, a veces hasta un año o más. Es esperado y no daña la fertilidad.",
+     "Si quiere el embarazo pronto, puede suspenderla ya y usar condón mientras completa el ácido fólico."],
+  r:"Se orienta sobre suspensión del inyectable trimestral y retorno tardío de la fertilidad (promedio de 10 meses desde la última aplicación)."},
+ "Método anticonceptivo actual|Implante":{t:"Para responderle: implante",
+  p:["Cuando decida buscar el embarazo, se retira el implante con un procedimiento corto en el servicio.",
+     "La fertilidad vuelve rápido, en días o pocas semanas después de retirarlo.",
+     "Lo ideal es retirarlo cuando ya lleve 3 meses de ácido fólico.",
+     "Revisar la fecha de vencimiento: si ya venció, ya no protege y hay que retirarlo o cambiarlo."],
+  r:"Se orienta sobre retiro del implante subdérmico cuando decida el embarazo y retorno rápido de la fertilidad; se verifica vigencia del método."},
+ "Método anticonceptivo actual|DIU":{t:"Para responderle: DIU",
+  p:["Cuando decida buscar el embarazo, el DIU lo retira un profesional; es rápido.",
+     "La fertilidad vuelve de inmediato al retirarlo.",
+     "Lo ideal es retirarlo cuando ya lleve 3 meses de ácido fólico.",
+     "Revisar hasta cuándo sirve el DIU que tiene."],
+  r:"Se orienta sobre retiro del DIU cuando decida el embarazo y retorno inmediato de la fertilidad; se verifica vigencia del método."},
+ "Método anticonceptivo actual|Pastillas":{t:"Para responderle: pastillas",
+  p:["Cuando decida buscar el embarazo, termina el paquete que está tomando y no empieza otro.",
+     "La fertilidad vuelve pronto (1 a 3 meses); la regla puede tardar un poco en regularizarse.",
+     "Lo ideal es seguir hasta completar 3 meses de ácido fólico."],
+  r:"Se orienta sobre suspensión de anticonceptivos orales al terminar el paquete y retorno de la fertilidad en 1 a 3 meses."},
+ "Método anticonceptivo actual|Condón":{t:"Para responderle: condón",
+  p:["Cuando decidan buscar el embarazo, dejan de usarlo.",
+     "Antes de dejarlo, es bueno que los dos se hagan pruebas de VIH, sífilis y hepatitis B.",
+     "Mientras se prepara, seguir usándolo en cada relación."],
+  r:"Se orienta sobre suspensión del condón al decidir el embarazo, previa tamización de ITS en ambos miembros de la pareja."},
 };
+function ivAplica(id,n){const q=ivFor(id),x=q[n];if(!x||!x.si)return true;const a=ivAns(id);const A=l=>{const k=q.findIndex(z=>z.l===l);return k<0?"":(a[k]||"").trim()};try{return x.si(A)}catch(e){return true}}
 function paneEntr(){
   const id=st.mod,q=ivFor(id),a=ivAns(id),i0=S.get(key(id,"ivi"));let i=Math.max(0,+(i0||0));if(i>=q.length)i=q.length;
   const answered=q.filter((_,k)=>(a[k]||"").trim()).length;
@@ -1116,8 +1173,9 @@ function paneEntr(){
   ta.addEventListener("input",guia);setTimeout(guia,0);
   document.querySelectorAll("[data-c]").forEach(b=>b.addEventListener("click",()=>setTimeout(guia,0)));
   document.querySelectorAll("[data-c]").forEach(b=>b.onclick=()=>{const c=b.dataset.c,v=ta.value.trim();ta.value=v?(/[.;:]$/.test(v)?v+" ":v+". ")+c:c;save();ta.focus();const m=/_+/.exec(c);if(m){const off=ta.value.length-c.length+m.index;ta.setSelectionRange(off,off+m[0].length)}});
-  const go=n=>{stopRec();save();S.set(key(id,"ivi"),String(n));paneEntr();const t=$("iv-a");if(t)t.focus();window.scrollTo(0,0)};
-  $("iv-next").onclick=()=>go(i+1);$("iv-prev").onclick=()=>go(i-1);$("iv-skip").onclick=()=>{S.set(key(id,"ivi"),String(i+1));paneEntr()};
+  const salta=(n,d)=>{while(n>=0&&n<q.length&&!ivAplica(id,n))n+=d;return Math.max(0,n)};
+  const go=n=>{stopRec();save();S.set(key(id,"ivi"),String(salta(n,n<i?-1:1)));paneEntr();const t=$("iv-a");if(t)t.focus();window.scrollTo(0,0)};
+  $("iv-next").onclick=()=>go(i+1);$("iv-prev").onclick=()=>go(i-1);$("iv-skip").onclick=()=>{S.set(key(id,"ivi"),String(salta(i+1,1)));paneEntr()};
   $("iv-reset").onclick=()=>{const b=$("iv-reset");if(b.dataset.armed!=="1"){b.dataset.armed="1";b.textContent="¿Borrar respuestas? Toca otra vez";return}S.del(key(id,"iv"));S.del(key(id,"ivi"));S.del(key(id,"dict"));paneEntr()};
   if($("iv-caso"))$("iv-caso").onclick=()=>cargarCaso(id);
   ta.focus();
