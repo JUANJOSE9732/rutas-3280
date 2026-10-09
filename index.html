@@ -1803,6 +1803,8 @@ const VARS=[
   {k:"FECHA PROXIMO CONTROL",l:"Fecha del próximo control",t:"date"},{k:"MOTIVO PROXIMO CONTROL",l:"Motivo del próximo control"},{k:"TIPO DE SEGUIMIENTO",l:"Tipo de seguimiento"},{k:"FECHA DE SEGUIMIENTO",l:"Fecha de seguimiento",t:"date"},{k:"OBSERVACIONES SEGUIMIENTO",l:"Observaciones del seguimiento",t:"area"}]}
 ];
 const ALLF=VARS.flatMap(g=>g.f);
+const REL_RM=["FECHA","NOMBRE COMPLETO","TIPO","DOCUMENTO ID.","FECHA NACIMIENTO","EDAD","AA / MM","GENERO","TELEFONO","ETNIA","PUEBLO","EAPB NOMBRE","RÉGIMEN","F.C","F. R","T. A","TEM","SPO2","PESO","TALLA","IMC","CURSO DE VIDA","HTA","HTA EN CONTROL","DIABETES","DIABETES EN CONTROL","HIPER O HIPOTIROIDISMO","TIROIDES EN CONTROL","PLANIFICACION FAMILIAR O CONTROL","PLANIFICACION FAMILIAR O CONTROL FECHA ULTIMO CONTROL","CITOLOGIA","CITOLOGIA FECHA ULTIMO CONTROL","ADN VPH","ADN VPH FECHA ULTIMO CONTROL","SE REALIZO LABORATORIOS","CANALIZADO A","CANALIZADO POR","OBSERVACION","OBSERVACION DE CANALIZACION","FECHA PROXIMO CONTROL","MOTIVO PROXIMO CONTROL"];
+function relDe(id){const m=id&&M[id];return m&&m.route==="rm"?REL_RM:null}
 const REQK=["NOMBRE COMPLETO","TIPO","DOCUMENTO ID.","FECHA NACIMIENTO","GENERO","FECHA"];
 const EJ_BASE={"ETNIA":"INDIGENA","PUEBLO":"CUBEO","CONSECUTIVO":"12","DIRECCION":"SECTOR LA PLAYA","NOMBRE COMPLETO":"EJEMPLO FICTICIO PÉREZ","ANTECEDENTES":"HIPERTENSIÓN ARTERIAL DIAGNOSTICADA EN 2019, EN TRATAMIENTO CON LOSARTÁN","ROL EN EL HOGAR":"JEFE DE HOGAR","FECHA NACIMIENTO":"1976-05-14","GENERO":"M","TIPO":"CC","DOCUMENTO ID.":"1000000000","EAPB NOMBRE":"MALLAMAS","RÉGIMEN":"SUBSIDIADO","CAPITADO":"SI","TELEFONO":"3000000000",
  "F.C":"78","F. R":"18","T. A":"150/95","TEM":"36.5","SPO2":"96","PESO":"82","TALLA":"1.68","RIESGO CARDIOVASCULAR":"SI",
@@ -1938,8 +1940,8 @@ function base(pref,opts){
     ${RV?`<section class="tool" id="b-falta"><h3 id="b-falta-h">Falta completar</h3><p class="hint" style="margin:0">Es la identificación: no se llenó en «¿A quién vas a atender?» al empezar. Llénala aquí una vez y queda guardada para los demás módulos.</p><div class="bgrid" id="b-falta-grid"></div>
       ${dictBox("Dictar lo que falta","Ej.: cédula 1 2 3 4 5, teléfono 310…, última consulta de crónicos 10 de marzo, canalizado a odontología")}</section>
       <details class="sec" id="b-idsec"><summary><span>Identificación</span><span class="cnt" id="b-idcnt"></span></summary><div class="bgrid" id="b-idgrid">${comL}${ALLF.filter(f=>ID_KEYS.includes(f.k)).map(fld).join("")}</div></details>
-      <details class="sec" id="b-hcsec" open><summary><span>Tomado de la historia: revisa</span><span class="cnt" id="b-hccnt"></span></summary><div class="bgrid" id="b-hcgrid">${ALLF.filter(f=>!ID_KEYS.includes(f.k)).map(fld).join("")}</div></details>
-      <details class="sec" id="b-optsec"><summary><span>Otros datos de la caracterización (opcionales)</span><span class="cnt" id="b-optcnt"></span></summary><p class="hint" style="margin:0 14px 8px">No son obligatorios para esta consulta: llénalos solo si los tienes. Lo vacío llega en blanco a la hoja. Los tamizajes que no corresponden por edad o sexo ya no aparecen.</p><div class="bgrid" id="b-optgrid"></div></details>`
+      <details class="sec" id="b-hcsec" open><summary><span>Datos de esta consulta: revisa</span><span class="cnt" id="b-hccnt"></span></summary><div class="bgrid" id="b-hcgrid">${ALLF.filter(f=>!ID_KEYS.includes(f.k)).map(fld).join("")}</div></details>
+      <details class="sec" id="b-optsec"><summary><span id="b-opt-t">Otros campos de la hoja</span><span class="cnt" id="b-optcnt"></span></summary><p class="hint" style="margin:0 14px 8px" id="b-opt-h"></p><div class="bgrid" id="b-optgrid" style="opacity:.55"></div></details>`
     :`<section class="tool" id="b-dict"><h3>Dictar en vez de escribir</h3>
       <label class="bfl" for="bd-id"><span>Identificación (se interpreta en el celular; no sale a Claude)</span>
         <textarea id="bd-id" style="min-height:70px" placeholder="Ej.: nombre María Pérez Gómez, cédula 1 2 3 4 5, mujer, nació el 3 de marzo de 1990, teléfono 310…, comunidad Querarí, jefe de hogar, EPS Mallamas subsidiado, hogar número 4"></textarea></label>
@@ -1970,15 +1972,20 @@ function base(pref,opts){
     const p=parseFloat(v("PESO")),t=parseFloat(String(v("TALLA")).replace(",","."));const tm=t>3?t/100:t;
     set("IMC",p>0&&tm>0.3&&tm<2.5?(p/(tm*tm)).toFixed(1):"");
     const sx=v("GENERO");
-    form.querySelectorAll("[data-wrap]").forEach(w=>{let show=true;if(w.dataset.if&&v(w.dataset.if)!==w.dataset.ifv)show=false;if(w.dataset.sx&&sx&&w.dataset.sx!==sx)show=false;if(w.dataset.ed&&ed){const[a,b]=w.dataset.ed.split("-").map(Number);if(ed.y<a||ed.y>b)show=false}w.hidden=!show})};
+    form.querySelectorAll("[data-wrap]").forEach(w=>{let show=true;if(w.dataset.if&&v(w.dataset.if)!==w.dataset.ifv)show=false;if(w.dataset.sx&&sx&&w.dataset.sx!==sx)show=false;const ey=ed?ed.y:parseFloat(v("EDAD"));if(w.dataset.ed&&Number.isFinite(ey)){const[a,b]=w.dataset.ed.split("-").map(Number);if(ey<a||ey>b)show=false}w.hidden=!show})};
   form.addEventListener("input",recompute);form.addEventListener("change",recompute);recompute();
   if(RV){const {falt}=revisar(form,false),fg=$("b-falta-grid");
     if(!$("b-com").value.trim())fg.append($("b-comw"));
     falt.forEach(f=>{const w=form.querySelector(`[data-wrap="${CSS.escape(f.k)}"]`);if(w)fg.append(w)});
     const og=$("b-optgrid"),vacio=w=>{const el=w.querySelector("[data-f]");if(!el||w.hidden)return false;if(el.dataset.multi)return!el.querySelector('[aria-pressed="true"]');return el.dataset.na!=="1"&&!el.readOnly&&!String(el.value||"").trim()};
-    [$("b-hcgrid"),$("b-idgrid")].forEach(g=>[...g.querySelectorAll("[data-wrap]")].forEach(w=>{if(vacio(w)&&!REQK.includes(w.dataset.wrap))og.append(w)}));
+    const REL=relDe(MD);
+    [$("b-hcgrid"),$("b-idgrid")].forEach(g=>[...g.querySelectorAll("[data-wrap]")].forEach(w=>{const k=w.dataset.wrap;if(REQK.includes(k))return;if(REL?!REL.includes(k):vacio(w))og.append(w)}));
+    if(REL){[...$("b-idgrid").querySelectorAll("[data-wrap]")].forEach(w=>{if(REL.includes(w.dataset.wrap)&&!vacio(w))return;if(!REQK.includes(w.dataset.wrap)&&vacio(w))$("b-hcgrid").append(w)})}
+    {const hg=$("b-hcgrid"),va=[...hg.querySelectorAll("[data-wrap]")].filter(w=>vacio(w)&&!REQK.includes(w.dataset.wrap));if(va.length){const t=document.createElement("p");t.className="lab";t.style.cssText="grid-column:1/-1;margin:10px 0 0";t.textContent="Sin dato todavía (opcional: llénalo solo si lo tienes)";hg.append(t);va.forEach(w=>{w.style.opacity=".6";hg.append(w)})}}
+    $("b-opt-t").textContent=REL?"Campos de la hoja que no son de esta consulta":"Otros datos de la caracterización (opcionales)";
+    $("b-opt-h").textContent=REL?"No hace falta llenarlos para "+M[MD].title.toLowerCase()+": llegan en blanco a la hoja. Ábrelo solo si quieres actualizar algo de la caracterización.":"No son obligatorios: llénalos solo si los tienes. Lo vacío llega en blanco a la hoja.";
     const n=g=>g.querySelectorAll("[data-wrap]:not([hidden])").length+(g.contains($("b-comw"))?1:0);
-    $("b-optcnt").textContent=n(og)+" vacíos";$("b-optsec").hidden=!n(og);
+    $("b-optcnt").textContent=n(og)+(REL?" campos":" vacíos");$("b-optsec").hidden=!n(og);
     const nf=n(fg);$("b-falta-h").textContent=nf?(nf===1?"Falta 1 dato":"Faltan "+nf+" datos"):"";$("b-falta").hidden=!nf;
     $("b-idcnt").textContent=n($("b-idgrid"))+" datos";$("b-hccnt").textContent=n($("b-hcgrid"))+" datos";
     if(!nf)$("b-st").textContent="No falta nada. Revisa y toca Guardar y enviar."}
