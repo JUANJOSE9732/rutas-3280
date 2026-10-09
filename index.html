@@ -688,6 +688,8 @@ function home(){
   $("t-base").onclick=()=>{baseEdit=null;base({});window.scrollTo(0,0)};
   document.querySelectorAll("[data-ag]").forEach(b=>b.onclick=()=>{if(b.dataset.armed!=="1"){b.dataset.armed="1";b.textContent="¿Seguro? Toca otra vez";return}setAgenda(agenda().map(x=>x.id===b.dataset.ag?Object.assign(x,{ok:hoy()}):x));home()});
   ["f-edad","f-uni","f-sexo","f-est"].forEach(i=>$(i).addEventListener("input",sugerir));
+  const rapido=()=>{const P=pac(),v=parseFloat($("f-edad").value),u=$("f-uni").value;if(Number.isFinite(v)&&u==="a")P.__edad=String(v);else delete P.__edad;if(!P["GENERO"]||P.__sxr)Object.assign(P,{GENERO:$("f-sexo").value==="m"?"M":"F",__sxr:1});setPac(P)};
+  ["f-edad","f-uni","f-sexo"].forEach(i=>$(i).addEventListener("change",rapido));
   const box=$("pac-f");wireNA(box);
   const pinta=()=>{const P=pac(),nm=P["NOMBRE COMPLETO"];
     $("pacsum").innerHTML=nm?`<b>${esc(nm)}</b>${pacResumen().map(x=>`<span>${x}</span>`).join("")}<button class="lnk" id="pac-new" type="button">Nueva persona</button>`:"";
@@ -697,7 +699,7 @@ function home(){
     const e=edadDe(P["FECHA NACIMIENTO"]);if(e){if(e.y>=1){$("f-edad").value=e.y;$("f-uni").value="a"}else{$("f-edad").value=e.tm;$("f-uni").value="m"}}
     if(P["GENERO"])$("f-sexo").value=P["GENERO"]==="F"?"f":"m";
     const conocido=!!(e&&P["GENERO"]);["f-edad","f-uni","f-sexo"].forEach(i=>$(i).closest("label").hidden=conocido);sugerir()};
-  const save=()=>{const {datos}=revisar(box,false),o={};ID_KEYS.forEach(k=>{if(datos[k]&&!(k==="PUEBLO"&&datos[k]==="N/A"))o[k]=["NOMBRE COMPLETO","DIRECCION","EAPB NOMBRE","PUEBLO"].includes(k)?datos[k].toUpperCase():datos[k]});const c=$("pac-com").value.trim().toUpperCase();if(c)o.__com=c;setPac(o);pinta()};
+  const save=()=>{const {datos}=revisar(box,false),o={};ID_KEYS.forEach(k=>{if(datos[k]&&!(k==="PUEBLO"&&datos[k]==="N/A"))o[k]=["NOMBRE COMPLETO","DIRECCION","EAPB NOMBRE","PUEBLO"].includes(k)?datos[k].toUpperCase():datos[k]});const c=$("pac-com").value.trim().toUpperCase();if(c)o.__com=c;const P0=pac();if(P0.__edad)o.__edad=P0.__edad;if(!o["GENERO"]&&P0.__sxr){o["GENERO"]=P0["GENERO"];o.__sxr=1}setPac(o);pinta()};
   box.addEventListener("input",save);box.addEventListener("change",save);
   const recomp=()=>{const sx=(box.querySelector('[data-f="ETNIA"]')||{}).value;box.querySelectorAll("[data-wrap]").forEach(w=>{if(w.dataset.if)w.hidden=(box.querySelector(`[data-f="${CSS.escape(w.dataset.if)}"]`)||{}).value!==w.dataset.ifv})};
   box.addEventListener("change",recomp);recomp();
@@ -1904,7 +1906,7 @@ function hist(k){try{return JSON.parse(S.get("dn2_hist_"+k)||"[]")}catch(e){retu
 function addHist(k,v){if(!v||v==="N/A")return;const h=[v].concat(hist(k).filter(x=>x!==v)).slice(0,8);S.set("dn2_hist_"+k,JSON.stringify(h))}
 function pac(){try{return JSON.parse(S.get("dn2_pac")||"{}")}catch(e){return{}}}
 function setPac(o){S.set("dn2_pac",JSON.stringify(o))}
-function identDe(){const o=Object.assign({},pac());delete o.__com;return o}
+function identDe(){const o=Object.assign({},pac());delete o.__com;if(o.__edad&&!o["FECHA NACIMIENTO"])o["EDAD"]=o.__edad;delete o.__edad;delete o.__sxr;return o}
 function pacCom(){return pac().__com||""}
 function pacEdad(ref){const P=pac(),e=edadDe(P["FECHA NACIMIENTO"],ref);return e?(e.y>=1?e.y+" años":e.tm+" meses"):""}
 function pacResumen(){const P=pac(),b=[];if(P["TIPO"]||P["DOCUMENTO ID."])b.push(esc((P["TIPO"]||"")+" "+(P["DOCUMENTO ID."]||"")));const e=pacEdad();if(e)b.push(e);if(P["GENERO"])b.push(P["GENERO"]==="F"?"mujer":"hombre");if(P.__com)b.push(esc(P.__com));if(P["ETNIA"])b.push(esc(P["PUEBLO"]||P["ETNIA"].toLowerCase()));return b}
@@ -1933,7 +1935,7 @@ function base(pref,opts){
   ${RV?"":`<details class="sec" id="b-reg" ${rec?"open":""}><summary><span>${rec?"Editar registro pendiente":"Registrar sin consulta (censo o visita)"}</span></summary><div style="padding:0 14px 14px">`}
   <form id="bform" class="bform" novalidate>
     <div class="box miss" id="b-miss" hidden><h3></h3><ul></ul></div>
-    ${RV?`<section class="tool" id="b-falta"><h3 id="b-falta-h">Falta completar</h3><p class="hint" style="margin:0">No salió de la historia. Escríbelo, díctalo o toca N/A si no aplica.</p><div class="bgrid" id="b-falta-grid"></div>
+    ${RV?`<section class="tool" id="b-falta"><h3 id="b-falta-h">Falta completar</h3><p class="hint" style="margin:0">Es la identificación: no se llenó en «¿A quién vas a atender?» al empezar. Llénala aquí una vez y queda guardada para los demás módulos.</p><div class="bgrid" id="b-falta-grid"></div>
       ${dictBox("Dictar lo que falta","Ej.: cédula 1 2 3 4 5, teléfono 310…, última consulta de crónicos 10 de marzo, canalizado a odontología")}</section>
       <details class="sec" id="b-idsec"><summary><span>Identificación</span><span class="cnt" id="b-idcnt"></span></summary><div class="bgrid" id="b-idgrid">${comL}${ALLF.filter(f=>ID_KEYS.includes(f.k)).map(fld).join("")}</div></details>
       <details class="sec" id="b-hcsec" open><summary><span>Tomado de la historia: revisa</span><span class="cnt" id="b-hccnt"></span></summary><div class="bgrid" id="b-hcgrid">${ALLF.filter(f=>!ID_KEYS.includes(f.k)).map(fld).join("")}</div></details>
@@ -2006,7 +2008,7 @@ function base(pref,opts){
     id=id||uid();if(MD)S.set(key(MD,"regid"),id);
     const reg={id,comunidad,datos:Object.assign({ID_REGISTRO:id,FECHA_REGISTRO:new Date().toISOString().slice(0,16).replace("T"," "),REGISTRADO_POR:cf.who||""},datos)};
     const q=cola().filter(r=>r.id!==id);q.push(reg);setCola(q);agendaGuardar(id,comunidad,datos);
-    if(baseOpts.mod){const ident={};ID_KEYS.forEach(k=>{if(datos[k]&&datos[k]!=="N/A")ident[k]=datos[k]});ident.__com=comunidad;setPac(ident)}
+    if(baseOpts.mod){const ident={};ID_KEYS.forEach(k=>{if(datos[k]&&datos[k]!=="N/A")ident[k]=datos[k]});ident.__com=comunidad;if(!ident["FECHA NACIMIENTO"]&&datos["EDAD"]&&datos["AA / MM"]==="AÑOS")ident.__edad=String(datos["EDAD"]);setPac(ident)}
     S.set("dn2_ultcom",comunidad);const cs=new Set((S.get("dn2_coms")||"").split("|").filter(Boolean));cs.add(comunidad);S.set("dn2_coms",[...cs].join("|"));
     baseEdit=null;base({});$("syncTxt").textContent=conf().url?"Guardado. Enviando a la hoja…":"Guardado en el celular como pendiente. Para que llegue a la hoja falta configurar la Conexión.";sync(true)};
   syncTxt();
@@ -2066,7 +2068,8 @@ function revisar(form,marcar){const datos={},falt=[];if(marcar)form.querySelecto
     let val=f.t==="multi"?[...el.querySelectorAll('[aria-pressed="true"]')].map(b=>b.dataset.o).join(", "):el.dataset.na==="1"?"N/A":el.value.trim();
     const incompleta=f.t==="date"&&!val&&el.validity&&el.validity.badInput;
     if(w&&w.hidden)val="N/A";
-    if(!val&&f.t!=="auto"&&REQK.includes(f.k)){falt.push(Object.assign({},f,{inc:incompleta}));if(marcar&&w){w.classList.add("falta");const det=w.closest("details");if(det)det.open=true}}
+    const edOk=f.k==="FECHA NACIMIENTO"&&(form.querySelector('[data-f="EDAD"]')||{}).value;
+    if(!val&&f.t!=="auto"&&REQK.includes(f.k)&&!edOk){falt.push(Object.assign({},f,{inc:incompleta}));if(marcar&&w){w.classList.add("falta");const det=w.closest("details");if(det)det.open=true}}
     datos[f.k]=val}
   return {datos,falt}}
 function mostrarFaltan(falt){const mb=$("b-miss");if(!mb)return;if(!falt.length){mb.hidden=true;return}mb.hidden=false;
