@@ -1305,8 +1305,7 @@ const OPC={
  "__com":["QUERARÍ","VEREDA ORIENTE","BERLIN","SANTA MARTA 2","CARTAGENITA","MITÚ"],
  "EAPB NOMBRE":["MALLAMAS","NUEVA EPS","SANITAS","COOSALUD","ASOCIACION INDIGENA DEL CAUCA","SIN EPS"],
  "PUEBLO":["CUBEO","DESANO","TUKANO","WANANO","PIRATAPUYO","TUYUCA","SIRIANO","BARASANA","CURRIPACO","PUINAVE","TATUYO","CARAPANA"],
- "DIRECCION":["CENTRO","SECTOR ALTO","SECTOR BAJO","ORILLA DEL RÍO","CERCA AL PUESTO DE SALUD","CERCA A LA ESCUELA"],
- "CONSECUTIVO":["1","2","3","4","5","6","7","8","9","10"]};
+ "DIRECCION":["CENTRO","SECTOR ALTO","SECTOR BAJO","ORILLA DEL RÍO","CERCA AL PUESTO DE SALUD","CERCA A LA ESCUELA"]};
 const ETQ={GENERO:{F:"Mujer",M:"Hombre"},TIPO:{CC:"CC cédula",TI:"TI tarjeta",RC:"RC registro civil",CE:"CE extranjería",PPT:"PPT",PEP:"PEP",MS:"MS menor sin id.",AS:"AS adulto sin id."}};
 function hist(k){try{return JSON.parse(S.get("dn2_hist_"+k)||"[]")}catch(e){return[]}}
 function addHist(k,v){if(!v||v==="N/A")return;const h=[v].concat(hist(k).filter(x=>x!==v)).slice(0,8);S.set("dn2_hist_"+k,JSON.stringify(h))}
