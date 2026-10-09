@@ -1498,10 +1498,28 @@ function hcSecciones(id){const m=M[id],P=pac(),f=S.get(key(id,"fecha"))||hoy(),o
   const n=S.get(key(id,"nota"));if(n)out.push({t:"Nota organizada",x:n});
   const r=anCargar(id);if(r){const L=(r.rutas||[]).map(z=>"- "+z.ruta+": "+z.accion+" ("+({hoy:"hoy",pronto:"pronto",programado:"programar"}[z.cuando]||z.cuando)+")");if(r.pendientes&&r.pendientes.length)L.push("Pendientes: "+r.pendientes.join("; "));if(L.length)out.push({t:"Plan y rutas",x:L.join("\n")})}
   return out}
-function hcWord(id){const S2=hcSecciones(id),P=pac(),m=M[id],f=S.get(key(id,"fecha"))||hoy();
-  const html=`<html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:w="urn:schemas-microsoft-com:office:word"><head><meta charset="utf-8"><title>Historia</title><style>body{font-family:Arial;font-size:11pt}h1{font-size:14pt}h2{font-size:12pt;margin:14pt 0 4pt;border-bottom:1px solid #999}p{margin:2pt 0}</style></head><body><h1>${esc(m.title)} — ${esc(f.split("-").reverse().join("/"))}</h1>${S2.map(z=>`<h2>${esc(z.t)}</h2>${z.x.split("\n").map(l=>`<p>${esc(l)}</p>`).join("")}`).join("")}`;
-  const nom=("HC_"+(P["NOMBRE COMPLETO"]||"persona")+"_"+m.title+"_"+f).replace(/[^\wÁÉÍÓÚÑáéíóúñ-]+/g,"_")+".doc";
-  try{const bl=new Blob(["\ufeff"+html],{type:"application/msword"}),u=URL.createObjectURL(bl),el=document.createElement("a");el.href=u;el.download=nom;document.body.append(el);el.click();setTimeout(()=>{URL.revokeObjectURL(u);el.remove()},1500);return true}catch(e){return false}}
+function crc32(u){let c,t=crc32.t;if(!t){t=crc32.t=[];for(let n=0;n<256;n++){c=n;for(let k=0;k<8;k++)c=c&1?0xEDB88320^(c>>>1):c>>>1;t[n]=c>>>0}}c=0xFFFFFFFF;for(let i=0;i<u.length;i++)c=t[(c^u[i])&255]^(c>>>8);return(c^0xFFFFFFFF)>>>0}
+function zipStore(files){const te=new TextEncoder(),parts=[],cen=[];let off=0;
+  const w16=(v)=>[v&255,(v>>8)&255],w32=(v)=>[v&255,(v>>8)&255,(v>>16)&255,(v>>>24)&255];
+  for(const[f,txt]of files){const n=te.encode(f),d=te.encode(txt),c=crc32(d);
+    const h=new Uint8Array([0x50,0x4b,3,4,...w16(20),0,0,0,0,0,0,0x21,0,...w32(c),...w32(d.length),...w32(d.length),...w16(n.length),0,0]);
+    parts.push(h,n,d);
+    cen.push(new Uint8Array([0x50,0x4b,1,2,...w16(20),...w16(20),0,0,0,0,0,0,0x21,0,...w32(c),...w32(d.length),...w32(d.length),...w16(n.length),0,0,0,0,0,0,0,0,0,0,0,0,...w32(off)]),n);
+    off+=h.length+n.length+d.length}
+  const cl=cen.reduce((x,y)=>x+y.length,0);
+  return new Blob([...parts,...cen,new Uint8Array([0x50,0x4b,5,6,0,0,0,0,...w16(files.length),...w16(files.length),...w32(cl),...w32(off),0,0])],{type:"application/vnd.openxmlformats-officedocument.wordprocessingml.document"})}
+function hcDocx(titulo,secs){const x=t=>String(t).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;");
+  const par=(t,b,sz)=>`<w:p><w:r><w:rPr><w:rFonts w:ascii="Arial" w:hAnsi="Arial"/>${b?"<w:b/>":""}<w:sz w:val="${sz||22}"/></w:rPr><w:t xml:space="preserve">${x(t)}</w:t></w:r></w:p>`;
+  const body=par(titulo,1,28)+secs.map(z=>par("",0)+par(z.t,1,24)+z.x.split("\n").map(l=>par(l,0)).join("")).join("");
+  return zipStore([["[Content_Types].xml",'<?xml version="1.0" encoding="UTF-8" standalone="yes"?><Types xmlns="http://schemas.openxmlformats.org/package/2006/content-types"><Default Extension="rels" ContentType="application/vnd.openxmlformats-package.relationships+xml"/><Default Extension="xml" ContentType="application/xml"/><Override PartName="/word/document.xml" ContentType="application/vnd.openxmlformats-officedocument.wordprocessingml.document.main+xml"/></Types>'],
+    ["_rels/.rels",'<?xml version="1.0" encoding="UTF-8" standalone="yes"?><Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships"><Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/officeDocument" Target="word/document.xml"/></Relationships>'],
+    ["word/document.xml",'<?xml version="1.0" encoding="UTF-8" standalone="yes"?><w:document xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main"><w:body>'+body+'<w:sectPr><w:pgSz w:w="12240" w:h="15840"/><w:pgMar w:top="1134" w:right="1134" w:bottom="1134" w:left="1134" w:header="708" w:footer="708" w:gutter="0"/></w:sectPr></w:body></w:document>']])}
+let dlcap;(async()=>{try{dlcap=window.claude?await window.claude.use("downloads"):null}catch(e){dlcap=null}})();
+async function hcWord(id){const S2=hcSecciones(id),P=pac(),m=M[id],f=S.get(key(id,"fecha"))||hoy();
+  const bl=hcDocx(m.title+" — "+f.split("-").reverse().join("/"),S2);
+  const nom=("HC_"+(P["NOMBRE COMPLETO"]||"persona")+"_"+m.title+"_"+f).replace(/[^\wÁÉÍÓÚÑáéíóúñ-]+/g,"_")+".docx";
+  if(dlcap){try{await dlcap.save({filename:nom,data:bl});return "ok"}catch(e){return e&&e.code==="declined"?"no":"err"}}
+  try{const u=URL.createObjectURL(bl),el=document.createElement("a");el.href=u;el.download=nom;document.body.append(el);el.click();setTimeout(()=>{URL.revokeObjectURL(u);el.remove()},1500);return "ok"}catch(e){return "err"}}
 function hcPanel(id){const S2=hcSecciones(id);
   return `<section class="tool" id="hc"><h3>Exportar la historia</h3><p class="note-src" style="margin:0">Para pasarla a la historia clínica oficial: descárgala en Word o copia cada parte.</p>
   <div class="btns"><button class="btn primary" type="button" id="hc-word" style="flex:none">Descargar en Word</button><button class="btn" type="button" id="hc-all" style="flex:none">Copiar todo</button></div><p class="status" id="hc-st"></p>
@@ -1511,7 +1529,7 @@ function hcWire(id){if(!$("hc"))return;const S2=hcSecciones(id),st=$("hc-st");
   const cp=t=>{try{navigator.clipboard.writeText(t).then(()=>st.textContent="Copiado. Pégalo en la historia oficial.",()=>st.textContent="No se pudo copiar; mantén presionado el texto para copiarlo.")}catch(e){st.textContent="No se pudo copiar; mantén presionado el texto para copiarlo."}};
   document.querySelectorAll("[data-hc]").forEach(b=>b.onclick=ev=>{ev.preventDefault();ev.stopPropagation();cp(S2[+b.dataset.hc].x)});
   $("hc-all").onclick=()=>cp(S2.map(z=>z.t.toUpperCase()+"\n"+z.x).join("\n\n"));
-  $("hc-word").onclick=()=>{st.textContent=hcWord(id)?"Descargado. Ábrelo con Word o Google Docs.":"Este navegador no permitió la descarga; usa Copiar."}}
+  $("hc-word").onclick=async()=>{const r=await hcWord(id);st.textContent=r==="ok"?"Listo. Ábrelo con Word o Google Docs.":r==="no"?"Descarga cancelada.":"Aquí no se pudo descargar; usa Copiar."}}
 function paneEntr(){
   const id=st.mod,q=ivFor(id),a=ivAns(id),i0=S.get(key(id,"ivi"));let i=Math.max(0,+(i0||0));if(i>=q.length)i=q.length;
   const answered=q.filter((_,k)=>(a[k]||"").trim()).length;
