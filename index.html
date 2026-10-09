@@ -188,6 +188,9 @@ textarea{width:100%;font:inherit;font-size:1.05rem;line-height:1.55;padding:14px
 .popts button{border:1.5px solid var(--accent);background:var(--surface);color:var(--ink);border-radius:999px;padding:6px 12px;font-weight:700;font-size:.85rem}
 .popts button[aria-pressed="true"]{background:var(--accent);color:var(--accent-ink)}
 .popts .ph{width:100%;font-size:.72rem;color:var(--muted);font-weight:700;letter-spacing:.04em;text-transform:uppercase}
+.guia{border:1.5px solid var(--accent);border-radius:10px;padding:12px 14px;background:var(--surface);display:flex;flex-direction:column;gap:6px}
+.guia h3{margin:0;font-size:.78rem;letter-spacing:.08em;text-transform:uppercase;color:var(--accent)}
+.guia ul{margin:0;padding-left:20px}.guia li{margin:2px 0}
 .narow{display:flex;gap:6px;min-width:0}.narow input{flex:1 1 auto;min-width:0}
 .na{border:1.5px solid var(--line);background:var(--surface);color:var(--muted);border-radius:8px;padding:0 10px;font-size:.8rem;font-weight:700}
 .na[aria-pressed="true"]{background:var(--ink);color:var(--bg);border-color:var(--ink)}
@@ -1016,6 +1019,26 @@ async function analizar(id){const st2=$("an-st");let r=null;
     catch(e){}}
   if(!r){r=anLocal(id);st2.textContent=sample?"No se pudo usar Claude; se analizó con reglas básicas.":""}else st2.textContent="";
   anGuardar(id,r);$("an-out").innerHTML=anHTML(r);anWire(id)}
+/* guías cortas para responderle en el momento, según la opción escogida */
+const GUIA={
+ "Dudas de fertilidad":{t:"Para responderle: dudas sobre fertilidad",
+  p:["Es normal que tarde: de cada 10 parejas sin planificar, unas 8 logran el embarazo en el primer año y 9 en dos años.",
+     "Consultar si no lo ha logrado después de 12 meses de relaciones sin planificar (6 meses si ella tiene 35 años o más). Antes, si no le viene la regla, le viene muy irregular, tuvo infecciones en la pelvis u operaciones, o la pareja tiene algún problema conocido.",
+     "Días fértiles: los de la mitad del ciclo. En ciclos de 28 días, más o menos entre el día 10 y el 16 contando desde el primer día de la regla. Basta tener relaciones cada 2 o 3 días durante todo el mes; no hace falta calcular exacto.",
+     "Después de planificar: con pastillas, DIU o implante la fertilidad vuelve en pocas semanas. Con la inyección de cada 3 meses puede tardar varios meses más (a veces hasta un año); eso es esperado.",
+     "La dificultad no siempre es de la mujer: en muchas parejas es del hombre o de los dos, así que también se valora a la pareja.",
+     "Ayudan: peso adecuado, no fumar ni tomar alcohol, tratar las infecciones y empezar el ácido fólico desde ya.",
+     "Si cumple el tiempo o tiene algún factor: remitir a medicina para estudio de la pareja."],
+  r:"Se brinda educación sobre tiempo esperado para lograr el embarazo, días fértiles, retorno de la fertilidad según el método previo, factor masculino y criterios de consulta por infertilidad."},
+ "Quiere embarazarse":{t:"Para responderle: cómo prepararse para el embarazo",
+  p:["Empezar ácido fólico desde ahora, al menos 3 meses antes de quedar embarazada.",
+     "Completar las vacunas antes del embarazo.",
+     "Llegar con buen peso, sin tabaco ni alcohol (tampoco chicha fuerte), y tratar infecciones y anemia.",
+     "Si tuvo un parto o cesárea, esperar al menos 18 meses antes del siguiente embarazo.",
+     "Mientras se prepara, seguir planificando si aún no es el momento.",
+     "Cuando le falte la regla, venir pronto al control prenatal (antes de la semana 10)."],
+  r:"Se brinda educación sobre preparación para el embarazo: ácido fólico, vacunación, peso adecuado, evitar tabaco y alcohol, intervalo intergenésico y control prenatal temprano."}
+};
 function paneEntr(){
   const id=st.mod,q=ivFor(id),a=ivAns(id),i0=S.get(key(id,"ivi"));let i=Math.max(0,+(i0||0));if(i>=q.length)i=q.length;
   const answered=q.filter((_,k)=>(a[k]||"").trim()).length;
@@ -1039,6 +1062,7 @@ function paneEntr(){
     <h2 style="font-family:var(--f-body);font-size:1.25rem;line-height:1.35;font-weight:700">${esc(x.q)}</h2>
     ${x.h?`<p class="hint" style="margin:0">${esc(x.h)}</p>`:""}
     ${x.c?`<div class="sugg">${x.c.map(c=>{const [l,t]=c.split("|");return `<button data-c="${esc(t||l)}" title="${esc(t||l)}">${esc(l)}</button>`}).join("")}</div>`:""}
+    <div class="guia" id="iv-g" hidden></div>
     <label for="iv-a" class="lab" style="margin:0">${x.t==="do"?"Hallazgo: toca una opción o dicta lo que encontraste":"Respuesta: toca una opción o dicta lo que respondió"}</label>
     <textarea id="iv-a" style="min-height:120px">${esc(a[i]||"")}</textarea>
     <div id="iv-mic">${micUI()}</div>
@@ -1051,6 +1075,11 @@ function paneEntr(){
     if(x.ck){const c=checks(id),v=ta.value.trim();if(v&&!/^(no realizado|no aplica)/i.test(v))c[x.ck]=1;else delete c[x.ck];S.set(key(id,"chk"),JSON.stringify(c))}
     const hit=x.al&&ta.value.trim()&&x.al.test(ta.value);$("iv-al").hidden=!hit;if(hit)$("iv-alt").textContent=x.am};
   ta.addEventListener("input",save);wireMic($("iv-mic"),ta,save);
+  const guia=()=>{const lbls=[...document.querySelectorAll("[data-c]")].filter(b=>ta.value.includes(b.dataset.c)).map(b=>b.textContent);const g=lbls.map(l=>GUIA[l]).filter(Boolean)[0],box=$("iv-g");if(!g){box.hidden=true;return}
+    box.innerHTML=`<h3>${esc(g.t)}</h3><ul>${g.p.map(x=>`<li>${esc(x)}</li>`).join("")}</ul><div class="btns"><button class="btn" type="button" id="iv-gr">${ta.value.includes(g.r)?"✓ Registrado en la respuesta":"Registrar que se educó"}</button></div>`;box.hidden=false;
+    $("iv-gr").onclick=()=>{if(!ta.value.includes(g.r)){ta.value=ta.value.trim()+" "+g.r;save()}$("iv-gr").textContent="✓ Registrado en la respuesta"}};
+  ta.addEventListener("input",guia);setTimeout(guia,0);
+  document.querySelectorAll("[data-c]").forEach(b=>b.addEventListener("click",()=>setTimeout(guia,0)));
   document.querySelectorAll("[data-c]").forEach(b=>b.onclick=()=>{const c=b.dataset.c,v=ta.value.trim();ta.value=v?(/[.;:]$/.test(v)?v+" ":v+". ")+c:c;save();ta.focus();const m=/_+/.exec(c);if(m){const off=ta.value.length-c.length+m.index;ta.setSelectionRange(off,off+m[0].length)}});
   const go=n=>{stopRec();save();S.set(key(id,"ivi"),String(n));paneEntr();const t=$("iv-a");if(t)t.focus();window.scrollTo(0,0)};
   $("iv-next").onclick=()=>go(i+1);$("iv-prev").onclick=()=>go(i-1);$("iv-skip").onclick=()=>{S.set(key(id,"ivi"),String(i+1));paneEntr()};
