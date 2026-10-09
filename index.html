@@ -165,6 +165,17 @@ textarea{width:100%;font:inherit;font-size:1.05rem;line-height:1.55;padding:14px
 .pac b{color:var(--ink);font-size:1rem}
 .pacbar{display:flex;flex-wrap:wrap;gap:4px 10px;align-items:baseline;background:var(--accent-soft);border-radius:10px;padding:8px 12px;font-size:.88rem;color:var(--muted);margin-bottom:10px}
 .pacbar b{color:var(--ink)}
+.gx{border:2px solid var(--accent);border-radius:12px;padding:12px;display:flex;flex-direction:column;gap:8px;background:var(--surface);margin-bottom:10px}
+.gx-top{display:flex;justify-content:space-between;align-items:center;gap:8px}
+.gx-lab{font-size:1.3rem;font-weight:700;line-height:1.2}
+.gx-hint{font-size:.85rem;color:var(--muted)}
+.gx-val{font-size:1.15rem;font-weight:700;background:var(--accent-soft);border-radius:8px;padding:8px 10px;min-height:44px}
+.gx-heard{font-size:.85rem;color:var(--muted);min-height:1.2em;font-style:italic}
+.gx-msg{font-size:.9rem;font-weight:700;min-height:1.2em}
+.gx-msg.err{color:var(--miss)} .gx-msg.ok{color:var(--accent)}
+.gx-mic{font-size:.8rem;font-weight:700;color:var(--accent)}
+.gx .btns .btn{flex:1 1 auto;padding:10px 12px;font-size:.92rem}
+.pgrid .gx-on{outline:3px solid var(--accent);outline-offset:3px;border-radius:6px}
 .narow{display:flex;gap:6px;min-width:0}.narow input{flex:1 1 auto;min-width:0}
 .na{border:1.5px solid var(--line);background:var(--surface);color:var(--muted);border-radius:8px;padding:0 10px;font-size:.8rem;font-weight:700}
 .na[aria-pressed="true"]{background:var(--ink);color:var(--bg);border-color:var(--ink)}
@@ -620,8 +631,22 @@ function home(){
     <p class="lab" id="fh">¿A quién vas a atender?</p>
     <div class="pac" id="pacsum"></div>
     <details class="pdet" id="pac-det"><summary id="pac-sumt"></summary>
-      <textarea id="pac-dic" rows="2" style="min-height:52px" placeholder="Dicta: nombre…, cédula…, nació el…, mujer, teléfono…, comunidad…, indígena cubeo, jefe de hogar, EPS… subsidiado, hogar número…"></textarea>
-      <div class="pdrow"><div id="pac-mic">${micUI(1)}</div><button class="btn" type="button" id="pac-go">Llenar con lo dictado</button><span class="note-src" id="pac-st"></span></div>
+      <button class="btn primary" type="button" id="gx-start" style="width:100%;margin-bottom:6px">Dictar campo por campo</button>
+      <div class="gx" id="gx" hidden>
+        <div class="gx-top"><span class="note-src" id="gx-n"></span><span class="gx-mic" id="gx-mic"></span><button class="lnk" type="button" id="gx-stop">Terminar</button></div>
+        <div class="box warn" id="gx-ok" hidden><p style="margin:0 0 8px">¿Quién va a responder? Si habla ella, pídele permiso: el audio se convierte en texto en los servidores de Google.</p><div class="btns"><button type="button" class="btn primary" id="gx-ok-me">Hablo yo</button><button type="button" class="btn" id="gx-ok-yes">Ella aceptó</button><button type="button" class="btn" id="gx-ok-no">No aceptó</button></div></div>
+        <div class="gx-lab" id="gx-lab"></div><div class="gx-hint" id="gx-hint"></div>
+        <div class="gx-val" id="gx-val" aria-live="polite"></div>
+        <div class="gx-heard" id="gx-heard"></div><div class="gx-msg" id="gx-msg" aria-live="polite"></div>
+        <input id="gx-txt" placeholder="O escríbelo aquí y pulsa Enter" autocomplete="off">
+        <div class="btns"><button class="btn" type="button" id="gx-prev">← Atrás</button><button class="btn" type="button" id="gx-na">No aplica</button><button class="btn" type="button" id="gx-next">Siguiente →</button></div>
+        <p class="note-src" style="margin:0">Di el dato y pasa solo al siguiente. Órdenes: «siguiente», «atrás», «borrar», «no tiene», «confirmar», «listo».</p>
+      </div>
+      <span class="note-src" id="pac-st"></span>
+      <details style="margin:4px 0 8px"><summary class="note-src" style="cursor:pointer">O dicta todo de corrido</summary>
+        <textarea id="pac-dic" rows="2" style="min-height:52px;margin-top:6px" placeholder="Nombre…, cédula…, nació el…, mujer, teléfono…, comunidad…, indígena cubeo, jefe de hogar, EPS… subsidiado, hogar número…"></textarea>
+        <div class="pdrow"><div id="pac-mic">${micUI(1)}</div><button class="btn" type="button" id="pac-go">Llenar con lo dictado</button></div>
+      </details>
       <div class="pgrid" id="pac-f"><label class="bfl" for="pac-com"><span>Comunidad o vereda</span><input id="pac-com" value="${esc(pacCom())}" placeholder="QUERARÍ"></label>${ALLF.filter(f=>ID_KEYS.includes(f.k)).map(f=>campo(f,identDe())).join("")}</div>
       <p class="note-src" style="margin:8px 0 0">Se escribe una sola vez y sirve para todos los módulos. Va solo a la base de datos: no pasa por Claude ni entra en la nota (la nota solo usa edad, sexo, comunidad y etnia).</p>
     </details>
@@ -657,6 +682,7 @@ function home(){
   box.addEventListener("change",recomp);recomp();
   wireMic($("pac-mic"),$("pac-dic"));
   $("pac-go").onclick=()=>{stopRec();const v=parseIdent($("pac-dic").value);if(v.__com){$("pac-com").value=v.__com;delete v.__com}const n=llenar(box,v);recomp();save();$("pac-st").textContent=n?`Se llenaron ${n} dato(s).`:"No reconocí datos. Prueba «cédula 1234, nació el 3 de marzo de 1990»."};
+  $("gx-start").onclick=()=>guiado(box,{save,recomp});
   if(!pac()["NOMBRE COMPLETO"])$("pac-det").open=true;
   pinta();
   window.scrollTo(0,0);
@@ -747,6 +773,105 @@ function paneHerr(){
 }
 function hhResumen(id){let hh={};try{hh=JSON.parse(S.get(key(id,"hh"))||"{}")}catch(e){}const ks=Object.keys(hh);if(!ks.length)return"";let s=0;const it=ks.map(k=>{s+=HH[+k][1];return HH[+k][0]+" ("+HH[+k][1]+")"});return "Escala de Herrera y Hurtado aplicada: "+s+(s===1?" punto (":" puntos (")+(s>=3?"alto riesgo":"bajo riesgo")+"). Factores: "+it.join("; ")}
 function marcados(id){const m=M[id],ck=checks(id),o=[];m.sections.forEach((s,i)=>s.items.forEach((it,j)=>{if(ck[i+"."+j])o.push(s.t+": "+(it.startsWith("Q:")?"Pregunta realizada – "+it.slice(2):it))}));return o}
+/* ---------- DICTADO CAMPO POR CAMPO ---------- */
+const NW={cero:0,un:1,uno:1,una:1,primero:1,dos:2,tres:3,cuatro:4,cinco:5,seis:6,siete:7,ocho:8,nueve:9,diez:10,once:11,doce:12,trece:13,catorce:14,quince:15,dieciseis:16,diecisiete:17,dieciocho:18,diecinueve:19,veinte:20,veintiun:21,veintiuno:21,veintidos:22,veintitres:23,veinticuatro:24,veinticinco:25,veintiseis:26,veintisiete:27,veintiocho:28,veintinueve:29,treinta:30,cuarenta:40,cincuenta:50,sesenta:60,setenta:70,ochenta:80,noventa:90,cien:100,ciento:100,doscientos:200,trescientos:300,cuatrocientos:400,quinientos:500,seiscientos:600,setecientos:700,ochocientos:800,novecientos:900};
+function plano(t){return String(t||"").toLowerCase().normalize("NFD").replace(/[̀-ͯ]/g,"").replace(/[¿?¡!«»"]/g," ").trim()}
+/* agrupa las palabras de número según la gramática ("mil novecientos noventa y nueve" = 1999; "uno dos tres" = 1|2|3) */
+function grupos(t){const tk=plano(t).replace(/[.,;:]/g," ").split(/\s+/).filter(Boolean),out=[];let g=null,y=false;
+  const flush=()=>{if(g){out.push({n:g.tot+g.part});g=null}y=false};
+  for(const w of tk){
+    if(/^\d+$/.test(w)){flush();out.push({d:w});continue}
+    if(w==="y"&&g&&g.last>=20&&g.last<100&&g.part%10===0){y=true;continue}
+    if(w==="mil"){if(!g)g={tot:0,part:0,last:0};if(g.last===1000){flush();g={tot:0,part:0,last:0}}g.tot+=(g.part||1)*1000;g.part=0;g.last=1000;continue}
+    if(!(w in NW)){flush();out.push({w});continue}
+    const v=NW[w];
+    const ok=g&&(v>=100?g.part===0&&g.last!==v:v>=10?g.part%100===0&&(g.last>=100||g.last===0):(g.part%10===0&&(y||g.last>=100)&&!(g.last>=10&&g.last<100&&!y)));
+    if(!ok){flush();g={tot:0,part:0,last:0}}
+    g.part+=v;g.last=v;if(v<10)y=false;
+    if(v===0){flush()}
+  }
+  flush();return out}
+function soloDigitos(t){return grupos(t).filter(x=>x.d!=null||x.n!=null).map(x=>x.d!=null?x.d:String(x.n)).join("")}
+function conNumeros(t){return grupos(t).map(x=>x.d!=null?x.d:x.n!=null?String(x.n):x.w).join(" ")}
+function limpiaTxt(t,quitar){let s=String(t||"").replace(/[.;:]+$/,"").trim();if(quitar)s=s.replace(quitar,"").trim();return s.toUpperCase()}
+const PUEBLOS=["CUBEO","DESANO","TUKANO","WANANO","PIRATAPUYO","TUYUCA","SIRIANO","BARASANA","CARAPANA","TATUYO","CURRIPACO","PUINAVE","NUKAK","YURUTI","BARA","MAKUNA","TAIWANO","SIONA","KARIJONA","YUHUP","HUPDA"];
+function edadTipo(tipo,fn){const e=edadDe(fn);if(!e||!tipo)return"";const y=e.y;
+  if(tipo==="CC"&&y<18)return`La fecha da ${y} años y el documento es cédula (mayores de 18).`;
+  if(tipo==="TI"&&(y<7||y>17))return`La fecha da ${y} años y la tarjeta de identidad es de 7 a 17 años.`;
+  if(tipo==="RC"&&y>=7)return`La fecha da ${y} años y el registro civil es para menores de 7.`;
+  if(tipo==="AS"&&y<18)return`La fecha da ${y} años y "adulto sin identificación" es para mayores de 18.`;
+  if(tipo==="MS"&&y>=18)return`La fecha da ${y} años y "menor sin identificación" es para menores de 18.`;return""}
+const GX=[
+ {k:"NOMBRE COMPLETO",h:"Nombres y apellidos completos.",p:(t)=>{const v=limpiaTxt(t,/^(se llama|su nombre es|nombre( completo)?( es)?|me llamo)\s*/i);if(/\d/.test(v))return{err:"El nombre no puede llevar números."};if(v.split(/\s+/).length<2)return{err:"Dime al menos un nombre y un apellido."};return{v}}},
+ {k:"TIPO",h:"Cédula, tarjeta de identidad, registro civil, extranjería, PPT… Puedes decir el número enseguida.",p:(t)=>{const x=plano(t);let v="";
+   if(/extranjer|\bce\b/.test(x))v="CE";else if(/cedula|\bcc\b/.test(x))v="CC";else if(/tarjeta|\bti\b/.test(x))v="TI";else if(/registro|\brc\b|nuip/.test(x))v="RC";else if(/ppt|proteccion temporal/.test(x))v="PPT";else if(/\bpep\b|permiso especial/.test(x))v="PEP";else if(/menor sin/.test(x))v="MS";else if(/adulto sin/.test(x))v="AS";
+   if(!v)return{err:"No reconocí el tipo. Di: cédula, tarjeta de identidad, registro civil…"};const d=soloDigitos(t);return d.length>=4?{v,extra:{"DOCUMENTO ID.":d}}:{v}}},
+ {k:"DOCUMENTO ID.",h:"Dígito por dígito o por grupos: «uno cero cero dos…».",p:(t,P)=>{if(MESES.some(m=>plano(t).includes(m)))return{err:"Eso parece una fecha, no un número de documento."};const d=soloDigitos(t);if(!d)return{err:"No oí números."};const tp=P["TIPO"];
+   const r={CC:[5,10],TI:[10,11],RC:[10,11],CE:[4,8]}[tp]||[4,15];if(d.length<r[0]||d.length>r[1])return{v:d,warn:`Quedó con ${d.length} dígitos; ${tp||"este documento"} suele tener ${r[0]===r[1]?r[0]:r[0]+" a "+r[1]}.`};return{v:d}}},
+ {k:"FECHA NACIMIENTO",h:"«Tres de marzo de mil novecientos noventa y nueve».",p:(t,P)=>{const f=fechaTxt(conNumeros(t).replace(/\bprimero\b/,"1"));if(!f)return{err:"No entendí la fecha. Di día, mes y año."};
+   const d=pD(f);if(!d||d>pD(hoy()))return{err:"Esa fecha queda en el futuro."};if(edadDe(f).y>115)return{err:"Esa fecha da más de 115 años."};
+   const w=edadTipo(P["TIPO"],f);return w?{v:f,warn:w}:{v:f}}},
+ {k:"GENERO",h:"Mujer u hombre.",p:(t)=>{const x=plano(t);if(/mujer|femenin|nina\b|^f\b/.test(x))return{v:"F"};if(/hombre|masculin|nino\b|varon|^m\b/.test(x))return{v:"M"};return{err:"Di mujer u hombre."}}},
+ {k:"ETNIA",h:"Indígena (y el pueblo), afrocolombiano, raizal, palenquero, rom o ninguna.",p:(t)=>{const x=plano(t);const pu=PUEBLOS.find(p=>x.includes(p.toLowerCase())||(p==="TUKANO"&&/tucano/.test(x))||(p==="CUBEO"&&/kubeo/.test(x)));
+   if(/indigena/.test(x)||pu)return pu?{v:"INDIGENA",extra:{"PUEBLO":pu}}:{v:"INDIGENA"};if(/afro|negr/.test(x))return{v:"AFROCOLOMBIANO"};if(/raizal/.test(x))return{v:"RAIZAL"};if(/palenquer/.test(x))return{v:"PALENQUERO"};if(/\brom\b|gitan/.test(x))return{v:"ROM"};if(/ningun|mestiz|blanc/.test(x))return{v:"NINGUNA"};return{err:"No reconocí la etnia."}}},
+ {k:"PUEBLO",h:"Cubeo, desano, tukano, wanano, piratapuyo…",p:(t)=>{const x=plano(t);const pu=PUEBLOS.find(p=>x.includes(p.toLowerCase())||(p==="TUKANO"&&/tucano/.test(x))||(p==="CUBEO"&&/kubeo/.test(x)));return{v:pu||limpiaTxt(t,/^(pueblo|es)\s*/i)}}},
+ {k:"__com",l:"Comunidad o vereda",h:"Nombre de la comunidad.",p:(t)=>({v:limpiaTxt(t,/^(de la |la )?(comunidad|vereda)( de)?\s*/i)})},
+ {k:"DIRECCION",h:"Sector o referencia de la vivienda.",p:(t)=>({v:limpiaTxt(t,/^(la direccion es|direccion|vive en)\s*/i)})},
+ {k:"CONSECUTIVO",h:"Número del hogar.",p:(t)=>{const g=grupos(t).find(x=>x.d!=null||x.n!=null);return g?{v:g.d!=null?g.d:String(g.n)}:{err:"Di el número del hogar."}}},
+ {k:"ROL EN EL HOGAR",h:"Jefe de hogar, cónyuge, hijo, padre o madre, nieto, hermano u otro.",p:(t)=>{const x=plano(t);const v=/conyuge|esposa|esposo|companer|pareja|mujer del|marido/.test(x)?"CONYUGE":/jefe|cabeza/.test(x)?"JEFE DE HOGAR":/hij/.test(x)?"HIJO(A)":/madre|padre|mama|papa/.test(x)?"PADRE/MADRE":/niet/.test(x)?"NIETO(A)":/herman/.test(x)?"HERMANO(A)":/otro|tio|tia|sobrin|abuel|suegr/.test(x)?"OTRO":"";return v?{v}:{err:"No reconocí el rol."}}},
+ {k:"TELEFONO",h:"Diez dígitos. Si no tiene, di «no tiene».",p:(t)=>{const d=soloDigitos(t);if(!d)return{err:"No oí números."};if(d.length!==10)return{v:d,warn:`Quedó con ${d.length} dígitos; un celular tiene 10.`};if(!/^3|^60/.test(d))return{v:d,warn:"Un celular empieza por 3."};return{v:d}}},
+ {k:"EAPB NOMBRE",h:"Nombre de la EPS.",p:(t)=>{const x=plano(t);const conocidas=[["MALLAMAS",/mallama|mayamas/],["NUEVA EPS",/nueva eps/],["SANITAS",/sanitas/],["COOSALUD",/coosalud|cosalud/],["SALUD TOTAL",/salud total/],["FAMISANAR",/famisanar/],["EMSSANAR",/emssanar|emsanar/],["ASOCIACION INDIGENA DEL CAUCA",/asociacion indigena|\baic\b/],["CAPRESOCA",/capresoca/],["SURA",/\bsura\b/]];
+   const h=conocidas.find(c=>c[1].test(x));return{v:h?h[0]:limpiaTxt(t,/^(eps|eapb|la eps es)\s*/i)}}},
+ {k:"RÉGIMEN",h:"Subsidiado, contributivo, especial o no afiliado.",p:(t)=>{const x=plano(t);const v=/subsid/.test(x)?"SUBSIDIADO":/contribut/.test(x)?"CONTRIBUTIVO":/especial|excepcion/.test(x)?"ESPECIAL":/no afiliad|sin eps|ninguno/.test(x)?"NO AFILIADO":"";return v?{v}:{err:"Di subsidiado, contributivo, especial o no afiliado."}}},
+ {k:"CAPITADO",h:"Sí o no.",p:(t)=>{const x=plano(t);if(/^no\b|no esta|no es/.test(x))return{v:"NO"};if(/^si\b|capitad|claro/.test(x))return{v:"SI"};return{err:"Di sí o no."}}}
+];
+function guiado(box,hk){
+  const P=()=>{const o=identDe();o.__com=pacCom();return o};
+  const lab=f=>f.l||(ALLF.find(z=>z.k===f.k)||{}).l||f.k;
+  const visible=f=>f.k!=="PUEBLO"||P()["ETNIA"]==="INDIGENA";
+  const lista=()=>GX.filter(visible);
+  let L=lista(),i=Math.max(0,L.findIndex(f=>!P()[f.k])),pend=null,activo=true,voz=false;
+  const el=k=>k==="__com"?$("pac-com"):box.querySelector(`[data-f="${CSS.escape(k)}"]`);
+  const wrap=k=>k==="__com"?$("pac-com").closest("label"):box.querySelector(`[data-wrap="${CSS.escape(k)}"]`);
+  const poner=(k,v)=>{if(k==="__com"){$("pac-com").value=v}else if(v==="N/A"){const b=box.querySelector(`[data-na-for="${CSS.escape(k)}"]`);if(b&&b.getAttribute("aria-pressed")!=="true")b.click()}else llenar(box,{[k]:v});hk.recomp();hk.save()};
+  const pinta=(msg,cls)=>{L=lista();if(i>=L.length){fin();return}const f=L[i],v=P()[f.k];
+    box.querySelectorAll(".gx-on").forEach(x=>x.classList.remove("gx-on"));$("pac-com").closest("label").classList.remove("gx-on");const w=wrap(f.k);if(w)w.classList.add("gx-on");
+    $("gx-n").textContent=`Dato ${i+1} de ${L.length}`;$("gx-lab").textContent=lab(f);$("gx-hint").textContent=f.h;
+    $("gx-val").textContent=v||"—";$("gx-msg").textContent=msg||"";$("gx-msg").className="gx-msg "+(cls||"");
+    $("gx-na").hidden=!box.querySelector(`[data-na-for="${CSS.escape(f.k)}"]`);$("gx-prev").disabled=i===0;$("gx-txt").value="";};
+  const ir=n=>{pend=null;i=Math.max(0,n);pinta()};
+  const aceptar=(f,r)=>{poner(f.k,r.v);if(r.extra)for(const [k,v] of Object.entries(r.extra))poner(k,v);
+    const sig=r.extra&&r.extra["DOCUMENTO ID."]?2:r.extra&&r.extra["PUEBLO"]?2:1;
+    $("gx-val").textContent=r.v;$("gx-msg").textContent="✓ "+(r.extra?Object.values(r.extra).concat(r.v).reverse().join(" · "):"Guardado");$("gx-msg").className="gx-msg ok";
+    setTimeout(()=>{if(activo){L=lista();ir(i+sig)}},700)};
+  const oir=t=>{if(!activo)return;const x=plano(t).replace(/[.,]$/,"");$("gx-heard").textContent="Oí: «"+t.trim()+"»";L=lista();const f=L[i];if(!f)return;
+    if(/^(siguiente|saltar|pasa|sigue)$/.test(x)){ir(i+1);return}
+    if(/^(atras|anterior|volver)$/.test(x)){ir(i-1);return}
+    if(/^(borrar|repetir|otra vez|corregir)$/.test(x)){poner(f.k,"");pinta("Borrado. Dilo de nuevo.");return}
+    if(/^(listo|terminar|termine|parar|detener)$/.test(x)){fin();return}
+    if(/^(confirmar|confirmo|si es correcto|correcto|asi es)$/.test(x)){if(pend){aceptar(pend.f,pend.r);pend=null}else pinta("No hay nada por confirmar.");return}
+    if(/^(no aplica|no tiene|no sabe|no se sabe|ninguno)$/.test(x)&&f.k!=="RÉGIMEN"&&f.k!=="CAPITADO"){if(box.querySelector(`[data-na-for="${CSS.escape(f.k)}"]`)){aceptar(f,{v:"N/A"})}else{pinta("Este dato no admite N/A; queda vacío.","err");setTimeout(()=>activo&&ir(i+1),900)}return}
+    const r=f.p(t,P());
+    if(r.err){pinta(r.err+" Repite, o di «siguiente».","err");return}
+    if(r.warn){pend={f,r};$("gx-val").textContent=r.v;$("gx-msg").textContent=r.warn+" Di «confirmar» si está bien, o repítelo.";$("gx-msg").className="gx-msg err";return}
+    aceptar(f,r)};
+  const fin=()=>{activo=false;stopRec();box.querySelectorAll(".gx-on").forEach(x=>x.classList.remove("gx-on"));$("pac-com").closest("label").classList.remove("gx-on");$("gx").hidden=true;$("gx-start").hidden=false;
+    const falt=lista().filter(f=>!P()[f.k]).map(lab);$("pac-st").textContent=falt.length?"Quedaron sin llenar: "+falt.join(", ")+".":"Identificación completa.";hk.done&&hk.done()};
+  const escuchar=()=>{if(!SR){$("gx-mic").textContent="Este navegador no transcribe voz: usa el micrófono del teclado en la casilla de abajo.";return}
+    stopRec();const r=new SR();REC=r;recOn=true;voz=true;r.lang="es-CO";r.continuous=true;r.interimResults=true;
+    r.onresult=e=>{let tmp="";for(let k=e.resultIndex;k<e.results.length;k++){const t=e.results[k][0].transcript;if(e.results[k].isFinal)oir(t);else tmp+=t}if(tmp)$("gx-heard").textContent="… "+tmp};
+    r.onerror=e=>{if(/not-allowed|service-not-allowed/.test(e.error)){recOn=false;$("gx-mic").textContent="Micrófono no permitido aquí: usa la app instalada o escribe abajo."}else if(e.error==="network"){recOn=false;$("gx-mic").textContent="Sin internet no se transcribe: escribe o usa el micrófono del teclado abajo."}};
+    r.onend=()=>{if(recOn&&REC===r&&activo){try{r.start()}catch(e){}}else $("gx-mic").textContent=activo?"Micrófono apagado":""};
+    try{r.start();$("gx-mic").textContent="● Escuchando"}catch(e){$("gx-mic").textContent="No se pudo iniciar el micrófono."}};
+  $("gx-txt").onkeydown=e=>{if(e.key==="Enter"){e.preventDefault();const t=$("gx-txt").value.trim();if(t)oir(t)}};
+  $("gx-next").onclick=()=>ir(i+1);$("gx-prev").onclick=()=>ir(i-1);$("gx-stop").onclick=fin;
+  $("gx-na").onclick=()=>{const f=lista()[i];if(f)aceptar(f,{v:"N/A"})};
+  $("gx-ok-me").onclick=()=>{$("gx-ok").hidden=true;escuchar()};$("gx-ok-yes").onclick=()=>{S.set("dn2_vozok_pac","1");$("gx-ok").hidden=true;escuchar()};
+  $("gx-ok-no").onclick=()=>{$("gx-ok").hidden=true;$("gx-mic").textContent="Sin voz de la paciente: dicta tú o escribe abajo.";$("gx-txt").focus()};
+  $("gx").hidden=false;$("gx-start").hidden=true;$("pac-det").open=true;pinta();
+  if(S.get("dn2_vozok_pac")||!SR){$("gx-ok").hidden=true;escuchar()}else $("gx-ok").hidden=false;
+  $("gx").scrollIntoView({block:"start",behavior:"smooth"});
+}
 /* ---------- ESCUCHA CONTINUA (Web Speech API) ---------- */
 const SR=window.SpeechRecognition||window.webkitSpeechRecognition;
 let REC=null,recOn=false;
