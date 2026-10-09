@@ -21,6 +21,7 @@
 <title>Dictado de Notas</title>
 <title>Dictado de Notas</title>
 <title>Dictado de Notas</title>
+<title>Dictado de Notas</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:ital,wght@0,400;0,700;1,400&family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,800&family=IBM+Plex+Mono:wght@500&display=swap">
 <style>
@@ -87,7 +88,7 @@ input,select{font:inherit;font-size:1rem;padding:10px 12px;border-radius:8px;bor
 .facts{display:flex;flex-wrap:wrap;gap:6px}
 .chip{font-family:var(--f-data);font-size:.8rem;padding:5px 9px;border-radius:999px;background:var(--accent-soft);color:var(--ink);font-variant-numeric:tabular-nums}
 .chip b{font-family:var(--f-body);font-weight:700;margin-right:4px;font-size:.78rem;color:var(--muted)}
-.tabs{display:flex;gap:6px;border-bottom:1.5px solid var(--line)}
+.tabs{display:flex;gap:4px;border-bottom:1.5px solid var(--line);overflow-x:auto;scrollbar-width:none}.tabs button{white-space:nowrap}
 .tabs button{border:0;background:none;color:var(--muted);padding:10px 12px;font-weight:700;border-bottom:3px solid transparent;margin-bottom:-1.5px}
 .tabs button[aria-selected="true"]{color:var(--ink);border-bottom-color:var(--accent)}
 .box{border-radius:10px;padding:12px 14px;border:1px solid}
@@ -337,6 +338,15 @@ const IV={
  ]
 };
 
+/* Entrevista generada desde la guía del módulo cuando no hay una escrita a mano */
+const IV_CACHE={};
+function ivFor(id){if(IV[id])return IV[id];if(IV_CACHE[id])return IV_CACHE[id];const m=M[id],q=[];
+  const ASK=/preguntar|antecedentes|gestaci[oó]n actual|psicosocial|informar|confirmar|valoraci[oó]n|causales/i;
+  m.sections.forEach((s,i)=>s.items.forEach((it,j)=>{const isQ=it.startsWith("Q:"),txt=isQ?it.slice(2):it,ask=isQ||ASK.test(s.t);
+    q.push({b:s.t,t:ask?"ask":"do",l:txt.length>70?txt.slice(0,67)+"…":txt,q:txt,ck:i+"."+j,
+      c:isQ?["No","Sí"]:ask?["Niega","Sí, refiere","Sin hallazgos"]:["Realizado","No realizado","No aplica"],
+      al:isQ?SI:undefined,am:isQ?(/golpead|forzada|humillada/i.test(txt)?"Violencia referida: activar la ruta de atención a víctimas y notificar.":"Tamizaje positivo: derivar a la ruta de salud mental."):undefined})}));
+  return IV_CACHE[id]=q}
 /* ---------- Herrera y Hurtado ---------- */
 const HH=[
  ["Historia reproductiva"],["Edad menor de 16",1],["Edad mayor de 35",2],["Nulípara",1],["5 o más partos",2],["Aborto habitual o infertilidad",1],["Retención placentaria o hemorragia posparto",1],["RN de más de 4.000 g",1],["RN de menos de 2.500 g",1],["Hipertensión inducida por el embarazo previa",1],["Embarazo gemelar o cesárea previa",1],["Mortinato o muerte neonatal",1],["Trabajo de parto prolongado o difícil",1],
@@ -498,6 +508,13 @@ PLAN: cuidados, retiro del vendaje, signos de alarma, método anticonceptivo sig
 - Varillas que no coinciden con el tipo (Jadelle 2, Implanon 1) o no íntegras → ALERTAS.`}
 };
 
+const EX_RPMS={
+ pinf:"Niño de 18 meses, control de crecimiento y desarrollo por enfermería. Peso 10,8 kg, talla 80 cm, perímetro cefálico 47 cm. Recibe leche materna y come de la olla familiar. EAD-3 sin alertas. Vacunas al día según carné. Desparasitado hace 7 meses. No ha ido a odontología. Remito a odontología y a vacunación de los 18 meses.",
+ inf:"Niña de 9 años, valoración integral. Peso 27 kg, talla 1,30 m. Cursa cuarto de primaria. Agudeza visual 20/20 en ambos ojos. Vacuna VPH pendiente. Última odontología hace un año. Vive con sus padres y tres hermanos. Niega maltrato. Remito a vacunación VPH y odontología.",
+ adol:"Adolescente mujer de 15 años, valoración integral. Peso 48, talla 1.56. Vive con mamá y abuela. Estudia octavo. Refiere relaciones sexuales desde hace 6 meses sin método. Niega consumo. Prueba rápida de VIH y sífilis no reactivas. Hemoglobina 11,2. Asesoría en anticoncepción, elige implante. Remito a odontología.",
+ juv:"Mujer de 24 años, valoración integral por enfermería. TA 110/70, FC 72. Peso 58, talla 1,56. Vida sexual activa con una pareja, planifica con inyectable trimestral. Citología hace un año normal. Pruebas rápidas de VIH y sífilis no reactivas. Niega consumo frecuente de alcohol. Sin odontología hace dos años. Remito a odontología; continúa su método.",
+ adul:"Hombre de 50 años, valoración integral por enfermería. Hipertenso desde 2019, en tratamiento con losartán, refiere que no lo toma todos los días. TA 150/95, FC 78, FR 18, SpO2 96. Peso 82, talla 1,68. Niega diabetes, EPOC y cáncer. Última consulta de crónicos el 10 de marzo. Nunca le han hecho PSA ni sangre oculta. Se ordenan glicemia, perfil lipídico, creatinina, uroanálisis, PSA y sangre oculta. Canalizo a medicina general prioritaria. Seguimiento telefónico en dos semanas.",
+ vej:"Mujer de 68 años, valoración integral. Diabética en control con metformina. TA 130/80, FC 74. Peso 60, talla 1,50. Se baña y viste sola; usa bastón fuera de casa. Una caída hace tres meses. Vive con su hija. Mamografía hace tres años. Se ordenan glicemia, perfil lipídico, creatinina, uroanálisis y sangre oculta. Remito a medicina por riesgo de caídas."};
 /* ======================= APLICACIÓN ======================= */
 const $=id=>document.getElementById(id);
 const S={get(k){try{return localStorage.getItem(k)}catch(e){return null}},set(k,v){try{localStorage.setItem(k,v)}catch(e){}},del(k){try{localStorage.removeItem(k)}catch(e){}},keys(){try{return Object.keys(localStorage)}catch(e){return[]}}};
@@ -594,10 +611,10 @@ function sugerir(){
 }
 
 /* ---------- MÓDULO ---------- */
-function openMod(id){st.view="mod";st.mod=id;st.tab=S.get(key(id,"tab"))||(IV[id]?"entr":"guia");st.note=S.get(key(id,"note"))||M[id].notes[0];if(!M[id].notes.includes(st.note))st.note=M[id].notes[0];renderMod();window.scrollTo(0,0)}
+function openMod(id){st.view="mod";st.mod=id;st.tab=S.get(key(id,"tab"))||"entr";st.note=S.get(key(id,"note"))||M[id].notes[0];if(!M[id].notes.includes(st.note))st.note=M[id].notes[0];renderMod();window.scrollTo(0,0)}
 function renderMod(){
   stopRec();const m=M[st.mod],id=st.mod;
-  const tabs=(IV[id]?[["entr","Entrevista"]]:[]).concat([["guia","Guía"]]).concat(m.tools?[["herr","Herramientas"]]:[]).concat([["nota","Nota"]]);
+  const tabs=[["entr","1 · Entrevista"],["guia","2 · Guía"]].concat(m.tools?[["herr","Herramientas"]]:[]).concat([["nota","3 · Nota"],["base","4 · Base"]]);
   if(!tabs.some(t=>t[0]===st.tab))st.tab="guia";
   const routeName={rm:"Materno perinatal",rp:"Curso de vida",pc:"Procedimientos"}[m.route];
   $("app").innerHTML=`
@@ -607,7 +624,8 @@ function renderMod(){
   <div class="tabs" role="tablist">${tabs.map(([k,l])=>`<button role="tab" data-tab="${k}" aria-selected="${st.tab===k}">${l}</button>`).join("")}</div>
   <div id="pane"></div>`;
   $("back").onclick=home;
-  document.querySelectorAll("[data-tab]").forEach(b=>b.onclick=()=>{st.tab=b.dataset.tab;S.set(key(id,"tab"),st.tab);renderMod()});
+  document.querySelectorAll("[data-tab]").forEach(b=>b.onclick=()=>{st.tab=b.dataset.tab;if(st.tab!=="base")S.set(key(id,"tab"),st.tab);renderMod()});
+  if(st.tab==="base"){st.tab=S.get(key(id,"tab"))==="base"?"nota":(S.get(key(id,"tab"))||"nota");$("pane").innerHTML=`<p class="status" id="status">Tomando los datos de esta historia…</p>`;enviarBase(id);return}
   if(st.tab==="entr")paneEntr();else if(st.tab==="guia")paneGuia();else if(st.tab==="herr")paneHerr();else paneNota();
 }
 function paneGuia(){
@@ -617,7 +635,7 @@ function paneGuia(){
   ${m.alerts.length?`<div class="box warn"><h3>Remitir o actuar si…</h3><ul>${m.alerts.map(a=>`<li>${esc(a)}</li>`).join("")}</ul></div>`:""}
   <p class="note-src">Marca lo que vas haciendo (${done} de ${total}). Lo marcado se pasa a la nota.</p>
   ${m.sections.map((s,i)=>`<details class="sec" ${i<2?"open":""}><summary><span>${esc(s.t)}</span><span class="cnt">${s.items.filter((_,j)=>ck[i+"."+j]).length}/${s.items.length}</span></summary><ul class="items">${s.items.map((it,j)=>{const q=it.startsWith("Q:");const txt=q?it.slice(2):it;return `<li><input type="checkbox" id="c${i}_${j}" data-k="${i}.${j}" ${ck[i+"."+j]?"checked":""}><label for="c${i}_${j}"><span class="${q?"q":""}">${esc(txt)}</span></label></li>`}).join("")}</ul></details>`).join("")}
-  <div class="btns"><button class="btn primary" id="goNota">Ir a la nota</button><button class="btn" id="clrChk">Desmarcar todo</button></div>`;
+  <div class="btns"><button class="btn primary" id="goNota">Siguiente: 3 · Nota →</button><button class="btn" id="clrChk">Desmarcar todo</button></div>`;
   document.querySelectorAll("[data-k]").forEach(c=>c.onchange=()=>{const o=checks(id);if(c.checked)o[c.dataset.k]=1;else delete o[c.dataset.k];S.set(key(id,"chk"),JSON.stringify(o));const det=c.closest("details");const sec=m.sections[+c.dataset.k.split(".")[0]];det.querySelector(".cnt").textContent=Object.keys(o).filter(k=>k.split(".")[0]===c.dataset.k.split(".")[0]).length+"/"+sec.items.length});
   $("goNota").onclick=()=>{st.tab="nota";S.set(key(id,"tab"),"nota");renderMod()};
   $("clrChk").onclick=()=>{S.del(key(id,"chk"));paneGuia()};
@@ -684,18 +702,18 @@ function wireMic(root,ta,onChange){
 
 /* ---------- ENTREVISTA GUIADA ---------- */
 function ivAns(id){try{return JSON.parse(S.get(key(id,"iv"))||"{}")}catch(e){return{}}}
-function ivCompose(id){const q=IV[id],a=ivAns(id);let blk="",out=[];
+function ivCompose(id){const q=ivFor(id),a=ivAns(id);let blk="",out=[];
   q.forEach((x,i)=>{const v=(a[i]||"").trim();if(!v)return;if(x.b!==blk){blk=x.b;out.push((out.length?"\n":"")+blk.toUpperCase())}out.push("- "+x.l+": "+v)});
   return out.join("\n")}
-function ivAlerts(id){const q=IV[id],a=ivAns(id),o=[];q.forEach((x,i)=>{const v=(a[i]||"").trim();if(v&&x.al&&x.al.test(v))o.push(x.am)});return o}
+function ivAlerts(id){const q=ivFor(id),a=ivAns(id),o=[];q.forEach((x,i)=>{const v=(a[i]||"").trim();if(v&&x.al&&x.al.test(v))o.push(x.am)});return o}
 function paneEntr(){
-  const id=st.mod,q=IV[id],a=ivAns(id);let i=+(S.get(key(id,"ivi"))||0);if(i>=q.length)i=q.length;
+  const id=st.mod,q=ivFor(id),a=ivAns(id);let i=+(S.get(key(id,"ivi"))||0);if(i>=q.length)i=q.length;
   const answered=q.filter((_,k)=>(a[k]||"").trim()).length;
   if(i>=q.length){
     const al=ivAlerts(id);
     $("pane").innerHTML=`<div class="tool"><h3>Entrevista terminada</h3><p class="note-src">${answered} de ${q.length} preguntas respondidas. Las respuestas ya están en el dictado de la pestaña Nota.</p>
     ${al.length?`<div class="box warn"><h3>Revisar antes de seguir</h3><ul>${al.map(x=>`<li>${esc(x)}</li>`).join("")}</ul></div>`:""}
-    <p class="status" id="iv-st"></p><div class="btns"><button class="btn primary" id="iv-nota">Ir a la nota</button><button class="btn" id="iv-base">Enviar datos a la base</button><button class="btn" id="iv-rev">Volver a la última pregunta</button></div></div>
+    <p class="status" id="iv-st"></p><div class="btns"><button class="btn primary" id="iv-nota">Siguiente: 3 · Nota →</button><button class="btn" id="iv-base">Ir a 4 · Base</button><button class="btn" id="iv-rev">Volver a la última pregunta</button></div></div>
     <details class="sec"><summary><span>Ver lo registrado</span></summary><pre style="white-space:pre-wrap;padding:0 14px 14px;font-family:var(--f-body);font-size:.92rem">${esc(ivCompose(id))||"(sin respuestas)"}</pre></details>`;
     $("iv-nota").onclick=()=>{st.tab="nota";S.set(key(id,"tab"),"nota");renderMod()};
     $("iv-base").onclick=()=>enviarBase(id);$("iv-rev").onclick=()=>{S.set(key(id,"ivi"),String(q.length-1));paneEntr()};return}
@@ -717,6 +735,7 @@ function paneEntr(){
   </div>`;
   const ta=$("iv-a");
   const save=()=>{const o=ivAns(id);o[i]=ta.value;S.set(key(id,"iv"),JSON.stringify(o));S.set(key(id,"dict"),ivCompose(id));
+    if(x.ck){const c=checks(id),v=ta.value.trim();if(v&&!/^(no realizado|no aplica)/i.test(v))c[x.ck]=1;else delete c[x.ck];S.set(key(id,"chk"),JSON.stringify(c))}
     const hit=x.al&&ta.value.trim()&&x.al.test(ta.value);$("iv-al").hidden=!hit;if(hit)$("iv-alt").textContent=x.am};
   ta.addEventListener("input",save);wireMic($("iv-mic"),ta,save);
   document.querySelectorAll("[data-c]").forEach(b=>b.onclick=()=>{const c=b.dataset.c;ta.value=ta.value.trim()?ta.value.trim()+". "+c:c;save();ta.focus()});
@@ -735,9 +754,9 @@ function paneNota(){
   <div><p class="lab"><label for="dict">Tu dictado</label></p>
   <textarea id="dict" placeholder="Toca el micrófono del teclado y habla. Puedes dictar en desorden.">${esc(S.get(key(id,"dict"))||"")}</textarea>
   <div id="n-mic">${micUI()}</div>
-  <p class="hint">Usa el micrófono del teclado o el botón Escuchar. No dictes nombre ni documento. ${marcados(id).length?`Se incluirán ${marcados(id).length} actividades marcadas en la guía.`:""}</p></div>
+  <p class="hint">Usa el micrófono del teclado o Dictar por voz. No dictes nombre ni documento. ${marcados(id).length?`Se incluirán ${marcados(id).length} actividades marcadas en la guía.`:""}</p></div>
   <div class="btns"><button class="btn primary" id="go">${sample?"Organizar nota":"Armar nota sin conexión"}</button><button class="btn" id="ej">Cargar ejemplo</button><button class="btn" id="nueva">Nueva paciente</button></div>
-  <button class="btn" id="toBase" style="width:100%">Enviar datos a la base (se toman de esta historia)</button>
+  <button class="btn" id="toBase" style="width:100%">Siguiente: 4 · Enviar a la base (los datos salen de esta historia) →</button>
   <p class="hint" id="offHint" ${sample?"hidden":""}>Sin conexión la nota se arma con la plantilla, lo marcado en la guía y tu dictado. Con señal, <a href="${ARTIFACT}" target="_blank" rel="noopener" id="rev">revisa con Claude</a>: el botón copia tu dictado para pegarlo allá.</p>
   ${n.edu?`<label class="check"><input type="checkbox" id="edu" checked> Agregar bloques fijos de educación, IVE, planificación y curso</label>`:""}
   <p class="status" id="status" role="status"></p>
@@ -758,7 +777,7 @@ function paneNota(){
   $("fecha").addEventListener("change",()=>S.set(key(id,"fecha"),$("fecha").value));
   $("go").onclick=organizar;$("stop").onclick=()=>ctl&&ctl.abort();$("copy").onclick=copiar;
   $("toBase").onclick=()=>enviarBase(id);
-  $("ej").onclick=()=>{$("dict").value=n.ex;S.set(key(id,"dict"),n.ex);$("status").textContent="Ejemplo cargado (datos inventados). Toca Organizar nota."};
+  $("ej").onclick=()=>{const exT=(st.note==="rpms"&&EX_RPMS[id])||n.ex;$("dict").value=exT;S.set(key(id,"dict"),exT);$("status").textContent="Ejemplo cargado (datos inventados). Toca Organizar nota."};
   $("nueva").onclick=()=>{const b=$("nueva");if(b.dataset.armed!=="1"){b.dataset.armed="1";b.textContent="¿Borrar este módulo? Toca otra vez";setTimeout(()=>{if(b.isConnected){b.dataset.armed="";b.textContent="Nueva paciente"}},4000);return}
     S.keys().filter(k=>k.startsWith("dn2_"+id+"_")&&!k.endsWith("_tab")&&!k.endsWith("_note")).forEach(k=>S.del(k));paneNota();$("status").textContent="Listo para una nueva paciente."};
   $("rev").onclick=()=>{try{navigator.clipboard.writeText("Módulo: "+m.title+" · Nota: "+n.label+" · Fecha: "+($("fecha").value||hoy())+"\n\n"+$("dict").value).catch(()=>{})}catch(e){}};
@@ -912,7 +931,7 @@ const ID_KEYS=["NOMBRE COMPLETO","TIPO","DOCUMENTO ID.","FECHA NACIMIENTO","GENE
 const NO_EXTRAER=["NOMBRE COMPLETO","TIPO","DOCUMENTO ID.","TELEFONO","DIRECCION","CONSECUTIVO","IMC","CURSO DE VIDA","AA / MM","FECHA NACIMIENTO"];
 
 /* ---------- extraer variables de la historia ya registrada ---------- */
-function fuenteHC(id){const p=[],ivt=IV[id]?ivCompose(id):"";
+function fuenteHC(id){const p=[],ivt=ivCompose(id);
   if(ivt)p.push("ENTREVISTA:\n"+ivt);const d=S.get(key(id,"dict"));if(d&&d!==ivt)p.push("DICTADO:\n"+d);
   const n=S.get(key(id,"nota"));if(n)p.push("NOTA:\n"+n);const mk=marcados(id);if(mk.length)p.push("ACTIVIDADES MARCADAS EN LA GUÍA:\n"+mk.join("\n"));
   const hh=hhResumen(id);if(hh)p.push(hh);
