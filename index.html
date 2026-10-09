@@ -184,6 +184,10 @@ textarea{width:100%;font:inherit;font-size:1.05rem;line-height:1.55;padding:14px
 .gx-mic{font-size:.8rem;font-weight:700;color:var(--accent)}
 .gx .btns .btn{flex:1 1 auto;padding:10px 12px;font-size:.92rem}
 .pgrid .gx-on{outline:3px solid var(--accent);outline-offset:3px;border-radius:6px}
+.popts{grid-column:1/-1;display:flex;flex-wrap:wrap;gap:6px;padding:8px;background:var(--accent-soft);border-radius:10px}
+.popts button{border:1.5px solid var(--accent);background:var(--surface);color:var(--ink);border-radius:999px;padding:6px 12px;font-weight:700;font-size:.85rem}
+.popts button[aria-pressed="true"]{background:var(--accent);color:var(--accent-ink)}
+.popts .ph{width:100%;font-size:.72rem;color:var(--muted);font-weight:700;letter-spacing:.04em;text-transform:uppercase}
 .narow{display:flex;gap:6px;min-width:0}.narow input{flex:1 1 auto;min-width:0}
 .na{border:1.5px solid var(--line);background:var(--surface);color:var(--muted);border-radius:8px;padding:0 10px;font-size:.8rem;font-weight:700}
 .na[aria-pressed="true"]{background:var(--ink);color:var(--bg);border-color:var(--ink)}
@@ -684,13 +688,30 @@ function home(){
     const e=edadDe(P["FECHA NACIMIENTO"]);if(e){if(e.y>=1){$("f-edad").value=e.y;$("f-uni").value="a"}else{$("f-edad").value=e.tm;$("f-uni").value="m"}}
     if(P["GENERO"])$("f-sexo").value=P["GENERO"]==="F"?"f":"m";
     const conocido=!!(e&&P["GENERO"]);["f-edad","f-uni","f-sexo"].forEach(i=>$(i).closest("label").hidden=conocido);sugerir()};
-  const save=()=>{const {datos}=revisar(box,false),o={};ID_KEYS.forEach(k=>{if(datos[k]&&!(k==="PUEBLO"&&datos[k]==="N/A"))o[k]=datos[k]});const c=$("pac-com").value.trim().toUpperCase();if(c)o.__com=c;setPac(o);pinta()};
+  const save=()=>{const {datos}=revisar(box,false),o={};ID_KEYS.forEach(k=>{if(datos[k]&&!(k==="PUEBLO"&&datos[k]==="N/A"))o[k]=["NOMBRE COMPLETO","DIRECCION","EAPB NOMBRE","PUEBLO"].includes(k)?datos[k].toUpperCase():datos[k]});const c=$("pac-com").value.trim().toUpperCase();if(c)o.__com=c;setPac(o);pinta()};
   box.addEventListener("input",save);box.addEventListener("change",save);
   const recomp=()=>{const sx=(box.querySelector('[data-f="ETNIA"]')||{}).value;box.querySelectorAll("[data-wrap]").forEach(w=>{if(w.dataset.if)w.hidden=(box.querySelector(`[data-f="${CSS.escape(w.dataset.if)}"]`)||{}).value!==w.dataset.ifv})};
   box.addEventListener("change",recomp);recomp();
   wireMic($("pac-mic"),$("pac-dic"));
   $("pac-go").onclick=()=>{stopRec();const v=parseIdent($("pac-dic").value);if(v.__com){$("pac-com").value=v.__com;delete v.__com}const n=llenar(box,v);recomp();save();$("pac-st").textContent=n?`Se llenaron ${n} dato(s).`:"No reconocí datos. Prueba «cédula 1234, nació el 3 de marzo de 1990»."};
   $("gx-start").onclick=()=>guiado(box,{save,recomp});
+  const op=document.createElement("div");op.className="popts";op.hidden=true;box.append(op);
+  const campos=()=>[$("pac-com")].concat([...box.querySelectorAll("[data-f]")]).filter(e=>!e.closest("[hidden]")&&!e.disabled&&e.dataset.f!=="__x");
+  const kOf=e=>e.id==="pac-com"?"__com":e.dataset.f;
+  const siguiente=e=>{const L=[...box.querySelectorAll("input,select")].filter(x=>(x.id==="pac-com"||x.dataset.f)&&!x.closest("[hidden]")&&!x.disabled);const i=L.indexOf(e);const n=L.slice(i+1).find(x=>!x.value)||L[i+1];if(n){n.focus();if(n.scrollIntoView)n.scrollIntoView({block:"nearest"})}else{op.hidden=true;e.blur()}};
+  const mostrar=e=>{const k=kOf(e);if(!k)return;const f=ALLF.find(z=>z.k===k);let o=[],ph="";
+    if(f&&f.t==="sel"){o=f.o.map(v=>[v,(ETQ[k]&&ETQ[k][v])||v]);ph="Escoge"}
+    else if(OPC[k]||hist(k).length){const h=hist(k);o=[...new Set(h.concat(OPC[k]||[]))].map(v=>[v,v]);ph=h.length?"Recientes y frecuentes":"Frecuentes"}
+    if(!o.length){op.hidden=true;return}
+    const cur=(e.value||"").toUpperCase();
+    op.innerHTML=`<span class="ph">${ph} · toca para llenar</span>`+o.map(([v,l])=>`<button type="button" data-v="${esc(v)}" aria-pressed="${cur===v.toUpperCase()}">${esc(l)}</button>`).join("");
+    const lab=e.closest("label");lab.after(op);op.hidden=false;
+    op.querySelectorAll("button").forEach(b=>b.onmousedown=ev=>ev.preventDefault());
+    op.querySelectorAll("button").forEach(b=>b.onclick=()=>{const v=b.dataset.v;if(e.tagName==="SELECT")e.value=v;else{e.value=v;if(e.dataset.na){delete e.dataset.na;e.disabled=false}}
+      lab.classList.add("lleno");e.dispatchEvent(new Event("input",{bubbles:true}));e.dispatchEvent(new Event("change",{bubbles:true}));recomp();siguiente(e)})};
+  box.addEventListener("focusin",ev=>{const e=ev.target;if(e.matches("input,select")&&(e.id==="pac-com"||e.dataset.f))mostrar(e)});
+  box.addEventListener("focusout",ev=>{setTimeout(()=>{if(!box.contains(document.activeElement))op.hidden=true},150)});
+  box.addEventListener("change",ev=>{const e=ev.target;const k=e&&kOf(e);if(k&&(OPC[k]||k==="__com")&&e.tagName!=="SELECT")addHist(k,(e.value||"").trim().toUpperCase())});
   if(!pac()["NOMBRE COMPLETO"])$("pac-det").open=true;
   pinta();
   window.scrollTo(0,0);
@@ -841,7 +862,7 @@ function guiado(box,hk){
   let L=lista(),i=Math.max(0,L.findIndex(f=>!P()[f.k])),pend=null,activo=true,voz=false;
   const el=k=>k==="__com"?$("pac-com"):box.querySelector(`[data-f="${CSS.escape(k)}"]`);
   const wrap=k=>k==="__com"?$("pac-com").closest("label"):box.querySelector(`[data-wrap="${CSS.escape(k)}"]`);
-  const poner=(k,v)=>{if(k==="__com"){$("pac-com").value=v}else if(v==="N/A"){const b=box.querySelector(`[data-na-for="${CSS.escape(k)}"]`);if(b&&b.getAttribute("aria-pressed")!=="true")b.click()}else llenar(box,{[k]:v});hk.recomp();hk.save()};
+  const poner=(k,v)=>{if(OPC[k])addHist(k,v);if(k==="__com"){$("pac-com").value=v}else if(v==="N/A"){const b=box.querySelector(`[data-na-for="${CSS.escape(k)}"]`);if(b&&b.getAttribute("aria-pressed")!=="true")b.click()}else llenar(box,{[k]:v});hk.recomp();hk.save()};
   const pinta=(msg,cls)=>{L=lista();if(i>=L.length){fin();return}const f=L[i],v=P()[f.k];
     box.querySelectorAll(".gx-on").forEach(x=>x.classList.remove("gx-on"));$("pac-com").closest("label").classList.remove("gx-on");const w=wrap(f.k);if(w)w.classList.add("gx-on");
     $("gx-n").textContent=`Dato ${i+1} de ${L.length}`;$("gx-lab").textContent=lab(f);$("gx-hint").textContent=f.h;
@@ -1280,6 +1301,15 @@ function campo(f,d){const v=d[f.k]!=null?d[f.k]:(f.def==="hoy"?hoy():"");const i
     return `<label class="bfl" for="${id}" data-wrap="${esc(f.k)}" ${f.if?`data-if="${esc(f.if[0])}" data-ifv="${esc(f.if[1])}"`:""} ${f.sx?`data-sx="${f.sx}"`:""}><span>${esc(f.l)}${f.req?" *":""}</span>${inp}</label>`}
 function wireNA(root){root.querySelectorAll("[data-na-for]").forEach(b=>b.onclick=()=>{const el=root.querySelector(`[data-f="${CSS.escape(b.dataset.naFor)}"]`);const on=b.getAttribute("aria-pressed")!=="true";b.setAttribute("aria-pressed",on);el.disabled=on;if(on){el.dataset.na="1";el.value=""}else{delete el.dataset.na;el.focus()}el.dispatchEvent(new Event("change",{bubbles:true}))});
   root.querySelectorAll("[data-multi] button").forEach(b=>b.onclick=()=>{b.setAttribute("aria-pressed",b.getAttribute("aria-pressed")!=="true");b.dispatchEvent(new Event("change",{bubbles:true}))})}
+const OPC={
+ "__com":["QUERARÍ","VEREDA ORIENTE","BERLIN","SANTA MARTA 2","CARTAGENITA","MITÚ"],
+ "EAPB NOMBRE":["MALLAMAS","NUEVA EPS","SANITAS","COOSALUD","ASOCIACION INDIGENA DEL CAUCA","SIN EPS"],
+ "PUEBLO":["CUBEO","DESANO","TUKANO","WANANO","PIRATAPUYO","TUYUCA","SIRIANO","BARASANA","CURRIPACO","PUINAVE","TATUYO","CARAPANA"],
+ "DIRECCION":["CENTRO","SECTOR ALTO","SECTOR BAJO","ORILLA DEL RÍO","CERCA AL PUESTO DE SALUD","CERCA A LA ESCUELA"],
+ "CONSECUTIVO":["1","2","3","4","5","6","7","8","9","10"]};
+const ETQ={GENERO:{F:"Mujer",M:"Hombre"},TIPO:{CC:"CC cédula",TI:"TI tarjeta",RC:"RC registro civil",CE:"CE extranjería",PPT:"PPT",PEP:"PEP",MS:"MS menor sin id.",AS:"AS adulto sin id."}};
+function hist(k){try{return JSON.parse(S.get("dn2_hist_"+k)||"[]")}catch(e){return[]}}
+function addHist(k,v){if(!v||v==="N/A")return;const h=[v].concat(hist(k).filter(x=>x!==v)).slice(0,8);S.set("dn2_hist_"+k,JSON.stringify(h))}
 function pac(){try{return JSON.parse(S.get("dn2_pac")||"{}")}catch(e){return{}}}
 function setPac(o){S.set("dn2_pac",JSON.stringify(o))}
 function identDe(){const o=Object.assign({},pac());delete o.__com;return o}
