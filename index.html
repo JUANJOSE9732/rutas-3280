@@ -380,8 +380,8 @@ const IV={
   {b:"Plan",t:"do",si:A=>!/^no desea|^no:/i.test(A("Deseo de embarazo")),ref:"Res. 3280 · 4.1.6.4, p. 247 (0,4 mg; 4 mg si hijo con defecto del tubo neural) y p. 250 (4 mg en epilepsia).",l:"Ácido fólico",q:"Formulación de ácido fólico.",c:["0,4 mg/día|Se formula ácido fólico 0,4 mg/día vía oral desde ahora y al menos 3 meses antes del embarazo.","4 mg/día por epilepsia|Se formula ácido fólico 4 mg/día vía oral por antecedente de epilepsia (Res. 3280), desde al menos 3 meses antes del embarazo; se remite a medicina para manejo de la epilepsia.","4 mg/día por defecto del tubo neural|Se formula ácido fólico 4 mg/día vía oral por antecedente de hijo con defecto del tubo neural (Res. 3280), desde al menos 3 meses antes del embarazo."],h:"Al menos 3 meses antes del embarazo. Dosis habitual 0,4 mg/día; 4 mg/día si tiene epilepsia o tuvo un hijo con defecto del tubo neural (Res. 3280, 4.1).",dyn:A=>{const t=(A("Enfermedades")+" "+A("Medicamentos y remedios")+" "+A("Antecedentes genéticos y familiares")+" "+A("Complicaciones obstétricas previas")).toLowerCase();const r=[];if(/epilepsia|anticonvulsivante/.test(t))r.push("epilepsia");if(/tubo neural/.test(t))r.push("hijo con defecto del tubo neural");return r.length?"Esta usuaria necesita dosis alta: ácido fólico 4 mg/día por "+r.join(" y ")+" (Res. 3280).":""}},
   {b:"Plan",t:"do",ref:"Res. 3280 · 4.1, p. 245 y 4.1.4: asesoría y provisión de método anticonceptivo.",l:"Anticoncepción hasta decidir",q:"Método anticonceptivo mientras se prepara.",c:["Continúa|Continúa con su método anticonceptivo actual hasta decidir el embarazo.", "Inicia|Inicia método anticonceptivo ____ hasta decidir el embarazo.", "Busca embarazo|Suspende anticoncepción para buscar el embarazo."]},
   {b:"Plan",t:"do",ref:"Res. 3280 · 4.1.6.4–4.1.6.5, p. 248: odontología, nutrición, psicología, trabajo social, especialistas.",conducta:1,l:"Remisiones",q:"¿A dónde remitiste?",c:["Vacunación|Se remite a vacunación.", "Odontología|Se remite a odontología.", "Nutrición|Se remite a nutrición.", "Psicología|Se remite a psicología.", "Medicina|Se remite a medicina.", "Ginecobstetricia|Se remite a ginecobstetricia.", "Ninguna|No requiere remisiones."]},
-  {b:"Plan",t:"do",ref:"Res. 3280 · 4.1.6.6, p. 249: información en salud, derechos reproductivos e IVE.",l:"Información brindada",q:"Educación y derechos.",c:["Intervalo 18 meses|Se informa sobre el intervalo intergenésico mínimo de 18 meses.", "Derechos e IVE|Se informa sobre derechos sexuales y reproductivos, incluido el derecho a la IVE.", "Signos de alarma|Se explican signos de alarma.", "Control prenatal temprano|Se recomienda acudir a control prenatal antes de la semana 10 al confirmar el embarazo."]},
-  {b:"Plan",t:"do",ref:"Res. 3280 · 4.1.5, p. 246 (mínimo una consulta inicial y un control) y 4.1.6.6, p. 249.",l:"Próximo control",q:"Fecha del control para leer los exámenes.",c:["Un mes|Control en un mes para lectura de exámenes.", "Próxima brigada|Control en la próxima brigada para lectura de exámenes."]}
+  {b:"Plan",t:"do",ref:"Res. 3280 · 4.1.6.6, p. 249: información en salud, derechos reproductivos e IVE.",l:"Información brindada",q:"Antes de cerrar, explícale estos temas (Res. 3280, 4.1.6.6). Toca los que hablaste.",h:"Toca cada tema para ver qué decirle. «Todos los temas» registra los de la norma en una sola frase.",c:["Todos los temas|Se brinda información en salud según Res. 3280: planeación de la familia y espaciamiento de los hijos (intervalo mínimo de 18 meses), prevención de la gestación no deseada, recomendaciones nutricionales, estado de vacunación, importancia del control prenatal temprano, detección de factores de riesgo cardiometabólicos, derechos sexuales y reproductivos, derecho a la IVE y signos de alarma.","Planeación y espaciamiento|Se informa sobre planeación de la familia y espaciamiento de los hijos, con intervalo intergenésico mínimo de 18 meses.","Nutrición|Se brindan recomendaciones nutricionales.","Vacunas|Se informa sobre el estado de vacunación y la importancia de completar el esquema antes del embarazo.","Control prenatal temprano|Se recomienda acudir a control prenatal antes de la semana 10 al confirmar el embarazo.","Riesgo cardiometabólico|Se informa sobre detección temprana de factores de riesgo cardiometabólicos.","Derechos e IVE|Se informa sobre derechos sexuales y reproductivos y el derecho a la IVE (Sentencia C-055 de 2022).","Riesgo por edad|Se informa sobre el riesgo de aneuploidías y cromosomopatías asociado a la edad materna y las opciones de tamizaje en caso de gestación.","Signos de alarma|Se explican signos de alarma."]},
+  {b:"Plan",t:"do",ref:"Res. 3280 · 4.1.5, p. 246 (mínimo una consulta inicial y un control) y 4.1.6.6, p. 249.",l:"Próximo control",q:"Fecha del control para leer los exámenes.",c:["Un mes|Control en un mes para lectura de exámenes.","Próxima brigada|Control en la próxima brigada para lectura de exámenes.","Fecha|Control el ____ para lectura de exámenes (Res. 3280: mínimo una consulta de control)."]}
  ]
 };
 
@@ -1043,7 +1043,7 @@ async function analizar(id){const st2=$("an-st");let r=null;
     try{const x=await sample.json(pAnalisis(id),{cache:false});if(x&&typeof x==="object"&&x.devolucion){r={riesgo:["bajo","medio","alto"].includes(x.riesgo)?x.riesgo:"",resumen:String(x.resumen||""),devolucion:String(x.devolucion),rutas:Array.isArray(x.rutas)?x.rutas.filter(z=>z&&z.ruta).map(z=>({ruta:String(z.ruta),porque:String(z.porque||""),accion:String(z.accion||""),cuando:["hoy","pronto","programado"].includes(z.cuando)?z.cuando:"programado"})):[],pendientes:Array.isArray(x.pendientes)?x.pendientes.map(String):[],alarma:Array.isArray(x.alarma)?x.alarma.map(String):[],fuente:"claude"}}}
     catch(e){}}
   if(!r){r=anLocal(id);st2.textContent=sample?"No se pudo usar Claude; se analizó con reglas básicas.":""}else st2.textContent="";
-  anGuardar(id,r);$("an-out").innerHTML=anHTML(r);anWire(id)}
+  anGuardar(id,r);$("an-out").innerHTML=anHTML(r);anWire(id);hcRefresh(id)}
 /* guías cortas para responderle en el momento, según la opción escogida */
 const GUIA={
  "Expectativas|Dudas de fertilidad":{t:"Para responderle: dudas sobre fertilidad",
@@ -1364,6 +1364,14 @@ const GUIA={
      "Registrar en la nota cuáles se hicieron, cuáles quedan pendientes y por qué.",
      "En el control se leen los resultados (la Res. 3280 pide al menos un control para eso)."],
   r:"Se ordenan los exámenes preconcepcionales según Res. 3280; se realizan las pruebas disponibles en el puesto y los demás quedan pendientes de toma, con fecha programada."},
+ "Información brindada|Planeación y espaciamiento":{t:"Qué decirle: planeación y espaciamiento",p:["Ella decide cuándo y cuántos hijos tener, sin presión de nadie.","Lo más sano es esperar al menos 18 meses entre un parto y el siguiente embarazo: la mamá recupera fuerzas y el bebé nace con mejor peso.","Mientras decide, puede planificar con el método que prefiera."],r:"Se informa sobre planeación de la familia y espaciamiento de los hijos (mínimo 18 meses)."},
+ "Información brindada|Nutrición":{t:"Qué decirle: nutrición",p:["Comer variado en cada comida: casabe o yuca + pescado, carne o huevo + fruta o verdura.","Frutas y verduras amarillas (chontaduro, moriche, ahuyama, mango) y hojas verdes.","Seguir el ácido fólico todos los días."],r:"Se brindan recomendaciones nutricionales."},
+ "Información brindada|Vacunas":{t:"Qué decirle: vacunas",p:["Las vacunas deben quedar completas al menos 3 meses antes del embarazo.","Algunas, como la triple viral, no se ponen durante el embarazo: por eso se completan antes."],r:"Se informa sobre la importancia de completar el esquema de vacunación antes del embarazo."},
+ "Información brindada|Control prenatal temprano":{t:"Qué decirle: control prenatal temprano",p:["Apenas le falte la regla o sospeche que está embarazada, venir al puesto de salud.","Lo ideal es empezar el control antes de la semana 10 (antes de 2 meses y medio)."],r:"Se recomienda control prenatal antes de la semana 10."},
+ "Información brindada|Riesgo cardiometabólico":{t:"Qué decirle: presión, azúcar y peso",p:["La presión alta, el azúcar alto y el sobrepeso aumentan los riesgos en el embarazo.","Por eso se revisan antes: tomar la presión, hacer la glicemia y cuidar el peso."],r:"Se informa sobre detección de factores de riesgo cardiometabólicos."},
+ "Información brindada|Derechos e IVE":{t:"Qué decirle: derechos e IVE",p:["Tiene derecho a decidir libremente si quiere tener hijos, cuántos y cuándo, sin violencia ni presión.","Tiene derecho a recibir métodos para planificar.","Si queda embarazada sin quererlo, tiene derecho a la interrupción voluntaria del embarazo: hasta la semana 24 por su sola decisión; después, por las causales de la ley. Es confidencial."],r:"Se informa sobre derechos sexuales y reproductivos y el derecho a la IVE."},
+ "Información brindada|Riesgo por edad":{t:"Qué decirle: riesgo por la edad",p:["Úsalo sobre todo si tiene 35 años o más.","Con la edad aumenta la probabilidad de que el bebé tenga alteraciones en los cromosomas (como el síndrome de Down).","En el embarazo hay exámenes (como la ecografía de las semanas 11 a 14) que ayudan a detectarlo; los ordena el control prenatal."],r:"Se informa sobre riesgo de cromosomopatías asociado a la edad y opciones de tamizaje en la gestación."},
+ "Información brindada|Signos de alarma":{t:"Qué decirle: cuándo volver de inmediato",p:["Si queda embarazada: sangrado, salida de líquido, dolor de cabeza fuerte o ver lucecitas, hinchazón de cara y manos, fiebre, dolor fuerte de barriga.","Ahora: cualquier síntoma nuevo o que le preocupe."],r:"Se explican signos de alarma."},
  "Deseo de embarazo|No":{t:"La consulta pasa a asesoría anticonceptiva",
   p:["Respetar su decisión: la consulta se enfoca en planificación familiar y se omite la formulación de ácido fólico.",
      "Preguntar qué métodos conoce o ha usado, cómo le fue y cuál prefiere. La decisión es de ella; no necesita permiso de la pareja.",
@@ -1478,6 +1486,32 @@ const SISTEMAS={gineco:[
  {k:"pie",l:"Piel y faneras",n:"Piel íntegra, sin lesiones.",o:"Úlceras que no sanan (pensar en leishmaniasis), manchas con pérdida de sensibilidad (pensar en lepra), hongos, sarna, y moretones o lesiones que sugieran violencia.",x:["Úlcera que no sana","Mancha sin sensibilidad","Hongos","Escabiosis","Hematomas o lesiones"],r:"Úlcera crónica o mancha sin sensibilidad: remitir a medicina. Hematomas o lesiones sin explicación: indagar violencia con ella a solas."},
  {k:"neu",l:"Neurológico",n:"Consciente, orientada, lenguaje y marcha normales, fuerza conservada.",o:"Estado mental, lenguaje, marcha, fuerza; si tiene epilepsia, ver si hay secuelas.",x:["Alteración de la marcha","Alteración del lenguaje","Disminución de fuerza"],r:"Cualquier alteración nueva: remitir a medicina."}]};
 GUIA["Valoración ginecológica|No: sin privacidad"]=GUIA["Valoración ginecológica|No: sin insumos"];GUIA["Valoración ginecológica|No: no acepta"]=GUIA["Valoración ginecológica|No: sin insumos"];
+/* ---------- exportar la historia (Word y secciones para copiar) ---------- */
+function hcSecciones(id){const m=M[id],P=pac(),f=S.get(key(id,"fecha"))||hoy(),out=[];
+  const idl=[];if(P["NOMBRE COMPLETO"])idl.push("Nombre: "+P["NOMBRE COMPLETO"]);if(P["TIPO"]||P["DOCUMENTO ID."])idl.push("Documento: "+(P["TIPO"]||"")+" "+(P["DOCUMENTO ID."]||""));
+  const e=pacEdad(f);if(P["FECHA NACIMIENTO"])idl.push("Fecha de nacimiento: "+P["FECHA NACIMIENTO"].split("-").reverse().join("/")+(e?" ("+e+")":""));if(P["GENERO"])idl.push("Sexo: "+(P["GENERO"]==="F"?"Femenino":"Masculino"));
+  if(P.__com)idl.push("Comunidad: "+P.__com+(P["DIRECCION"]?", "+P["DIRECCION"]:""));if(P["ETNIA"])idl.push("Pertenencia étnica: "+P["ETNIA"]+(P["PUEBLO"]?" ("+P["PUEBLO"]+")":""));
+  if(P["EAPB NOMBRE"])idl.push("EAPB: "+P["EAPB NOMBRE"]+(P["RÉGIMEN"]?", "+P["RÉGIMEN"]:""));if(P["TELEFONO"])idl.push("Teléfono: "+P["TELEFONO"]);
+  out.push({t:"Datos de la consulta",x:["Fecha: "+f.split("-").reverse().join("/"),"Atención: "+m.title+" ("+m.who+")"].concat(idl).join("\n")});
+  const q=ivFor(id),a=ivAns(id),B=[];q.forEach((z,i)=>{let v=(a[i]||"").trim();if(!v&&z.si&&!ivAplica(id,i))v="No aplica.";if(!v)return;let b=B.find(y=>y.t===z.b);if(!b){b={t:z.b,L:[]};B.push(b)}b.L.push(z.l+": "+v)});
+  B.forEach(b=>out.push({t:b.t,x:b.L.join("\n")}));
+  const n=S.get(key(id,"nota"));if(n)out.push({t:"Nota organizada",x:n});
+  const r=anCargar(id);if(r){const L=(r.rutas||[]).map(z=>"- "+z.ruta+": "+z.accion+" ("+({hoy:"hoy",pronto:"pronto",programado:"programar"}[z.cuando]||z.cuando)+")");if(r.pendientes&&r.pendientes.length)L.push("Pendientes: "+r.pendientes.join("; "));if(L.length)out.push({t:"Plan y rutas",x:L.join("\n")})}
+  return out}
+function hcWord(id){const S2=hcSecciones(id),P=pac(),m=M[id],f=S.get(key(id,"fecha"))||hoy();
+  const html=`<html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:w="urn:schemas-microsoft-com:office:word"><head><meta charset="utf-8"><title>Historia</title><style>body{font-family:Arial;font-size:11pt}h1{font-size:14pt}h2{font-size:12pt;margin:14pt 0 4pt;border-bottom:1px solid #999}p{margin:2pt 0}</style></head><body><h1>${esc(m.title)} — ${esc(f.split("-").reverse().join("/"))}</h1>${S2.map(z=>`<h2>${esc(z.t)}</h2>${z.x.split("\n").map(l=>`<p>${esc(l)}</p>`).join("")}`).join("")}`;
+  const nom=("HC_"+(P["NOMBRE COMPLETO"]||"persona")+"_"+m.title+"_"+f).replace(/[^\wÁÉÍÓÚÑáéíóúñ-]+/g,"_")+".doc";
+  try{const bl=new Blob(["\ufeff"+html],{type:"application/msword"}),u=URL.createObjectURL(bl),el=document.createElement("a");el.href=u;el.download=nom;document.body.append(el);el.click();setTimeout(()=>{URL.revokeObjectURL(u);el.remove()},1500);return true}catch(e){return false}}
+function hcPanel(id){const S2=hcSecciones(id);
+  return `<section class="tool" id="hc"><h3>Exportar la historia</h3><p class="note-src" style="margin:0">Para pasarla a la historia clínica oficial: descárgala en Word o copia cada parte.</p>
+  <div class="btns"><button class="btn primary" type="button" id="hc-word" style="flex:none">Descargar en Word</button><button class="btn" type="button" id="hc-all" style="flex:none">Copiar todo</button></div><p class="status" id="hc-st"></p>
+  ${S2.map((z,n)=>`<details class="sec"><summary><span>${esc(z.t)}</span><button class="btn" type="button" data-hc="${n}" style="padding:4px 10px;font-size:.8rem;flex:none">Copiar</button></summary><pre style="white-space:pre-wrap;padding:0 14px 12px;margin:0;font-family:var(--f-body);font-size:.9rem">${esc(z.x)}</pre></details>`).join("")}</section>`}
+function hcRefresh(id){const h=$("hc");if(!h)return;const o=h.querySelectorAll("details[open]");const ab=[...o].map(d=>d.querySelector("summary span").textContent);h.outerHTML=hcPanel(id);document.querySelectorAll("#hc details").forEach(d=>{if(ab.includes(d.querySelector("summary span").textContent))d.open=true});hcWire(id)}
+function hcWire(id){if(!$("hc"))return;const S2=hcSecciones(id),st=$("hc-st");
+  const cp=t=>{try{navigator.clipboard.writeText(t).then(()=>st.textContent="Copiado. Pégalo en la historia oficial.",()=>st.textContent="No se pudo copiar; mantén presionado el texto para copiarlo.")}catch(e){st.textContent="No se pudo copiar; mantén presionado el texto para copiarlo."}};
+  document.querySelectorAll("[data-hc]").forEach(b=>b.onclick=ev=>{ev.preventDefault();ev.stopPropagation();cp(S2[+b.dataset.hc].x)});
+  $("hc-all").onclick=()=>cp(S2.map(z=>z.t.toUpperCase()+"\n"+z.x).join("\n\n"));
+  $("hc-word").onclick=()=>{st.textContent=hcWord(id)?"Descargado. Ábrelo con Word o Google Docs.":"Este navegador no permitió la descarga; usa Copiar."}}
 function paneEntr(){
   const id=st.mod,q=ivFor(id),a=ivAns(id),i0=S.get(key(id,"ivi"));let i=Math.max(0,+(i0||0));if(i>=q.length)i=q.length;
   const answered=q.filter((_,k)=>(a[k]||"").trim()).length;
@@ -1489,9 +1523,10 @@ function paneEntr(){
     <section class="tool" id="an"><h3>Análisis: devolución y rutas</h3><p class="note-src" style="margin:0">Revisa todo lo registrado y te propone, por escrito, los puntos para tu devolución y las rutas a seguir.</p>
       <button class="btn ${anCargar(id)?"":"primary"}" id="an-go" style="flex:none">${anCargar(id)?"Volver a analizar":sample?"Analizar la consulta":"Analizar (sin conexión)"}</button><p class="status" id="an-st"></p>
       <div id="an-out">${anHTML(anCargar(id))}</div></section>
+    ${hcPanel(id)}
     <details class="sec"><summary><span>Ver lo registrado</span></summary><pre style="white-space:pre-wrap;padding:0 14px 14px;font-family:var(--f-body);font-size:.92rem">${esc(ivCompose(id))||"(sin respuestas)"}</pre></details>`;
     $("iv-nota").onclick=()=>{st.tab="guia";S.set(key(id,"tab"),"guia");renderMod()};
-    $("an-go").onclick=()=>analizar(id);anWire(id);$("iv-rev").onclick=()=>{S.set(key(id,"ivi"),String(q.length-1));paneEntr()};return}
+    $("an-go").onclick=()=>analizar(id);anWire(id);hcWire(id);$("iv-rev").onclick=()=>{S.set(key(id,"ivi"),String(q.length-1));paneEntr()};return}
   const x=q[i],pct=Math.round(i/q.length*100),al=(a[i]&&x.al&&x.al.test(a[i]))?x.am:"";
   $("pane").innerHTML=`
   <div class="tool" style="gap:14px">
@@ -1581,6 +1616,7 @@ function paneNota(){
   ${n.edu?`<label class="check"><input type="checkbox" id="edu" checked> Agregar bloques fijos de educación, IVE, planificación y curso</label>`:""}
   <div class="btns"><button class="btn primary" id="go">${sample?"Organizar nota":"Armar nota sin conexión"}</button></div>
   <div class="linkrow">${CASO_EJ[id]?"":'<button class="lnk" id="ej">Cargar ejemplo</button>'}<button class="lnk" id="nueva">Nueva paciente (borra este módulo)</button></div>
+  ${hcPanel(id)}
   <button class="btn" id="toBase" style="width:100%">Siguiente: enviar a la base →<br><small style="font-weight:400;color:var(--muted)">solo te pedirá lo que no salió de la historia</small></button>
   <p class="hint" id="offHint" ${sample?"hidden":""}>Sin conexión la nota se arma con la plantilla, lo marcado en la guía y tu dictado. Con señal, <a href="${ARTIFACT}" target="_blank" rel="noopener" id="rev">revisa con Claude</a>: el botón copia tu dictado para pegarlo allá.</p>
   <p class="status" id="status" role="status"></p>
@@ -1597,10 +1633,10 @@ function paneNota(){
   try{const c=JSON.parse(S.get(key(id,"calc"))||"null");if(c)$("calc").innerHTML=chipsCalc(calcular(c.x,c.fecha))}catch(e){}
   $("dict").addEventListener("input",()=>S.set(key(id,"dict"),$("dict").value));
   wireMic($("n-mic"),$("dict"),()=>S.set(key(id,"dict"),$("dict").value));
-  $("nota").addEventListener("input",()=>S.set(key(id,"nota"),$("nota").value));
+  let hcT;$("nota").addEventListener("input",()=>{S.set(key(id,"nota"),$("nota").value);clearTimeout(hcT);hcT=setTimeout(()=>hcRefresh(id),900)});
   $("fecha").addEventListener("change",()=>S.set(key(id,"fecha"),$("fecha").value));
   $("go").onclick=organizar;$("stop").onclick=()=>ctl&&ctl.abort();$("copy").onclick=copiar;
-  $("toBase").onclick=()=>enviarBase(id);
+  $("toBase").onclick=()=>enviarBase(id);hcWire(id);
   if($("ej"))$("ej").onclick=()=>{const exT=(st.note==="rpms"&&EX_RPMS[id])||n.ex;$("dict").value=exT;S.set(key(id,"dict"),exT);$("status").textContent="Ejemplo cargado (datos inventados). Toca Organizar nota."};
   $("nueva").onclick=()=>{const b=$("nueva");if(b.dataset.armed!=="1"){b.dataset.armed="1";b.textContent="¿Seguro? Toca otra vez para borrar";setTimeout(()=>{if(b.isConnected){b.dataset.armed="";b.textContent="Nueva paciente (borra este módulo)"}},4000);return}
     S.keys().filter(k=>k.startsWith("dn2_"+id+"_")&&!k.endsWith("_note")).forEach(k=>S.del(k));st.tab="entr";renderMod()};
@@ -1624,14 +1660,14 @@ function armarLocal(){
   $("out").hidden=false;$("nota").value=full;S.set(key(id,"nota"),full);
   const fx=falt.slice(0,12).join("\n");S.set(key(id,"falt"),fx);listaUI($("faltantes"),$("missBox"),fx);
   S.set(key(id,"alert"),"");listaUI($("alertas"),$("alertBox"),"");
-  $("status").textContent="Nota armada con la plantilla. En 'Faltan datos' están los puntos de la guía que no marcaste. Revísala antes de copiar.";
+  hcRefresh(id);$("status").textContent="Nota armada con la plantilla. En 'Faltan datos' están los puntos de la guía que no marcaste. Revísala antes de copiar.";
 }
 function listaUI(ul,box,txt){ul.innerHTML="";const it=(txt||"").split("\n").map(s=>s.replace(/^\s*[-•*]\s*/,"").trim()).filter(s=>s&&!/^ningun[oa]\.?$/i.test(s));it.forEach(x=>{const li=document.createElement("li");li.textContent=x;ul.append(li)});box.hidden=!it.length}
 function partes(t){const g=(a,b)=>{const i=t.indexOf(a);if(i<0)return null;const s=i+a.length,j=b?t.indexOf(b,s):-1;return t.slice(s,j<0?undefined:j).trim()};return{nota:g("===NOTA===","===FALTANTES==="),falt:g("===FALTANTES===","===ALERTAS==="),alert:g("===ALERTAS===",null)}}
 function pintar(t,final){const id=st.mod,p=partes(t),nota=p.nota??(t.includes("===")?"":t);let full=nota;
   if(final&&N[st.note].edu&&$("edu")&&$("edu").checked&&nota)full=nota+"\n\n"+EDU_PAMI;
   $("nota").value=full;listaUI($("faltantes"),$("missBox"),p.falt);listaUI($("alertas"),$("alertBox"),p.alert);
-  if(final){S.set(key(id,"nota"),full);S.set(key(id,"falt"),p.falt||"");S.set(key(id,"alert"),p.alert||"")}}
+  if(final){S.set(key(id,"nota"),full);S.set(key(id,"falt"),p.falt||"");S.set(key(id,"alert"),p.alert||"");hcRefresh(id)}}
 
 function pExtr(d,f){return `Eres un extractor de datos de una consulta dictada por un enfermero en Colombia. Fecha de la consulta: ${f}.
 Extrae SOLO lo dictado. Fechas sin año: el año que las deja antes de la fecha de consulta.
