@@ -1,0 +1,16 @@
+{
+  "name": "Dictado de Notas – Rutas 3280",
+  "short_name": "Rutas 3280",
+  "description": "Guía de las rutas materno perinatal y de promoción y mantenimiento (Res. 3280) con notas de enfermería, para usar sin conexión.",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#F3F6F4",
+  "theme_color": "#1D6B52",
+  "lang": "es",
+  "icons": [
+    {"src": "icon-192.png", "sizes": "192x192", "type": "image/png"},
+    {"src": "icon-512.png", "sizes": "512x512", "type": "image/png"},
+    {"src": "icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable"}
+  ]
+}

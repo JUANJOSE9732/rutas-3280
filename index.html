@@ -1,0 +1,719 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#1D6B52">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="icon-192.png">
+<link rel="apple-touch-icon" href="icon-192.png">
+<style>:root{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}body{margin:0}[hidden]{display:none!important}</style>
+<title>Dictado de Notas</title>
+<title>Dictado de Notas</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:ital,wght@0,400;0,700;1,400&family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,800&family=IBM+Plex+Mono:wght@500&display=swap">
+<style>
+/* Layout: panel de rutas (inicio) → módulo con Guía / Herramientas / Nota, una columna pensada para el celular */
+:root{
+  --bg:#F3F6F4; --surface:#FFFFFF; --ink:#13241E; --muted:#56685F; --line:#D5DFD9;
+  --accent:#1D6B52; --accent-ink:#FFFFFF; --accent-soft:#E1EFE8;
+  --rose:#9C3D5B; --rose-soft:#F8E6EC; --sky:#2B5F8A; --sky-soft:#E3EEF7;
+  --warn:#8A5A00; --warn-bg:#FFF3D6; --warn-line:#EBCB82;
+  --miss:#7A2E3A; --miss-bg:#FBE9EC; --miss-line:#E9B8C1;
+  --f-display:"Bricolage Grotesque", "Segoe UI", system-ui, sans-serif;
+  --f-body:"Atkinson Hyperlegible", "Segoe UI", system-ui, sans-serif;
+  --f-data:"IBM Plex Mono", ui-monospace, Menlo, monospace;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --bg:#0E1714; --surface:#16221E; --ink:#E4EEE9; --muted:#9DB0A7; --line:#2A3A34;
+  --accent:#5CC39A; --accent-ink:#06140F; --accent-soft:#1B3229;
+  --rose:#F0A3BC; --rose-soft:#33202A; --sky:#8FC1EA; --sky-soft:#1A2A38;
+  --warn:#F2C46B; --warn-bg:#2E2512; --warn-line:#5E4A1C;
+  --miss:#F2A3B0; --miss-bg:#2E1A1E; --miss-line:#5C2C35; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#0E1714; --surface:#16221E; --ink:#E4EEE9; --muted:#9DB0A7; --line:#2A3A34;
+  --accent:#5CC39A; --accent-ink:#06140F; --accent-soft:#1B3229;
+  --rose:#F0A3BC; --rose-soft:#33202A; --sky:#8FC1EA; --sky-soft:#1A2A38;
+  --warn:#F2C46B; --warn-bg:#2E2512; --warn-line:#5E4A1C;
+  --miss:#F2A3B0; --miss-bg:#2E1A1E; --miss-line:#5C2C35; color-scheme:dark}
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--ink);font-family:var(--f-body);font-size:17px;line-height:1.5}
+.wrap{max-width:720px;margin:0 auto;padding-inline:16px;padding-block:18px 72px;display:flex;flex-direction:column;gap:22px}
+h1,h2,h3{font-family:var(--f-display);margin:0;text-wrap:balance}
+h1{font-weight:800;font-size:1.7rem;line-height:1.1;letter-spacing:-.01em}
+h2{font-weight:800;font-size:1.25rem}
+h3{font-weight:600;font-size:1.02rem}
+.sub{margin:6px 0 0;color:var(--muted);font-size:.95rem}
+.lab{font-size:.74rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);margin:0 0 8px}
+button{font:inherit;cursor:pointer}
+textarea:focus,button:focus-visible,input:focus-visible,select:focus-visible,summary:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
+/* panel */
+.finder{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:14px;display:flex;flex-direction:column;gap:12px}
+.frow{display:flex;gap:10px;flex-wrap:wrap}
+.frow label{display:flex;flex-direction:column;gap:4px;font-size:.82rem;color:var(--muted);flex:1 1 120px;min-width:0}
+input,select{font:inherit;font-size:1rem;padding:10px 12px;border-radius:8px;border:1.5px solid var(--line);background:var(--surface);color:var(--ink);width:100%}
+.sugg{display:flex;flex-wrap:wrap;gap:8px}
+.sugg button{border:1.5px solid var(--accent);background:var(--accent-soft);color:var(--ink);border-radius:999px;padding:8px 14px;font-weight:700;font-size:.92rem}
+.sugg p{margin:0;color:var(--muted);font-size:.9rem}
+.route{display:flex;flex-direction:column;gap:10px}
+.route-head{display:flex;align-items:baseline;gap:10px;flex-wrap:wrap}
+.route-head span{font-size:.85rem;color:var(--muted)}
+.tiles{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:8px}
+.tile{display:flex;flex-direction:column;align-items:flex-start;gap:2px;text-align:left;padding:12px 14px;border-radius:10px;border:1.5px solid var(--line);background:var(--surface);color:var(--ink);min-height:74px;position:relative}
+.tile b{font-size:.98rem;line-height:1.25}
+.tile small{color:var(--muted);font-size:.8rem;line-height:1.3}
+.tile.rm{border-left:5px solid var(--rose)}
+.tile.rp{border-left:5px solid var(--sky)}
+.tile.pc{border-left:5px solid var(--accent)}
+.tile .dot{position:absolute;top:8px;right:10px;width:9px;height:9px;border-radius:50%;background:var(--warn)}
+.tile.hl{box-shadow:0 0 0 3px var(--accent)}
+/* módulo */
+.top{display:flex;align-items:center;gap:10px;position:sticky;top:env(safe-area-inset-top,0px);background:var(--bg);padding-block:8px;z-index:5}
+.back{border:1.5px solid var(--line);background:var(--surface);color:var(--ink);border-radius:8px;padding:8px 12px;font-weight:700}
+.tag{font-size:.75rem;font-weight:700;letter-spacing:.06em;text-transform:uppercase;padding:3px 8px;border-radius:6px}
+.tag.rm{background:var(--rose-soft);color:var(--rose)} .tag.rp{background:var(--sky-soft);color:var(--sky)} .tag.pc{background:var(--accent-soft);color:var(--accent)}
+.facts{display:flex;flex-wrap:wrap;gap:6px}
+.chip{font-family:var(--f-data);font-size:.8rem;padding:5px 9px;border-radius:999px;background:var(--accent-soft);color:var(--ink);font-variant-numeric:tabular-nums}
+.chip b{font-family:var(--f-body);font-weight:700;margin-right:4px;font-size:.78rem;color:var(--muted)}
+.tabs{display:flex;gap:6px;border-bottom:1.5px solid var(--line)}
+.tabs button{border:0;background:none;color:var(--muted);padding:10px 12px;font-weight:700;border-bottom:3px solid transparent;margin-bottom:-1.5px}
+.tabs button[aria-selected="true"]{color:var(--ink);border-bottom-color:var(--accent)}
+.box{border-radius:10px;padding:12px 14px;border:1px solid}
+.box h3{margin:0 0 6px;font-size:.78rem;letter-spacing:.08em;text-transform:uppercase;font-family:var(--f-body);font-weight:700}
+.box ul{margin:0;padding-left:20px}
+.box.warn{background:var(--warn-bg);border-color:var(--warn-line)} .box.warn h3{color:var(--warn)}
+.box.miss{background:var(--miss-bg);border-color:var(--miss-line)} .box.miss h3{color:var(--miss)}
+details.sec{background:var(--surface);border:1px solid var(--line);border-radius:10px}
+details.sec summary{cursor:pointer;padding:12px 14px;font-weight:700;display:flex;justify-content:space-between;gap:8px;list-style:none}
+details.sec summary::-webkit-details-marker{display:none}
+details.sec summary .cnt{font-family:var(--f-data);font-size:.8rem;color:var(--muted);font-weight:500}
+details.sec[open] summary{border-bottom:1px solid var(--line)}
+.items{list-style:none;margin:0;padding:6px 8px 10px}
+.items li{display:flex;gap:10px;align-items:flex-start;padding:7px 6px;border-radius:6px}
+.items li:has(input:checked) span{color:var(--muted);text-decoration:line-through;text-decoration-color:var(--line)}
+.items input{width:20px;height:20px;margin-top:2px;flex:none;accent-color:var(--accent)}
+.items .q{font-style:italic}
+.note-src{font-size:.82rem;color:var(--muted);margin:0}
+.notes-pick{display:flex;flex-wrap:wrap;gap:8px}
+.notes-pick button{border:1.5px solid var(--line);background:var(--surface);color:var(--ink);border-radius:10px;padding:10px 14px;font-size:.92rem}
+.notes-pick button[aria-pressed="true"]{border-color:var(--accent);background:var(--accent-soft);font-weight:700}
+textarea{width:100%;font:inherit;font-size:1.05rem;line-height:1.55;padding:14px;border-radius:12px;border:1.5px solid var(--line);background:var(--surface);color:var(--ink);resize:vertical}
+#dict{min-height:220px} #nota{min-height:340px;font-size:.97rem}
+.hint{font-size:.86rem;color:var(--muted);margin:6px 0 0}
+.btns{display:flex;gap:10px;flex-wrap:wrap}
+.btn{font-weight:700;font-size:1rem;padding:12px 16px;border-radius:10px;border:1.5px solid var(--line);background:var(--surface);color:var(--ink)}
+.btn.primary{background:var(--accent);border-color:var(--accent);color:var(--accent-ink);flex:1 1 200px}
+.btn:disabled{opacity:.55;cursor:default}
+.check{display:flex;gap:8px;align-items:center;font-size:.92rem}
+.check input{width:20px;height:20px;accent-color:var(--accent)}
+.status{font-size:.9rem;color:var(--muted);min-height:1.4em;margin:0}
+.tool{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:14px;display:flex;flex-direction:column;gap:12px}
+.out{display:flex;flex-wrap:wrap;gap:8px}
+.risk{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.score{font-family:var(--f-data);font-size:1.6rem;font-variant-numeric:tabular-nums}
+.pill{padding:5px 12px;border-radius:999px;font-weight:700;font-size:.88rem}
+.pill.low{background:var(--accent-soft);color:var(--accent)} .pill.high{background:var(--miss-bg);color:var(--miss)}
+.hh{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:2px}
+.hh li{display:flex;gap:10px;align-items:center;padding:5px 2px}
+.hh input{width:20px;height:20px;flex:none;accent-color:var(--accent)}
+.hh .pts{margin-left:auto;font-family:var(--f-data);font-size:.82rem;color:var(--muted)}
+.hh .grp{font-size:.74rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);padding-top:10px}
+.foot{font-size:.84rem;color:var(--muted);border-top:1px solid var(--line);padding-top:14px}
+.drafts{display:flex;flex-direction:column;gap:6px}
+.drafts button{display:flex;justify-content:space-between;gap:10px;text-align:left;border:1px solid var(--warn-line);background:var(--warn-bg);color:var(--ink);border-radius:8px;padding:10px 12px}
+@media (prefers-reduced-motion:no-preference){.tile,.btn,.notes-pick button{transition:background .15s,border-color .15s,box-shadow .15s}}
+</style>
+
+</head>
+<body>
+<div class="wrap" id="app"></div>
+
+<script>
+/* ======================= CONTENIDO NORMATIVO (Res. 3280 de 2018) ======================= */
+const VIOL = ["¿DURANTE EL ÚLTIMO AÑO, ha sido humillada, menospreciada, insultada o amenazada por su pareja?","¿DURANTE EL ÚLTIMO AÑO, fue golpeada, bofeteada, pateada o lastimada físicamente de otra manera?","¿DESDE QUE ESTÁ EN GESTACIÓN, ha sido golpeada, bofeteada, pateada o lastimada físicamente de alguna manera?","¿DURANTE EL ÚLTIMO AÑO, fue forzada a tener relaciones sexuales?"];
+const DEPR = ["Durante el mes pasado, ¿con frecuencia se ha sentido triste, deprimida o sin esperanza?","Durante el mes pasado, ¿ha permanecido preocupada por tener poco interés o placer para hacer las cosas cotidianas?","Si responde sí a alguna: ¿Siente que necesita ayuda?"];
+const CERVIX = ["Cuello uterino (rural disperso, obligatorio): 25 a 29 años citología; 30 a 50 años Ver y Tratar (VIA/VILI + crioterapia inmediata; prueba rápida ADN-VPH como alternativa junto con Ver y Tratar); 51 a 65 años citología o ADN-VPH sin triage","Si en la especuloscopia hay signos de carcinoma invasor: informar, alertar y gestionar colposcopia + biopsia en máximo 1 semana"];
+
+const M = {
+ precon:{route:"rm",title:"Preconcepcional",who:"Mujer que quiere embarazarse en el próximo año",
+  facts:[["Consultas","1 inicial (30 min) + 1 control (20 min)"],["Quién","Medicina o enfermería"],["Ácido fólico","≥ 3 meses antes"]],
+  alerts:["Antecedente genético o familiar (madre > 35, alteraciones genéticas, hemofilia) → ginecobstetricia","Respuesta positiva a las preguntas de depresión → ruta de salud mental","Enfermedad crónica (diabetes, tiroides, epilepsia, HTA, lupus, ERC, cardiopatía, trombofilia, asma, TB, cáncer) → especialista y anticoncepción hasta que esté controlada"],
+  sections:[
+   {t:"Preguntar",items:["¿Quiere embarazarse en el próximo año? (si no: asesoría anticonceptiva de la RPMS)","Enfermedades: diabetes, tiroides, epilepsia, HTA, lupus, artritis, ERC, cardiopatía, trombofilia, anemia, asma, tuberculosis, cáncer, IMC > 35","Salud sexual: inicio de relaciones, ITS, patología cervical o VPH, último tamizaje de cuello uterino, compañeros, preservativo, anticonceptivo actual","Antecedentes genéticos o familiares: madre mayor de 35, alteraciones genéticas, hemofilia","Obstétricos: pretérmino, cesárea, abortos, muerte fetal, gran multiparidad, intervalo < 18 meses, Rh, preeclampsia, RN < 2.500 g o macrosómico, hemorragia posparto, mola, depresión posparto","Hábitos: alimentación, suplementos o medicamentos para bajar de peso, actividad física, sueño, estrés, medicamentos, tabaco, alcohol, sustancias","Psicosocial: familia, redes de apoyo, violencias de género o sexual, pobreza","Esquema de vacunación"]},
+   {t:"Examinar",items:["Examen físico completo cefalocaudal, incluida la cavidad bucal","Peso, talla, IMC y estado nutricional","Valoración ginecológica completa con especuloscopia"]},
+   {t:"Exámenes",items:["Antígeno de superficie de hepatitis B","Tamizaje de cuello uterino según edad y ámbito (rural disperso)","Glicemia en ayunas","Hemoclasificación y hemograma","Hemoparásitos: gota gruesa (zona endémica)","IgG para toxoplasma, rubéola y varicela","Prueba treponémica rápida","Urocultivo con CMI","Prueba rápida de VIH con asesoría pre y post"]},
+   {t:"Plan",items:["Ácido fólico 0,4 mg/día (4 mg si tuvo hijo con defecto del tubo neural), desde al menos 3 meses antes","Método anticonceptivo formulado desde la primera consulta hasta que decida embarazarse","Completar vacunas al menos 3 meses antes del embarazo","Esperar al menos 18 meses desde el último parto o cesárea","IMC ideal para embarazarse: menos de 25","Informar el derecho a la IVE","Control para leer los exámenes","Remitir según hallazgos: odontología, nutrición, psicología, trabajo social, especialista"]}
+  ],
+  notes:["precon"]},
+ prenatal:{route:"rm",title:"Prenatal",who:"Gestante: inscripción y controles",
+  facts:[["Captación","antes de la semana 10"],["Controles","mensual hasta 36, quincenal hasta 40"],["Mínimo","10 nulípara · 7 multípara"],["36, 38, 40","medicina"]],
+  alerts:["Cualquier factor de riesgo, enfermedad o paraclínico anormal → remisión inmediata a medicina","TA ≥ 140/90 en 2 tomas (≥ 4 h) después de la semana 20, o ≥ 160/110 en una toma → hospital","Prueba treponémica positiva → penicilina benzatínica 2.400.000 UI IM en ese momento (sin prueba de alergia si no hay antecedente)","VIH reactiva → segunda prueba diferente; si reactiva: carga viral, antirretroviral profiláctico y remitir","Ganancia de peso inadecuada en la semana 28 → equipo multidisciplinario","Adolescente → salud mental y trabajo social toda la gestación","Una respuesta positiva de violencia → ruta de víctimas de violencia"],
+  sections:[
+   {t:"Antes de inscribir",items:["Informar opciones frente al embarazo y el derecho a la IVE; registrar su decisión"]},
+   {t:"Gestación actual",items:["Fecha de las dos últimas menstruaciones y si es segura","Ecografía: fecha y semanas","Movimientos fetales","Síntomas urinarios, flujo, sangrado","Cefalea persistente, edemas, epigastralgia","Náuseas, vómito, hemorroides","Tratamientos o remedios recibidos en esta gestación"]},
+   {t:"Antecedentes",items:["Obstétricos: G P C A E, molas, intervalos, partos (vía, término, peso), placenta previa, abruptio, RPM, poli u oligohidramnios, RCIU, retención placentaria, infección o hemorragia posparto, preeclampsia, eclampsia, HELLP, muertes perinatales, malformaciones","Ginecológicos: menarquia, ciclos, anticoncepción y hasta cuándo, flujos, ITS incluido VIH, infertilidad, último tamizaje de cuello uterino","Personales: patológicos, quirúrgicos, alérgicos, medicamentos, tabaco, alcohol, sustancias, trastornos mentales, trombosis","Familiares: HTA, preeclampsia, cardiopatía, diabetes, autoinmunes, epilepsia, mentales, gemelares, TB, cáncer"]},
+   {t:"Psicosocial, violencia y depresión",items:["Familia, redes de apoyo, embarazo deseado y programado, vulnerabilidad","Soporte familiar: ¿está satisfecha con el apoyo de su familia? Si no: tiempo, espacio, dinero","Ansiedad: tensión emocional, humor depresivo, síntomas neurovegetativos"].concat(VIOL.map(v=>"Q:"+v)).concat(DEPR.map(v=>"Q:"+v)).concat(["Alcohol y sustancias (si consume: intervención breve; si persiste: ASSIST)","Barrera de idioma o de acceso → albergue materno o intérprete"])},
+   {t:"Examinar",items:["Signos vitales completos y TA","Peso, talla, IMC y gráfica de Atalah; meta de ganancia de peso","Valoración ginecológica en la primera consulta","Altura uterina","Frecuencia cardiaca fetal y movimientos fetales","Situación y presentación desde la semana 36 (Leopold)"]},
+   {t:"Exámenes de ingreso",items:["Urocultivo y antibiograma","Hemograma y hemoclasificación","Glicemia","Prueba rápida de VIH con asesoría","Prueba treponémica rápida","HBsAg","IgG rubéola antes de la semana 16 si no está vacunada","IgG e IgM toxoplasma si no se conoce su estado","Tamizaje de cuello uterino si no está al día","Ecografía 10+6 a 13+6 semanas","Gota gruesa (zona endémica)","ELISA Chagas si tiene factores de riesgo"]},
+   {t:"Exámenes de seguimiento",items:["VIH y sífilis cada trimestre (VIH también en el parto)","IgM toxoplasma mensual en seronegativas","Gota gruesa mensual","Ecografía de detalle 18 a 23+6 semanas","PTOG 75 g entre las semanas 24 y 28","Hemograma en la semana 28","Cultivo de estreptococo B entre las semanas 35 y 37","Urocultivo de control si recibió tratamiento por bacteriuria"]},
+   {t:"Plan",items:["Ácido fólico 0,4 mg/día hasta la semana 12","Calcio 1.200 mg/día desde la semana 14","Hierro (no si Hb > 14 g/dl)","Aspirina 75–100 mg desde la semana 12 si 1 criterio alto o 2 moderados de preeclampsia","Albendazol 400 mg dosis única en 2.º o 3.er trimestre","Vacunas: Td según antecedente, influenza desde la 14, Tdap desde la 26 (confirmar PAI vigente)","Condones","Remitir a odontología (2), nutrición (1), curso de preparación (7 sesiones)","Carné materno CLAP","Asesoría anticonceptiva: método elegido en historia y carné","Plan de parto en el tercer trimestre (incluye partera y transporte comunitario)","Escala de Herrera y Hurtado en cada trimestre; depresión en la semana 28"]}
+  ],
+  tools:["eg","herrera"],
+  notes:["pami","prenatal"]},
+ parto:{route:"rm",title:"Parto y puerperio",who:"Parto, puerperio y control posparto",
+  facts:[["Puerperio inmediato","SV y sangrado c/15 min, 2 h"],["Alta","24 h vaginal · 48 h cesárea"],["Control posparto","día 3 a 5"]],
+  alerts:["Loquios con mal olor, sangrado abundante, fiebre > 38 °C después de las primeras 24 h","Cefalea, visión borrosa, tinnitus, fosfenos, epigastralgia, convulsiones","Dolor o hinchazón en las piernas, dolor torácico, disnea","Mamas rojas, calientes y dolorosas; dolor al orinar","Sí a ambas preguntas de depresión → psicología y psiquiatría; Edimburgo > 12 → salud mental"],
+  sections:[
+   {t:"Parto (si lo atiendes en comunidad)",items:["Pinzamiento del cordón cuando deje de latir (habitualmente 2–3 min)","Contacto piel a piel sin separar al RN de la madre los primeros 60 min","Lactancia durante el contacto piel a piel","Puerperio inmediato: signos vitales y sangrado cada 15 min durante 2 horas","Globo de seguridad, sangrado genital, suturas o episiotomía","Escala de alerta temprana obstétrica","Remitir si hay hemorragia, tras estabilizar"]},
+   {t:"Puerperio mediato (2 a 48 h)",items:["Involución uterina y aspecto de los loquios","Fiebre, taquicardia, taquipnea, útero doloroso, loquios fétidos","Deambulación temprana y alimentación"]},
+   {t:"Control posparto (día 3 a 5): preguntar",items:["Sangrado y olor de los loquios, fiebre, dolor","Cefalea, visión, micción, mamas, piernas","Lactancia y cuidado del recién nacido","Sexualidad en el posparto","Intención reproductiva (próximo embarazo en no menos de 18 meses)"].concat(["Q:Durante el último mes, ¿se ha preocupado porque con frecuencia se sentía triste, deprimida o sin esperanza?","Q:Durante el último mes, ¿se ha preocupado porque con frecuencia sentía poco interés por realizar actividades y además no sentía que le proporcionaran placer?"])},
+   {t:"Examinar",items:["Signos vitales y TA","Involución uterina y loquios","Periné, episiotomía o herida de cesárea","Mamas y pezones","Miembros inferiores"]},
+   {t:"Verificar",items:["Rh: anti-D en 72 h si es Rh negativo con RN Rh positivo","Resultados maternos de VIH, sífilis, hepatitis B, toxoplasma, estreptococo B","Vacunas pendientes de la gestación","Riesgo tromboembólico"]},
+   {t:"Plan",items:["Método anticonceptivo antes del alta: DIU posparto, implante, inyectable trimestral, oral de solo progestina, ligadura, condones","Entrega del método con cobertura de 3 meses","Anticoncepción de emergencia: cuándo usarla","Analgesia: ibuprofeno 600 mg o acetaminofén sin pasar de 4.000 mg/día","Educación: lactancia exclusiva, alimentación, actividad física progresiva, sueño, violencias y cómo denunciarlas","Registro de nacido vivo y registro civil"]}
+  ],
+  notes:["posparto","parto"]},
+ rn:{route:"rm",title:"Recién nacido",who:"0 a 7 días: atención inmediata y control",
+  facts:[["Piel a piel","primeros 60 min"],["Vitamina K","1 mg IM"],["Control","día 3 a 5"]],
+  alerts:["Temperatura fuera de 36,5–37,5 °C es señal de peligro","Apgar < 7 → remitir; < 7 a los 5 min: descartar asfixia","Pulsioximetría pre y postductal con diferencia > 3 % o < 90 % → pediatría o cardiología","No succiona, convulsiona, letárgico, dificultad para respirar, ictericia precoz, ombligo rojo o con pus → remitir","Riesgo social (maltrato, drogas, abandono) → trabajo social y restablecimiento de derechos"],
+  sections:[
+   {t:"Atención inmediata",items:["Pinzamiento al dejar de latir el cordón (2–3 min); inmediato solo en abruptio o placenta previa sangrante","Contacto piel a piel 60 min y lactancia","Apgar al minuto y a los 5 minutos","Silverman si hay dificultad respiratoria a los 10 min","Identificación frente a la madre"]},
+   {t:"Entre los 60 y 90 minutos",items:["Profilaxis umbilical: ligadura y clorhexidina o yodopovidona","Profilaxis ocular: povidona yodada 2,5–5 %, 1 gota en cada ojo","Vitamina K 1 mg IM en el muslo (0,5 mg si pesa < 1.500 g)","Examen físico inicial: permeabilidad esofágica y anal, temperatura","Antropometría"]},
+   {t:"Antes del egreso",items:["Signos vitales cada 6 horas","Tamizaje de cardiopatía: pulsioximetría pre y postductal a las 24 h","TA en las 4 extremidades","Tamizaje visual: reflejo rojo","Tamizaje auditivo","TSH neonatal","Vacunas BCG y hepatitis B","Hemoclasificación del RN; anti-D a la madre si aplica","Resultados maternos de VIH, sífilis, toxoplasma, hepatitis B, estreptococo B"]},
+   {t:"Control del recién nacido (día 3 a 5): preguntar",items:["¿Cómo y cada cuánto mama? ¿Se pega bien?","Orina y deposiciones","Color amarillo de la piel, fiebre, frialdad","Succión, llanto, actividad","Vacunas y tamizajes hechos"]},
+   {t:"Control: examinar",items:["Peso y pérdida desde el nacimiento","Temperatura, FC, FR","Ictericia","Ombligo","Observar una toma (posición y agarre)"]},
+   {t:"Madre",items:["Consejería en lactancia materna exclusiva","Con VIH confirmado: fórmula, no leche materna"]}
+  ],
+  notes:["rn"]},
+ ive:{route:"rm",title:"IVE",who:"Mujer que pide interrumpir el embarazo",
+  facts:[["Hasta semana 24","solo su voluntad"],["Después","1 de 3 causales"],["Plazo","máximo 5 días"]],
+  alerts:["Menor de 14 años: decide de forma autónoma; además activar ruta de violencia sexual y notificar","Remitir a medicina el mismo día por los tiempos de traslado"],
+  sections:[
+   {t:"Informar sin inducir",items:["Derecho a la IVE en el primer contacto con el servicio","Todas las opciones: continuar, IVE, adopción","Confidencialidad"]},
+   {t:"Confirmar",items:["FUM y edad gestacional","Si es mayor de 24 semanas: identificar la causal"]},
+   {t:"Causales después de la semana 24",items:["Riesgo para su vida o salud física, mental o social → certificado de medicina o psicología","Malformación grave incompatible con la vida → certificado médico","Violencia sexual, incesto, inseminación no consentida → no exigir denuncia; si no se ha denunciado, informar a las autoridades"]},
+   {t:"No exigir",items:["Juntas médicas, comités ni revisión por abogados","Autorización de pareja, familia, capitán, cabildo ni otros","Orden judicial, dictamen forense ni exámenes que retrasen"]},
+   {t:"Plan",items:["Registrar la solicitud y la decisión en la historia clínica","Remisión prioritaria a medicina (máximo 5 días hasta el procedimiento)","Valoración de salud mental y emocional","Asesoría y provisión anticonceptiva post-IVE","Consulta de seguimiento"]}
+  ],
+  notes:["ive"]},
+ pinf:{route:"rp",title:"Primera infancia",who:"7 días a 5 años",
+  facts:[["Medicina","1 m, 4–5 m, 12–18 m, 24–29 m, 3 a, 5 a"],["Enfermería","2–3 m, 6–8 m, 9–11 m, 18–23 m, 30–35 m, 4 a"]],
+  alerts:["Hitos de la EAD-3 no alcanzados → valoración médica","Desviación de las curvas de crecimiento o desnutrición aguda → manejo y remisión","Signos generales de peligro AIEPI → remisión urgente","Sospecha de maltrato → ruta de violencia y notificación"],
+  sections:[
+   {t:"Valoración",items:["Crecimiento: peso, talla, perímetro cefálico, curvas OMS","Desarrollo con EAD-3","Alimentación: lactancia, alimentación complementaria","Esquema de vacunación","Salud bucal","Familia: familiograma, red de apoyo, cuidado"]},
+   {t:"Protección específica",items:["Vacunación según esquema PAI","Micronutrientes en polvo (fortificación casera) en las edades del cuadro de la 3280","Micronutrientes dos veces al año desde los 2 años","Desparasitación desde el año, dos veces al año","Barniz de flúor y profilaxis semestral desde el año","Sellantes desde los 3 años según criterio","Consejería en lactancia"]},
+   {t:"Detección temprana",items:["Hemoglobina según riesgo (una vez)","Odontología anual desde los 6 meses"]},
+   {t:"Educación",items:["Educación individual a padres o cuidadores","Al menos dos ciclos educativos"]}
+  ],
+  notes:["rpms"]},
+ inf:{route:"rp",title:"Infancia",who:"6 a 11 años",
+  facts:[["Medicina","6, 8, 10 años"],["Enfermería","7, 9, 11 años"],["Odontología","anual"]],
+  alerts:["Alteración visual o auditiva → remitir","Sospecha de maltrato o abuso → ruta de violencia"],
+  sections:[
+   {t:"Valoración",items:["Crecimiento y estado nutricional","Desarrollo y desempeño escolar","Agudeza visual y audición","Salud mental, violencias, acoso","Esquema de vacunación"]},
+   {t:"Detección temprana",items:["Tamizaje de anemia (hemoglobina y hematocrito) una vez entre los 10 y 13 años, solo niñas"]},
+   {t:"Protección específica",items:["Vacunación según PAI (VPH a los 9 años según PAI vigente)","Barniz de flúor y profilaxis dos veces al año","Sellantes según necesidad"]},
+   {t:"Educación",items:["Educación individual y familiar","Al menos dos ciclos educativos"]}
+  ],
+  notes:["rpms"]},
+ adol:{route:"rp",title:"Adolescencia",who:"12 a 17 años",
+  facts:[["Medicina","12, 14, 16 años"],["Enfermería","13, 15, 17 años"],["Odontología","anual"]],
+  alerts:["Embarazo en menor de 14 años → delito sexual presunto: ruta de violencia sexual y notificación","Ideación suicida, consumo, violencia → remisión prioritaria"],
+  sections:[
+   {t:"Valoración",items:["Crecimiento y estado nutricional","Salud sexual y reproductiva: inicio de relaciones, protección","Salud mental, consumo de sustancias, violencias","Proyecto de vida","Esquema de vacunación"]},
+   {t:"Detección temprana",items:["Prueba treponémica y VIH según exposición al riesgo, con asesoría","Tamizaje de anemia una vez entre los 14 y 17 años, solo mujeres","Prueba de embarazo si hay retraso menstrual u otros signos"]},
+   {t:"Protección específica",items:["Asesoría en anticoncepción y control","Suministro por demanda: DIU, implante, oral, inyectable, preservativos","Vacunación según esquema","Flúor y profilaxis dos veces al año; detartraje y sellantes según necesidad"]},
+   {t:"Educación",items:["Educación individual y familiar","Al menos dos ciclos educativos"]}
+  ],
+  notes:["rpms"]},
+ juv:{route:"rp",title:"Juventud",who:"18 a 28 años",
+  facts:[["Valoración","2 en el periodo (medicina y enfermería)"],["Odontología","cada 2 años"],["Cuello uterino","desde los 25"]],
+  alerts:CERVIX.slice(1).concat(["Riesgo cardiovascular alto → medicina"]),
+  sections:[
+   {t:"Valoración",items:["Estado nutricional, TA, hábitos","Salud sexual y reproductiva, intención reproductiva (si quiere embarazarse: preconcepcional)","Salud mental, consumo, violencias"]},
+   {t:"Detección temprana",items:["Riesgo cardiovascular según clasificación: glicemia, perfil lipídico, creatinina, uroanálisis","Sífilis, VIH y hepatitis B según exposición al riesgo","Hepatitis C una vez si tiene antecedente de riesgo","Prueba de embarazo si hay sospecha",CERVIX[0]]},
+   {t:"Protección específica",items:["Asesoría y suministro de anticoncepción","Preservativos","Vacunación según esquema","Profilaxis oral anual"]},
+   {t:"Educación",items:["Educación individual","Ciclos educativos"]}
+  ],
+  notes:["rpms"]},
+ adul:{route:"rp",title:"Adultez",who:"29 a 59 años",
+  facts:[["Valoración","cada 5 años"],["Riesgo CV","quinquenal"],["Mama","clínica anual ≥ 40 · mamografía c/2 a 50–69"]],
+  alerts:CERVIX.slice(1).concat(["Masa mamaria o hallazgo clínico → ecografía o mamografía y remisión","Sangre oculta positiva → colonoscopia"]),
+  sections:[
+   {t:"Valoración",items:["Estado nutricional, TA, perímetro abdominal","Hábitos, salud mental, violencias, consumo","Salud sexual y reproductiva, anticoncepción"]},
+   {t:"Detección temprana",items:["Riesgo cardiovascular y metabólico quinquenal: glicemia, perfil lipídico, creatinina, uroanálisis",CERVIX[0],"Mama: examen clínico anual desde los 40; mamografía cada 2 años de 50 a 69","Colon: sangre oculta en heces cada 2 años desde los 50","Próstata (hombres): PSA y tacto rectal cada 5 años desde los 50","Sífilis, VIH, hepatitis B según exposición","Hepatitis C una vez desde los 50 o con antecedente de transfusión"]},
+   {t:"Protección específica",items:["Anticoncepción y preservativos","Vacunación según esquema","Profilaxis oral cada 2 años"]},
+   {t:"Educación",items:["Educación individual","Ciclos educativos"]}
+  ],
+  notes:["rpms"]},
+ vej:{route:"rp",title:"Vejez",who:"60 años y más",
+  facts:[["Valoración","cada 3 años"],["Odontología","cada 2 años"],["Colon y próstata","hasta 75"]],
+  alerts:["Caídas, dependencia funcional o deterioro cognitivo → medicina","Sospecha de maltrato o abandono → ruta de violencia","Masa mamaria o sangre oculta positiva → remisión"],
+  sections:[
+   {t:"Valoración",items:["Funcionalidad (actividades básicas e instrumentales)","Cognición y estado de ánimo","Riesgo de caídas","Estado nutricional, TA","Maltrato, abandono, red de apoyo"]},
+   {t:"Detección temprana",items:["Riesgo cardiovascular: glicemia, perfil lipídico, creatinina, uroanálisis","Cuello uterino hasta los 65 (citología o ADN-VPH)","Mama: mamografía y examen clínico hasta los 69","Colon: sangre oculta cada 2 años hasta los 75","Próstata (hombres): cada 5 años hasta los 75"]},
+   {t:"Protección específica",items:["Vacunación según esquema","Profilaxis oral cada 2 años"]},
+   {t:"Educación",items:["Educación individual y a cuidadores"]}
+  ],
+  notes:["rpms"]},
+ proc:{route:"pc",title:"Procedimientos y consejerías",who:"VIH, lactancia, implante",
+  facts:[],alerts:["Prueba rápida de VIH reactiva no es diagnóstico: segunda prueba, confirmación, remisión y notificación"],
+  sections:[{t:"Antes de registrar",items:["Consentimiento informado firmado cuando aplica","Asesoría pre y post prueba en VIH","Método anticonceptivo siguiente al retirar un implante"]}],
+  notes:["vih","lact","impl"]}
+};
+
+/* ---------- Herrera y Hurtado ---------- */
+const HH=[
+ ["Historia reproductiva"],["Edad menor de 16",1],["Edad mayor de 35",2],["Nulípara",1],["5 o más partos",2],["Aborto habitual o infertilidad",1],["Retención placentaria o hemorragia posparto",1],["RN de más de 4.000 g",1],["RN de menos de 2.500 g",1],["Hipertensión inducida por el embarazo previa",1],["Embarazo gemelar o cesárea previa",1],["Mortinato o muerte neonatal",1],["Trabajo de parto prolongado o difícil",1],
+ ["Condiciones asociadas"],["Cirugía ginecológica previa",1],["Enfermedad renal crónica",1],["Diabetes gestacional",2],["Diabetes mellitus",3],["Enfermedad cardíaca",3],["Infección aguda bacteriana",1],["Enfermedad autoinmune",3],["Anemia (Hb < 10 g/dl)",1],
+ ["Embarazo actual"],["Hemorragia antes de la semana 20",1],["Hemorragia después de la semana 20",3],["Embarazo de más de 42 semanas",1],["Hipertensión arterial",2],["Ruptura prematura de membranas",2],["Polihidramnios",2],["Restricción del crecimiento",3],["Embarazo múltiple",3],["Mala presentación",3],["Isoinmunización Rh",3],
+ ["Psicosocial"],["Ansiedad severa",1],["Soporte familiar inadecuado",1]
+];
+
+/* ---------- Bloque fijo de educación PAMI (plantilla ESE) ---------- */
+const EDU_PAMI = `EDUCACIÓN
+Se brinda educación clara, comprensible y culturalmente respetuosa, explicada de manera verbal y reforzada con material educativo:
+- Importancia del control prenatal: el control periódico y oportuno permite identificar riesgos, prevenir complicaciones maternas y fetales, detectar enfermedades de manera temprana y garantizar una atención segura durante la gestación, el parto y el puerperio.
+- Atención del parto institucional: importancia de que el parto sea atendido en una institución de salud, con personal capacitado y acceso a atención oportuna ante complicaciones de la madre o el recién nacido.
+- Signos y síntomas de alarma: consultar de inmediato por sangrado vaginal, salida de líquido por vagina, disminución o ausencia de movimientos fetales, cefalea persistente, visión borrosa, zumbidos en los oídos, dolor epigástrico, edemas progresivos, fiebre, síntomas urinarios, convulsiones o cualquier otro síntoma que genere alarma.
+- Alimentación saludable: dieta balanceada, variada y suficiente, rica en proteínas, frutas, verduras, hierro, calcio y líquidos, acorde a su cultura y disponibilidad de alimentos.
+- Actividad física y descanso: actividad física moderada según tolerancia, evitar esfuerzos excesivos, descanso adecuado.
+- Preparación para el trabajo de parto: etapas del trabajo de parto, respiración, acompañamiento y señales de inicio.
+- Lactancia materna: exclusiva durante los primeros seis (6) meses y complementaria hasta los dos (2) años o más.
+- Prevención del consumo de sustancias: riesgos del alcohol, tabaco y sustancias psicoactivas en gestación y lactancia, y de la automedicación.
+- Higiene y autocuidado, y prevención de infecciones respiratorias.
+
+INFORMACIÓN SOBRE INTERRUPCIÓN VOLUNTARIA DEL EMBARAZO (IVE)
+Se brinda información clara, completa y sin inducción sobre el derecho a la IVE, conforme a la Sentencia C-055 de 2022 y la Resolución 051 de 2023: es un derecho hasta la semana veinticuatro (24) por la sola voluntad de la mujer; después de la semana 24 procede cuando el embarazo represente riesgo para su vida o salud física o mental, sea resultado de violencia sexual, incesto o inseminación no consentida, o exista grave malformación fetal que haga inviable la vida extrauterina. El acceso debe ser oportuno, seguro, confidencial y sin barreras.
+
+CONSEJERÍA EN PLANIFICACIÓN FAMILIAR PARA EL EGRESO
+Se brinda consejería integral sobre los métodos anticonceptivos disponibles, su mecanismo de acción, efectividad, duración, efectos secundarios y contraindicaciones, y sobre la importancia de la planificación en el posparto. La elección es libre, voluntaria e informada.
+
+INVITACIÓN AL CURSO DE PREPARACIÓN PARA LA MATERNIDAD Y LA PATERNIDAD
+Se invita a la gestante y a su pareja o red de apoyo al curso. Se entrega volante con las fechas programadas.`;
+
+/* ---------- Tipos de nota ---------- */
+const N = {
+ pami:{label:"Inscripción PAMI",extract:true,edu:true,
+  ex:"Mujer de 24 años, comunidad de Querarí, etnia cubeo, primaria incompleta, unión libre, sin celular. Inscripción a control prenatal. FUM 2 de julio, segura. Sin ecografía. G2 P1 C0 A0 V1, último parto hace 3 años en casa con partera. Menarquia 12, ciclos regulares. Niega sangrado, salida de líquido, cefalea y síntomas urinarios. TA 100/60, FC 78, T 36.5. Buen estado general, mamas normales, útero no palpable por encima del pubis. Peso 52 kilos, talla 1 con 50, no sabe el peso de antes. Gota gruesa negativa. Embarazo no planeado pero aceptado, apoyo del esposo y la mamá. Satisfecha con el apoyo familiar. Niega violencia en las 4 preguntas. Preguntas de depresión negativas. Usa rezos del payé. Quiere parir en Mitú. Se le explicó la IVE y quiere continuar. No acepta albergue. Formulo ácido fólico y sulfato ferroso, ordeno laboratorios y ecografía, remito a odontología y vacunación.",
+  structure:`INSCRIPCIÓN PAMI
+(primer párrafo: mujer de __ años que asiste para inscripción al Programa de Atención Materno Perinatal (PAMI), comunidad, etnia, escolaridad, estado civil, contacto)
+GESTACIÓN ACTUAL: edad gestacional y método, FPP, lo que refiere.
+ANTECEDENTES GINECO-OBSTÉTRICOS: G P C A E V M, FUP, menarquia, ciclos, antecedentes.
+ANTECEDENTES PERSONALES Y FAMILIARES.
+LABORATORIOS Y AYUDAS DIAGNÓSTICAS.
+MICRONUTRIENTES.
+VALORACIONES INTERDISCIPLINARIAS: vacunación, odontología, nutrición, psicología, ginecología.
+CLASIFICACIÓN DEL RIESGO: escala de Herrera y Hurtado (puntaje) y criterios clínicos.
+VALORACIÓN PSICOSOCIAL: soporte familiar, ansiedad, tamizaje de violencia (4 preguntas), riesgo de depresión, consumo.
+SIGNOS Y SÍNTOMAS DE ALARMA.
+EXAMEN FÍSICO: signos vitales; por sistemas; abdomen (altura uterina, FCF, movimientos fetales); especuloscopia/citología.
+CLASIFICACIÓN NUTRICIONAL – ATALAH: pesos, talla, EG, IMC, ganancia, interpretación.
+ANÁLISIS Y PLAN DE MANEJO: decisiones de la paciente (medicina tradicional, deseo de parto, IVE, albergue, planificación), carné materno, CLAP, cita con medicina, pendientes.
+PLAN: micronutrientes, medicamentos, laboratorios, ecografía, interconsultas, vacunación.`,
+  rules:`- No clasifiques "alto riesgo" solo por ausencia de controles previos: clasifica con Herrera y Hurtado y criterios clínicos dictados; si no se dictaron, "Clasificación del riesgo: ____" y a FALTANTES. (La ausencia de control prenatal sí es criterio del Anexo 3 para el nivel de atención del parto; puedes mencionarlo como tal.)
+- Revisa coherencia con la edad gestacional calculada: FCF con doppler antes de 10–12 semanas, altura uterina antes de 12–13, movimientos fetales antes de 18–20, albendazol en primer trimestre, calcio antes de la 14, aspirina antes de la 12. Lo incoherente va en ALERTAS.
+- Fórmula obstétrica: G = P + C + A + E + 1. Si no cuadra, ALERTAS.
+- Laboratorios positivos o signos de alarma presentes van en ALERTAS.
+- Atalah: no uses cortes fijos; "Ubicar en gráfica de Atalah para la EG: ____" salvo que se dicte.
+- No incluyas los bloques de educación, IVE, planificación ni curso: se agregan aparte. Sí la decisión de la paciente.`},
+ prenatal:{label:"Control prenatal",extract:true,
+  ex:"Gestante de 28 años, control prenatal. FUM 10 de marzo. Refiere movimientos fetales, niega cefalea, sangrado y salida de líquido. Ardor al orinar hace 3 días. TA 110/70, FC 80. Peso 60 kilos, talla 1.55, peso al inicio 54. Altura uterina 27 cm, FCF 140, cefálico. Toma hierro y calcio. VIH y sífilis de este trimestre no reactivas. Gota gruesa negativa. Preguntas de depresión negativas. Remito a medicina por síntomas urinarios, ordeno urocultivo.",
+  structure:`CONTROL PRENATAL DE SEGUIMIENTO
+Datos generales, edad gestacional (método) y FPP.
+SUBJETIVO: síntomas nuevos y signos de alarma (referidos o negados), movimientos fetales, adherencia a micronutrientes.
+EXAMEN FÍSICO: signos vitales y TA, peso y ganancia (curva), altura uterina, FCF, situación y presentación (desde la 36), edemas.
+PARACLÍNICOS: resultados revisados y pendientes según la edad gestacional.
+VALORACIÓN DEL RIESGO: reclasificación; Herrera y Hurtado si es cambio de trimestre; preguntas de depresión si es semana 28.
+PLAN: micronutrientes, aspirina si aplica, vacunas según EG, exámenes del periodo, remisiones, educación, plan de parto (tercer trimestre), método anticonceptivo elegido, próxima cita.`,
+  rules:`- Con la EG calculada, revisa qué exámenes, vacunas y suplementos tocan y no se dictaron (PTOG 24–28, hemograma 28, ecografía 18–23+6, SGB 35–37, VIH y sífilis del trimestre, calcio desde 14, Tdap desde 26) y ponlos en FALTANTES.
+- TA ≥ 140/90 después de la semana 20, AU discordante con la EG (diferencia de más de 3 cm), ganancia de peso inadecuada en la 28, síntomas urinarios o signos de alarma → ALERTAS.
+- Desde la semana 36 los controles son por medicina: si la nota es de enfermería y EG ≥ 36, ponlo en ALERTAS.`},
+ precon:{label:"Consulta preconcepcional",
+  ex:"Mujer de 26 años que quiere embarazarse el próximo año. Usa inyectable mensual. Sin enfermedades crónicas. Un parto hace 2 años por cesárea. Última citología hace 3 años normal. No fuma ni toma. Vacunas incompletas, no tiene Td. Peso 58, talla 1.52. Examen normal, especuloscopia normal. Ordeno laboratorios preconcepcionales y gota gruesa, inicio ácido fólico 0,4 mg, continúa inyectable, remito a vacunación.",
+  structure:`CONSULTA PRECONCEPCIONAL
+Datos generales e intención reproductiva.
+ANTECEDENTES: personales (enfermedades crónicas), salud sexual y reproductiva, ginecobstétricos, genéticos y familiares, hábitos, psicosocial y violencias, vacunación.
+EXAMEN FÍSICO: signos vitales, antropometría e IMC, examen por sistemas, valoración ginecológica con especuloscopia.
+EXÁMENES SOLICITADOS.
+ANÁLISIS: factores protectores y de riesgo.
+PLAN: ácido fólico, método anticonceptivo hasta la decisión, vacunas, intervalo intergenésico, remisiones, información (incluido derecho a IVE), control para lectura de exámenes.`,
+  rules:`- Intervalo menor de 18 meses desde el último parto o cesárea, IMC ≥ 25, enfermedad crónica o antecedente genético → ALERTAS con la recomendación de la norma.
+- Si no se dicta método anticonceptivo para el periodo de preparación, ponlo en FALTANTES.`},
+ posparto:{label:"Control posparto",
+  ex:"Puérpera de 22 años, día 4 posparto vaginal en Mitú. Loquios escasos sin mal olor, sin fiebre. Lacta bien, bebé se pega. Mamas sin dolor. TA 110/70, FC 76, T 36.8. Útero involucionado, periné sin signos de infección, piernas sin edema. Preguntas de depresión negativas. Eligió implante, ya se lo pusieron antes del alta. Rh positivo.",
+  structure:`CONTROL POSPARTO
+Datos generales, días posparto, vía del parto, lugar.
+SUBJETIVO: loquios, fiebre, dolor, signos de alarma, micción, mamas, piernas, estado de ánimo (tamizaje de depresión), lactancia, sexualidad, intención reproductiva.
+EXAMEN FÍSICO: signos vitales y TA, mamas, involución uterina, loquios, periné o herida, miembros inferiores.
+VERIFICACIÓN: Rh y anti-D, resultados maternos, vacunas.
+PLAN: método anticonceptivo, analgesia si aplica, educación, signos de alarma, control del recién nacido, próximo control.`,
+  rules:`- Signos de alarma del posparto o respuesta positiva a ambas preguntas de depresión → ALERTAS.
+- Si no se dicta el método anticonceptivo, ponlo en FALTANTES.`},
+ parto:{label:"Atención del parto en comunidad",
+  ex:"Mujer de 30 años, G3 P2, a término, parto vaginal en casa con partera, llego a las 2 horas. Placenta completa. Sangrado moderado, útero contraído, globo de seguridad. TA 110/70, FC 88. Bebé lloró al nacer, piel a piel, ya mamó. Se aplica oxitocina 10 UI IM. Coordino traslado a Mitú.",
+  structure:`ATENCIÓN DEL PARTO / PUERPERIO INMEDIATO
+Datos generales, edad gestacional, paridad, hora del parto, lugar, quién lo atendió.
+PARTO: vía, alumbramiento (placenta completa o no), pinzamiento del cordón, contacto piel a piel, lactancia.
+PUERPERIO INMEDIATO: signos vitales y sangrado (cada 15 min por 2 horas), globo de seguridad, periné, medicamentos administrados.
+RECIÉN NACIDO: estado al nacer, Apgar si se conoce, profilaxis aplicadas.
+PLAN: remisión o traslado, signos de alarma, control posparto entre el día 3 y 5.`,
+  rules:`- Hemorragia, signos de choque, placenta incompleta, TA elevada o RN con Apgar < 7 → ALERTAS.
+- Si no se dictan las tomas de signos vitales o la hora, ponlo en FALTANTES.`},
+ rn:{label:"Control del recién nacido",
+  ex:"Recién nacido de 4 días, nació en Mitú a término, peso al nacer 3.100 g, hoy 2.950 g. Mama cada 2 a 3 horas, buen agarre. Orina 6 veces, deposiciones amarillas. Leve ictericia en cara. T 36.9, FC 140, FR 44. Ombligo limpio. Tiene BCG y hepatitis B. No sabe si le hicieron tamizaje auditivo.",
+  structure:`CONTROL DEL RECIÉN NACIDO
+Datos generales: días de vida, edad gestacional al nacer, peso al nacer, lugar del parto.
+SUBJETIVO: alimentación (lactancia, frecuencia, agarre), orina y deposiciones, signos de peligro referidos.
+EXAMEN FÍSICO: peso actual y porcentaje de pérdida, temperatura, FC, FR, ictericia (extensión), ombligo, piel, reflejos, observación de una toma.
+VERIFICACIÓN: vacunas (BCG, hepatitis B), tamizajes (TSH, auditivo, visual, cardiopatía), resultados maternos.
+PLAN: consejería en lactancia, cuidados del recién nacido, signos de peligro, remisiones, registro civil, próxima cita.`,
+  rules:`- Calcula el porcentaje de pérdida de peso solo si se dictan ambos pesos; pérdida > 10 % → ALERTAS.
+- Temperatura fuera de 36,5–37,5 °C, ictericia antes de 24 h o que baja al abdomen o más, signos de peligro → ALERTAS.
+- Tamizajes o vacunas no verificados → FALTANTES.`},
+ ive:{label:"Información y asesoría IVE",
+  ex:"Mujer de 19 años, 9 semanas por FUM, solicita información sobre IVE. Se informan las opciones sin inducir. Decide interrumpir. No refiere violencia. Se remite a medicina hoy.",
+  structure:`ASESORÍA EN OPCIONES FRENTE AL EMBARAZO / IVE
+Datos generales, edad gestacional (método).
+INFORMACIÓN BRINDADA: derecho a la IVE (Sentencia C-055 de 2022 y Resolución 051 de 2023), opciones (continuar, IVE, adopción), confidencialidad, sin inducción.
+DECISIÓN DE LA MUJER, registrada con sus palabras.
+SI ES MAYOR DE 24 SEMANAS: causal y soporte.
+PLAN: remisión a medicina con prioridad, plazo máximo de 5 días, valoración de salud mental, anticoncepción post-IVE, seguimiento.`,
+  rules:`- Redacta con lenguaje neutro, sin juicios ni elementos disuasorios.
+- Menor de 14 años → ALERTAS: ruta de violencia sexual y notificación, además de la atención.
+- No escribas exigencias prohibidas (autorización de terceros, denuncia previa, juntas).`},
+ rpms:{label:"Valoración integral",
+  ex:"Adolescente mujer de 15 años, valoración integral. Peso 48, talla 1.56. Vive con mamá y abuela. Estudia octavo. Refiere relaciones sexuales desde hace 6 meses sin método. Niega consumo. Se hace prueba rápida de VIH y sífilis no reactivas. Hemoglobina 11,2. Se da asesoría en anticoncepción y elige implante. Remito a odontología.",
+  structure:`VALORACIÓN INTEGRAL – RUTA DE PROMOCIÓN Y MANTENIMIENTO
+Datos generales y momento del curso de vida.
+ANAMNESIS: motivo, antecedentes, hábitos, salud mental, violencias, consumo, salud sexual y reproductiva según la edad, familia.
+EXAMEN FÍSICO: signos vitales, antropometría con clasificación, examen por sistemas; escalas aplicadas (EAD-3, agudeza visual, funcionalidad según edad).
+DETECCIÓN TEMPRANA: tamizajes realizados con resultado y los ordenados.
+PROTECCIÓN ESPECÍFICA: vacunas, salud bucal, micronutrientes, desparasitación, anticoncepción según edad.
+ANÁLISIS Y PLAN: hallazgos, remisiones, educación, próxima valoración.`,
+  rules:`- Usa la LISTA DEL MÓDULO para identificar lo que corresponde a esta edad y no se dictó; ponlo en FALTANTES.
+- Hallazgos de riesgo (crecimiento, desarrollo, violencia, salud mental, embarazo en menor de 14) → ALERTAS.`},
+ vih:{label:"Asesoría VIH",
+  ex:"Gestante de 19 años, primer trimestre. Asesoría pre prueba, creía que se transmitía por zancudos y se aclaró. Firmó consentimiento. Prueba rápida dual VIH y sífilis hoy, no reactivas. Se explicó ventana inmunológica y uso de condón.",
+  structure:`ASESORÍA PARA PRUEBA VOLUNTARIA DE VIH
+ASESORÍA PRE-PRUEBA: VIH/sida e ITS, transmisión, conceptos aclarados, prevención, afrontamiento, propósito y confidencialidad.
+CONSENTIMIENTO INFORMADO.
+PRUEBA: tipo, fecha, resultado.
+ASESORÍA POST-PRUEBA según el resultado.`,
+  rules:`- Prueba reactiva no es diagnóstico: en la nota, segunda prueba o confirmatoria y remisión; en ALERTAS "Prueba reactiva: confirmar, remitir y notificar".
+- Si es gestante: en ALERTAS recordar tamizaje cada trimestre y en el parto, y que con VIH confirmado se reemplaza la lactancia.
+- No escribas "negativo" si no se dictó el resultado.`},
+ lact:{label:"Consejería en lactancia",
+  ex:"Puérpera de 28 años, bebé de 3 días. Observé una toma: boca poco abierta, labio inferior hacia adentro, grieta pequeña en pezón derecho. Corregí el agarre. Enseñé extracción manual y dar la leche con vaso. La abuela le dice que le dé agua de panela, se explicó que no es necesario.",
+  structure:`CONSEJERÍA EN LACTANCIA MATERNA
+Contexto y hallazgos observados.
+Contenidos: beneficios para bebé y madre; exclusiva hasta los 6 meses y complementaria hasta los 2 años o más; el RN sano no necesita agua ni otros alimentos; inicio en la primera hora; la succión estimula la producción; posición y agarre; ambos pechos; cuidado de pezones; extracción manual, conservación y ofrecimiento con vaso o cuchara; cuidados según su cultura.
+Observación de una toma y plan. Cierre: refiere entender.`,
+  rules:`- Incluye los contenidos estándar aunque no se dicten (son la consejería fija); no inventes hallazgos.
+- No incluyas el texto antiguo sobre COVID-19.
+- VIH confirmado u otra contraindicación → ALERTAS.`},
+ impl:{label:"Retiro de implante",
+  ex:"Mujer de 31 años, retiro de Jadelle por deseo de embarazo, puesto hace 4 años. Brazo izquierdo. Firmó consentimiento. Isodine, lidocaína al 2 % 2 cc. Incisión de 3 mm, salieron las 2 varillas íntegras, se le mostraron. Poco sangrado, steri strip y vendaje compresivo. Sin complicaciones.",
+  structure:`RETIRO DE IMPLANTE SUBDÉRMICO
+Motivo, tipo de implante, fecha de inserción, consentimiento.
+PROCEDIMIENTO: brazo, antisepsia, anestesia (medicamento y cantidad), incisión, extracción (número de varillas, íntegras), sangrado, cierre y vendaje.
+EVENTOS ADVERSOS.
+PLAN: cuidados, retiro del vendaje, signos de alarma, método anticonceptivo siguiente o consejería preconcepcional.`,
+  rules:`- Sin método posterior dictado → FALTANTES (la fertilidad regresa rápido). Si el motivo es deseo de embarazo, sugiere en el plan consulta preconcepcional y ácido fólico.
+- Varillas que no coinciden con el tipo (Jadelle 2, Implanon 1) o no íntegras → ALERTAS.`}
+};
+
+/* ======================= APLICACIÓN ======================= */
+const $=id=>document.getElementById(id);
+const S={get(k){try{return localStorage.getItem(k)}catch(e){return null}},set(k,v){try{localStorage.setItem(k,v)}catch(e){}},del(k){try{localStorage.removeItem(k)}catch(e){}},keys(){try{return Object.keys(localStorage)}catch(e){return[]}}};
+const esc=s=>String(s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+let sample=null, ctl=null;
+const ARTIFACT="https://claude.ai/artifact/AZbkuSCNNduKVaf4PwWRZJ";
+const st={view:"home",mod:null,tab:"guia",note:null};
+function hoy(){const d=new Date();return d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0")}
+
+/* ---------- cálculos ---------- */
+const DAY=86400000;
+function pD(s){if(!s||!/^\d{4}-\d{2}-\d{2}$/.test(s))return null;const[a,b,c]=s.split("-").map(Number);return new Date(Date.UTC(a,b-1,c))}
+function fmt(d){return String(d.getUTCDate()).padStart(2,"0")+"/"+String(d.getUTCMonth()+1).padStart(2,"0")+"/"+d.getUTCFullYear()}
+function egT(n){return Math.floor(n/7)+" semanas y "+(n%7)+" días"}
+function calcular(x,fechaStr){
+  const r={},f=pD(fechaStr);if(!f||!x)return r;
+  const fum=pD(x.fum);
+  if(fum){const d=Math.round((f-fum)/DAY);if(d>=0&&d<320){r.egFum=d;r.fppFum=new Date(fum.getTime()+280*DAY)}}
+  const fe=pD(x.eco_fecha);
+  if(fe&&Number.isFinite(+x.eco_semanas)&&x.eco_semanas!==null&&x.eco_semanas!==""){const a=(+x.eco_semanas)*7+(Number.isFinite(+x.eco_dias)?+x.eco_dias:0);const d=a+Math.round((f-fe)/DAY);if(d>=0&&d<320){r.egEco=d;r.fppEco=new Date(f.getTime()+(280-d)*DAY)}}
+  const eco=r.egEco!=null&&(x.fum_confiable===false||r.egFum==null);
+  r.eg=eco?r.egEco:r.egFum;r.fpp=eco?r.fppEco:r.fppFum;r.metodo=r.eg==null?null:(eco?"ecografía":"FUM");
+  const t=+x.talla_m;
+  if(t>1&&t<2.2){if(+x.peso_kg>25)r.imc=(+x.peso_kg)/(t*t);if(+x.peso_pre_kg>25)r.imcPre=(+x.peso_pre_kg)/(t*t)}
+  if(+x.peso_kg>25&&+x.peso_pre_kg>25)r.gan=(+x.peso_kg)-(+x.peso_pre_kg);
+  return r;
+}
+function metaGanancia(imc){if(imc==null)return null;if(imc<20)return"12 a 18 kg";if(imc<25)return"10 a 13 kg";if(imc<30)return"7 a 10 kg";return"6 a 7 kg"}
+function calcTexto(r){const L=[];
+  if(r.egFum!=null)L.push("EG por FUM: "+egT(r.egFum)+"; FPP por FUM: "+fmt(r.fppFum));
+  if(r.egEco!=null)L.push("EG por ecografía (actualizada): "+egT(r.egEco)+"; FPP por ecografía: "+fmt(r.fppEco));
+  if(r.metodo)L.push("EG que se usa en la nota: "+egT(r.eg)+" por "+r.metodo);
+  if(r.imcPre!=null)L.push("IMC pregestacional/primer control: "+r.imcPre.toFixed(1)+" kg/m² (meta de ganancia total: "+metaGanancia(r.imcPre)+")");
+  if(r.imc!=null)L.push("IMC actual: "+r.imc.toFixed(1)+" kg/m²");
+  if(r.gan!=null)L.push("Ganancia de peso acumulada: "+r.gan.toFixed(1)+" kg");
+  return L.join("\n")}
+function chipsCalc(r){const o=[];
+  if(r.eg!=null)o.push(["EG",Math.floor(r.eg/7)+"+"+(r.eg%7)+" ("+r.metodo+")"]);
+  if(r.fpp)o.push(["FPP",fmt(r.fpp)]);
+  if(r.imcPre!=null)o.push(["IMC pre",r.imcPre.toFixed(1)]);
+  if(r.imc!=null)o.push(["IMC actual",r.imc.toFixed(1)]);
+  if(r.imcPre!=null)o.push(["Meta ganancia",metaGanancia(r.imcPre)]);
+  if(r.gan!=null)o.push(["Ganancia",r.gan.toFixed(1)+" kg"]);
+  return o.map(([k,v])=>`<span class="chip"><b>${esc(k)}</b>${esc(v)}</span>`).join("")}
+
+/* ---------- estado guardado por módulo ---------- */
+const key=(m,k)=>"dn2_"+m+"_"+k;
+function checks(m){try{return JSON.parse(S.get(key(m,"chk"))||"{}")}catch(e){return{}}}
+function hasDraft(m){return !!(S.get(key(m,"dict"))||S.get(key(m,"nota"))||Object.keys(checks(m)).length)}
+
+/* ---------- PANEL ---------- */
+function home(){
+  st.view="home";
+  const rm=["precon","prenatal","parto","rn","ive"],rp=["pinf","inf","adol","juv","adul","vej"];
+  const tile=id=>{const m=M[id];return `<button class="tile ${m.route}" data-mod="${id}" id="t-${id}">${hasDraft(id)?'<span class="dot" title="Borrador guardado"></span>':""}<b>${esc(m.title)}</b><small>${esc(m.who)}</small></button>`};
+  const drafts=Object.keys(M).filter(hasDraft);
+  $("app").innerHTML=`
+  <header><h1>Dictado de Notas</h1><p class="sub">Rutas de la Resolución 3280: escoge a quién vas a atender, sigue la guía y dicta la nota.</p></header>
+  <section class="finder" aria-labelledby="fh">
+    <p class="lab" id="fh">¿A quién vas a atender?</p>
+    <div class="frow">
+      <label for="f-edad">Edad<input id="f-edad" type="number" inputmode="numeric" min="0" placeholder="24"></label>
+      <label for="f-uni">Unidad<select id="f-uni"><option value="a">años</option><option value="m">meses</option><option value="d">días</option></select></label>
+      <label for="f-sexo">Sexo<select id="f-sexo"><option value="f">Mujer</option><option value="m">Hombre</option></select></label>
+      <label for="f-est">Situación<select id="f-est"><option value="">Ninguna especial</option><option value="ges">Gestante</option><option value="pos">Puérpera (hasta 42 días)</option><option value="pre">Quiere embarazarse</option><option value="ive">Pide IVE</option></select></label>
+    </div>
+    <div class="sugg" id="sugg"><p>Escribe la edad para ver qué le corresponde.</p></div>
+  </section>
+  ${drafts.length?`<section><p class="lab">Borradores guardados</p><div class="drafts">${drafts.map(d=>`<button data-mod="${d}"><span>${esc(M[d].title)}</span><span>Continuar →</span></button>`).join("")}</div></section>`:""}
+  <section class="route"><div class="route-head"><h2>Ruta materno perinatal</h2><span>RIAMP</span></div><div class="tiles">${rm.map(tile).join("")}</div></section>
+  <section class="route"><div class="route-head"><h2>Promoción y mantenimiento</h2><span>RPMS · cursos de vida</span></div><div class="tiles">${rp.map(tile).join("")}</div></section>
+  <section class="route"><div class="route-head"><h2>Procedimientos y consejerías</h2></div><div class="tiles">${tile("proc")}</div></section>
+  <p class="foot">Contenido según la Resolución 3280 de 2018, con IVE actualizada a la Sentencia C-055 de 2022 y la Resolución 051 de 2023. Las semanas de vacunas se confirman con el lineamiento PAI vigente. Lo que dictas queda solo en este celular hasta que lo borres. Organizar la nota necesita internet.</p>`;
+  document.querySelectorAll("[data-mod]").forEach(b=>b.onclick=()=>openMod(b.dataset.mod));
+  ["f-edad","f-uni","f-sexo","f-est"].forEach(i=>$(i).addEventListener("input",sugerir));
+  window.scrollTo(0,0);
+}
+function sugerir(){
+  const v=parseFloat($("f-edad").value),u=$("f-uni").value,sx=$("f-sexo").value,es=$("f-est").value;
+  document.querySelectorAll(".tile.hl").forEach(t=>t.classList.remove("hl"));
+  if(!Number.isFinite(v)){$("sugg").innerHTML="<p>Escribe la edad para ver qué le corresponde.</p>";return}
+  const anos=u==="a"?v:u==="m"?v/12:v/365;const out=[];
+  if(u==="d"&&v<=7)out.push("rn");
+  else if(anos<6)out.push("pinf");else if(anos<12)out.push("inf");else if(anos<18)out.push("adol");else if(anos<29)out.push("juv");else if(anos<60)out.push("adul");else out.push("vej");
+  if(sx==="f"){if(es==="ges")out.unshift("prenatal");if(es==="pos")out.unshift("parto");if(es==="pre")out.unshift("precon");if(es==="ive")out.unshift("ive")}
+  if(sx==="f"&&es==="pos")out.push("rn");
+  const uniq=[...new Set(out)];
+  uniq.forEach(id=>{const t=$("t-"+id);if(t)t.classList.add("hl")});
+  let extra="";if(sx==="f"&&anos<14&&(es==="ges"||es==="ive"))extra=`<p style="width:100%;color:var(--miss);font-weight:700">Menor de 14 años: activa la ruta de violencia sexual y notifica.</p>`;
+  $("sugg").innerHTML=uniq.map(id=>`<button data-mod="${id}">${esc(M[id].title)}</button>`).join("")+extra;
+  $("sugg").querySelectorAll("[data-mod]").forEach(b=>b.onclick=()=>openMod(b.dataset.mod));
+}
+
+/* ---------- MÓDULO ---------- */
+function openMod(id){st.view="mod";st.mod=id;st.tab=S.get(key(id,"tab"))||"guia";st.note=S.get(key(id,"note"))||M[id].notes[0];if(!M[id].notes.includes(st.note))st.note=M[id].notes[0];renderMod();window.scrollTo(0,0)}
+function renderMod(){
+  const m=M[st.mod],id=st.mod;
+  const tabs=[["guia","Guía"]].concat(m.tools?[["herr","Herramientas"]]:[]).concat([["nota","Nota"]]);
+  if(!tabs.some(t=>t[0]===st.tab))st.tab="guia";
+  const routeName={rm:"Materno perinatal",rp:"Curso de vida",pc:"Procedimientos"}[m.route];
+  $("app").innerHTML=`
+  <div class="top"><button class="back" id="back">← Rutas</button><span class="tag ${m.route}">${routeName}</span></div>
+  <header><h1>${esc(m.title)}</h1><p class="sub">${esc(m.who)}</p></header>
+  ${m.facts.length?`<div class="facts">${m.facts.map(([k,v])=>`<span class="chip"><b>${esc(k)}</b>${esc(v)}</span>`).join("")}</div>`:""}
+  <div class="tabs" role="tablist">${tabs.map(([k,l])=>`<button role="tab" data-tab="${k}" aria-selected="${st.tab===k}">${l}</button>`).join("")}</div>
+  <div id="pane"></div>`;
+  $("back").onclick=home;
+  document.querySelectorAll("[data-tab]").forEach(b=>b.onclick=()=>{st.tab=b.dataset.tab;S.set(key(id,"tab"),st.tab);renderMod()});
+  if(st.tab==="guia")paneGuia();else if(st.tab==="herr")paneHerr();else paneNota();
+}
+function paneGuia(){
+  const m=M[st.mod],id=st.mod,ck=checks(id);
+  const total=m.sections.reduce((a,s)=>a+s.items.length,0),done=Object.keys(ck).length;
+  $("pane").innerHTML=`
+  ${m.alerts.length?`<div class="box warn"><h3>Remitir o actuar si…</h3><ul>${m.alerts.map(a=>`<li>${esc(a)}</li>`).join("")}</ul></div>`:""}
+  <p class="note-src">Marca lo que vas haciendo (${done} de ${total}). Lo marcado se pasa a la nota.</p>
+  ${m.sections.map((s,i)=>`<details class="sec" ${i<2?"open":""}><summary><span>${esc(s.t)}</span><span class="cnt">${s.items.filter((_,j)=>ck[i+"."+j]).length}/${s.items.length}</span></summary><ul class="items">${s.items.map((it,j)=>{const q=it.startsWith("Q:");const txt=q?it.slice(2):it;return `<li><input type="checkbox" id="c${i}_${j}" data-k="${i}.${j}" ${ck[i+"."+j]?"checked":""}><label for="c${i}_${j}"><span class="${q?"q":""}">${esc(txt)}</span></label></li>`}).join("")}</ul></details>`).join("")}
+  <div class="btns"><button class="btn primary" id="goNota">Ir a la nota</button><button class="btn" id="clrChk">Desmarcar todo</button></div>`;
+  document.querySelectorAll("[data-k]").forEach(c=>c.onchange=()=>{const o=checks(id);if(c.checked)o[c.dataset.k]=1;else delete o[c.dataset.k];S.set(key(id,"chk"),JSON.stringify(o));const det=c.closest("details");const sec=m.sections[+c.dataset.k.split(".")[0]];det.querySelector(".cnt").textContent=Object.keys(o).filter(k=>k.split(".")[0]===c.dataset.k.split(".")[0]).length+"/"+sec.items.length});
+  $("goNota").onclick=()=>{st.tab="nota";S.set(key(id,"tab"),"nota");renderMod()};
+  $("clrChk").onclick=()=>{S.del(key(id,"chk"));paneGuia()};
+}
+function paneHerr(){
+  const id=st.mod;let hh={};try{hh=JSON.parse(S.get(key(id,"hh"))||"{}")}catch(e){}
+  const v=k=>esc(S.get(key(id,"eg_"+k))||"");
+  $("pane").innerHTML=`
+  <section class="tool"><h3>Edad gestacional, FPP e IMC</h3>
+    <div class="frow">
+      <label for="e-fecha">Fecha de consulta<input type="date" id="e-fecha" value="${v("fecha")||hoy()}"></label>
+      <label for="e-fum">FUM<input type="date" id="e-fum" value="${v("fum")}"></label>
+    </div>
+    <div class="frow">
+      <label for="e-ecof">Fecha de ecografía<input type="date" id="e-ecof" value="${v("ecof")}"></label>
+      <label for="e-ecos">Semanas en la eco<input type="number" id="e-ecos" min="0" max="42" value="${v("ecos")}"></label>
+      <label for="e-ecod">Días<input type="number" id="e-ecod" min="0" max="6" value="${v("ecod")}"></label>
+    </div>
+    <label class="check"><input type="checkbox" id="e-nofum" ${S.get(key(id,"eg_nofum"))?"checked":""}> La FUM no es confiable (usar ecografía)</label>
+    <div class="frow">
+      <label for="e-talla">Talla (m)<input type="number" step="0.01" id="e-talla" placeholder="1.52" value="${v("talla")}"></label>
+      <label for="e-ppre">Peso inicial (kg)<input type="number" step="0.1" id="e-ppre" value="${v("ppre")}"></label>
+      <label for="e-pact">Peso actual (kg)<input type="number" step="0.1" id="e-pact" value="${v("pact")}"></label>
+    </div>
+    <div class="out" id="e-out"></div>
+    <p class="note-src">Clasifica el IMC en la gráfica de Atalah según la edad gestacional; la meta de ganancia sale del IMC inicial (Res. 3280).</p>
+  </section>
+  <section class="tool"><h3>Escala de Herrera y Hurtado</h3>
+    <div class="risk"><span class="score" id="hh-s">0</span><span class="pill low" id="hh-p">Bajo riesgo</span></div>
+    <ul class="hh">${HH.map((h,i)=>h.length===1?`<li class="grp">${esc(h[0])}</li>`:`<li><input type="checkbox" id="h${i}" data-h="${i}" ${hh[i]?"checked":""}><label for="h${i}">${esc(h[0])}</label><span class="pts">${h[1]} pt</span></li>`).join("")}</ul>
+    <p class="note-src">3 puntos o más = alto riesgo. Se aplica en cada trimestre. Puntajes de la tabla habitual: verifícalos con el carné de tu ESE.</p>
+  </section>`;
+  const ids=["fecha","fum","ecof","ecos","ecod","talla","ppre","pact"],map={fecha:"e-fecha",fum:"e-fum",ecof:"e-ecof",ecos:"e-ecos",ecod:"e-ecod",talla:"e-talla",ppre:"e-ppre",pact:"e-pact"};
+  const upd=()=>{ids.forEach(k=>S.set(key(id,"eg_"+k),$(map[k]).value));if($("e-nofum").checked)S.set(key(id,"eg_nofum"),"1");else S.del(key(id,"eg_nofum"));
+    const r=calcular({fum:$("e-fum").value,fum_confiable:!$("e-nofum").checked,eco_fecha:$("e-ecof").value,eco_semanas:$("e-ecos").value===""?null:$("e-ecos").value,eco_dias:$("e-ecod").value,talla_m:$("e-talla").value,peso_kg:$("e-pact").value,peso_pre_kg:$("e-ppre").value},$("e-fecha").value);
+    $("e-out").innerHTML=chipsCalc(r)||'<span class="note-src">Llena la FUM o la ecografía, y la talla con los pesos.</span>'};
+  Object.values(map).forEach(i=>$(i).addEventListener("input",upd));$("e-nofum").onchange=upd;upd();
+  const hupd=()=>{const o={};let s=0;document.querySelectorAll("[data-h]").forEach(c=>{if(c.checked){o[c.dataset.h]=1;s+=HH[+c.dataset.h][1]}});S.set(key(id,"hh"),JSON.stringify(o));$("hh-s").textContent=s;const hi=s>=3;$("hh-p").textContent=hi?"Alto riesgo: medicina y ginecobstetricia":"Bajo riesgo";$("hh-p").className="pill "+(hi?"high":"low")};
+  document.querySelectorAll("[data-h]").forEach(c=>c.onchange=hupd);hupd();
+}
+function hhResumen(id){let hh={};try{hh=JSON.parse(S.get(key(id,"hh"))||"{}")}catch(e){}const ks=Object.keys(hh);if(!ks.length)return"";let s=0;const it=ks.map(k=>{s+=HH[+k][1];return HH[+k][0]+" ("+HH[+k][1]+")"});return "Escala de Herrera y Hurtado aplicada: "+s+(s===1?" punto (":" puntos (")+(s>=3?"alto riesgo":"bajo riesgo")+"). Factores: "+it.join("; ")}
+function marcados(id){const m=M[id],ck=checks(id),o=[];m.sections.forEach((s,i)=>s.items.forEach((it,j)=>{if(ck[i+"."+j])o.push(s.t+": "+(it.startsWith("Q:")?"Pregunta realizada – "+it.slice(2):it))}));return o}
+function lista(m){return m.sections.map(s=>s.t+": "+s.items.map(i=>i.startsWith("Q:")?i.slice(2):i).join(" | ")).join("\n")}
+
+function paneNota(){
+  const id=st.mod,m=M[id],n=N[st.note];
+  $("pane").innerHTML=`
+  ${m.notes.length>1?`<div><p class="lab">Tipo de nota</p><div class="notes-pick">${m.notes.map(k=>`<button data-n="${k}" aria-pressed="${k===st.note}">${esc(N[k].label)}</button>`).join("")}</div></div>`:""}
+  <div class="frow"><label for="fecha">Fecha de la consulta<input type="date" id="fecha" value="${esc(S.get(key(id,"fecha"))||hoy())}"></label></div>
+  <div><p class="lab"><label for="dict">Tu dictado</label></p>
+  <textarea id="dict" placeholder="Toca el micrófono del teclado y habla. Puedes dictar en desorden.">${esc(S.get(key(id,"dict"))||"")}</textarea>
+  <p class="hint">Usa el micrófono del teclado del celular. No dictes nombre ni documento. ${marcados(id).length?`Se incluirán ${marcados(id).length} actividades marcadas en la guía.`:""}</p></div>
+  <div class="btns"><button class="btn primary" id="go">${sample?"Organizar nota":"Armar nota sin conexión"}</button><button class="btn" id="ej">Cargar ejemplo</button><button class="btn" id="nueva">Nueva paciente</button></div>
+  <p class="hint" id="offHint" ${sample?"hidden":""}>Sin conexión la nota se arma con la plantilla, lo marcado en la guía y tu dictado. Con señal, <a href="${ARTIFACT}" target="_blank" rel="noopener" id="rev">revisa con Claude</a>: el botón copia tu dictado para pegarlo allá.</p>
+  ${n.edu?`<label class="check"><input type="checkbox" id="edu" checked> Agregar bloques fijos de educación, IVE, planificación y curso</label>`:""}
+  <p class="status" id="status" role="status"></p>
+  <section id="out" ${S.get(key(id,"nota"))?"":"hidden"} style="display:flex;flex-direction:column;gap:12px">
+    <div class="out" id="calc"></div>
+    <div class="box warn" id="alertBox" hidden><h3>Revisar antes de firmar</h3><ul id="alertas"></ul></div>
+    <div class="box miss" id="missBox" hidden><h3>Faltan datos</h3><ul id="faltantes"></ul></div>
+    <div><p class="lab"><label for="nota">Nota organizada (editable)</label></p><textarea id="nota">${esc(S.get(key(id,"nota"))||"")}</textarea></div>
+    <div class="btns"><button class="btn primary" id="copy">Copiar nota</button><button class="btn" id="stop" hidden>Detener</button></div>
+  </section>`;
+  if(!S.get(key(id,"nota")))$("out").hidden=true;
+  document.querySelectorAll("[data-n]").forEach(b=>b.onclick=()=>{st.note=b.dataset.n;S.set(key(id,"note"),st.note);paneNota()});
+  listaUI($("faltantes"),$("missBox"),S.get(key(id,"falt")));listaUI($("alertas"),$("alertBox"),S.get(key(id,"alert")));
+  try{const c=JSON.parse(S.get(key(id,"calc"))||"null");if(c)$("calc").innerHTML=chipsCalc(calcular(c.x,c.fecha))}catch(e){}
+  let t;$("dict").addEventListener("input",()=>{clearTimeout(t);t=setTimeout(()=>S.set(key(id,"dict"),$("dict").value),400)});
+  $("nota").addEventListener("input",()=>S.set(key(id,"nota"),$("nota").value));
+  $("fecha").addEventListener("change",()=>S.set(key(id,"fecha"),$("fecha").value));
+  $("go").onclick=organizar;$("stop").onclick=()=>ctl&&ctl.abort();$("copy").onclick=copiar;
+  $("ej").onclick=()=>{$("dict").value=n.ex;S.set(key(id,"dict"),n.ex);$("status").textContent="Ejemplo cargado (datos inventados). Toca Organizar nota."};
+  $("nueva").onclick=()=>{const b=$("nueva");if(b.dataset.armed!=="1"){b.dataset.armed="1";b.textContent="¿Borrar este módulo? Toca otra vez";setTimeout(()=>{if(b.isConnected){b.dataset.armed="";b.textContent="Nueva paciente"}},4000);return}
+    S.keys().filter(k=>k.startsWith("dn2_"+id+"_")&&!k.endsWith("_tab")&&!k.endsWith("_note")).forEach(k=>S.del(k));paneNota();$("status").textContent="Listo para una nueva paciente."};
+  $("rev").onclick=()=>{try{navigator.clipboard.writeText("Módulo: "+m.title+" · Nota: "+n.label+" · Fecha: "+($("fecha").value||hoy())+"\n\n"+$("dict").value).catch(()=>{})}catch(e){}};
+}
+function armarLocal(){
+  const id=st.mod,m=M[id],n=N[st.note],f=$("fecha").value||hoy(),d=$("dict").value.trim(),ck=checks(id);
+  const L=[n.label.toUpperCase(),"Fecha: "+f.split("-").reverse().join("/"),""];
+  if(id==="prenatal"){
+    const g=k=>S.get(key(id,"eg_"+k))||"";
+    const r=calcular({fum:g("fum"),fum_confiable:!S.get(key(id,"eg_nofum")),eco_fecha:g("ecof"),eco_semanas:g("ecos")===""?null:g("ecos"),eco_dias:g("ecod"),talla_m:g("talla"),peso_kg:g("pact"),peso_pre_kg:g("ppre")},f);
+    const c=calcTexto(r);if(c){L.push("DATOS CALCULADOS",c,"");$("calc").innerHTML=chipsCalc(r)}
+    const hh=hhResumen(id);if(hh)L.push("CLASIFICACIÓN DEL RIESGO",hh,"");
+  }
+  L.push("DESCRIPCIÓN Y HALLAZGOS",d||"____","");
+  const hechos=[],falt=[];
+  m.sections.forEach((s,i)=>{const h=[];s.items.forEach((it,j)=>{const t=it.startsWith("Q:")?"Se realiza pregunta: "+it.slice(2):it;if(ck[i+"."+j])h.push("- "+t);else falt.push(s.t+": "+(it.startsWith("Q:")?it.slice(2):it))});if(h.length)hechos.push(s.t.toUpperCase(),...h,"")});
+  if(hechos.length)L.push("ACTIVIDADES REALIZADAS",...hechos);
+  let full=L.join("\n").trim();
+  if(n.edu&&$("edu")&&$("edu").checked)full+="\n\n"+EDU_PAMI;
+  $("out").hidden=false;$("nota").value=full;S.set(key(id,"nota"),full);
+  const fx=falt.slice(0,12).join("\n");S.set(key(id,"falt"),fx);listaUI($("faltantes"),$("missBox"),fx);
+  S.set(key(id,"alert"),"");listaUI($("alertas"),$("alertBox"),"");
+  $("status").textContent="Nota armada con la plantilla. En 'Faltan datos' están los puntos de la guía que no marcaste. Revísala antes de copiar.";
+}
+function listaUI(ul,box,txt){ul.innerHTML="";const it=(txt||"").split("\n").map(s=>s.replace(/^\s*[-•*]\s*/,"").trim()).filter(s=>s&&!/^ningun[oa]\.?$/i.test(s));it.forEach(x=>{const li=document.createElement("li");li.textContent=x;ul.append(li)});box.hidden=!it.length}
+function partes(t){const g=(a,b)=>{const i=t.indexOf(a);if(i<0)return null;const s=i+a.length,j=b?t.indexOf(b,s):-1;return t.slice(s,j<0?undefined:j).trim()};return{nota:g("===NOTA===","===FALTANTES==="),falt:g("===FALTANTES===","===ALERTAS==="),alert:g("===ALERTAS===",null)}}
+function pintar(t,final){const id=st.mod,p=partes(t),nota=p.nota??(t.includes("===")?"":t);let full=nota;
+  if(final&&N[st.note].edu&&$("edu")&&$("edu").checked&&nota)full=nota+"\n\n"+EDU_PAMI;
+  $("nota").value=full;listaUI($("faltantes"),$("missBox"),p.falt);listaUI($("alertas"),$("alertBox"),p.alert);
+  if(final){S.set(key(id,"nota"),full);S.set(key(id,"falt"),p.falt||"");S.set(key(id,"alert"),p.alert||"")}}
+
+function pExtr(d,f){return `Eres un extractor de datos de una consulta dictada por un enfermero en Colombia. Fecha de la consulta: ${f}.
+Extrae SOLO lo dictado. Fechas sin año: el año que las deja antes de la fecha de consulta.
+Responde solo con un objeto JSON (null si no se dictó):
+{"fum":"AAAA-MM-DD"|null,"fum_confiable":true|false|null,"eco_fecha":"AAAA-MM-DD"|null,"eco_semanas":número|null,"eco_dias":número|null,"peso_kg":número|null,"peso_pre_kg":número|null,"talla_m":número|null}
+peso_pre_kg = peso pregestacional o del primer control. Talla en metros.
+
+DICTADO:
+"""${d}"""`}
+function pNota(d,f,calc){const id=st.mod,m=M[id],n=N[st.note],mk=marcados(id),hh=id==="prenatal"?hhResumen(id):"";
+return `Eres un asistente de documentación clínica para un enfermero profesional de atención primaria rural en el Vaupés, Colombia (población mayoritariamente indígena). Convierte su dictado en una nota de enfermería para la historia clínica, en español, redacción clínica formal en tercera persona ("paciente refiere", "se realiza", "se brinda").
+
+MÓDULO: ${m.title} (${m.who})
+TIPO DE NOTA: ${n.label}
+FECHA DE LA CONSULTA: ${f}
+
+ESTRUCTURA DE LA NOTA:
+${n.structure}
+
+LISTA DEL MÓDULO SEGÚN LA RESOLUCIÓN 3280 (para detectar faltantes; no la copies como si se hubiera hecho):
+${lista(m)}
+
+ACTIVIDADES QUE EL ENFERMERO MARCÓ COMO REALIZADAS (puedes registrarlas como realizadas, sin inventar resultados):
+${mk.length?mk.join("\n"):"(ninguna)"}
+${hh?"\n"+hh+"\n":""}
+REGLAS:
+- Usa SOLO el dictado, las actividades marcadas y los datos calculados. No inventes hallazgos, valores ni negativos.
+- Dato de la estructura no dictado: escribe "____" y agrégalo a FALTANTES. Sección sin datos: "____".
+- Corrige errores obvios de dictado sin cambiar el sentido.
+- Usa exactamente los valores de DATOS CALCULADOS; no recalcules.
+- FALTANTES: además de los datos de la estructura, lo que la lista del módulo exige para esta persona y no aparece ni dictado ni marcado (máximo 8, lo más importante primero).
+${n.rules}
+
+FORMATO DE RESPUESTA (exactamente estas tres marcas, nada antes):
+===NOTA===
+(la nota, texto plano, títulos de sección en MAYÚSCULAS, sin asteriscos ni markdown)
+===FALTANTES===
+- (uno por línea; "- Ninguno" si no falta nada)
+===ALERTAS===
+- (incoherencias o hallazgos a revisar antes de firmar; "- Ninguna" si no hay)
+
+DATOS CALCULADOS:
+${calc||"(ninguno)"}
+
+DICTADO:
+"""${d}"""`}
+const MSG={not_granted:"No se dio permiso para usar Claude en esta página. Ábrela de nuevo y toca Permitir.",sampling_disabled:"Claude no está disponible en esta cuenta.",rate_limited:"Llegaste al límite de uso por ahora. Intenta en unos minutos; el dictado sigue guardado.",session_expired:"Tu sesión de Claude venció. Vuelve a iniciar sesión.",refused:"Claude no procesó este dictado. Revisa el texto.",invalid_json:"No se pudieron leer las fechas del dictado. Toca Organizar nota otra vez.",upstream_error:"Se cortó la conexión. Revisa la señal y vuelve a tocar Organizar nota; el dictado sigue guardado."};
+const sampleMsg="Organizar la nota necesita la app de Claude con internet. Puedes dictar igual: queda guardado.";
+async function organizar(){
+  const id=st.mod,n=N[st.note],d=$("dict").value.trim();
+  if(!d){$("status").textContent="Primero dicta o escribe los datos.";$("dict").focus();return}
+  if(!sample){armarLocal();return}
+  const f=$("fecha").value||hoy();$("go").disabled=true;$("stop").hidden=false;$("out").hidden=false;$("nota").value="";$("calc").innerHTML="";
+  ctl=new AbortController();
+  try{let calc="";
+    if(n.extract){$("status").textContent="Leyendo fechas y medidas…";const x=await sample.json(pExtr(d,f),{modelTier:"quick",signal:ctl.signal});if(x&&typeof x==="object"){const r=calcular(x,f);calc=calcTexto(r);$("calc").innerHTML=chipsCalc(r);S.set(key(id,"calc"),JSON.stringify({x,fecha:f}))}}
+    $("status").textContent="Organizando la nota… (puede tardar hasta un minuto)";
+    const {text,truncated}=await sample(pNota(d,f,calc),{signal:ctl.signal,cache:false,onText:({text})=>{pintar(text,false);$("status").textContent="Escribiendo la nota…"}});
+    pintar(text,true);$("status").textContent=truncated?"La nota quedó incompleta. Divide el dictado o revisa el final.":"Lista. Revisa alertas y faltantes antes de copiar.";
+  }catch(e){if(e&&e.text)pintar(e.text,false);$("status").textContent=e&&e.code==="cancelled"?"Detenido.":(MSG[e&&e.code]||MSG.upstream_error)}
+  finally{$("go").disabled=false;$("stop").hidden=true}
+}
+async function copiar(){const t=$("nota").value;try{await navigator.clipboard.writeText(t);$("status").textContent="Nota copiada. Pégala en la historia clínica."}catch(e){$("nota").focus();$("nota").select();$("status").textContent="Selecciona todo y copia con el menú del teclado."}}
+
+/* ---------- arranque ---------- */
+home();
+(async()=>{try{sample=window.claude?await window.claude.use("sample"):null}catch(e){sample=null}
+  if(sample&&st.view==="mod"&&st.tab==="nota"){const g=$("go"),h=$("offHint");if(g)g.textContent="Organizar nota";if(h)h.hidden=true}})();
+</script>
+
+<script>
+if("serviceWorker" in navigator){window.addEventListener("load",()=>{navigator.serviceWorker.register("sw.js").catch(()=>{})})}
+</script>
+</body>
+</html>
