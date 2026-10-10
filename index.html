@@ -447,7 +447,7 @@ function ivFor(id){if(IV[id])return IV[id];if(IV_CACHE[id])return IV_CACHE[id];c
   m.sections.forEach((s,i)=>s.items.forEach((it,j)=>{const isQ=it.startsWith("Q:"),txt=isQ?it.slice(2):it,ask=isQ||ASK.test(s.t);
     q.push({b:s.t,t:ask?"ask":"do",l:txt.length>70?txt.slice(0,67)+"…":txt,q:txt,ck:i+"."+j,ref:(m.ref?m.ref+" · ":"")+"bloque «"+s.t+"» de la guía del módulo",
       c:isQ?["No","Sí"]:ask?["Niega","Sí, refiere","Sin hallazgos"]:EXAM.test(s.t)?["Normal","Alterado","No realizado"]:["Realizado","No realizado","No aplica"],
-      al:isQ?SI:undefined,am:isQ?(/golpead|forzada|humillada/i.test(txt)?"Violencia referida: activar la ruta de atención a víctimas y notificar.":"Tamizaje positivo: derivar a la ruta de salud mental."):undefined});const _x=(typeof IVX!=="undefined")&&IVX[id+"::"+txt];if(_x){const z=q[q.length-1];if(_x.c&&_x.c.length)z.c=_x.c;if(_x.widget){z.widget=_x.widget;z.c=[]}if(_x.campos){z.campos=_x.campos;if(!_x.keepc)z.c=[]}if(_x.dyn)z.dyn=_x.dyn;if(_x.pauta)z.pauta=_x.pauta;if(_x.si)z.si=_x.si}}));
+      al:isQ?SI:undefined,am:isQ?(/golpead|forzada|humillada/i.test(txt)?"Violencia referida: activar la ruta de atención a víctimas y notificar.":"Tamizaje positivo: derivar a la ruta de salud mental."):undefined});const _x=(typeof IVX!=="undefined")&&IVX[id+"::"+txt];if(_x){const z=q[q.length-1];if(_x.c&&_x.c.length)z.c=_x.c;if(_x.cf)Object.defineProperty(z,"c",{get:_x.cf,set(){},configurable:true,enumerable:true});if(_x.widget){z.widget=_x.widget;z.c=[]}if(_x.campos){z.campos=_x.campos;if(!_x.keepc)z.c=[]}if(_x.dyn)z.dyn=_x.dyn;if(_x.pauta)z.pauta=_x.pauta;if(_x.si)z.si=_x.si}}));
   return IV_CACHE[id]=q}
 /* ---------- Herrera y Hurtado ---------- */
 const HH=[
@@ -936,7 +936,7 @@ function checks(m){try{return JSON.parse(S.get(key(m,"chk"))||"{}")}catch(e){ret
 function hasDraft(m){return !!(S.get(key(m,"dict"))||S.get(key(m,"nota"))||Object.keys(checks(m)).length)}
 
 /* ---------- PANEL ---------- */
-const VERSION_APP="2026-10-10 v98";
+const VERSION_APP="2026-10-10 v99";
 function home(){
   stopRec();st.view="home";
   const rm=["precon","prenatal","parto","rn","ive"],rp=["pinf","inf","adol","juv","adul","vej"];
@@ -2208,6 +2208,13 @@ Object.assign(IVX,{
  "adol::Crecimiento y estado nutricional":{campos:"antropoNNA",keepc:1,c:["Adecuado|Talla e IMC para la edad adecuados (Res. 2465 de 2016).","Riesgo|Riesgo de talla baja o de delgadez, o sobrepeso; consejería en alimentación y actividad física, control en 1 a 3 meses.","Déficit|Talla baja o delgadez; se remite a medicina y a la ruta de alteraciones nutricionales.","Obesidad|Obesidad; se remite a medicina para valorar riesgo cardiometabólico."],
   pauta:{t:"Cómo valorar (Res. 2465 de 2016)",p:["Hasta los 17 años se usan talla para la edad e IMC para la edad (referencia OMS 2007); desde los 18, IMC de adulto.","La app calcula el z exacto y la clasificación.","Pregunta por dietas, vómito provocado o preocupación excesiva por el peso."],r:"",b:""}}
 });
+/* opciones de salud bucal según la edad */
+IVX["pinf::Salud bucal"].cf=()=>{const m=edadMesesMod("pinf");
+  if(m!=null&&m<6)return ["Encías sanas|Encías sanas, aún sin dientes. Se enseña a limpiar las encías con gasa o paño húmedo una vez al día; la primera consulta de odontología es a los 6 meses.","Alteración en boca|Se observan placas blancas, aftas u otra lesión en encías o mucosa; se remite a medicina.","Diente al nacer|Presenta diente natal o neonatal; se remite a odontología."];
+  return ["Sana|Boca sana; higiene oral adecuada. Al día con odontología.","Placa o caries|Se observa placa o manchas blancas o cafés en los dientes; se remite a odontología.",m!=null&&m<18?"Pendiente odontología|Aún no ha tenido su consulta de odontología (corresponde desde los 6 meses); se remite.":"Pendiente odontología|No ha tenido consulta de odontología en el último año; se remite."]};
+IVX["pinf::Barniz de flúor y profilaxis semestral desde el año"].cf=()=>{const m=edadMesesMod("pinf");
+  if(m!=null&&m<12)return ["No aplica|No aplica: menor de 1 año; el barniz de flúor y la profilaxis inician al año."];
+  return ["Aplicado|Se aplica barniz de flúor (semestral).","Remitido|Se remite a odontología o auxiliar de salud oral para barniz de flúor y profilaxis.","Ya recibió|Ya recibió barniz de flúor y profilaxis en los últimos 6 meses."]};
 const _cvTextoP=cvDesdeTexto;cvDesdeTexto=function(tipo,t){return _cvTextoP(tipo==="vitalesP"?"vitales":tipo,t)};
 const _cvF=cvCalc;cvCalc=function(tipo,v){if(tipo!=="formula")return _cvF(tipo,v);
   const n=k=>{const x=nv(v[k]);return x==null?null:Math.round(x)},g=n("g"),p=n("p"),c=n("c"),a=n("a"),e=n("e"),mo=n("m"),vi=n("v"),o={},al=[],m={};
