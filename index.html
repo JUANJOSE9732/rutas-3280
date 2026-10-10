@@ -936,7 +936,7 @@ function checks(m){try{return JSON.parse(S.get(key(m,"chk"))||"{}")}catch(e){ret
 function hasDraft(m){return !!(S.get(key(m,"dict"))||S.get(key(m,"nota"))||Object.keys(checks(m)).length)}
 
 /* ---------- PANEL ---------- */
-const VERSION_APP="2026-10-10 v104";
+const VERSION_APP="2026-10-10 v105";
 function home(){
   stopRec();st.view="home";
   const rm=["precon","prenatal","parto","rn","ive"],rp=["pinf","inf","adol","juv","adul","vej"];
@@ -996,7 +996,7 @@ function home(){
     $("pac-sumt").textContent=nm?"Ver o corregir sus datos":"Identificación y ubicación";
     if($("pac-new"))$("pac-new").onclick=()=>{const b=$("pac-new");if(b.dataset.armed!=="1"){b.dataset.armed="1";b.textContent="¿Borrar esta persona y sus borradores? Toca otra vez";return}
       S.del("dn2_pac");S.keys().filter(k=>/^dn2_[a-z]+_/.test(k)&&Object.keys(M).includes(k.split("_")[1])&&!k.endsWith("_note")).forEach(k=>S.del(k));home();$("pac-det").open=true};
-    const e=edadDe(P["FECHA NACIMIENTO"]);if(e){if(e.y>=1){$("f-edad").value=e.y;$("f-uni").value="a"}else{$("f-edad").value=e.tm;$("f-uni").value="m"}}
+    const e=edadDe(P["FECHA NACIMIENTO"]);if(e){if(e.y>=1){$("f-edad").value=e.y;$("f-uni").value="a"}else if(e.tm>=1){$("f-edad").value=e.tm;$("f-uni").value="m"}else{$("f-edad").value=e.d;$("f-uni").value="d"}}
     if(P["GENERO"])$("f-sexo").value=P["GENERO"]==="F"?"f":"m";
     const conocido=!!(e&&P["GENERO"]);["f-edad","f-uni","f-sexo"].forEach(i=>$(i).closest("label").hidden=conocido);sugerir()};
   const save=()=>{const {datos}=revisar(box,false),o={};ID_KEYS.forEach(k=>{if(datos[k]&&!(k==="PUEBLO"&&datos[k]==="N/A"))o[k]=["NOMBRE COMPLETO","DIRECCION","EAPB NOMBRE","PUEBLO"].includes(k)?datos[k].toUpperCase():datos[k]});const c=$("pac-com").value.trim().toUpperCase();if(c)o.__com=c;const P0=pac();if(P0.__edad)o.__edad=P0.__edad;if(!o["GENERO"]&&P0.__sxr){o["GENERO"]=P0["GENERO"];o.__sxr=1}setPac(o);pinta()};
@@ -2049,13 +2049,13 @@ WIDGET.egive={html:id=>{const f=esc(S.get(key(id,"ivefum"))||""),fe=esc(S.get(ke
  wire:(id,save)=>{const up=()=>{document.querySelectorAll("[data-ivf]").forEach(e=>S.set(key(id,e.dataset.ivf),e.value));const r=WIDGET.egive.calc(id);$("ive-s").textContent=r?coma(Math.floor(r.w))+" sem":"–";$("ive-p").textContent=r?r.t:"Escribe la FUM o las semanas";$("ive-p").className="pill "+(r?r.c:"low");save()};document.querySelectorAll("[data-ivf]").forEach(e=>e.addEventListener(e.type==="date"?"change":"input",up));up()}};
 /* ---------- Primera infancia: opciones, pautas y alertas por edad ---------- */
 function edadMesesMod(id){const fn=pac()["FECHA NACIMIENTO"];if(!fn||!pD(fn))return null;return mesesEntre(fn,S.get(key(id,"fecha"))||hoy())}
-function edadTxtM(m){return m==null?"":m<24?m+(m===1?" mes":" meses"):Math.floor(m/12)+" años"+(m%12?" y "+(m%12)+" meses":"")}
+function edadTxtM(m){if(m!=null&&m<1){try{const fn=pac()["FECHA NACIMIENTO"],fe=(typeof st!=="undefined"&&st&&st.mod&&S.get(key(st.mod,"fecha")))||hoy(),e=edadDe(fn,fe);if(e)return e.d+(e.d===1?" día":" días")}catch(_){}}return m==null?"":m<24?m+(m===1?" mes":" meses"):Math.floor(m/12)+" años"+(m%12?" y "+(m%12)+" meses":"")}
 function previasMod(id){const P=pac();if(!P["NOMBRE COMPLETO"]&&!P["DOCUMENTO ID."])return[];const x=pacientes()[pkey(P)];if(!x)return[];const rid=S.get(key(id,"regid"));return x.aten.filter(a=>a.mod===id&&a.regid!==rid).sort((p,q)=>p.fecha<q.fecha?-1:1)}
 const PINF_W=[[1,1,"1 mes","medicina"],[2,3,"2 a 3 meses","enfermería"],[4,5,"4 a 5 meses","medicina"],[6,8,"6 a 8 meses","enfermería"],[9,11,"9 a 11 meses","enfermería"],[12,18,"12 a 18 meses","medicina"],[19,23,"19 a 23 meses","enfermería"],[24,29,"24 a 29 meses","medicina"],[30,35,"30 a 35 meses","enfermería"],[36,47,"3 años","medicina"],[48,59,"4 años","enfermería"],[60,71,"5 años","medicina"]];
 function pinfVentana(m){return PINF_W.find(w=>m>=w[0]&&m<=w[1])||null}
 const PI_DYN={
  crec:()=>{const m=edadMesesMod("pinf");if(m==null)return"Falta la fecha de nacimiento del niño o niña: sin ella no se puede saber qué valoración le toca. Corrígela en Datos.";
-   const L=[];if(m<0||m>71)L.push("Tiene "+edadTxtM(m)+": este módulo es de los 7 días a los 5 años. Revisa la fecha de nacimiento o usa el módulo de su edad.");
+   const L=[];const _e=edadDe(pac()["FECHA NACIMIENTO"],S.get(key("pinf","fecha"))||hoy());if(m<0||m>71||(_e&&_e.d<7))L.push("Tiene "+edadTxtM(m)+": este módulo es de los 7 días a los 5 años. "+(_e&&_e.d<7?"Con menos de 7 días le toca el control del recién nacido (módulo Recién nacido).":"Revisa la fecha de nacimiento o usa el módulo de su edad."));else if(m<1)L.push("Tiene "+edadTxtM(m)+": la primera valoración de primera infancia es al mes, con medicina. Si viene antes, revisa que haya tenido el control del recién nacido (3 a 5 días) y deja la cita del mes.");
    const w=pinfVentana(m);L.push("Tiene "+edadTxtM(m)+(w?": le corresponde la valoración de los "+w[2]+", a cargo de "+w[3]+" (Res. 3280, cuadro 1).":": está entre dos valoraciones del esquema."));
    if(w&&w[3]==="medicina")L.push("Esta valoración le toca a medicina: si la haces tú, déjalo justificado o remite.");
    const pv=previasMod("pinf");if(pv.length){const u=pv[pv.length-1],mu=mesesEntre(pac()["FECHA NACIMIENTO"],u.fecha),wu=pinfVentana(mu);if(wu&&w&&wu===w)L.push("Ya tuvo la valoración de esta misma edad el "+u.fecha.split("-").reverse().join("/")+": no se repite, salvo que haya un motivo.");else if(pv.length)L.push("Última valoración: "+u.fecha.split("-").reverse().join("/")+" (a los "+edadTxtM(mu)+").")}
@@ -3023,7 +3023,7 @@ function setCola(c){S.set("dn2_cola",JSON.stringify(c))}
 function conf(){try{return JSON.parse(S.get("dn2_conf")||"{}")}catch(e){return{}}}
 function uid(){return Date.now().toString(36)+"-"+Math.random().toString(36).slice(2,8)}
 function cursoVida(a){if(a==null)return"";if(a<6)return"PRIMERA INFANCIA";if(a<12)return"INFANCIA";if(a<18)return"ADOLESCENCIA";if(a<29)return"JUVENTUD";if(a<60)return"ADULTEZ";return"VEJEZ"}
-function edadDe(fn,ref){const a=pD(fn),b=pD(ref)||pD(hoy());if(!a||!b||a>b)return null;let y=b.getUTCFullYear()-a.getUTCFullYear(),m=b.getUTCMonth()-a.getUTCMonth();if(b.getUTCDate()<a.getUTCDate())m--;if(m<0){y--;m+=12}return{y,m,tm:y*12+m}}
+function edadDe(fn,ref){const a=pD(fn),b=pD(ref)||pD(hoy());if(!a||!b||a>b)return null;let y=b.getUTCFullYear()-a.getUTCFullYear(),m=b.getUTCMonth()-a.getUTCMonth();if(b.getUTCDate()<a.getUTCDate())m--;if(m<0){y--;m+=12}return{y,m,tm:y*12+m,d:Math.round((b-a)/864e5)}}
 let baseEdit=null,syncing=false,baseOpts={};
 const ID_KEYS=["ETNIA","PUEBLO","NOMBRE COMPLETO","TIPO","DOCUMENTO ID.","FECHA NACIMIENTO","GENERO","TELEFONO","DIRECCION","CONSECUTIVO","ROL EN EL HOGAR","EAPB NOMBRE","RÉGIMEN","CAPITADO"];
 const NO_EXTRAER=["FECHA PROXIMO CONTROL","MOTIVO PROXIMO CONTROL","ETNIA","PUEBLO","NOMBRE COMPLETO","TIPO","DOCUMENTO ID.","TELEFONO","DIRECCION","CONSECUTIVO","IMC","CURSO DE VIDA","AA / MM","FECHA NACIMIENTO"];
@@ -3104,7 +3104,7 @@ function pac(){try{return JSON.parse(S.get("dn2_pac")||"{}")}catch(e){return{}}}
 function setPac(o){S.set("dn2_pac",JSON.stringify(o))}
 function identDe(){const o=Object.assign({},pac());delete o.__com;if(o.__edad&&!o["FECHA NACIMIENTO"])o["EDAD"]=o.__edad;delete o.__edad;delete o.__sxr;return o}
 function pacCom(){return pac().__com||""}
-function pacEdad(ref){const P=pac(),e=edadDe(P["FECHA NACIMIENTO"],ref);return e?(e.y>=1?e.y+" años":e.tm+" meses"):""}
+function pacEdad(ref){const P=pac(),e=edadDe(P["FECHA NACIMIENTO"],ref);return e?(e.y>=1?e.y+" años":e.tm>=1?e.tm+(e.tm===1?" mes":" meses"):e.d+(e.d===1?" día":" días")):""}
 function pacResumen(){const P=pac(),b=[];if(P["TIPO"]||P["DOCUMENTO ID."])b.push(esc((P["TIPO"]||"")+" "+(P["DOCUMENTO ID."]||"")));const e=pacEdad();if(e)b.push(e);if(P["GENERO"])b.push(P["GENERO"]==="F"?"mujer":"hombre");if(P.__com)b.push(esc(P.__com));if(P["ETNIA"])b.push(esc(P["PUEBLO"]||P["ETNIA"].toLowerCase()));return b}
 function perfilNota(f){const P=pac(),b=[];const e=pacEdad(f);if(e)b.push(e);if(P["GENERO"])b.push(P["GENERO"]==="F"?"mujer":"hombre");if(P.__com)b.push("comunidad "+P.__com);if(P["ETNIA"])b.push(P["ETNIA"]==="INDIGENA"?"indígena"+(P["PUEBLO"]?" "+P["PUEBLO"].toLowerCase():""):P["ETNIA"].toLowerCase());if(P["ROL EN EL HOGAR"])b.push(P["ROL EN EL HOGAR"].toLowerCase());return b.join(", ")}
 function base(pref,opts){
@@ -3162,7 +3162,7 @@ function base(pref,opts){
   const form=$("bform");
   const recompute=()=>{const v=k=>{const e=form.querySelector(`[data-f="${CSS.escape(k)}"]`);return e?e.value:""};const set=(k,x)=>{const e=form.querySelector(`[data-f="${CSS.escape(k)}"]`);if(e)e.value=x};
     const ed=edadDe(v("FECHA NACIMIENTO"),v("FECHA"));
-    if(ed){if(ed.y>=1){set("EDAD",ed.y);set("AA / MM","AÑOS")}else{set("EDAD",ed.tm);set("AA / MM","MESES")}set("CURSO DE VIDA",cursoVida(ed.y))}
+    if(ed){if(ed.y>=1){set("EDAD",ed.y);set("AA / MM","AÑOS")}else if(ed.tm>=1){set("EDAD",ed.tm);set("AA / MM","MESES")}else{set("EDAD",ed.d);set("AA / MM","DÍAS")}set("CURSO DE VIDA",cursoVida(ed.y))}
     else{const e0=parseFloat(v("EDAD"));if(e0>=0&&!v("FECHA NACIMIENTO")){set("AA / MM","AÑOS");set("CURSO DE VIDA",cursoVida(e0))}else{set("EDAD","");set("AA / MM","");set("CURSO DE VIDA","")}}
     const p=parseFloat(v("PESO")),t=parseFloat(String(v("TALLA")).replace(",","."));const tm=t>3?t/100:t;
     set("IMC",p>0&&tm>0.3&&tm<2.5?(p/(tm*tm)).toFixed(1):"");
