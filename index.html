@@ -936,7 +936,7 @@ function checks(m){try{return JSON.parse(S.get(key(m,"chk"))||"{}")}catch(e){ret
 function hasDraft(m){return !!(S.get(key(m,"dict"))||S.get(key(m,"nota"))||Object.keys(checks(m)).length)}
 
 /* ---------- PANEL ---------- */
-const VERSION_APP="2026-10-10 v106";
+const VERSION_APP="2026-10-10 v107";
 function home(){
   stopRec();st.view="home";
   const rm=["precon","prenatal","parto","rn","ive"],rp=["pinf","inf","adol","juv","adul","vej"];
@@ -1049,22 +1049,36 @@ function fnMal(fn,fe,id){if(!fn||fn==="N/A")return"";const e=edadDe(fn,fe||hoy()
   return !e?"es posterior a la fecha de la consulta":e.y>110?"da más de 110 años":rm&&e.y<9?"da una edad de "+(e.y?e.y+(e.y===1?" año":" años"):e.tm+(e.tm===1?" mes":" meses"))+": no corresponde a una consulta materna":""}
 function idFalta(id){const P=pac(),f=[];if(!P.__com)f.push("Comunidad");[["NOMBRE COMPLETO","Nombre"],["TIPO","Tipo de documento"],["DOCUMENTO ID.","Número de documento"],["GENERO","Sexo"]].forEach(([k,l])=>{if(!P[k])f.push(l)});
   const fn=P["FECHA NACIMIENTO"];if((!fn||fn==="N/A")&&!P.__edad)f.push("Fecha de nacimiento o edad");else if(fnMal(fn,S.get(key(id,"fecha")),id))f.push("Fecha de nacimiento ("+fnMal(fn,S.get(key(id,"fecha")),id)+")");return f}
+/* ---------- Madre, padre o cuidador del menor ("hijo de") ---------- */
+const MAD_REL=["HIJO(A) DE","NIETO(A) DE","SOBRINO(A) DE","A CARGO DE"];
+function madAplica(id){const P=pac(),e=edadDe(P["FECHA NACIMIENTO"]);const y=e?e.y:(P.__edad?+P.__edad:null);return ["rn","pinf","inf","adol"].includes(id)||(y!=null&&y<18)}
+function madTxt(P){const m=(P||pac()).__mad;if(!m||!m.nom)return"";const rel=(m.rel||"HIJO(A) DE").toLowerCase().replace("(a)",(P||pac())["GENERO"]==="F"?"a":(P||pac())["GENERO"]==="M"?"o":"o(a)").replace("hijoo","hijo");
+  return rel.charAt(0).toUpperCase()+rel.slice(1)+" "+m.nom+(m.doc?" ("+(m.tip||"CC")+" "+m.doc+")":"")}
+function madHTML(id){if(!madAplica(id))return"";const m=pac().__mad||{},ps=Object.values(pacientes()).filter(x=>x.ident&&x.ident["NOMBRE COMPLETO"]&&(edadP(x)==null||edadP(x)>=12));
+  return `<details class="sec" open style="grid-column:1/-1"><summary><span>Madre, padre o cuidador</span><span class="cnt">${m.nom?"listo":"opcional"}</span></summary><div class="bgrid" style="padding:0 14px 14px">
+   <label class="bfl"><span>Relación</span><select id="mad-rel">${MAD_REL.map(r=>`<option ${m.rel===r?"selected":""}>${r}</option>`).join("")}</select></label>
+   <label class="bfl"><span>Nombre completo</span><input id="mad-nom" list="dl-mad" value="${esc(m.nom||"")}" placeholder="Escribe o elige de los pacientes"><datalist id="dl-mad">${ps.map(x=>`<option value="${esc(x.ident["NOMBRE COMPLETO"]+" — "+(x.ident["TIPO"]||"")+" "+(x.ident["DOCUMENTO ID."]||""))}">`).join("")}</datalist></label>
+   <label class="bfl"><span>Tipo de documento</span><select id="mad-tip">${["CC","TI","CE","PPT","PEP","AS"].map(t=>`<option ${(m.tip||"CC")===t?"selected":""}>${t}</option>`).join("")}</select></label>
+   <label class="bfl"><span>Número de documento</span><input id="mad-doc" inputmode="numeric" value="${esc(m.doc||"")}"></label>
+   <p class="note-src" style="grid-column:1/-1;margin:0">Sirve sobre todo cuando el niño todavía no tiene documento (recién nacido): queda en la nota como «Hijo de …» y enlaza las dos fichas en Pacientes.</p></div></details>`}
+function madWire(){const n=$("mad-nom");if(!n)return;n.addEventListener("change",()=>{const mm=n.value.match(/^(.*?)\s+—\s+(\S+)\s+(\S+)\s*$/);if(mm){n.value=mm[1];$("mad-tip").value=mm[2]||"CC";$("mad-doc").value=mm[3]||""}})}
+function madLeer(o){const n=$("mad-nom");if(!n)return;const nom=n.value.trim().toUpperCase(),doc=$("mad-doc").value.replace(/\D/g,"");if(nom||doc)o.__mad={rel:$("mad-rel").value,nom,tip:$("mad-tip").value,doc};else delete o.__mad}
 function paneId(){const id=st.mod,P=pac(),d=identDe(),ks=idCampos(id);if(M[id].route==="rm"&&id!=="rn"&&!d["GENERO"])d["GENERO"]="F";
   const dl=k=>{const o=[...new Set(hist(k).concat(OPC[k]||[]))];return o.length?`<datalist id="dl-${k.replace(/\W/g,"")}">${o.map(v=>`<option value="${esc(v)}">`).join("")}</datalist>`:""};
   $("pane").innerHTML=`<section class="tool"><h3>Datos de la persona</h3><p class="note-src" style="margin:0">Se llenan una sola vez y sirven para la historia, la base de datos y los demás módulos. Lo obligatorio lleva *. Toca una casilla para ver opciones.</p>
    <div class="bgrid" id="id-f"><label class="bfl" for="id-com"><span>Comunidad o vereda *</span><input id="id-com" list="dl-__com" value="${esc(P.__com||S.get("dn2_ultcom")||"")}" placeholder="QUERARÍ">${dl("__com")}</label>
    ${ALLF.filter(f=>ks.includes(f.k)).map(f=>campo(f,d)).join("")}
-   <label class="bfl" for="id-edad" id="id-edadw"><span>Edad en años (solo si no sabe la fecha de nacimiento)</span><input id="id-edad" type="number" inputmode="numeric" min="0" max="120" value="${esc(P.__edad||"")}"></label></div>
+   ${madHTML(id)}<label class="bfl" for="id-edad" id="id-edadw"><span>Edad en años (solo si no sabe la fecha de nacimiento)</span><input id="id-edad" type="number" inputmode="numeric" min="0" max="120" value="${esc(P.__edad||"")}"></label></div>
    <div class="box miss" id="id-miss" hidden><h3>Falta</h3><ul></ul></div>
    <div class="btns"><button class="btn primary" type="button" id="id-go">Guardar y seguir a las preguntas →</button></div><p class="status" id="id-st"></p></section>`;
-  const box=$("id-f");wireNA(box);
+  const box=$("id-f");wireNA(box);madWire();
   ["EAPB NOMBRE","PUEBLO"].forEach(k=>{const e=box.querySelector(`[data-f="${k}"]`),h=dl(k);if(e&&h){e.setAttribute("list","dl-"+k.replace(/\W/g,""));e.insertAdjacentHTML("afterend",h)}});
   const rec=()=>{box.querySelectorAll("[data-wrap]").forEach(w=>{if(w.dataset.if)w.hidden=(box.querySelector(`[data-f="${CSS.escape(w.dataset.if)}"]`)||{}).value!==w.dataset.ifv});
     const fn=(box.querySelector('[data-f="FECHA NACIMIENTO"]')||{}).value;$("id-edadw").hidden=!!fn};
   box.addEventListener("change",rec);box.addEventListener("input",rec);rec();
   $("id-go").onclick=()=>{baseOpts={mod:id};const {datos}=revisar(box,false),o=pac(),com=$("id-com").value.trim().toUpperCase(),ed=$("id-edad").value.trim();
     ks.forEach(k=>{const v=datos[k];if(v&&!(k==="PUEBLO"&&v==="N/A"))o[k]=["NOMBRE COMPLETO","EAPB NOMBRE","PUEBLO"].includes(k)?v.toUpperCase():v;else if(!v)delete o[k]});
-    if(com){o.__com=com;S.set("dn2_ultcom",com);addHist("__com",com)}if(o["FECHA NACIMIENTO"]&&o["FECHA NACIMIENTO"]!=="N/A")delete o.__edad;else if(ed)o.__edad=ed;delete o.__sxr;
+    if(com){o.__com=com;S.set("dn2_ultcom",com);addHist("__com",com)}if(o["FECHA NACIMIENTO"]&&o["FECHA NACIMIENTO"]!=="N/A")delete o.__edad;else if(ed)o.__edad=ed;delete o.__sxr;madLeer(o);
     ["EAPB NOMBRE","PUEBLO"].forEach(k=>{if(o[k]&&o[k]!=="N/A")addHist(k,o[k])});setPac(o);
     const f=idFalta(id);if(f.length){const mb=$("id-miss");mb.hidden=false;mb.querySelector("ul").innerHTML=f.map(x=>`<li>${esc(x)}</li>`).join("");$("id-st").textContent="";mb.scrollIntoView({block:"nearest"});return}
     st.tab="entr";S.set(key(id,"tab"),"entr");renderMod();window.scrollTo(0,0)}}
@@ -1284,7 +1298,7 @@ function ivAns(id){let a={};try{a=JSON.parse(S.get(key(id,"iv"))||"{}")||{}}catc
     const oi=+(S.get(key(id,"ivi"))||0),ni=oi<old.length?cur.indexOf(old[oi]):cur.length;if(ni>=0)S.set(key(id,"ivi"),String(ni));
     a=n;S.set(key(id,"iv"),JSON.stringify(a));S.set(key(id,"ivlab"),JSON.stringify(cur))}
   return a}
-function ivCompose(id){const q=ivFor(id),a=ivAns(id);let blk="",out=[];
+function ivCompose(id){const q=ivFor(id),a=ivAns(id);let blk="",out=[];if(madAplica(id)&&madTxt())out.push("IDENTIFICACIÓN\n- "+madTxt()+".");
   q.forEach((x,i)=>{let v=(a[i]||"").trim();if(!v&&x.si&&!ivAplica(id,i))v=(typeof x.siTxt==="function"?x.siTxt():x.siTxt)||"No aplica.";if(!v)return;if(x.b!==blk){blk=x.b;out.push((out.length?"\n":"")+blk.toUpperCase())}out.push("- "+x.l+": "+v)});
   return out.join("\n")}
 function ivAlerts(id){const q=ivFor(id),a=ivAns(id),o=[];q.forEach((x,i)=>{const v=(a[i]||"").trim();if(v&&x.al&&x.al.test(v))o.push(x.am)});return o}
@@ -2803,7 +2817,7 @@ function rutasPara(anos,sx){if(anos==null)return[];const o=[];if(anos<6)o.push("
 function pacienteAtencion(mod,com,d,regid,ext){const ps=pacientes(),ident={};ID_KEYS.forEach(k=>{if(d[k]&&d[k]!=="N/A")ident[k]=d[k]});if(!ident["NOMBRE COMPLETO"]&&!ident["DOCUMENTO ID."])return;
   ident.__com=com;if(!ident["FECHA NACIMIENTO"]&&d["EDAD"]&&d["AA / MM"]==="AÑOS")ident.__edad=String(d["EDAD"]);
   const k=pkey(ident);let x=ps[k];if(!x){const n=Object.values(ps).reduce((m,y)=>Math.max(m,y.n||0),0)+1;x=ps[k]={n,creado:hoy(),ident:{},aten:[],pend:[]}}
-  Object.assign(x.ident,ident);const fe=d["FECHA"]||hoy();
+  {const P0=pac();if(P0.__mad&&pkey(P0)===k)ident.__mad=P0.__mad}Object.assign(x.ident,ident);const fe=d["FECHA"]||hoy();
   const nota=mod?(S.get(key(mod,"nota"))||ivCompose(mod)||""):(d["OBSERVACION"]||"");
   const a={regid,fecha:fe,mod:mod||"",title:mod?M[mod].title:"Registro sin consulta",nota:String(nota).slice(0,4000),prox:d["FECHA PROXIMO CONTROL"]&&d["FECHA PROXIMO CONTROL"]!=="N/A"?d["FECHA PROXIMO CONTROL"]:"",mot:d["MOTIVO PROXIMO CONTROL"]||""};
   if(mod==="prenatal"){try{const r=calcular({fum:S.get(key("prenatal","eg_fum"))||"",fum_confiable:!S.get(key("prenatal","eg_nofum")),eco_fecha:S.get(key("prenatal","eg_ecof"))||"",eco_semanas:(S.get(key("prenatal","eg_ecos"))||"")===""?null:S.get(key("prenatal","eg_ecos")),eco_dias:S.get(key("prenatal","eg_ecod"))||""},fe);if(r.eg!=null)a.eg=r.eg;a.fum=S.get(key("prenatal","eg_fum"))||"";a.primera=PRIM(prenA)}catch(e){}}
@@ -2997,6 +3011,10 @@ function verPaciente(k){const ps=pacientes(),x=ps[k];if(!x)return verPacientes()
   const rut=rutasPara(ed,I["GENERO"]);
   $("app").innerHTML=`<div class="top"><button class="back" id="back">← Pacientes</button><span class="tag pc">#${x.n}</span></div>
   <header><h1>${esc(I["NOMBRE COMPLETO"]||"(sin nombre)")}</h1><p class="sub">${esc([I["TIPO"]&&I["DOCUMENTO ID."]?I["TIPO"]+" "+I["DOCUMENTO ID."]:"",I["GENERO"]==="F"?"Mujer":I["GENERO"]==="M"?"Hombre":"",ed!=null?ed+" años":"",I.__com,I["TELEFONO"]?"Tel. "+I["TELEFONO"]:"",I["PUEBLO"]||I["ETNIA"]||"",I["EAPB NOMBRE"]||""].filter(Boolean).join(" · "))}</p></header>
+  ${(()=>{const L=[];const m=I.__mad;if(m&&m.nom){const mk=Object.keys(ps).find(kk=>m.doc&&ps[kk].ident["DOCUMENTO ID."]===m.doc);L.push(`<p style="margin:4px 0">${esc(madTxt(Object.assign({},I)))}${mk?` · <button class="lnk" data-pk="${esc(mk)}">ver ficha</button>`:""}</p>`)}
+    const hijos=I["DOCUMENTO ID."]?Object.entries(ps).filter(([kk,y])=>y.ident.__mad&&y.ident.__mad.doc===I["DOCUMENTO ID."]):[];
+    if(hijos.length)L.push(`<p style="margin:4px 0"><b>A su cargo:</b> ${hijos.map(([kk,y])=>`<button class="lnk" data-pk="${esc(kk)}">${esc(y.ident["NOMBRE COMPLETO"]||"(sin nombre)")}</button>${(()=>{const e=edadDe(y.ident["FECHA NACIMIENTO"]);return e?" ("+(e.y>=1?e.y+" años":e.tm>=1?e.tm+" meses":e.d+" días")+")":""})()}`).join(", ")}</p>`);
+    return L.length?`<div class="box" style="margin:8px 0">${L.join("")}</div>`:""})()}
   <div class="btns"><button class="btn primary" id="pk-at">Atender ahora</button></div>
   ${cohHTML(x)}
   ${rut.length?`<p class="note-src" style="margin:8px 0 0">Le corresponde según edad y sexo: ${rut.map(r=>esc(M[r].title)).join(", ")}${I["GENERO"]==="F"&&ed>=10&&ed<55?" (preconcepcional o prenatal solo si aplica)":""}.</p>`:""}
@@ -3011,7 +3029,7 @@ function verPaciente(k){const ps=pacientes(),x=ps[k];if(!x)return verPacientes()
     <label class="bfl" style="grid-column:1/-1"><span>Resumen (lo importante de esa historia)</span><textarea id="pa-n" style="min-height:70px"></textarea></label>
     <label class="bfl"><span>Próximo control que quedó</span><input type="date" id="pa-p"></label>
     <div class="btns" style="grid-column:1/-1"><button class="btn" id="pa-go">Guardar atención anterior</button></div><p class="status" id="pa-st" style="grid-column:1/-1"></p></div></details></section>`;
-  $("back").onclick=verPacientes;
+  $("back").onclick=verPacientes;document.querySelectorAll("[data-pk]").forEach(b=>b.onclick=()=>verPaciente(b.dataset.pk));
   $("pk-at").onclick=()=>{const o=Object.assign({},I),cur=pac();if((cur["NOMBRE COMPLETO"]||cur["DOCUMENTO ID."])&&pkey(cur)!==k)S.keys().filter(z=>/^dn2_[a-z]+_/.test(z)&&Object.keys(M).includes(z.split("_")[1])&&!z.endsWith("_note")).forEach(z=>S.del(z));setPac(o);home();const t=$("sugg");if(t)t.scrollIntoView({block:"center"})};
   document.querySelectorAll("[data-pz]").forEach(c=>c.onchange=()=>{const ps2=pacientes(),y=ps2[k];y.pend.forEach(z=>{if(z.id===c.dataset.pz)z.ok=c.checked?hoy():""});setPacientes(ps2);verPaciente(k)});
   $("pk-add").onclick=()=>{const t=$("pk-np").value.trim();if(!t)return;const ps2=pacientes();ps2[k].pend.push({id:uid(),t,desde:hoy(),ok:"",cons:"Agregado a mano"});setPacientes(ps2);verPaciente(k)};
@@ -3057,7 +3075,7 @@ function extraerLocal(id,txt,f){const o={},M1=(re,i=1)=>{const m=txt.match(re);r
    else if(en){if(/hipertens/i.test(en))o["HTA"]="SI";if(/diabetes/i.test(en))o["DIABETES"]="SI";if(/tiroid/i.test(en))o["HIPER O HIPOTIROIDISMO"]="SI"}
    const ex=A("Exámenes solicitados");if(/realizan hoy|prueba r[aá]pida/i.test(ex))o["SE REALIZO LABORATORIOS"]="SI";else if(/pendiente/i.test(ex))o["SE REALIZO LABORATORIOS"]="NO";
    const w=conf().who;if(w&&!/^clave$/i.test(w))o["CANALIZADO POR"]=w}
-  o["FECHA"]=f;o["OBSERVACION"]=m.title+" – "+N[m.notes.includes(st.note)?st.note:m.notes[0]].label;
+  o["FECHA"]=f;o["OBSERVACION"]=m.title+" – "+N[m.notes.includes(st.note)?st.note:m.notes[0]].label+(madAplica(id)&&madTxt()?". "+madTxt():"");
   return o}
 function pExtraerVars(txt,f){
   const lst=ALLF.filter(x=>!NO_EXTRAER.includes(x.k)).map(x=>`"${x.k}": ${x.l}${x.o?(x.t==="multi"?" — lista separada por coma, de: ":" — exactamente una de: ")+x.o.join(" | "):x.t==="date"?" — fecha AAAA-MM-DD":x.t==="num"||x.t==="auto"?" — número":""}`).join("\n");
@@ -3102,10 +3120,10 @@ function hist(k){try{return JSON.parse(S.get("dn2_hist_"+k)||"[]")}catch(e){retu
 function addHist(k,v){if(!v||v==="N/A")return;const h=[v].concat(hist(k).filter(x=>x!==v)).slice(0,8);S.set("dn2_hist_"+k,JSON.stringify(h))}
 function pac(){try{return JSON.parse(S.get("dn2_pac")||"{}")}catch(e){return{}}}
 function setPac(o){S.set("dn2_pac",JSON.stringify(o))}
-function identDe(){const o=Object.assign({},pac());delete o.__com;if(o.__edad&&!o["FECHA NACIMIENTO"])o["EDAD"]=o.__edad;delete o.__edad;delete o.__sxr;return o}
+function identDe(){const o=Object.assign({},pac());delete o.__com;if(o.__edad&&!o["FECHA NACIMIENTO"])o["EDAD"]=o.__edad;delete o.__edad;delete o.__sxr;delete o.__mad;return o}
 function pacCom(){return pac().__com||""}
 function pacEdad(ref){const P=pac(),e=edadDe(P["FECHA NACIMIENTO"],ref);return e?(e.y>=1?e.y+" años":e.tm>=1?e.tm+(e.tm===1?" mes":" meses"):e.d+(e.d===1?" día":" días")):""}
-function pacResumen(){const P=pac(),b=[];if(P["TIPO"]||P["DOCUMENTO ID."])b.push(esc((P["TIPO"]||"")+" "+(P["DOCUMENTO ID."]||"")));const e=pacEdad();if(e)b.push(e);if(P["GENERO"])b.push(P["GENERO"]==="F"?"mujer":"hombre");if(P.__com)b.push(esc(P.__com));if(P["ETNIA"])b.push(esc(P["PUEBLO"]||P["ETNIA"].toLowerCase()));return b}
+function pacResumen(){const P=pac(),b=[];if(P["TIPO"]||P["DOCUMENTO ID."])b.push(esc((P["TIPO"]||"")+" "+(P["DOCUMENTO ID."]||"")));const e=pacEdad();if(e)b.push(e);if(P["GENERO"])b.push(P["GENERO"]==="F"?"mujer":"hombre");if(P.__com)b.push(esc(P.__com));if(P.__mad&&P.__mad.nom)b.push(esc(madTxt(P)));if(P["ETNIA"])b.push(esc(P["PUEBLO"]||P["ETNIA"].toLowerCase()));return b}
 function perfilNota(f){const P=pac(),b=[];const e=pacEdad(f);if(e)b.push(e);if(P["GENERO"])b.push(P["GENERO"]==="F"?"mujer":"hombre");if(P.__com)b.push("comunidad "+P.__com);if(P["ETNIA"])b.push(P["ETNIA"]==="INDIGENA"?"indígena"+(P["PUEBLO"]?" "+P["PUEBLO"].toLowerCase():""):P["ETNIA"].toLowerCase());if(P["ROL EN EL HOGAR"])b.push(P["ROL EN EL HOGAR"].toLowerCase());return b.join(", ")}
 function base(pref,opts){
   stopRec();st.view="base";baseOpts=opts||{};const c=conf(),q=cola();
