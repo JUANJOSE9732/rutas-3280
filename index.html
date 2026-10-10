@@ -436,7 +436,7 @@ const IV={
   {b:"Plan",t:"do",si:A=>PRIM(A)||(semPren()||0)>=28,ref:"Res. 3280 · 4.3.6.1.6, p. 272: asesoría anticonceptiva; el método elegido se registra en la historia y el carné, para iniciarlo antes del alta del parto.",l:"Anticoncepción posparto",q:"Asesoría en anticoncepción para después del parto: ¿qué método eligió?",c:["Implante|Se brinda asesoría anticonceptiva; elige implante subdérmico para el posparto. Se registra en el carné.","DIU|Se brinda asesoría anticonceptiva; elige DIU posparto. Se registra en el carné.","Inyectable trimestral|Se brinda asesoría anticonceptiva; elige inyectable trimestral. Se registra en el carné.","Ligadura|Se brinda asesoría anticonceptiva; solicita ligadura de trompas (firmar consentimiento con anticipación).","Lactancia (MELA) y condón|Se brinda asesoría anticonceptiva; elige método de amenorrea de la lactancia hasta los 6 meses, con condón, y cambio a otro método al cumplirse cualquier condición de salida.","No ha decidido|Se brinda asesoría anticonceptiva; aún no decide el método."]},
   {b:"Plan",t:"do",si:()=>(semPren()||0)>=28,ref:"Res. 3280 · 4.3.6.1.8, p. 272: plan de parto en el último trimestre (incluye partera y transporte comunitario).",l:"Plan de parto",q:"Plan de parto: ¿dónde va a tener el bebé y cómo va a llegar?",c:["Hospital|Plan de parto: atención institucional en ____; traslado previsto en ____ hacia la semana ____.","Hogar materno|Plan de parto: se traslada al hogar materno o casa de paso en ____ desde la semana ____.","Partera|Prefiere atención con partera; se informa cómo activar el sistema de referencia y el transporte comunitario ante signos de alarma.","Hijos y casa|Se organiza con la familia quién cuidará la casa y los hijos durante su ausencia."],h:"Incluye: presentación fetal (Leopold), lugar y prestador del parto, quién cuida a los hijos, transporte y signos de inicio del trabajo de parto."},
   {b:"Plan",t:"do",ref:"Res. 3280 · 4.3.6.1.4, p. 270 y 4.3.6.1.7, p. 272: información en salud.",l:"Información en salud",q:"Antes de cerrar, explícale estos temas. Toca los que hablaste.",c:["Todos los temas|Se brinda información en salud según Res. 3280: derechos y servicios, hábitos saludables (higiene, alimentación, actividad física, sueño, redes de apoyo), signos de alarma, curso de preparación para la maternidad, anticoncepción posparto y lactancia materna.","Signos de alarma|Se explican los signos de alarma por los que debe consultar de inmediato.","Alimentación y hábitos|Se brindan recomendaciones de alimentación, higiene, actividad física y sueño.","Lactancia|Se brinda información sobre lactancia materna.","Curso de preparación|Se explica la importancia del curso de preparación para la maternidad y la paternidad.","Derechos|Se informa sobre los servicios a los que tiene derecho y cómo exigirlos.","Condones|Se entregan condones para prevenir ITS durante la gestación."]},
-  {b:"Plan",t:"do",ref:"Res. 3280 · 4.3.5, p. 265: mensual hasta la semana 36 y cada 15 días hasta la 40; mínimo 10 controles en nulípara y 7 en multípara. Semanas 36, 38 y 40 por medicina (4.3.2, p. 264).",l:"Próximo control",q:"¿Cuándo es el próximo control?",def:()=>{const s=semPren();return s!=null&&s>=34?"Control el {+15} (control quincenal desde la semana 36; las semanas 36, 38 y 40 las atiende medicina).":"Control prenatal el {+30}."},c:["1 mes|Control prenatal el {+30}.","15 días|Control el {+15} (control quincenal desde la semana 36; las semanas 36, 38 y 40 las atiende medicina).","Próxima brigada|Control en la próxima brigada, el ____.","Otra fecha|Control el ____."],dyn:()=>{const s=semPren();if(s==null)return"";const w=Math.floor(s);return w>=34?"Con "+w+" semanas los controles pasan a cada 15 días desde la semana 36, y los de las semanas 36, 38 y 40 son por medicina: agéndala con el médico.":"Con "+w+" semanas el siguiente control es en 1 mes (mensual hasta la semana 36)."}}
+  {b:"Plan",t:"do",ref:"Res. 3280 · 4.3.5, p. 265: mensual hasta la semana 36 y cada 15 días hasta la 40; mínimo 10 controles en nulípara y 7 en multípara. Semanas 36, 38 y 40 por medicina (4.3.2, p. 264).",l:"Próximo control",q:"¿Cuándo es el próximo control?",def:()=>ctrlSug().txt,c:["1 mes|Control prenatal el {+30}.","15 días|Control el {+15} (control quincenal desde la semana 36; las semanas 36, 38 y 40 las atiende medicina).","Próxima brigada|Control en la próxima brigada, el ____.","Otra fecha|Control el ____."],dyn:()=>ctrlSug().nota}
  ]
 };
 
@@ -460,6 +460,30 @@ const HH=[
 
 
 
+
+/* ---------- próximo control prenatal sugerido según los datos ---------- */
+function ctrlSug(){const R={txt:"",nota:""},s=semPren(),fc=S.get(key("prenatal","fecha"))||hoy();
+  if(s==null){R.txt="Control prenatal el "+fMas(fc,30)+".";R.nota="Llena la edad gestacional para ajustar la fecha y lo que le toca en el próximo control.";return R}
+  const w=Math.floor(s),A=prenA,pl=l=>plano(A(l)),todo=plano(ivCompose("prenatal"));
+  if(w>=41){R.txt="Gestación de "+w+" semanas: se remite hoy a medicina; no se programa control por enfermería.";R.nota="Con 41 semanas o más no se programa control: remítela hoy (embarazo prolongado).";return R}
+  const d=w>=34?15:30,wn=Math.floor(s+d/7),tri=x=>x<14?1:x<28?2:3;
+  let hh=0;try{const o=hhEfectivo("prenatal");Object.keys(o).forEach(k=>hh+=HH[+k][1])}catch(e){}
+  let asp=false;try{asp=!!peCalc(peEfectivo("prenatal")).ind}catch(e){}
+  const quien=wn>=36?"medicina (controles de las semanas 36, 38 y 40)":hh>=3?"medicina (alto riesgo por Herrera y Hurtado, "+hh+" puntos)":asp?"medicina (indicación de aspirina)":"enfermería";
+  const T=[],hecho=re=>re.test(todo);
+  if(tri(wn)!==tri(w)){T.push("pruebas rápidas de VIH y sífilis del "+(tri(wn)===2?"segundo":"tercer")+" trimestre");T.push("escala de Herrera y Hurtado del "+(tri(wn)===2?"segundo":"tercer")+" trimestre")}
+  if(wn>=18&&wn<=23&&!hecho(/detalle anatomico/))T.push("ecografía de detalle anatómico (semanas 18 a 23+6)");
+  if(wn>=24&&wn<=28&&!hecho(/ptog/))T.push("PTOG 75 g (semanas 24 a 28)");
+  if(wn>=27&&w<29&&!hecho(/hemograma de la semana 28/))T.push("hemograma de la semana 28");
+  if(wn>=28&&w<28)T.push("tamizaje de depresión de la semana 28");
+  if(wn>=26&&!hecho(/tdap/))T.push("vacuna Tdap (desde la semana 26), si no la tiene");
+  if(wn>=28&&!A("Plan de parto"))T.push("plan de parto");
+  if(wn>=35&&w<=37&&!hecho(/estreptococo/))T.push("cultivo para estreptococo B (semanas 35 a 37)");
+  if(asp)T.push("revisar que tome la aspirina cada noche");
+  const tr=[];if(/se solicitan|pendiente/.test(pl("Exámenes de ingreso")))tr.push("los exámenes de ingreso");if(/se solicita|pendiente/.test(pl("Exámenes de seguimiento")))tr.push("los exámenes de seguimiento");if(/ecografia/.test(pl("Exámenes de ingreso")+" "+pl("Exámenes de seguimiento"))&&!tr.length)tr.push("la ecografía");
+  R.txt="Control prenatal el "+fMas(fc,d)+" (tendrá "+wn+" semanas), con "+quien+"."+(T.length?" En ese control: "+T.join("; ")+".":"")+" Traer el carné"+(tr.length?" y los resultados de "+tr.join(" y "):"")+".";
+  R.nota="Con "+w+" semanas el siguiente es en "+(d===30?"1 mes (mensual hasta la semana 36)":"15 días (quincenal desde la semana 36)")+": llegará con "+wn+" semanas"+(quien==="enfermería"?"":" y le corresponde a "+quien.split(" (")[0])+". Ya quedó escrito abajo con lo que le toca; si la brigada no llega en esa fecha, toca «Próxima brigada».";
+  return R}
 /* ---------- desparasitación sugerida según los datos ---------- */
 function despSug(){const R={txt:"",nota:""},s=semPren();if(s==null){R.nota="Llena la edad gestacional para saber si ya puede recibir el albendazol.";return R}
   const w=Math.floor(s),P=pac(),ini=fMas(S.get(key("prenatal","fecha"))||hoy(),-Math.round(s*7)).split("/").reverse().join("-"),fe=d=>String(d).split("-").reverse().join("/");
@@ -827,7 +851,7 @@ function checks(m){try{return JSON.parse(S.get(key(m,"chk"))||"{}")}catch(e){ret
 function hasDraft(m){return !!(S.get(key(m,"dict"))||S.get(key(m,"nota"))||Object.keys(checks(m)).length)}
 
 /* ---------- PANEL ---------- */
-const VERSION_APP="2026-10-10 v73";
+const VERSION_APP="2026-10-10 v74";
 function home(){
   stopRec();st.view="home";
   const rm=["precon","prenatal","parto","rn","ive"],rp=["pinf","inf","adol","juv","adul","vej"];
