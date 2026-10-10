@@ -936,7 +936,7 @@ function checks(m){try{return JSON.parse(S.get(key(m,"chk"))||"{}")}catch(e){ret
 function hasDraft(m){return !!(S.get(key(m,"dict"))||S.get(key(m,"nota"))||Object.keys(checks(m)).length)}
 
 /* ---------- PANEL ---------- */
-const VERSION_APP="2026-10-10 v99";
+const VERSION_APP="2026-10-10 v100";
 function home(){
   stopRec();st.view="home";
   const rm=["precon","prenatal","parto","rn","ive"],rp=["pinf","inf","adol","juv","adul","vej"];
@@ -2215,6 +2215,37 @@ IVX["pinf::Salud bucal"].cf=()=>{const m=edadMesesMod("pinf");
 IVX["pinf::Barniz de flúor y profilaxis semestral desde el año"].cf=()=>{const m=edadMesesMod("pinf");
   if(m!=null&&m<12)return ["No aplica|No aplica: menor de 1 año; el barniz de flúor y la profilaxis inician al año."];
   return ["Aplicado|Se aplica barniz de flúor (semestral).","Remitido|Se remite a odontología o auxiliar de salud oral para barniz de flúor y profilaxis.","Ya recibió|Ya recibió barniz de flúor y profilaxis en los últimos 6 meses."]};
+/* opciones según la edad en primera infancia: solo se muestra lo que aplica */
+(function(){const mP=()=>edadMesesMod("pinf"),X=k=>IVX["pinf::"+k],ok=k=>{if(!X(k))console.warn("falta IVX",k);return !!X(k)};
+ const set=(k,f)=>{if(ok(k))X(k).cf=f};
+ set("Alimentación: lactancia, alimentación complementaria",()=>{const m=mP();
+  if(m!=null&&m<6)return ["Lactancia exclusiva|Lactancia materna exclusiva a libre demanda.","Lactancia mixta|Recibe pecho y fórmula (o leche de tarro); se refuerza la lactancia exclusiva y se revisa la técnica.","Sin lactancia|No recibe pecho; se alimenta con fórmula infantil; se revisa la preparación y la cantidad.","Otros alimentos antes de tiempo|Recibe agua, coladas, jugos u otros alimentos antes de los 6 meses; se educa sobre lactancia exclusiva y se considera hemoglobina por riesgo de anemia."];
+  if(m!=null&&m<12)return ["Complementaria adecuada|Alimentación complementaria adecuada para la edad, con lactancia materna.","Complementaria sin pecho|Alimentación complementaria adecuada para la edad; ya no recibe pecho.","Inadecuada|Alimentación inadecuada para la edad (consistencia, frecuencia o variedad); se dan pautas y se valora en 1 mes.","Leche de vaca antes del año|Recibe leche de vaca entera antes del año; se educa y se considera hemoglobina por riesgo de anemia."];
+  if(m!=null&&m<24)return ["Dieta familiar con pecho|Consume la dieta familiar (3 comidas y 2 refrigerios); lactancia materna continuada.","Dieta familiar sin pecho|Consume la dieta familiar (3 comidas y 2 refrigerios); ya no recibe pecho.","Inadecuada|Alimentación inadecuada para la edad; se dan pautas y se valora en 1 mes."];
+  return ["Adecuada|Consume la dieta familiar, variada, con frutas, verduras y proteína; sin paquetes ni bebidas azucaradas.","Inadecuada|Alimentación poco variada o con paquetes y bebidas azucaradas; se dan pautas y se valora en 1 mes."]});
+ set("Micronutrientes en polvo (fortificación casera) en las edades del cuadro de la 3280",()=>{const m=mP();
+  if(m!=null&&(m<6||m>=24))return [m<6?"No aplica|No aplica: menor de 6 meses; los micronutrientes en polvo inician a los 6 meses.":"No aplica|No aplica: mayor de 2 años; pasa a suplementación con hierro y vitamina A."];
+  return ["Entregados|Se entregan 60 sobres de micronutrientes en polvo (1 sobre al día por 60 días) y se explica su uso.","Ya recibió|Ya recibió el ciclo de micronutrientes en polvo de esta edad.","En descanso|Terminó un ciclo hace menos de 4 meses; está en el periodo de descanso, el siguiente ciclo se entrega en el próximo control."]});
+ set("Micronutrientes dos veces al año desde los 2 años",()=>{const m=mP();
+  if(m!=null&&(m<24||m>=60))return [m<24?"No aplica|No aplica: menor de 2 años (recibe micronutrientes en polvo).":"No aplica|No aplica: mayor de 59 meses."];
+  return ["Entregados|Se suministra hierro 3 mg/kg/día y vitamina A 200.000 UI en una toma (dosis semestral).","Ya recibió|Ya recibió la suplementación de este semestre."]});
+ set("Desparasitación desde el año, dos veces al año",()=>{const m=mP();
+  if(m!=null&&m<12)return ["No aplica|No aplica: menor de 1 año; la desparasitación inicia al año."];
+  const dosis=m!=null&&m<24?"Albendazol 200 mg|Se administra albendazol 200 mg vía oral, dosis única (12 a 23 meses).":"Albendazol 400 mg|Se administra albendazol 400 mg vía oral, dosis única (desde los 2 años).";
+  return [dosis,"Ya recibió|Ya recibió la desparasitación de este semestre."]});
+ set("Sellantes desde los 3 años según criterio",()=>{const m=mP();
+  if(m!=null&&m<36)return ["No aplica|No aplica: menor de 3 años."];
+  return ["Remitido|Se remite a odontología para valorar sellantes.","Ya tiene|Ya fue valorado por odontología para sellantes.","No requiere|Odontología no indicó sellantes."]});
+ set("Odontología anual desde los 6 meses",()=>{const m=mP();
+  if(m!=null&&m<6)return ["No aplica|No aplica: menor de 6 meses; la primera consulta de odontología es a los 6 meses."];
+  return ["Al día|Valorado por odontología en el último año.",m!=null&&m<18?"Remitido|Aún no ha tenido su primera consulta de odontología; se remite.":"Remitido|Sin consulta de odontología en el último año; se remite."]});
+ set("Consejería en lactancia",()=>{const m=mP();
+  if(m!=null&&m<6)return ["Realizada|Se brinda consejería en lactancia materna exclusiva a libre demanda hasta los 6 meses; se observa una toma.","Con dificultad|Se identifica dificultad en la lactancia (agarre, dolor, grietas o poca leche percibida); se corrige la técnica y se programa consulta de apoyo a la lactancia."];
+  if(m!=null&&m<24)return ["Realizada|Se brinda consejería en lactancia materna continuada hasta los 2 años o más, con alimentación complementaria.","No aplica|No aplica: ya no lacta."];
+  return ["Realizada|Se brinda consejería: la lactancia puede continuar mientras madre e hijo lo deseen.","No aplica|No aplica: ya no lacta."]});
+ if(ok("Hemoglobina según riesgo (una vez)")){X("Hemoglobina según riesgo (una vez)").pauta.p.push("Anemia de 6 a 59 meses: hemoglobina menor de 11 g/dl (sin ajuste por altura en zonas bajas como Mitú).");
+  X("Hemoglobina según riesgo (una vez)").dyn=()=>{const m=mP();if(m==null)return"";const pv=previasMod("pinf");return (m<6?"Con "+edadTxtM(m)+": solo si hay factores de riesgo (prematuro, bajo peso al nacer, pinzamiento precoz). ":"")+"Se pide una sola vez en la primera infancia, según el riesgo: revisa si ya tiene una registrada antes de ordenarla."}}
+})();
 const _cvTextoP=cvDesdeTexto;cvDesdeTexto=function(tipo,t){return _cvTextoP(tipo==="vitalesP"?"vitales":tipo,t)};
 const _cvF=cvCalc;cvCalc=function(tipo,v){if(tipo!=="formula")return _cvF(tipo,v);
   const n=k=>{const x=nv(v[k]);return x==null?null:Math.round(x)},g=n("g"),p=n("p"),c=n("c"),a=n("a"),e=n("e"),mo=n("m"),vi=n("v"),o={},al=[],m={};
