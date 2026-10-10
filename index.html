@@ -936,7 +936,7 @@ function checks(m){try{return JSON.parse(S.get(key(m,"chk"))||"{}")}catch(e){ret
 function hasDraft(m){return !!(S.get(key(m,"dict"))||S.get(key(m,"nota"))||Object.keys(checks(m)).length)}
 
 /* ---------- PANEL ---------- */
-const VERSION_APP="2026-10-10 v83";
+const VERSION_APP="2026-10-10 v84";
 function home(){
   stopRec();st.view="home";
   const rm=["precon","prenatal","parto","rn","ive"],rp=["pinf","inf","adol","juv","adul","vej"];
@@ -2237,16 +2237,18 @@ function paneEntr(){
   const id=st.mod,q=ivFor(id),a=ivAns(id),i0=S.get(key(id,"ivi"));let i=Math.max(0,+(i0||0));if(i>=q.length)i=q.length;
   const answered=q.filter((_,k)=>(a[k]||"").trim()).length;
   if(i>=q.length){
+    if(answered&&!S.get(key(id,"fin"))&&(pac()["NOMBRE COMPLETO"]||pac()["DOCUMENTO ID."]))try{finalizarConsulta(id)}catch(e){}
     const al=ivAlerts(id);
     $("pane").innerHTML=`<div class="tool"><h3>Entrevista terminada</h3><p class="note-src">${answered} de ${q.length} preguntas respondidas. Las respuestas ya están en el dictado de la pestaña Nota.</p>
     ${al.length?`<div class="box warn"><h3>Revisar antes de seguir</h3><ul>${al.map(x=>`<li>${esc(x)}</li>`).join("")}</ul></div>`:""}
-    <p class="status" id="iv-st"></p><div class="btns"><button class="btn primary" id="iv-nota">Siguiente: Guía →</button><button class="btn" id="iv-rev">Volver a la última pregunta</button></div></div>
+    <p class="status" id="iv-st"></p><div class="btns"><button class="btn" id="iv-nota">Siguiente: Guía →</button><button class="btn" id="iv-rev">Volver a la última pregunta</button></div></div>
+    ${finHTML(id)}
     <section class="tool" id="an"><h3>Análisis: devolución y rutas</h3><p class="note-src" style="margin:0">Revisa todo lo registrado y te propone, por escrito, los puntos para tu devolución y las rutas a seguir.</p>
       <button class="btn ${anCargar(id)?"":"primary"}" id="an-go" style="flex:none">${anCargar(id)?"Volver a analizar":sample?"Analizar la consulta":"Analizar (sin conexión)"}</button><p class="status" id="an-st"></p>
       <div id="an-out">${anHTML(anCargar(id))}</div></section>
     ${hcPanel(id)}
     <details class="sec"><summary><span>Ver lo registrado</span></summary><pre style="white-space:pre-wrap;padding:0 14px 14px;font-family:var(--f-body);font-size:.92rem">${esc(ivCompose(id))||"(sin respuestas)"}</pre></details>`;
-    $("iv-nota").onclick=()=>{st.tab="guia";S.set(key(id,"tab"),"guia");renderMod()};
+    $("iv-nota").onclick=()=>{st.tab="guia";S.set(key(id,"tab"),"guia");renderMod()};finWire(id);
     $("an-go").onclick=()=>analizar(id);anWire(id);hcWire(id);$("iv-rev").onclick=()=>{S.set(key(id,"ivi"),String(q.length-1));paneEntr()};return}
   const x=q[i],pct=Math.round(i/q.length*100),al=(a[i]&&x.al&&x.al.test(a[i]))?x.am:"";
   $("pane").innerHTML=`
@@ -2346,6 +2348,7 @@ function paneNota(){
   <div class="btns"><button class="btn primary" id="go">${sample?"Organizar nota":"Armar nota sin conexión"}</button></div>
   <div class="linkrow">${CASO_EJ[id]?"":'<button class="lnk" id="ej">Cargar ejemplo</button>'}<button class="lnk" id="nueva">Nueva paciente (borra este módulo)</button></div>
   ${hcPanel(id)}
+  ${finHTML(id)}
   <button class="btn" id="toBase" style="width:100%">Siguiente: enviar a la base →<br><small style="font-weight:400;color:var(--muted)">solo te pedirá lo que no salió de la historia</small></button>
   <p class="hint" id="offHint" ${sample?"hidden":""}>Sin conexión la nota se arma con la plantilla, lo marcado en la guía y tu dictado. Con señal, <a href="${ARTIFACT}" target="_blank" rel="noopener" id="rev">revisa con Claude</a>: el botón copia tu dictado para pegarlo allá.</p>
   <p class="status" id="status" role="status"></p>
@@ -2365,7 +2368,7 @@ function paneNota(){
   let hcT;$("nota").addEventListener("input",()=>{S.set(key(id,"nota"),$("nota").value);clearTimeout(hcT);hcT=setTimeout(()=>hcRefresh(id),900)});
   $("fecha").addEventListener("change",()=>S.set(key(id,"fecha"),$("fecha").value));
   $("go").onclick=organizar;$("stop").onclick=()=>ctl&&ctl.abort();$("copy").onclick=copiar;
-  $("toBase").onclick=()=>enviarBase(id);hcWire(id);
+  $("toBase").onclick=()=>enviarBase(id);hcWire(id);finWire(id);
   if($("ej"))$("ej").onclick=()=>{const exT=(st.note==="rpms"&&EX_RPMS[id])||n.ex;$("dict").value=exT;S.set(key(id,"dict"),exT);$("status").textContent="Ejemplo cargado (datos inventados). Toca Organizar nota."};
   $("nueva").onclick=()=>{const b=$("nueva");if(b.dataset.armed!=="1"){b.dataset.armed="1";b.textContent="¿Seguro? Toca otra vez para borrar";setTimeout(()=>{if(b.isConnected){b.dataset.armed="";b.textContent="Nueva paciente (borra este módulo)"}},4000);return}
     S.keys().filter(k=>k.startsWith("dn2_"+id+"_")&&!k.endsWith("_note")).forEach(k=>S.del(k));st.tab="entr";renderMod()};
@@ -2532,7 +2535,7 @@ function setPacientes(o){S.set("dn2_pacientes",JSON.stringify(o))}
 function pkey(P){const d=P["DOCUMENTO ID."];return d&&d!=="N/A"?(P["TIPO"]||"")+":"+d:"N:"+String(P["NOMBRE COMPLETO"]||"").trim().toUpperCase()}
 function edadP(x){const e=edadDe(x.ident["FECHA NACIMIENTO"]);return e?e.y:(x.ident.__edad?+x.ident.__edad:null)}
 function rutasPara(anos,sx){if(anos==null)return[];const o=[];if(anos<6)o.push("pinf");else if(anos<12)o.push("inf");else if(anos<18)o.push("adol");else if(anos<29)o.push("juv");else if(anos<60)o.push("adul");else o.push("vej");if(sx==="F"&&anos>=10&&anos<55)o.unshift("precon","prenatal");return o}
-function pacienteAtencion(mod,com,d,regid){const ps=pacientes(),ident={};ID_KEYS.forEach(k=>{if(d[k]&&d[k]!=="N/A")ident[k]=d[k]});if(!ident["NOMBRE COMPLETO"]&&!ident["DOCUMENTO ID."])return;
+function pacienteAtencion(mod,com,d,regid,ext){const ps=pacientes(),ident={};ID_KEYS.forEach(k=>{if(d[k]&&d[k]!=="N/A")ident[k]=d[k]});if(!ident["NOMBRE COMPLETO"]&&!ident["DOCUMENTO ID."])return;
   ident.__com=com;if(!ident["FECHA NACIMIENTO"]&&d["EDAD"]&&d["AA / MM"]==="AÑOS")ident.__edad=String(d["EDAD"]);
   const k=pkey(ident);let x=ps[k];if(!x){const n=Object.values(ps).reduce((m,y)=>Math.max(m,y.n||0),0)+1;x=ps[k]={n,creado:hoy(),ident:{},aten:[],pend:[]}}
   Object.assign(x.ident,ident);const fe=d["FECHA"]||hoy();
@@ -2545,11 +2548,45 @@ function pacienteAtencion(mod,com,d,regid){const ps=pacientes(),ident={};ID_KEYS
     if(/positiva|reactiv/i.test(A("Exámenes solicitados")+A("Exámenes de ingreso")+A("Exámenes de seguimiento")))nuevo("Seguir resultado reactivo o positivo con medicina");}
   String(d["CANALIZADO A"]||"").split(", ").filter(v=>v&&v!=="NINGUNO").forEach(v=>nuevo("Verificar que asistió a "+v.toLowerCase()));
   if(d["SE REALIZO LABORATORIOS"]==="NO"&&mod&&!x.pend.some(z=>!z.ok&&/exámenes/.test(z.t)))nuevo("Tomar los exámenes ordenados ("+M[mod].title.toLowerCase()+")");
+  if(mod){const E=ext||{citas:citasDe(mod,fe),pend:pendDe(mod)};x.pend=x.pend.filter(z=>z.ok||z.reg!==regid);
+    E.citas.forEach(c=>x.pend.push({id:uid(),t:c.t,f:c.f||"",desde:fe,ok:"",reg:regid}));E.pend.forEach(t=>{if(!x.pend.some(z=>!z.ok&&z.t===t))x.pend.push({id:uid(),t,desde:fe,ok:"",reg:regid})});
+    if(!a.prox){const c0=E.citas.find(c=>c.f);if(c0){a.prox=c0.f;a.mot=c0.mot}}}
   setPacientes(ps);return x}
+/* ---------- Finalizar consulta: guarda en Pacientes con citas y pendientes ---------- */
+function isoMas(iso,n){const d=pD(iso)||pD(hoy());d.setUTCDate(d.getUTCDate()+n);return d.toISOString().slice(0,10)}
+function citasDe(mod,fe){const q=ivFor(mod),a=ivAns(mod),A=l=>{const i=q.findIndex(z=>z.l===l||z.l.startsWith(l));return i>=0?(a[i]||""):""},C=[],add=(t,f,mot)=>C.push({t,f,mot});
+  const pc=A("Próximo control"),pf=isoDeTxt(pc);
+  if(pf)add((M[mod].title)+": "+pc.replace(/\s+/g," ").slice(0,140),pf,M[mod].title.toUpperCase()+": CONTROL");
+  else if(/brigada/i.test(pc))add(M[mod].title+": control en la próxima brigada (fecha por definir)","",M[mod].title.toUpperCase()+": CONTROL");
+  if(mod==="parto"){add("Control posparto de la madre (día 3 a 5)",isoMas(fe,3),"CONTROL POSPARTO");add("Control del recién nacido (día 3 a 5)",isoMas(fe,3),"CONTROL RECIÉN NACIDO");
+    const me=plano(A("Método anticonceptivo antes del alta"));
+    if(/implante/.test(me))add("Control del implante (al mes)",isoMas(fe,30),"CONTROL ANTICONCEPCIÓN");
+    if(/diu/.test(me))add("Control del DIU (a los 3 meses)",isoMas(fe,90),"CONTROL ANTICONCEPCIÓN");
+    if(/medroxiprogesterona|inyectable/.test(me))add("Siguiente inyección trimestral",isoMas(fe,90),"ANTICONCEPCIÓN: INYECCIÓN");
+    if(/progestina|oral/.test(me))add("Control del anticonceptivo oral (a los 3 meses)",isoMas(fe,90),"CONTROL ANTICONCEPCIÓN");
+    if(/se gestiona inmunoglobulina|gestionar/.test(plano(A("Rh: anti-D"))))add("Aplicar anti-D a la madre antes de 72 horas",isoMas(fe,3),"ANTI-D")}
+  if(mod==="rn"){const nac=(pac()["FECHA NACIMIENTO"]&&pD(pac()["FECHA NACIMIENTO"]))?pac()["FECHA NACIMIENTO"]:fe;
+    if(!A("¿Cómo y cada cuánto mama?")&&!A("Peso y pérdida"))add("Control del recién nacido (día 3 a 5 de vida)",isoMas(nac,3),"CONTROL RECIÉN NACIDO");
+    add("Valoración integral de primera infancia (al mes de vida)",isoMas(nac,30),"PRIMERA INFANCIA: VALORACIÓN")}
+  return C.filter(c=>!c.f||c.f>=fe).sort((x,y)=>(x.f||"9")<(y.f||"9")?-1:1)}
+function pendDe(mod){const q=ivFor(mod),a=ivAns(mod),P=[];q.forEach((x,i)=>{const t=String(a[i]||"");if(!t||/^Exámenes (solicitados|de ingreso|de seguimiento)$|^Próximo control$/.test(x.l))return;
+  if(/pendiente|se programa|se gestiona|queda[n]? pendiente/i.test(t))P.push(x.l.replace(/…$/,"")+": "+t.split(/(?<=\.)\s/)[0].slice(0,120));
+  else if(/se remite|remisión|remitir/i.test(t))P.push("Verificar que asistió a la remisión: "+t.split(/(?<=\.)\s/)[0].slice(0,120))});return P}
+function finalizarConsulta(id){const P=pac();if(!P["NOMBRE COMPLETO"]&&!P["DOCUMENTO ID."])return {err:"Primero identifica a la persona en la pestaña Datos."};
+  const fe=S.get(key(id,"fecha"))||hoy(),d={};ID_KEYS.forEach(k=>{if(P[k])d[k]=P[k]});d["FECHA"]=fe;if(P.__edad&&!P["FECHA NACIMIENTO"]){d["EDAD"]=P.__edad;d["AA / MM"]="AÑOS"}
+  const C=citasDe(id,fe),c0=C.find(c=>c.f);if(c0){d["FECHA PROXIMO CONTROL"]=c0.f;d["MOTIVO PROXIMO CONTROL"]=c0.mot}
+  let rid=S.get(key(id,"regid"));if(!rid){rid=uid();S.set(key(id,"regid"),rid)}
+  const com=P.__com||S.get("dn2_ultcom")||"";agendaGuardar(rid,com,d);const x=pacienteAtencion(id,com,d,rid,{citas:C,pend:pendDe(id)});{const z=new Date(),p2=v=>String(v).padStart(2,"0");S.set(key(id,"fin"),z.getFullYear()+"-"+p2(z.getMonth()+1)+"-"+p2(z.getDate())+"T"+p2(z.getHours())+":"+p2(z.getMinutes()))}return {x,C,k:x?pkey(x.ident):""}}
+function finHTML(id){const r=S.get(key(id,"fin")),ff=s=>s?s.split("-").reverse().join("/"):"";let x=null;const P=pac();if(P["NOMBRE COMPLETO"]||P["DOCUMENTO ID."])x=pacientes()[pkey(P)];
+  const rid=S.get(key(id,"regid")),mine=x?x.pend.filter(z=>z.reg===rid&&!z.ok):[];
+  return `<section class="tool" id="fin"><h3>Finalizar consulta</h3>${r&&x?`<p class="note-src" style="margin:0">Guardada en Pacientes (#${x.n}) el ${esc(ff(r.slice(0,10)))} a las ${esc(r.slice(11,16))}.</p>${mine.length?`<p class="lab" style="margin:8px 0 4px">Citas y pendientes que quedaron</p><ul style="margin:0;padding-left:20px">${mine.map(z=>`<li>${z.f?"<b>"+esc(ff(z.f))+"</b> · ":""}${esc(z.t)}</li>`).join("")}</ul>`:`<p class="note-src" style="margin:6px 0 0">No quedaron citas ni pendientes de esta consulta.</p>`}`:`<p class="note-src" style="margin:0">Guarda esta consulta en la ficha de la paciente con sus próximas citas y pendientes. No necesita conexión.</p>`}
+   <div class="btns"><button class="btn primary" id="fin-go">${r?"Actualizar (si cambiaste algo)":"Finalizar y guardar en Pacientes"}</button>${x?'<button class="btn" id="fin-ver">Ver ficha</button>':""}</div><p class="status" id="fin-st"></p></section>`}
+function finWire(id){const b=$("fin-go");if(!b)return;b.onclick=()=>{const r=finalizarConsulta(id);if(r.err){$("fin-st").textContent=r.err;return}const box=$("fin");box.outerHTML=finHTML(id);finWire(id);$("fin-st").textContent="Listo: guardada en Pacientes."};
+  const v=$("fin-ver");if(v)v.onclick=()=>{const P=pac();verPaciente(pkey(P))}}
 function estadoP(x){const u=x.aten[x.aten.length-1];if(!u)return null;const px=[...x.aten].reverse().find(a=>a.prox);if(!px)return null;const cumplido=x.aten.some(a=>a.fecha>px.fecha);if(cumplido)return null;return Object.assign({px:px.prox,mot:px.mot},semaforo(px.prox)||{})}
 function verPacientes(){stopRec();st.view="pacs";const ps=Object.entries(pacientes()).sort((a,b)=>(a[1].n||0)-(b[1].n||0)),ff=s=>s?s.split("-").reverse().join("/"):"";
   $("app").innerHTML=`<div class="top"><button class="back" id="back">← Rutas</button><span class="tag pc">Pacientes</span></div>
-  <header><h1>Pacientes</h1><p class="sub">${ps.length} registrados en este celular. Cada consulta enviada a la base se guarda aquí con su nota, su próximo control y sus pendientes.</p></header>
+  <header><h1>Pacientes</h1><p class="sub">${ps.length} registrados en este celular. Cada consulta finalizada (o enviada a la base) se guarda aquí con su nota, sus próximas citas y sus pendientes.</p></header>
   <input id="ps-q" placeholder="Buscar por nombre, documento o comunidad" style="margin-bottom:10px">
   <div class="btns" style="margin-bottom:10px"><button class="btn" id="ps-all">Todos</button><button class="btn" id="ps-ctl">Con control vencido o esta semana</button><button class="btn" id="ps-pen">Con pendientes</button></div>
   <div class="agl" id="ps-l"></div>`;
@@ -2569,7 +2606,7 @@ function verPaciente(k){const ps=pacientes(),x=ps[k];if(!x)return verPacientes()
   ${rut.length?`<p class="note-src" style="margin:8px 0 0">Le corresponde según edad y sexo: ${rut.map(r=>esc(M[r].title)).join(", ")}${I["GENERO"]==="F"&&ed>=10&&ed<55?" (preconcepcional o prenatal solo si aplica)":""}.</p>`:""}
   <section class="tool"><h3>Próximo control</h3>${e?`<p style="margin:0"><b class="sem ${e.c}"></b> ${esc(ff(e.px))} — ${esc(e.t)}${e.mot?" · "+esc(e.mot.toLowerCase()):""}</p>`:`<p class="note-src" style="margin:0">Sin control pendiente.</p>`}
    <p class="note-src" style="margin:6px 0 0">${x.aten.length} ${x.aten.length===1?"atención":"atenciones"} desde ${esc(ff(x.aten[0]?x.aten[0].fecha:x.creado))}${dias!=null?" · en promedio cada "+dias+" días":""}.</p></section>
-  <section class="tool"><h3>Pendientes</h3><div id="pk-pen">${x.pend.length?x.pend.map(z=>`<label style="display:flex;gap:10px;align-items:flex-start;margin:4px 0;${z.ok?"opacity:.55;text-decoration:line-through":""}"><input type="checkbox" style="width:20px;height:20px;flex:none;margin-top:2px" data-pz="${z.id}" ${z.ok?"checked":""}><span>${esc(z.t)} <small class="note-src">(desde ${esc(ff(z.desde))}${z.ok?", hecho "+esc(ff(z.ok)):""})</small></span></label>`).join(""):`<p class="note-src" style="margin:0">No tiene pendientes.</p>`}</div>
+  <section class="tool"><h3>Pendientes</h3><div id="pk-pen">${x.pend.length?x.pend.map(z=>`<label style="display:flex;gap:10px;align-items:flex-start;margin:4px 0;${z.ok?"opacity:.55;text-decoration:line-through":""}"><input type="checkbox" style="width:20px;height:20px;flex:none;margin-top:2px" data-pz="${z.id}" ${z.ok?"checked":""}><span>${z.f?"<b>"+esc(ff(z.f))+"</b> · ":""}${esc(z.t)} <small class="note-src">(desde ${esc(ff(z.desde))}${z.ok?", hecho "+esc(ff(z.ok)):""})</small></span></label>`).join(""):`<p class="note-src" style="margin:0">No tiene pendientes.</p>`}</div>
    <div class="pdrow" style="margin-top:8px"><input id="pk-np" placeholder="Agregar pendiente: ej. traer carné de vacunas"><button class="btn" id="pk-add" style="flex:none">Agregar</button></div></section>
   <section class="tool"><h3>Historial</h3>${x.aten.length?[...x.aten].reverse().map(a=>`<details class="sec"><summary><span>${esc(ff(a.fecha))} · ${esc(a.title)}${a.prox?" · próximo "+esc(ff(a.prox)):""}</span></summary><pre style="white-space:pre-wrap;padding:0 14px 12px;margin:0;font-family:var(--f-body);font-size:.88rem">${esc(a.nota||"(sin nota)")}</pre></details>`).join(""):`<p class="note-src" style="margin:0">Sin atenciones.</p>`}
    <details class="sec" id="pk-ant"><summary><span>Agregar una atención anterior (de otra historia)</span></summary><div class="bgrid" style="padding:0 14px 14px">
