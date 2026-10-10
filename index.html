@@ -447,7 +447,7 @@ function ivFor(id){if(IV[id])return IV[id];if(IV_CACHE[id])return IV_CACHE[id];c
   m.sections.forEach((s,i)=>s.items.forEach((it,j)=>{const isQ=it.startsWith("Q:"),txt=isQ?it.slice(2):it,ask=isQ||ASK.test(s.t);
     q.push({b:s.t,t:ask?"ask":"do",l:txt.length>70?txt.slice(0,67)+"…":txt,q:txt,ck:i+"."+j,ref:(m.ref?m.ref+" · ":"")+"bloque «"+s.t+"» de la guía del módulo",
       c:isQ?["No","Sí"]:ask?["Niega","Sí, refiere","Sin hallazgos"]:EXAM.test(s.t)?["Normal","Alterado","No realizado"]:["Realizado","No realizado","No aplica"],
-      al:isQ?SI:undefined,am:isQ?(/golpead|forzada|humillada/i.test(txt)?"Violencia referida: activar la ruta de atención a víctimas y notificar.":"Tamizaje positivo: derivar a la ruta de salud mental."):undefined});const _x=(typeof IVX!=="undefined")&&IVX[id+"::"+txt];if(_x){const z=q[q.length-1];if(_x.c&&_x.c.length)z.c=_x.c;if(_x.cf)Object.defineProperty(z,"c",{get:_x.cf,set(){},configurable:true,enumerable:true});if(_x.widget){z.widget=_x.widget;z.c=[]}if(_x.campos){z.campos=_x.campos;if(!_x.keepc)z.c=[]}if(_x.dyn)z.dyn=_x.dyn;if(_x.pauta)z.pauta=_x.pauta;if(_x.si)z.si=_x.si}}));
+      al:isQ?SI:undefined,am:isQ?(/golpead|forzada|humillada/i.test(txt)?"Violencia referida: activar la ruta de atención a víctimas y notificar.":"Tamizaje positivo: derivar a la ruta de salud mental."):undefined});const _x=(typeof IVX!=="undefined")&&IVX[id+"::"+txt];if(_x){const z=q[q.length-1];if(_x.c&&_x.c.length)z.c=_x.c;if(_x.cf)Object.defineProperty(z,"c",{get:_x.cf,set(){},configurable:true,enumerable:true});if(_x.widget){z.widget=_x.widget;z.c=[]}if(_x.campos){z.campos=_x.campos;if(!_x.keepc)z.c=[]}if(_x.dyn)z.dyn=_x.dyn;if(_x.pauta)z.pauta=_x.pauta;if(_x.si)z.si=_x.si;if(_x.siTxt)z.siTxt=_x.siTxt}}));
   return IV_CACHE[id]=q}
 /* ---------- Herrera y Hurtado ---------- */
 const HH=[
@@ -936,7 +936,7 @@ function checks(m){try{return JSON.parse(S.get(key(m,"chk"))||"{}")}catch(e){ret
 function hasDraft(m){return !!(S.get(key(m,"dict"))||S.get(key(m,"nota"))||Object.keys(checks(m)).length)}
 
 /* ---------- PANEL ---------- */
-const VERSION_APP="2026-10-10 v100";
+const VERSION_APP="2026-10-10 v101";
 function home(){
   stopRec();st.view="home";
   const rm=["precon","prenatal","parto","rn","ive"],rp=["pinf","inf","adol","juv","adul","vej"];
@@ -1285,7 +1285,7 @@ function ivAns(id){let a={};try{a=JSON.parse(S.get(key(id,"iv"))||"{}")||{}}catc
     a=n;S.set(key(id,"iv"),JSON.stringify(a));S.set(key(id,"ivlab"),JSON.stringify(cur))}
   return a}
 function ivCompose(id){const q=ivFor(id),a=ivAns(id);let blk="",out=[];
-  q.forEach((x,i)=>{let v=(a[i]||"").trim();if(!v&&x.si&&!ivAplica(id,i))v="No aplica.";if(!v)return;if(x.b!==blk){blk=x.b;out.push((out.length?"\n":"")+blk.toUpperCase())}out.push("- "+x.l+": "+v)});
+  q.forEach((x,i)=>{let v=(a[i]||"").trim();if(!v&&x.si&&!ivAplica(id,i))v=(typeof x.siTxt==="function"?x.siTxt():x.siTxt)||"No aplica.";if(!v)return;if(x.b!==blk){blk=x.b;out.push((out.length?"\n":"")+blk.toUpperCase())}out.push("- "+x.l+": "+v)});
   return out.join("\n")}
 function ivAlerts(id){const q=ivFor(id),a=ivAns(id),o=[];q.forEach((x,i)=>{const v=(a[i]||"").trim();if(v&&x.al&&x.al.test(v))o.push(x.am)});return o}
 /* ---------- ANÁLISIS: DEVOLUCIÓN Y RUTAS ---------- */
@@ -2246,6 +2246,16 @@ IVX["pinf::Barniz de flúor y profilaxis semestral desde el año"].cf=()=>{const
  if(ok("Hemoglobina según riesgo (una vez)")){X("Hemoglobina según riesgo (una vez)").pauta.p.push("Anemia de 6 a 59 meses: hemoglobina menor de 11 g/dl (sin ajuste por altura en zonas bajas como Mitú).");
   X("Hemoglobina según riesgo (una vez)").dyn=()=>{const m=mP();if(m==null)return"";const pv=previasMod("pinf");return (m<6?"Con "+edadTxtM(m)+": solo si hay factores de riesgo (prematuro, bajo peso al nacer, pinzamiento precoz). ":"")+"Se pide una sola vez en la primera infancia, según el riesgo: revisa si ya tiene una registrada antes de ordenarla."}}
 })();
+/* preguntas que no aplican por edad: se saltan en la entrevista y quedan como "No aplica" en la nota */
+(function(){const mP=()=>edadMesesMod("pinf");
+ const R=[["Micronutrientes en polvo (fortificación casera) en las edades del cuadro de la 3280",6,24,"No aplica por edad: los micronutrientes en polvo son de los 6 a los 23 meses."],
+  ["Micronutrientes dos veces al año desde los 2 años",24,60,"No aplica por edad: la suplementación con hierro y vitamina A es de los 24 a los 59 meses."],
+  ["Desparasitación desde el año, dos veces al año",12,999,"No aplica por edad: la desparasitación inicia al año."],
+  ["Barniz de flúor y profilaxis semestral desde el año",12,999,"No aplica por edad: el barniz de flúor y la profilaxis inician al año."],
+  ["Sellantes desde los 3 años según criterio",36,999,"No aplica por edad: los sellantes son desde los 3 años."],
+  ["Odontología anual desde los 6 meses",6,999,"No aplica por edad: la consulta de odontología inicia a los 6 meses."]];
+ R.forEach(([k,a,b,t])=>{const x=IVX["pinf::"+k];if(!x){console.warn("falta IVX",k);return}x.si=()=>{const m=mP();return m==null||(m>=a&&m<b)};x.siTxt=t});
+})();
 const _cvTextoP=cvDesdeTexto;cvDesdeTexto=function(tipo,t){return _cvTextoP(tipo==="vitalesP"?"vitales":tipo,t)};
 const _cvF=cvCalc;cvCalc=function(tipo,v){if(tipo!=="formula")return _cvF(tipo,v);
   const n=k=>{const x=nv(v[k]);return x==null?null:Math.round(x)},g=n("g"),p=n("p"),c=n("c"),a=n("a"),e=n("e"),mo=n("m"),vi=n("v"),o={},al=[],m={};
@@ -2428,7 +2438,7 @@ function hcSecciones(id){const m=M[id],P=pac(),f=S.get(key(id,"fecha"))||hoy(),o
   if(P.__com)idl.push("Comunidad: "+P.__com+(P["DIRECCION"]?", "+P["DIRECCION"]:""));if(P["ETNIA"])idl.push("Pertenencia étnica: "+P["ETNIA"]+(P["PUEBLO"]?" ("+P["PUEBLO"]+")":""));
   if(P["EAPB NOMBRE"])idl.push("EAPB: "+P["EAPB NOMBRE"]+(P["RÉGIMEN"]?", "+P["RÉGIMEN"]:""));if(P["TELEFONO"])idl.push("Teléfono: "+P["TELEFONO"]);
   out.push({t:"Datos de la consulta",x:["Fecha: "+f.split("-").reverse().join("/"),"Atención: "+m.title+" ("+m.who+")"].concat(idl).join("\n")});
-  const q=ivFor(id),a=ivAns(id),B=[];q.forEach((z,i)=>{let v=(a[i]||"").trim();if(!v&&z.si&&!ivAplica(id,i))v="No aplica.";if(!v)return;let b=B.find(y=>y.t===z.b);if(!b){b={t:z.b,L:[]};B.push(b)}b.L.push(z.l+": "+v)});
+  const q=ivFor(id),a=ivAns(id),B=[];q.forEach((z,i)=>{let v=(a[i]||"").trim();if(!v&&z.si&&!ivAplica(id,i))v=(typeof z.siTxt==="function"?z.siTxt():z.siTxt)||"No aplica.";if(!v)return;let b=B.find(y=>y.t===z.b);if(!b){b={t:z.b,L:[]};B.push(b)}b.L.push(z.l+": "+v)});
   B.forEach(b=>out.push({t:b.t,x:b.L.join("\n")}));
   const n=S.get(key(id,"nota"));if(n)out.push({t:"Nota organizada",x:n});
   const r=anCargar(id);if(r){const L=(r.rutas||[]).map(z=>"- "+z.ruta+": "+z.accion+" ("+({hoy:"hoy",pronto:"pronto",programado:"programar"}[z.cuando]||z.cuando)+")");if(r.pendientes&&r.pendientes.length)L.push("Pendientes: "+r.pendientes.join("; "));if(L.length)out.push({t:"Plan y rutas",x:L.join("\n")})}
@@ -2505,10 +2515,10 @@ function paneEntr(){
     <details class="sec"><summary><span>Ver lo registrado</span></summary><pre style="white-space:pre-wrap;padding:0 14px 14px;font-family:var(--f-body);font-size:.92rem">${esc(ivCompose(id))||"(sin respuestas)"}</pre></details>`;
     $("iv-nota").onclick=()=>{st.tab="guia";S.set(key(id,"tab"),"guia");renderMod()};finWire(id);
     $("an-go").onclick=()=>analizar(id);anWire(id);hcWire(id);$("iv-rev").onclick=()=>{S.set(key(id,"ivi"),String(q.length-1));paneEntr()};return}
-  const x=q[i],pct=Math.round(i/q.length*100),al=(a[i]&&x.al&&x.al.test(a[i]))?x.am:"";
+  const _ap=q.map((z,k)=>ivAplica(id,k)),_tot=_ap.filter(Boolean).length,_pos=_ap.slice(0,i+1).filter(Boolean).length,_omit=q.length-_tot;const x=q[i],pct=Math.round((_pos-1)/Math.max(1,_tot)*100),al=(a[i]&&x.al&&x.al.test(a[i]))?x.am:"";
   $("pane").innerHTML=`
   <div class="tool" style="gap:14px">
-    <div style="display:flex;justify-content:space-between;gap:8px;align-items:baseline;flex-wrap:wrap"><span class="tag ${x.t==="do"?"pc":"rm"}">${esc(x.b)}</span><span class="note-src">Pregunta ${i+1} de ${q.length}</span></div>
+    <div style="display:flex;justify-content:space-between;gap:8px;align-items:baseline;flex-wrap:wrap"><span class="tag ${x.t==="do"?"pc":"rm"}">${esc(x.b)}</span><span class="note-src">Pregunta ${_pos} de ${_tot}${_omit?` · ${_omit} no aplica${_omit>1?"n":""}`:""}</span></div>
     <div style="height:6px;background:var(--accent-soft);border-radius:99px"><div style="height:6px;width:${pct}%;background:var(--accent);border-radius:99px"></div></div>
     <p class="lab" style="margin:0">${x.t==="do"?"Registra tú":"Pregúntale"}</p>
     <h2 style="font-family:var(--f-body);font-size:1.25rem;line-height:1.35;font-weight:700">${esc(x.q)}</h2>
