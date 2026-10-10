@@ -936,7 +936,7 @@ function checks(m){try{return JSON.parse(S.get(key(m,"chk"))||"{}")}catch(e){ret
 function hasDraft(m){return !!(S.get(key(m,"dict"))||S.get(key(m,"nota"))||Object.keys(checks(m)).length)}
 
 /* ---------- PANEL ---------- */
-const VERSION_APP="2026-10-10 v102";
+const VERSION_APP="2026-10-10 v103";
 function home(){
   stopRec();st.view="home";
   const rm=["precon","prenatal","parto","rn","ive"],rp=["pinf","inf","adol","juv","adul","vej"];
@@ -2097,7 +2097,7 @@ Object.assign(IVX,{
  "pinf::Odontología anual desde los 6 meses":{dyn:PI_DYN.bucal,c:["Al día|Valorado por odontología en el último año.","Remitido|Se remite a odontología (anual desde los 6 meses).","No aplica|No aplica: menor de 6 meses."],pauta:{t:"Qué saber",p:["Una vez al año desde los 6 meses."],r:"",b:""}},
  "pinf::Educación individual a padres o cuidadores":{c:["Realizada|Se brinda educación individual a los cuidadores en: alimentación, crianza amorosa, prevención de accidentes, signos de alarma AIEPI y uso del carné."],
   pauta:{t:"Qué decir",p:["Signos de peligro: no puede beber o mamar, vomita todo, convulsiona, letárgico, respiración rápida o con tiraje, fiebre alta, diarrea con sangre.","Crianza sin golpes; juego y conversación.","Prevenir accidentes: agua, fuego, caídas, químicos.","Traer el carné a cada consulta."],r:"Se brinda educación individual a padres o cuidadores.",b:"Registrar que se educó"}},
- "pinf::Al menos dos ciclos educativos":{c:["Derivado|Se deriva a los ciclos de educación grupal para la salud (al menos dos).","Asistió|Ya asistió a ciclos de educación grupal."],pauta:{t:"Qué saber",p:["Se deriva al menos a dos ciclos educativos grupales (cuadro 1).","En la comunidad pueden coincidir con la brigada."],r:"",b:""}}
+ "pinf::Al menos dos ciclos educativos":{c:["Derivado (lo envío hoy)|Se deriva a los padres o cuidadores a por lo menos dos ciclos de educación grupal para la salud (talleres de crianza, alimentación, cuidado y signos de alarma); se les informa fecha y lugar.","Ya asistió a 2 o más|Los padres o cuidadores ya asistieron a dos o más ciclos de educación grupal para la salud en esta etapa.","Asistió a 1|Los padres o cuidadores asistieron a un ciclo de educación grupal; se deriva al siguiente.","Sin oferta|No hay ciclos de educación grupal programados en la comunidad; queda pendiente derivar cuando se programen."],pauta:{t:"Qué es",p:["Son talleres en grupo para los padres o cuidadores (no consulta individual): crianza amorosa, alimentación, prevención de accidentes, signos de alarma AIEPI.","Derivar = enviarlos o inscribirlos a esos talleres. La norma pide derivar a por lo menos dos ciclos en la primera infancia (cuadro 1, código 9901).","Los contenidos y el número de sesiones los define el profesional según lo que encontró en la valoración.","En la comunidad pueden coincidir con la brigada o con las actividades del componente comunitario de AIEPI."],r:"",b:""}}
 });
 
 CAMPOS.antropoPI=[{k:"peso",l:"Peso",u:"kg",ph:"9,5",n:""},{k:"talla",l:"Talla",u:"cm",ph:"75",n:"Acostado hasta los 2 años"},{k:"pc",l:"Perímetro cefálico",u:"cm",ph:"45",n:"Hasta los 2 años"}];
