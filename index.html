@@ -786,7 +786,7 @@ function checks(m){try{return JSON.parse(S.get(key(m,"chk"))||"{}")}catch(e){ret
 function hasDraft(m){return !!(S.get(key(m,"dict"))||S.get(key(m,"nota"))||Object.keys(checks(m)).length)}
 
 /* ---------- PANEL ---------- */
-const VERSION_APP="2026-10-09 v68";
+const VERSION_APP="2026-10-09 v69";
 function home(){
   stopRec();st.view="home";
   const rm=["precon","prenatal","parto","rn","ive"],rp=["pinf","inf","adol","juv","adul","vej"];
@@ -1119,7 +1119,16 @@ function wireMic(root,ta,onChange){
 }
 
 /* ---------- ENTREVISTA GUIADA ---------- */
-function ivAns(id){try{return JSON.parse(S.get(key(id,"iv"))||"{}")}catch(e){return{}}}
+function ivAns(id){let a={};try{a=JSON.parse(S.get(key(id,"iv"))||"{}")||{}}catch(e){a={}}
+  if(!IV[id])return a;const cur=ivFor(id).map(z=>z.l);let old=null;try{old=JSON.parse(S.get(key(id,"ivlab"))||"null")}catch(e){}
+  if(!old){let lay=null;if(id==="prenatal"&&Object.keys(a).length){const k=cur.indexOf("Menarquia y ciclos");const prev=cur.slice(0,k).concat(["Antecedentes ginecológicos"],cur.slice(k+5));const R={"Antecedentes familiares":/familiar/i,"Hemoclasificación":/grupo sangu|rh /i,"Alimentación":/recordatorio/i,"Signos vitales":/TA \d/,"Alcohol, tabaco y sustancias":/consumo/i,"Vacunas del embarazo":/td |influenza|tdap|carn/i,"Antropometría y ganancia de peso":/peso/i,"Valoración obstétrica":/altura uterina|feto/i,"Próximo control":/control/i};
+      let sp=0,sc=0;Object.entries(R).forEach(([l,re])=>{if(re.test(a[prev.indexOf(l)]||""))sp++;if(re.test(a[cur.indexOf(l)]||""))sc++});if(sp>sc)lay=prev}
+    old=lay||cur;S.set(key(id,"ivlab"),JSON.stringify(old))}
+  if(JSON.stringify(old)!==JSON.stringify(cur)){const n={},mv=[];old.forEach((l,oi)=>{const ni=cur.indexOf(l);if(ni<0)return;if(a[oi]!=null)n[ni]=a[oi];["cv","cvo","sx"].forEach(t=>{const v=S.get(key(id,t+oi));if(v!=null)mv.push([t,ni,v])})});
+    ["cv","cvo","sx"].forEach(t=>old.forEach((_,oi)=>S.del(key(id,t+oi))));mv.forEach(([t,ni,v])=>S.set(key(id,t+ni),v));
+    const oi=+(S.get(key(id,"ivi"))||0),ni=oi<old.length?cur.indexOf(old[oi]):cur.length;if(ni>=0)S.set(key(id,"ivi"),String(ni));
+    a=n;S.set(key(id,"iv"),JSON.stringify(a));S.set(key(id,"ivlab"),JSON.stringify(cur))}
+  return a}
 function ivCompose(id){const q=ivFor(id),a=ivAns(id);let blk="",out=[];
   q.forEach((x,i)=>{let v=(a[i]||"").trim();if(!v&&x.si&&!ivAplica(id,i))v="No aplica.";if(!v)return;if(x.b!==blk){blk=x.b;out.push((out.length?"\n":"")+blk.toUpperCase())}out.push("- "+x.l+": "+v)});
   return out.join("\n")}
