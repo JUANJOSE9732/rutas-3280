@@ -744,7 +744,7 @@ function checks(m){try{return JSON.parse(S.get(key(m,"chk"))||"{}")}catch(e){ret
 function hasDraft(m){return !!(S.get(key(m,"dict"))||S.get(key(m,"nota"))||Object.keys(checks(m)).length)}
 
 /* ---------- PANEL ---------- */
-const VERSION_APP="2026-10-09 v64";
+const VERSION_APP="2026-10-09 v65";
 function home(){
   stopRec();st.view="home";
   const rm=["precon","prenatal","parto","rn","ive"],rp=["pinf","inf","adol","juv","adul","vej"];
@@ -1141,6 +1141,7 @@ function anLocal(id){const m=M[id],f=S.get(key(id,"fecha"))||hoy(),txt=[ivCompos
      else if(/ha recibido (?!acido folico)/.test(md)&&!/micronutriente|acido folico ____/.test(md)&&/ha recibido .* por /.test(md))PEN.push("Revisar con medicina el medicamento recibido en la gestación: "+A("Medicamentos en este embarazo").replace(/\.$/,""));
      if(/remedio de plantas/.test(pl("Partera y medicina tradicional")))PEN.push("Remedio de plantas en la gestación: identificar la planta y consultarla con medicina");
      if(/sobado o acomodado/.test(pl("Partera y medicina tradicional")))D.push("Le recomiendo que no le soben el bebé con fuerza; si después de una sobada siente dolor, sangrado o el bebé se mueve menos, venga de inmediato.")}
+    {const an=pl("Antropometría y ganancia de peso"),sw=semPren()||0;if(/ganancia (baja|alta)\)/.test(an))ruta("Valoración por nutrición"+(sw>=28?" y equipo multidisciplinario":""),"Ganancia de peso "+an.match(/ganancia (baja|alta)/)[1]+" para la edad gestacional","Revisar alimentación"+(/alta/.test(an)?", edemas y TA":", vómito, parasitosis y anemia")+"; graficar en Atalah"+(sw>=28?"; seguimiento por equipo multidisciplinario (Res. 3280, p. 271)":""),"pronto",/alta/.test(an)?"Está subiendo de peso más de lo esperado; vamos a revisar su alimentación y su presión.":"Está subiendo menos peso del que el bebé necesita; vamos a revisar su alimentación.")}
     if(/disminu/.test(pl("Movimientos fetales")))ruta("Valoración médica hoy","Movimientos fetales disminuidos","Auscultar FCF y remitir hoy","hoy","Si el bebé se mueve menos, hay que revisarlo hoy.");
     const fcf=(A("Valoración obstétrica").match(/frecuencia cardiaca fetal (\d+)/)||[])[1];if(fcf&&(+fcf<110||+fcf>160))ruta("Valoración médica hoy","FCF "+fcf+" lpm","Remitir hoy","hoy","El corazón del bebé está fuera de lo normal; hay que revisarlo hoy.");
     if(/(menor|mayor) de lo esperado|ecografia obstetrica \(percentil/.test(x))PEN.push("Altura uterina que no concuerda con la edad gestacional: ecografía obstétrica");
@@ -1650,9 +1651,17 @@ cvCalc=function(tipo,v){
     const w=semPren();let ini=null,base="";if(pp&&ta>0.8&&ta<2.3){ini=Math.round(pp/(ta*ta)*10)/10;base="peso antes del embarazo"}else if(r.imc&&w!=null&&w<16){ini=r.imc;base="primer control antes de la semana 16"}
     if(ini){const meta=metaGanancia(ini);r.m.ppre="IMC inicial "+coma(ini)+": meta de ganancia "+meta;if(ini<20)r.al.push("IMC inicial menor de 20: meta de ganancia de 12 a 18 kg; valoración por nutrición.");else if(ini>=30)r.al.push("IMC inicial de 30 o más: meta de ganancia de 6 a 7 kg; valoración por nutrición."+(ini>=35?" IMC ≥ 35 es criterio moderado de preeclampsia.":""))}
     else if(nv(v.ppre)==null)r.m.ppre=w!=null&&w>=16?"Pregúntale cuánto pesaba antes del embarazo":"";
-    const gan=p&&pp?Math.round((p-pp)*10)/10:null;if(gan!=null){r.m.peso="Ganancia hasta hoy: "+coma(gan)+" kg";if(gan<0)r.al.push("Ha perdido peso en la gestación: valorar alimentación, vómito y enfermedad; remitir a nutrición o medicina.")}
-    if(w!=null&&w>=28&&gan!=null)r.al.push("Semana 28 o más: si la ganancia es inadecuada en la curva de Atalah, debe seguir con equipo multidisciplinario (Res. 3280, p. 271).");
-    const P=[];if(p)P.push("Peso "+coma(p)+" kg");if(ta)P.push("talla "+coma(Math.round(ta*100)/100)+" m");if(r.imc)P.push("IMC "+coma(r.imc));if(pp)P.push("peso pregestacional "+coma(pp)+" kg");if(ini)P.push("IMC inicial "+coma(ini)+" ("+base+"), meta de ganancia "+metaGanancia(ini));if(gan!=null)P.push("ganancia de peso "+coma(gan)+" kg");
+    const gan=p&&pp?Math.round((p-pp)*10)/10:null;let ganTxt="";
+    if(gan!=null){r.m.peso="Ganancia hasta hoy: "+coma(gan)+" kg";
+      if(ini&&w!=null){const T=ini<20?[12,18]:ini<25?[10,13]:ini<30?[7,10]:[6,7],wk=Math.min(Math.max(w,0),40),r1=v=>Math.round(v*10)/10;
+        const lo=wk<=13?r1(0.5*wk/13):r1(0.5+(T[0]-0.5)*(wk-13)/27),hi=wk<=13?r1(2*wk/13):r1(2+(T[1]-2)*(wk-13)/27);
+        const est=gan<lo?"baja":gan>hi?"alta":"adecuada";ganTxt=" (esperado a las "+Math.floor(wk)+" semanas: "+coma(lo)+" a "+coma(hi)+" kg; ganancia "+est+")";
+        r.m.peso="Ganancia "+coma(gan)+" kg · esperado "+coma(lo)+"–"+coma(hi)+" kg: "+est.toUpperCase();r.flag.peso=est==="adecuada"?"":"alto";
+        if(est==="baja")r.al.push("Ganancia de peso BAJA para la semana "+Math.floor(wk)+" ("+coma(gan)+" kg; esperado "+coma(lo)+" a "+coma(hi)+"): revisar alimentación, vómito, parasitosis y anemia; remitir a nutrición"+(wk>=28?" y, por estar en la semana 28 o más, a seguimiento con equipo multidisciplinario (Res. 3280, p. 271)":"")+".");
+        if(est==="alta")r.al.push("Ganancia de peso ALTA para la semana "+Math.floor(wk)+" ("+coma(gan)+" kg; esperado "+coma(lo)+" a "+coma(hi)+"): revisar edemas y TA (preeclampsia) y alimentación; remitir a nutrición"+(wk>=28?" y a seguimiento con equipo multidisciplinario (Res. 3280, p. 271)":"")+".");}
+      if(gan<0)r.al.push("Ha perdido peso en la gestación: valorar alimentación, vómito y enfermedad; remitir a nutrición o medicina.")}
+
+    const P=[];if(p)P.push("Peso "+coma(p)+" kg");if(ta)P.push("talla "+coma(Math.round(ta*100)/100)+" m");if(r.imc)P.push("IMC "+coma(r.imc));if(pp)P.push("peso pregestacional "+coma(pp)+" kg");if(ini)P.push("IMC inicial "+coma(ini)+" ("+base+"), meta de ganancia "+metaGanancia(ini));if(gan!=null)P.push("ganancia de peso "+coma(gan)+" kg"+ganTxt);
     r.txt=P.length?P.join(", ")+".":"";return r}
   if(tipo==="obst"){const au=nv(v.au),f=nv(v.fcf),w=semPren(),o={},al=[],m={};
     if(au){if(w!=null&&w>=20&&w<=36){const df=au-Math.floor(w);m.au=Math.abs(df)<=2?"Concuerda con "+Math.floor(w)+" semanas":(df<0?"Menor":"Mayor")+" de lo esperado para "+Math.floor(w)+" semanas";if(Math.abs(df)>2){o.au="alto";al.push("Altura uterina "+(df<0?"menor":"mayor")+" de lo esperado (más de 2 cm de diferencia): ecografía obstétrica (percentil < 10 o > 90, Res. 3280, p. 271) y remitir a medicina.")}}else m.au=w==null?"Llena la edad gestacional para compararla":w<20?"Antes de la semana 20 se compara con el examen":"Después de la 36 puede variar por el encajamiento"}
@@ -1948,8 +1957,8 @@ function paneEntr(){
   </div>`;
   const ta=$("iv-a");let cv={};try{cv=JSON.parse(S.get(key(id,"cv"+i))||"{}")}catch(e){}
   const cvPinta=()=>{if(!x.campos)return;const r=cvCalc(x.campos,cv);document.querySelectorAll("[data-cv]").forEach(e=>{const k=e.dataset.cv;if(CAMPOS[x.campos].find(c=>c.k===k).auto){e.value=r.imc?coma(r.imc):""}else if(document.activeElement!==e)e.value=cv[k]||"";e.style.borderColor=r.flag[k]?"var(--miss)":"";e.style.borderWidth=r.flag[k]?"2px":"";
-      const sm=document.querySelector(`[data-cvm="${k}"]`);if(sm){const t=r.m&&r.m[k];sm.textContent=t||sm.dataset.n;sm.style.color=!t?"var(--muted)":/^(Normal|Cuadra|Primigestante|Concuerda)/.test(t)?"var(--accent)":"var(--miss)";sm.style.fontWeight=t?"700":"400"}});
-    const b=$("cv-al");b.hidden=true;b.querySelector("ul").innerHTML=r.al.map(z=>`<li>${esc(z)}</li>`).join("");return r};
+      const sm=document.querySelector(`[data-cvm="${k}"]`);if(sm){const t=r.m&&r.m[k];sm.textContent=t||sm.dataset.n;sm.style.color=!t?"var(--muted)":/^(Normal|Cuadra|Primigestante|Concuerda|IMC inicial|Grafícalo|Pregúntale)|ADECUADA$/.test(t)?"var(--accent)":"var(--miss)";sm.style.fontWeight=t?"700":"400"}});
+    const b=$("cv-al");b.hidden=!(x.campos==="antropoG"&&r.al.length);b.querySelector("ul").innerHTML=r.al.map(z=>`<li>${esc(z)}</li>`).join("");return r};
   let sx={};try{sx=JSON.parse(S.get(key(id,"sx"+i))||"{}")}catch(e){}
   const sxTxt=()=>x.sistemas?SISTEMAS[x.sistemas].filter(c=>(sx[c.k]||"").trim()).map(c=>c.l+": "+sx[c.k].trim().replace(/\.?$/,".")).join(" "):"";
   const sxPinta=()=>{if(!x.sistemas)return;SISTEMAS[x.sistemas].forEach(c=>{const v=(sx[c.k]||"").trim(),inp=document.querySelector(`[data-sx="${c.k}"]`),nb=document.querySelector(`[data-sxn="${c.k}"]`),rr=document.querySelector(`[data-sxr="${c.k}"]`),w=document.querySelector(`[data-sxw="${c.k}"]`);
