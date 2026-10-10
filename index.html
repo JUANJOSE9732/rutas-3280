@@ -936,7 +936,7 @@ function checks(m){try{return JSON.parse(S.get(key(m,"chk"))||"{}")}catch(e){ret
 function hasDraft(m){return !!(S.get(key(m,"dict"))||S.get(key(m,"nota"))||Object.keys(checks(m)).length)}
 
 /* ---------- PANEL ---------- */
-const VERSION_APP="2026-10-10 v84";
+const VERSION_APP="2026-10-10 v85";
 function home(){
   stopRec();st.view="home";
   const rm=["precon","prenatal","parto","rn","ive"],rp=["pinf","inf","adol","juv","adul","vej"];
@@ -2237,7 +2237,7 @@ function paneEntr(){
   const id=st.mod,q=ivFor(id),a=ivAns(id),i0=S.get(key(id,"ivi"));let i=Math.max(0,+(i0||0));if(i>=q.length)i=q.length;
   const answered=q.filter((_,k)=>(a[k]||"").trim()).length;
   if(i>=q.length){
-    if(answered&&!S.get(key(id,"fin"))&&(pac()["NOMBRE COMPLETO"]||pac()["DOCUMENTO ID."]))try{finalizarConsulta(id)}catch(e){}
+    if(answered&&(pac()["NOMBRE COMPLETO"]||pac()["DOCUMENTO ID."]))try{finalizarConsulta(id)}catch(e){}
     const al=ivAlerts(id);
     $("pane").innerHTML=`<div class="tool"><h3>Entrevista terminada</h3><p class="note-src">${answered} de ${q.length} preguntas respondidas. Las respuestas ya están en el dictado de la pestaña Nota.</p>
     ${al.length?`<div class="box warn"><h3>Revisar antes de seguir</h3><ul>${al.map(x=>`<li>${esc(x)}</li>`).join("")}</ul></div>`:""}
@@ -2542,22 +2542,29 @@ function pacienteAtencion(mod,com,d,regid,ext){const ps=pacientes(),ident={};ID_
   const nota=mod?(S.get(key(mod,"nota"))||ivCompose(mod)||""):(d["OBSERVACION"]||"");
   const a={regid,fecha:fe,mod:mod||"",title:mod?M[mod].title:"Registro sin consulta",nota:String(nota).slice(0,4000),prox:d["FECHA PROXIMO CONTROL"]&&d["FECHA PROXIMO CONTROL"]!=="N/A"?d["FECHA PROXIMO CONTROL"]:"",mot:d["MOTIVO PROXIMO CONTROL"]||""};
   x.aten=x.aten.filter(z=>z.regid!==regid).concat([a]).sort((p,q)=>p.fecha<q.fecha?-1:1);
-  const nuevo=t=>{if(!x.pend.some(z=>!z.ok&&z.t===t))x.pend.push({id:uid(),t,desde:fe,ok:""})};
+  const nOrd={};x.aten.forEach(z=>{const t=z.mod&&M[z.mod]?M[z.mod].title:(z.title||"Atención").replace(/ \(historia anterior\)$/,"");nOrd[t]=(nOrd[t]||0)+1;z.cons=t+" "+nOrd[t]});
+  const cons=a.cons;x.pend=x.pend.filter(z=>z.ok||z.reg!==regid);
+  const nuevo=(t,f)=>{if(!x.pend.some(z=>!z.ok&&z.t===t))x.pend.push({id:uid(),t,f:f||"",desde:fe,ok:"",reg:regid,cons})};
   if(mod){const qq=ivFor(mod),aa=ivAns(mod),A=l=>{const i=qq.findIndex(z=>z.l===l);return i>=0?(aa[i]||""):""};
     if(/pendiente/i.test(A("Exámenes solicitados")+A("Exámenes de ingreso")+A("Exámenes de seguimiento")))nuevo("Tomar los exámenes pendientes ("+M[mod].title.toLowerCase()+")");
     if(/positiva|reactiv/i.test(A("Exámenes solicitados")+A("Exámenes de ingreso")+A("Exámenes de seguimiento")))nuevo("Seguir resultado reactivo o positivo con medicina");}
   String(d["CANALIZADO A"]||"").split(", ").filter(v=>v&&v!=="NINGUNO").forEach(v=>nuevo("Verificar que asistió a "+v.toLowerCase()));
   if(d["SE REALIZO LABORATORIOS"]==="NO"&&mod&&!x.pend.some(z=>!z.ok&&/exámenes/.test(z.t)))nuevo("Tomar los exámenes ordenados ("+M[mod].title.toLowerCase()+")");
-  if(mod){const E=ext||{citas:citasDe(mod,fe),pend:pendDe(mod)};x.pend=x.pend.filter(z=>z.ok||z.reg!==regid);
-    E.citas.forEach(c=>x.pend.push({id:uid(),t:c.t,f:c.f||"",desde:fe,ok:"",reg:regid}));E.pend.forEach(t=>{if(!x.pend.some(z=>!z.ok&&z.t===t))x.pend.push({id:uid(),t,desde:fe,ok:"",reg:regid})});
+  if(mod){const E=ext||{citas:citasDe(mod,fe),pend:pendDe(mod)};
+    E.citas.forEach(c=>x.pend.push({id:uid(),t:c.t,f:c.f||"",desde:fe,ok:"",reg:regid,cons,cita:1}));E.pend.forEach(t=>nuevo(t));
     if(!a.prox){const c0=E.citas.find(c=>c.f);if(c0){a.prox=c0.f;a.mot=c0.mot}}}
+  x.pend.forEach(z=>{const at=x.aten.find(y=>y.regid===z.reg);if(at){z.cons=at.cons;z.desde=at.fecha}});
   setPacientes(ps);return x}
+function pendGrupos(x,primero,soloAbiertos){const ff=s=>s?s.split("-").reverse().join("/"):"",G=new Map();
+  x.pend.filter(z=>!soloAbiertos||!z.ok).forEach(z=>{const k=z.reg||"_";if(!G.has(k))G.set(k,{k,cons:z.cons||"Otros pendientes",fe:z.desde||"",it:[]});G.get(k).it.push(z)});
+  return [...G.values()].sort((a,b)=>a.k===primero?-1:b.k===primero?1:(a.fe<b.fe?1:-1)).map(g=>({t:g.cons+" · "+ff(g.fe),it:g.it.sort((p,q)=>(q.cita||0)-(p.cita||0)||((p.f||"9")<(q.f||"9")?-1:1))}))}
+function pendItemHTML(z,check){const ff=s=>s?s.split("-").reverse().join("/"):"";return `<label style="display:flex;gap:10px;align-items:flex-start;margin:4px 0;${z.ok?"opacity:.55;text-decoration:line-through":""}">${check?`<input type="checkbox" style="width:20px;height:20px;flex:none;margin-top:2px" data-pz="${z.id}" ${z.ok?"checked":""}>`:"<span>•</span>"}<span>${z.cita?"📅 ":""}${z.f?"<b>"+esc(ff(z.f))+"</b> · ":""}${esc(z.t)}${z.ok?` <small class="note-src">(hecho ${esc(ff(z.ok))})</small>`:""}</span></label>`}
 /* ---------- Finalizar consulta: guarda en Pacientes con citas y pendientes ---------- */
 function isoMas(iso,n){const d=pD(iso)||pD(hoy());d.setUTCDate(d.getUTCDate()+n);return d.toISOString().slice(0,10)}
 function citasDe(mod,fe){const q=ivFor(mod),a=ivAns(mod),A=l=>{const i=q.findIndex(z=>z.l===l||z.l.startsWith(l));return i>=0?(a[i]||""):""},C=[],add=(t,f,mot)=>C.push({t,f,mot});
   const pc=A("Próximo control"),pf=isoDeTxt(pc);
-  if(pf)add((M[mod].title)+": "+pc.replace(/\s+/g," ").slice(0,140),pf,M[mod].title.toUpperCase()+": CONTROL");
-  else if(/brigada/i.test(pc))add(M[mod].title+": control en la próxima brigada (fecha por definir)","",M[mod].title.toUpperCase()+": CONTROL");
+  if(pf)add("Próxima cita: "+pc.replace(/\s+/g," ").slice(0,140),pf,M[mod].title.toUpperCase()+": CONTROL");
+  else if(/brigada/i.test(pc))add("Próxima cita: control en la próxima brigada (fecha por definir)","",M[mod].title.toUpperCase()+": CONTROL");
   if(mod==="parto"){add("Control posparto de la madre (día 3 a 5)",isoMas(fe,3),"CONTROL POSPARTO");add("Control del recién nacido (día 3 a 5)",isoMas(fe,3),"CONTROL RECIÉN NACIDO");
     const me=plano(A("Método anticonceptivo antes del alta"));
     if(/implante/.test(me))add("Control del implante (al mes)",isoMas(fe,30),"CONTROL ANTICONCEPCIÓN");
@@ -2578,9 +2585,10 @@ function finalizarConsulta(id){const P=pac();if(!P["NOMBRE COMPLETO"]&&!P["DOCUM
   let rid=S.get(key(id,"regid"));if(!rid){rid=uid();S.set(key(id,"regid"),rid)}
   const com=P.__com||S.get("dn2_ultcom")||"";agendaGuardar(rid,com,d);const x=pacienteAtencion(id,com,d,rid,{citas:C,pend:pendDe(id)});{const z=new Date(),p2=v=>String(v).padStart(2,"0");S.set(key(id,"fin"),z.getFullYear()+"-"+p2(z.getMonth()+1)+"-"+p2(z.getDate())+"T"+p2(z.getHours())+":"+p2(z.getMinutes()))}return {x,C,k:x?pkey(x.ident):""}}
 function finHTML(id){const r=S.get(key(id,"fin")),ff=s=>s?s.split("-").reverse().join("/"):"";let x=null;const P=pac();if(P["NOMBRE COMPLETO"]||P["DOCUMENTO ID."])x=pacientes()[pkey(P)];
-  const rid=S.get(key(id,"regid")),mine=x?x.pend.filter(z=>z.reg===rid&&!z.ok):[];
-  return `<section class="tool" id="fin"><h3>Finalizar consulta</h3>${r&&x?`<p class="note-src" style="margin:0">Guardada en Pacientes (#${x.n}) el ${esc(ff(r.slice(0,10)))} a las ${esc(r.slice(11,16))}.</p>${mine.length?`<p class="lab" style="margin:8px 0 4px">Citas y pendientes que quedaron</p><ul style="margin:0;padding-left:20px">${mine.map(z=>`<li>${z.f?"<b>"+esc(ff(z.f))+"</b> · ":""}${esc(z.t)}</li>`).join("")}</ul>`:`<p class="note-src" style="margin:6px 0 0">No quedaron citas ni pendientes de esta consulta.</p>`}`:`<p class="note-src" style="margin:0">Guarda esta consulta en la ficha de la paciente con sus próximas citas y pendientes. No necesita conexión.</p>`}
-   <div class="btns"><button class="btn primary" id="fin-go">${r?"Actualizar (si cambiaste algo)":"Finalizar y guardar en Pacientes"}</button>${x?'<button class="btn" id="fin-ver">Ver ficha</button>':""}</div><p class="status" id="fin-st"></p></section>`}
+  const rid=S.get(key(id,"regid")),at=x?x.aten.find(a=>a.regid===rid):null,G=x?pendGrupos(x,rid,true):[];
+  return `<section class="tool" id="fin"><h3>Finalizar consulta</h3>${r&&at?`<p style="margin:0"><b>${esc(at.cons||at.title)}</b> · consulta del ${esc(ff(at.fecha))}</p><p class="note-src" style="margin:2px 0 0">Guardada en Pacientes (#${x.n}) el ${esc(ff(r.slice(0,10)))} a las ${esc(r.slice(11,16))}. Si cambias respuestas, toca Actualizar.</p>`:`<p class="note-src" style="margin:0">Guarda esta consulta en la ficha de la paciente con sus próximas citas y pendientes. No necesita conexión.</p>`}
+   <div class="btns"><button class="btn primary" id="fin-go">${r?"Actualizar con lo registrado":"Finalizar y guardar en Pacientes"}</button>${x?'<button class="btn" id="fin-ver">Ver ficha</button>':""}</div><p class="status" id="fin-st"></p>
+   ${x?`<h3 style="margin-top:6px">Pendientes de ${esc((x.ident["NOMBRE COMPLETO"]||"la paciente").split(" ")[0].charAt(0)+(x.ident["NOMBRE COMPLETO"]||"la paciente").split(" ")[0].slice(1).toLowerCase())}</h3>${G.length?G.map(g=>`<div style="margin:6px 0"><p class="lab" style="margin:0 0 2px">${esc(g.t)}</p>${g.it.map(z=>pendItemHTML(z,false)).join("")}</div>`).join(""):`<p class="note-src" style="margin:0">No tiene pendientes abiertos.</p>`}`:""}</section>`}
 function finWire(id){const b=$("fin-go");if(!b)return;b.onclick=()=>{const r=finalizarConsulta(id);if(r.err){$("fin-st").textContent=r.err;return}const box=$("fin");box.outerHTML=finHTML(id);finWire(id);$("fin-st").textContent="Listo: guardada en Pacientes."};
   const v=$("fin-ver");if(v)v.onclick=()=>{const P=pac();verPaciente(pkey(P))}}
 function estadoP(x){const u=x.aten[x.aten.length-1];if(!u)return null;const px=[...x.aten].reverse().find(a=>a.prox);if(!px)return null;const cumplido=x.aten.some(a=>a.fecha>px.fecha);if(cumplido)return null;return Object.assign({px:px.prox,mot:px.mot},semaforo(px.prox)||{})}
@@ -2606,9 +2614,9 @@ function verPaciente(k){const ps=pacientes(),x=ps[k];if(!x)return verPacientes()
   ${rut.length?`<p class="note-src" style="margin:8px 0 0">Le corresponde según edad y sexo: ${rut.map(r=>esc(M[r].title)).join(", ")}${I["GENERO"]==="F"&&ed>=10&&ed<55?" (preconcepcional o prenatal solo si aplica)":""}.</p>`:""}
   <section class="tool"><h3>Próximo control</h3>${e?`<p style="margin:0"><b class="sem ${e.c}"></b> ${esc(ff(e.px))} — ${esc(e.t)}${e.mot?" · "+esc(e.mot.toLowerCase()):""}</p>`:`<p class="note-src" style="margin:0">Sin control pendiente.</p>`}
    <p class="note-src" style="margin:6px 0 0">${x.aten.length} ${x.aten.length===1?"atención":"atenciones"} desde ${esc(ff(x.aten[0]?x.aten[0].fecha:x.creado))}${dias!=null?" · en promedio cada "+dias+" días":""}.</p></section>
-  <section class="tool"><h3>Pendientes</h3><div id="pk-pen">${x.pend.length?x.pend.map(z=>`<label style="display:flex;gap:10px;align-items:flex-start;margin:4px 0;${z.ok?"opacity:.55;text-decoration:line-through":""}"><input type="checkbox" style="width:20px;height:20px;flex:none;margin-top:2px" data-pz="${z.id}" ${z.ok?"checked":""}><span>${z.f?"<b>"+esc(ff(z.f))+"</b> · ":""}${esc(z.t)} <small class="note-src">(desde ${esc(ff(z.desde))}${z.ok?", hecho "+esc(ff(z.ok)):""})</small></span></label>`).join(""):`<p class="note-src" style="margin:0">No tiene pendientes.</p>`}</div>
+  <section class="tool"><h3>Pendientes</h3><div id="pk-pen">${x.pend.length?pendGrupos(x,"",false).map(g=>`<div style="margin:6px 0"><p class="lab" style="margin:0 0 2px">${esc(g.t)}</p>${g.it.map(z=>pendItemHTML(z,true)).join("")}</div>`).join(""):`<p class="note-src" style="margin:0">No tiene pendientes.</p>`}</div>
    <div class="pdrow" style="margin-top:8px"><input id="pk-np" placeholder="Agregar pendiente: ej. traer carné de vacunas"><button class="btn" id="pk-add" style="flex:none">Agregar</button></div></section>
-  <section class="tool"><h3>Historial</h3>${x.aten.length?[...x.aten].reverse().map(a=>`<details class="sec"><summary><span>${esc(ff(a.fecha))} · ${esc(a.title)}${a.prox?" · próximo "+esc(ff(a.prox)):""}</span></summary><pre style="white-space:pre-wrap;padding:0 14px 12px;margin:0;font-family:var(--f-body);font-size:.88rem">${esc(a.nota||"(sin nota)")}</pre></details>`).join(""):`<p class="note-src" style="margin:0">Sin atenciones.</p>`}
+  <section class="tool"><h3>Historial</h3>${x.aten.length?[...x.aten].reverse().map(a=>`<details class="sec"><summary><span>${esc(ff(a.fecha))} · ${esc(a.cons||a.title)}${a.prox?" · próximo "+esc(ff(a.prox)):""}</span></summary><pre style="white-space:pre-wrap;padding:0 14px 12px;margin:0;font-family:var(--f-body);font-size:.88rem">${esc(a.nota||"(sin nota)")}</pre></details>`).join(""):`<p class="note-src" style="margin:0">Sin atenciones.</p>`}
    <details class="sec" id="pk-ant"><summary><span>Agregar una atención anterior (de otra historia)</span></summary><div class="bgrid" style="padding:0 14px 14px">
     <label class="bfl"><span>Fecha</span><input type="date" id="pa-f"></label>
     <label class="bfl"><span>Atención</span><select id="pa-m"><option value="">Otra</option>${Object.keys(M).map(m=>`<option value="${m}">${esc(M[m].title)}</option>`).join("")}</select></label>
@@ -2618,7 +2626,7 @@ function verPaciente(k){const ps=pacientes(),x=ps[k];if(!x)return verPacientes()
   $("back").onclick=verPacientes;
   $("pk-at").onclick=()=>{const o=Object.assign({},I),cur=pac();if((cur["NOMBRE COMPLETO"]||cur["DOCUMENTO ID."])&&pkey(cur)!==k)S.keys().filter(z=>/^dn2_[a-z]+_/.test(z)&&Object.keys(M).includes(z.split("_")[1])&&!z.endsWith("_note")).forEach(z=>S.del(z));setPac(o);home();const t=$("sugg");if(t)t.scrollIntoView({block:"center"})};
   document.querySelectorAll("[data-pz]").forEach(c=>c.onchange=()=>{const ps2=pacientes(),y=ps2[k];y.pend.forEach(z=>{if(z.id===c.dataset.pz)z.ok=c.checked?hoy():""});setPacientes(ps2);verPaciente(k)});
-  $("pk-add").onclick=()=>{const t=$("pk-np").value.trim();if(!t)return;const ps2=pacientes();ps2[k].pend.push({id:uid(),t,desde:hoy(),ok:""});setPacientes(ps2);verPaciente(k)};
+  $("pk-add").onclick=()=>{const t=$("pk-np").value.trim();if(!t)return;const ps2=pacientes();ps2[k].pend.push({id:uid(),t,desde:hoy(),ok:"",cons:"Agregado a mano"});setPacientes(ps2);verPaciente(k)};
   $("pa-go").onclick=()=>{const f=$("pa-f").value;if(!f){$("pa-st").textContent="Escribe la fecha de esa atención.";return}const m=$("pa-m").value,ps2=pacientes(),y=ps2[k];
     y.aten.push({regid:"ant-"+uid(),fecha:f,mod:m,title:(m?M[m].title:"Atención")+" (historia anterior)",nota:$("pa-n").value.trim(),prox:$("pa-p").value||"",mot:m?M[m].title.toUpperCase()+": CONTROL":""});y.aten.sort((p,q)=>p.fecha<q.fecha?-1:1);setPacientes(ps2);verPaciente(k)};
   window.scrollTo(0,0)}
