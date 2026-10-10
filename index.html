@@ -936,7 +936,7 @@ function checks(m){try{return JSON.parse(S.get(key(m,"chk"))||"{}")}catch(e){ret
 function hasDraft(m){return !!(S.get(key(m,"dict"))||S.get(key(m,"nota"))||Object.keys(checks(m)).length)}
 
 /* ---------- PANEL ---------- */
-const VERSION_APP="2026-10-10 v91";
+const VERSION_APP="2026-10-10 v92";
 function home(){
   stopRec();st.view="home";
   const rm=["precon","prenatal","parto","rn","ive"],rp=["pinf","inf","adol","juv","adul","vej"];
@@ -2939,7 +2939,9 @@ function base(pref,opts){
   const enVivo=()=>{if($("b-miss").hidden)return;const {falt}=revisar(form,false);const fk=new Set(falt.map(f=>f.k));
     form.querySelectorAll(".falta").forEach(w=>{if(!fk.has(w.dataset.wrap))w.classList.remove("falta")});mostrarFaltan(falt);
     if(!falt.length)$("b-st").textContent="Ya está completo. Toca Guardar y enviar."};
-  if(MD){try{const sg=proxNorma(MD,(form.querySelector('[data-f="FECHA"]')||{}).value||hoy()),w=form.querySelector('[data-wrap="FECHA PROXIMO CONTROL"]');if(sg&&w){const p=document.createElement("p");p.className="note-src";p.style.cssText="grid-column:1/-1;margin:2px 0 0;color:var(--accent)";p.textContent="Sugerido por la norma: "+(sg.f?sg.f.split("-").reverse().join("/")+" — ":"")+sg.por;w.after(p)}}catch(e){}}
+  if(MD){try{const sg=proxNorma(MD,(form.querySelector('[data-f="FECHA"]')||{}).value||hoy()),w=form.querySelector('[data-wrap="FECHA PROXIMO CONTROL"]');if(sg&&w){const p=document.createElement("p");p.className="note-src";p.style.cssText="grid-column:1/-1;margin:2px 0 0;color:var(--accent)";p.innerHTML="<b>Sugerido por la norma:</b> "+esc((sg.f?sg.f.split("-").reverse().join("/")+" — ":"")+sg.por)+(sg.f?' <button type="button" class="btn" id="px-usar" style="padding:4px 10px;font-size:.82rem;margin-left:6px">Usar esta fecha</button>':"");p.style.cssText+=";background:var(--accent-soft);padding:8px 10px;border-radius:10px";w.after(p);
+    const bu=$("px-usar");if(bu)bu.onclick=()=>{const fi=form.querySelector('[data-f="FECHA PROXIMO CONTROL"]'),mo=form.querySelector('[data-f="MOTIVO PROXIMO CONTROL"]');if(fi){fi.value=sg.f;fi.dispatchEvent(new Event("input",{bubbles:true}));fi.dispatchEvent(new Event("change",{bubbles:true}))}if(mo&&!mo.value){mo.value=sg.mot;mo.dispatchEvent(new Event("input",{bubbles:true}))}bu.textContent="✓ Puesta"};
+    const top=document.createElement("p");top.className="note-src";top.style.cssText="margin:0 0 8px;background:var(--accent-soft);padding:8px 10px;border-radius:10px";top.innerHTML="<b>Próximo control sugerido:</b> "+esc(sg.f?sg.f.split("-").reverse().join("/"):"sin fecha")+" · "+esc(sg.mot)+' <a href="#" id="px-ir">ver el campo</a>';const hc=$("b-hcsec");if(hc)hc.before(top);const ir=$("px-ir");if(ir)ir.onclick=e=>{e.preventDefault();const hs=$("b-hcsec");if(hs)hs.open=true;w.scrollIntoView({behavior:"smooth",block:"center"})}}}catch(e){}}
   form.addEventListener("input",enVivo);form.addEventListener("change",enVivo);form.addEventListener("click",e=>{if(e.target.closest("[data-na-for],[data-multi] button"))setTimeout(enVivo,0)});
   if($("bd-id"))wireMic($("bd-id-mic"),$("bd-id"));wireMic($("bd-cl-mic"),$("bd-cl"));
   $("bd-go").onclick=async()=>{const st2=$("bd-st"),cl=$("bd-cl").value.trim(),idt=$("bd-id")?$("bd-id").value.trim():cl;stopRec();
