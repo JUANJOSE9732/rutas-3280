@@ -430,7 +430,7 @@ const IV={
   {b:"Exámenes",t:"do",si:A=>!PRIM(A),ref:"Res. 3280 · 4.3.2, p. 264 y 4.3.6.1.5, p. 271: todo paraclínico anormal se remite a medicina y se informa a la EAPB.",l:"Resultados de exámenes",q:"¿Trae resultados? ¿Cómo salieron?",c:["Normales|Se leen resultados de ____: dentro de lo normal.","Alterados|Resultado alterado: ____.","No trae|No trae resultados; pendientes: ____."],al:/alterad/i,am:"Paraclínico anormal: remite de inmediato a medicina e informa a la EAPB por medio documentable (Res. 3280, p. 271)."},
   {b:"Riesgo",t:"do",ref:"Res. 3280 · 4.3.6.1.2, p. 266 (Anexo 2) y 4.3.6.1.5, p. 270: escala de Herrera y Hurtado en cada trimestre.",l:"Herrera y Hurtado",q:"Escala de riesgo biopsicosocial de Herrera y Hurtado.",widget:"herrera",h:"La app marca sola lo que ya respondiste (en verde «sugerido»). Revisa, corrige y el puntaje se calcula. 3 o más puntos = alto riesgo."},
   {b:"Riesgo",t:"do",ref:"Res. 3280 · 4.3.6.1.6, p. 272 (notas 124 y 125): aspirina 75–100 mg desde la semana 12 hasta el parto si hay 1 criterio alto o 2 o más moderados.",l:"Riesgo de preeclampsia",q:"Criterios de riesgo de preeclampsia.",widget:"preecl",h:"La app marca sola lo que ya registraste («sugerido»). Revisa y corrige: la conclusión y la conducta se escriben solas."},
-  {b:"Plan",t:"do",ref:"Res. 3280 · 4.3.6.1.4, p. 269: ácido fólico hasta la semana 12; calcio 1.200 mg/día desde la semana 14; hierro a todas (no si Hb > 14 g/dl).",l:"Micronutrientes",q:"Formulación de micronutrientes.",dyn0:1,c:["Ácido fólico|Se formula ácido fólico 0,4 mg/día vía oral hasta la semana 12.","Ácido fólico 4 mg|Se formula ácido fólico 4 mg/día vía oral hasta la semana 12 por ____ (epilepsia / hijo con defecto del tubo neural).","Calcio|Se formula carbonato de calcio 1.200 mg/día vía oral desde la semana 14 (separado del hierro).","Hierro|Se formula sulfato ferroso ____ vía oral, una vez al día.","Los tres|Se formulan micronutrientes según edad gestacional: ácido fólico ____, carbonato de calcio 1.200 mg/día y sulfato ferroso ____."],dyn:()=>{const s=semPren();if(s==null)return"";const w=Math.floor(s),L=[];const alto=/epilepsia|anticonvulsivante|tubo neural/i.test(prenA("Enfermedades crónicas")+prenA("Medicamentos en este embarazo")+prenA("Complicaciones en embarazos anteriores"));if(w<=12)L.push("ácido fólico "+(alto?"4 mg/día (epilepsia o defecto del tubo neural)":"0,4 mg/día")+" hasta la semana 12");else if(alto)L.push("ácido fólico: la norma lo da hasta la semana 12; si se continúa lo decide medicina");if(w>=14)L.push("calcio 1.200 mg/día");L.push("hierro");return "Con "+w+" semanas le corresponde: "+L.join(", ")+"."+(/no ha recibido medicamentos ni suplementos/i.test(prenA("Medicamentos en este embarazo"))?" Todavía no ha recibido ninguno: inícialos hoy.":"")}},
+  {b:"Plan",t:"do",ref:"Res. 3280 · 4.3.6.1.4, p. 269: ácido fólico hasta la semana 12 (0,4 mg; 4 mg en alto riesgo de defectos del tubo neural); calcio 1.200 mg/día desde la semana 14; hierro a todas (no si Hb > 14 g/dl).",l:"Micronutrientes",q:"Formulación de micronutrientes.",dyn0:1,def:()=>microSug().txt,c:["Ácido fólico|Se formula ácido fólico 0,4 mg/día vía oral hasta la semana 12.","Ácido fólico 4 mg|Se formula ácido fólico 4 mg/día vía oral hasta la semana 12 por ____ (epilepsia / hijo con defecto del tubo neural).","Calcio|Se formula carbonato de calcio 1.200 mg/día vía oral desde la semana 14 (separado del hierro).","Hierro|Se formula sulfato ferroso 300 mg (60 mg de hierro elemental) vía oral, una tableta al día.","Los tres|Se formulan micronutrientes según edad gestacional: ácido fólico ____, carbonato de calcio 1.200 mg/día y sulfato ferroso 300 mg/día."],dyn:()=>microSug().nota},
   {b:"Plan",t:"do",si:()=>(semPren()||0)>=13,ref:"Res. 3280 · 4.3.6.1.4, p. 270 y 4.3.6.1.6, p. 272: albendazol 400 mg dosis única en 2.º o 3.er trimestre en zonas de riesgo (sin acueducto ni alcantarillado, grupos étnicos).",l:"Desparasitación",q:"Desparasitación con albendazol (una vez en el embarazo).",c:["Se entrega|Se suministra albendazol 400 mg vía oral, dosis única (segundo o tercer trimestre, zona de riesgo de geohelmintos).","Ya la recibió|Ya recibió albendazol en esta gestación el ____.","Primer trimestre|No se administra: cursa primer trimestre; se programa para el segundo trimestre."]},
   {b:"Plan",t:"do",conducta:1,ref:"Res. 3280 · 4.3.2, p. 264 (remisión inmediata a medicina ante cualquier riesgo); 4.3.6.1.3, p. 269 (adolescentes: salud mental y trabajo social).",l:"Remisiones",q:"¿A dónde la remitiste?",c:["Odontología|Se remite a odontología.","Nutrición|Se remite a nutrición.","Curso de preparación|Se inscribe en el curso de preparación para la maternidad y la paternidad.","Medicina|Se remite a medicina.","Ginecobstetricia|Se remite a ginecobstetricia.","Psicología|Se remite a psicología.","Trabajo social|Se remite a trabajo social.","Vacunación|Se remite a vacunación.","Ninguna|No requiere remisiones."]},
   {b:"Plan",t:"do",si:A=>PRIM(A)||(semPren()||0)>=28,ref:"Res. 3280 · 4.3.6.1.6, p. 272: asesoría anticonceptiva; el método elegido se registra en la historia y el carné, para iniciarlo antes del alta del parto.",l:"Anticoncepción posparto",q:"Asesoría en anticoncepción para después del parto: ¿qué método eligió?",c:["Implante|Se brinda asesoría anticonceptiva; elige implante subdérmico para el posparto. Se registra en el carné.","DIU|Se brinda asesoría anticonceptiva; elige DIU posparto. Se registra en el carné.","Inyectable trimestral|Se brinda asesoría anticonceptiva; elige inyectable trimestral. Se registra en el carné.","Ligadura|Se brinda asesoría anticonceptiva; solicita ligadura de trompas (firmar consentimiento con anticipación).","No ha decidido|Se brinda asesoría anticonceptiva; aún no decide el método."]},
@@ -458,6 +458,22 @@ const HH=[
 ];
 
 
+
+/* ---------- micronutrientes sugeridos según los datos ---------- */
+function microHb(){const q=ivFor("prenatal"),a=ivAns("prenatal");const t=Object.values(a||{}).filter(Boolean).join(" ");const m=t.match(/(?:hb|hemoglobina)\D{0,12}(\d{1,2}(?:[.,]\d{1,2})?)/i);return m?parseFloat(m[1].replace(",",".")):null}
+function microSug(){const s=semPren(),R={txt:"",nota:""};if(s==null){R.nota="Llena la edad gestacional (FUM o ecografía) para sugerir la fórmula.";return R}
+  const w=Math.floor(s),A=prenA,alto=/epilepsia|anticonvulsivante|tubo neural|espina b[ií]fida|anencefal/i.test(A("Enfermedades crónicas")+" "+A("Medicamentos en este embarazo")+" "+A("Complicaciones en embarazos anteriores")),
+   md=plano(A("Medicamentos en este embarazo")),ya=/micronutriente|acido folico|ferroso|hierro|calcio/.test(md)&&!/no ha recibido/.test(md),hb=microHb(),F=[],N=[];
+  if(w<=12)F.push("ácido fólico "+(alto?"4 mg":"0,4 mg")+" vía oral una vez al día hasta la semana 12"+(alto?" (alto riesgo de defectos del tubo neural)":""));
+  else if(!alto&&/acido folico/.test(md))N.push("Ya pasó la semana 12: suspende el ácido fólico que venía tomando.");
+  else if(alto)N.push("Pasó la semana 12: la norma ya no indica ácido fólico; si toma anticonvulsivantes, que medicina decida si lo continúa.");
+  if(w>=14)F.push("carbonato de calcio 1.200 mg vía oral al día (separado del hierro)");else N.push("El calcio se inicia en la semana 14 (le faltan "+(14-w)+" semana"+(14-w===1?"":"s")+").");
+  if(hb!=null&&hb>14)N.push("Hemoglobina "+String(hb).replace(".",",")+" g/dl (mayor de 14): no requiere hierro de rutina.");
+  else{F.push("sulfato ferroso 300 mg (60 mg de hierro elemental) vía oral una tableta al día, con jugo de fruta");if(hb!=null&&hb<11)N.push("Hemoglobina "+String(hb).replace(".",",")+" g/dl: anemia. La dosis de tratamiento la define medicina: remítela.");else if(hb==null)N.push("No encontré hemoglobina registrada: el hierro va de rutina; si al llegar el hemograma la Hb es mayor de 14 g/dl, se suspende.")}
+  const l=F.length?F.join("; ")+".":"";
+  R.txt=l?(ya?"Continúa con micronutrientes; se formula para 1 mes: ":"Se formulan micronutrientes para 1 mes: ")+l:"";
+  R.nota="Con "+w+" semanas"+(hb!=null?" y Hb "+String(hb).replace(".",",")+" g/dl":"")+" le corresponde: "+(F.length?F.map(z=>z.split(" vía")[0].split(" (")[0]).join(", "):"ningún micronutriente de rutina")+". Ya quedó escrito abajo; corrígelo si hace falta."+(N.length?" "+N.join(" "):"")+(ya?" Ya los venía tomando: verifica que no le falten.":/no ha recibido medicamentos ni suplementos/i.test(md)?" Todavía no ha recibido ninguno: inícialos hoy.":"");
+  return R}
 /* ---------- prenatal: edad gestacional, tipo de consulta, Herrera automática ---------- */
 function FO(A){const t=A("Fórmula obstétrica"),n=l=>{const m=t.match(new RegExp("\\b"+l+"\\s*(\\d+)"));return m?+m[1]:null},g=n("G"),p=n("P"),c=n("C");return {partos:p==null&&c==null?null:(p||0)+(c||0),previos:g==null?null:g-1}}
 function PRIM(A){return !/seguimiento/i.test(A("Tipo de consulta"))}
@@ -800,7 +816,7 @@ function checks(m){try{return JSON.parse(S.get(key(m,"chk"))||"{}")}catch(e){ret
 function hasDraft(m){return !!(S.get(key(m,"dict"))||S.get(key(m,"nota"))||Object.keys(checks(m)).length)}
 
 /* ---------- PANEL ---------- */
-const VERSION_APP="2026-10-09 v70";
+const VERSION_APP="2026-10-10 v71";
 function home(){
   stopRec();st.view="home";
   const rm=["precon","prenatal","parto","rn","ive"],rp=["pinf","inf","adol","juv","adul","vej"];
@@ -2609,8 +2625,7 @@ window.addEventListener("online",()=>sync(false));
 home();sync(false);
 (async()=>{try{sample=window.claude?await window.claude.use("sample"):null}catch(e){sample=null}
   if(sample&&st.view==="mod"&&st.tab==="nota"){const g=$("go"),h=$("offHint");if(g)g.textContent="Organizar nota";if(h)h.hidden=true}})();
-</script>
-<script>
+</script><script>
 if("serviceWorker" in navigator){window.addEventListener("load",()=>{navigator.serviceWorker.register("sw.js").then(reg=>{reg.update();setInterval(()=>reg.update(),30*60*1000)}).catch(()=>{})});
   let recargado=false;navigator.serviceWorker.addEventListener("controllerchange",()=>{if(recargado)return;recargado=true;
     const ocupado=document.activeElement&&/INPUT|TEXTAREA|SELECT/.test(document.activeElement.tagName);
