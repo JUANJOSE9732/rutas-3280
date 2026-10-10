@@ -447,7 +447,7 @@ function ivFor(id){if(IV[id])return IV[id];if(IV_CACHE[id])return IV_CACHE[id];c
   m.sections.forEach((s,i)=>s.items.forEach((it,j)=>{const isQ=it.startsWith("Q:"),txt=isQ?it.slice(2):it,ask=isQ||ASK.test(s.t);
     q.push({b:s.t,t:ask?"ask":"do",l:txt.length>70?txt.slice(0,67)+"…":txt,q:txt,ck:i+"."+j,ref:(m.ref?m.ref+" · ":"")+"bloque «"+s.t+"» de la guía del módulo",
       c:isQ?["No","Sí"]:ask?["Niega","Sí, refiere","Sin hallazgos"]:EXAM.test(s.t)?["Normal","Alterado","No realizado"]:["Realizado","No realizado","No aplica"],
-      al:isQ?SI:undefined,am:isQ?(/golpead|forzada|humillada/i.test(txt)?"Violencia referida: activar la ruta de atención a víctimas y notificar.":"Tamizaje positivo: derivar a la ruta de salud mental."):undefined});const _x=(typeof IVX!=="undefined")&&IVX[id+"::"+txt];if(_x){const z=q[q.length-1];if(_x.c&&_x.c.length)z.c=_x.c;if(_x.widget){z.widget=_x.widget;z.c=[]}if(_x.pauta)z.pauta=_x.pauta}}));
+      al:isQ?SI:undefined,am:isQ?(/golpead|forzada|humillada/i.test(txt)?"Violencia referida: activar la ruta de atención a víctimas y notificar.":"Tamizaje positivo: derivar a la ruta de salud mental."):undefined});const _x=(typeof IVX!=="undefined")&&IVX[id+"::"+txt];if(_x){const z=q[q.length-1];if(_x.c&&_x.c.length)z.c=_x.c;if(_x.widget){z.widget=_x.widget;z.c=[]}if(_x.campos){z.campos=_x.campos;z.c=[]}if(_x.pauta)z.pauta=_x.pauta}}));
   return IV_CACHE[id]=q}
 /* ---------- Herrera y Hurtado ---------- */
 const HH=[
@@ -640,7 +640,7 @@ const IVX={
  "parto::Durante el último mes, ¿se ha preocupado porque con frecuencia se sentía triste, deprimida o sin esperanza?":{
   pauta:{t:"Cómo preguntar",p:["A solas y con calma; normaliza: «a muchas mamás les pasa».","Si responde sí a las dos preguntas: psicología y psiquiatría (p. 287). Aplica Edimburgo si la tienes: más de 12 puntos, seguimiento por salud mental.","Si menciona querer hacerse daño o hacerle daño al bebé: no la dejes sola y remite hoy."],r:"",b:""}},
  "parto::Durante el último mes, ¿se ha preocupado porque con frecuencia sentía poco interés por realizar actividades y además no sentía que le proporcionaran placer?":{pauta:{t:"Si responde sí a las dos",p:["Dos respuestas afirmativas: psicología y psiquiatría para confirmar el diagnóstico (Res. 3280, p. 287).","Aplica Edimburgo si la tienes: más de 12 puntos, seguimiento por salud mental después del alta.","Pregunta si ha pensado en hacerse daño o hacerle daño al bebé: si es así, no la dejes sola y remite hoy."],r:"",b:""}},
- "parto::Signos vitales y TA":{c:["Normal|Signos vitales dentro de lo normal.","TA alta|TA de 140/90 o más: posible preeclampsia posparto; se remite.","Fiebre|Temperatura de 38 °C o más: se buscan focos de infección y se remite.","Taquicardia|Pulso mayor de 100: se busca sangrado o infección y se remite."],
+ "parto::Signos vitales y TA":{campos:"vitalesP",c:["Normal|Signos vitales dentro de lo normal.","TA alta|TA de 140/90 o más: posible preeclampsia posparto; se remite.","Fiebre|Temperatura de 38 °C o más: se buscan focos de infección y se remite.","Taquicardia|Pulso mayor de 100: se busca sangrado o infección y se remite."],
   pauta:{t:"Valores de alarma",p:["TA de 140/90 o más: preeclampsia posparto, remitir; 160/110 o más, urgente.","Temperatura de 38 °C o más después de las 24 horas: buscar infección.","Pulso mayor de 100 o TA sistólica menor de 90: sangrado o infección."],r:"",b:""}},
  "parto::Involución uterina y loquios":{c:["Normal|Útero involucionado acorde a los días posparto, no doloroso; loquios normales sin mal olor.","Alterado|Útero doloroso, subinvolucionado o loquios fétidos; se remite a medicina."],
   pauta:{t:"Qué es normal",p:["Al día 3 a 5 el útero está unos dedos por debajo del ombligo, firme y no duele.","Loquios rosados o cafés, en disminución, sin mal olor."],r:"",b:""}},
@@ -936,7 +936,7 @@ function checks(m){try{return JSON.parse(S.get(key(m,"chk"))||"{}")}catch(e){ret
 function hasDraft(m){return !!(S.get(key(m,"dict"))||S.get(key(m,"nota"))||Object.keys(checks(m)).length)}
 
 /* ---------- PANEL ---------- */
-const VERSION_APP="2026-10-10 v78";
+const VERSION_APP="2026-10-10 v79";
 function home(){
   stopRec();st.view="home";
   const rm=["precon","prenatal","parto","rn","ive"],rp=["pinf","inf","adol","juv","adul","vej"];
@@ -1876,6 +1876,18 @@ cvDesdeTexto=function(tipo,t){if(tipo==="vitalesG")return _cvTexto("vitales",t);
 
 
 CAMPOS.formula=[{k:"g",l:"G · Gestaciones",u:"con esta",ph:"1",n:""},{k:"p",l:"P · Partos",u:"vaginales",ph:"0",n:""},{k:"c",l:"C · Cesáreas",u:"",ph:"0",n:""},{k:"a",l:"A · Abortos",u:"",ph:"0",n:""},{k:"e",l:"E · Ectópicos",u:"",ph:"0",n:""},{k:"m",l:"M · Molas",u:"",ph:"0",n:""},{k:"v",l:"V · Hijos vivos",u:"",ph:"0",n:""}];
+
+CAMPOS.vitalesP=CAMPOS.vitales.map(c=>c.k==="tas"?Object.assign({},c,{n:"En el posparto, alarma con 140 o más o menos de 90"}):c.k==="tad"?Object.assign({},c,{n:"En el posparto, alarma con 90 o más"}):c.k==="fc"?Object.assign({},c,{n:"Alarma con más de 100"}):c.k==="t"?Object.assign({},c,{n:"Fiebre: 38 o más después de 24 h"}):c);
+const _cvBaseP=cvCalc;
+cvCalc=function(tipo,v){if(tipo!=="vitalesP")return _cvBaseP(tipo,v);
+  const r=_cvBaseP("vitales",v),s=nv(v.tas),d=nv(v.tad),fc=nv(v.fc),t=nv(v.t);r.al=r.al.filter(z=>!/^(Presión|Fiebre \()/.test(z));r.flag=r.flag||{};
+  if(s&&d){if(s>=160||d>=110){r.m.tas=r.m.tad="Severa: llevar HOY al hospital";r.flag.tas=r.flag.tad="alto";r.al.unshift("TA de 160/110 o más en el posparto: preeclampsia severa posparto; traslado hoy acompañada, con signos de alarma vigilados.")}
+   else if(s>=140||d>=90){r.m.tas=r.m.tad="Alta: preeclampsia posparto, remitir";r.flag.tas=r.flag.tad="alto";r.al.unshift("TA de 140/90 o más en el posparto: repite en reposo; pregunta por cefalea, visión borrosa y dolor en la boca del estómago; remite (la preeclampsia puede aparecer hasta 6 semanas después del parto).")}
+   else if(s<90){r.m.tas="Baja: buscar sangrado";r.flag.tas="alto"}else r.m.tas=r.m.tad="Normal"}
+  if(fc&&s){const ic=Math.round(fc/s*100)/100;if(ic>=0.9){r.m.fc="Índice de choque "+String(ic).replace(".",",")+": alarma";r.flag.fc="alto";r.al.unshift("Índice de choque (pulso ÷ TA sistólica) de "+String(ic).replace(".",",")+": 0,9 o más sugiere sangrado aunque la TA parezca normal. Revisa útero y sangrado; si se confirma, código rojo.")}}
+  if(t!=null&&t>=38){r.m.t="Fiebre: buscar infección";r.flag.t="alto";r.al.push("Fiebre de 38 °C o más: si es después de las primeras 24 horas, busca el foco (útero y loquios, orina, mamas, herida, piernas) y remite. En las primeras 24 horas, pregunta si recibió misoprostol.")}
+  return r};
+const _cvTextoP=cvDesdeTexto;cvDesdeTexto=function(tipo,t){return _cvTextoP(tipo==="vitalesP"?"vitales":tipo,t)};
 const _cvF=cvCalc;cvCalc=function(tipo,v){if(tipo!=="formula")return _cvF(tipo,v);
   const n=k=>{const x=nv(v[k]);return x==null?null:Math.round(x)},g=n("g"),p=n("p"),c=n("c"),a=n("a"),e=n("e"),mo=n("m"),vi=n("v"),o={},al=[],m={};
   if(g!=null&&[p,c,a,e,mo].every(z=>z!=null)){const sm=p+c+a+e+mo;if(g!==sm+1){o.g="alto";m.g="No cuadra: debería ser "+(sm+1)+" (P+C+A+E+M + este)"}else m.g=g===1?"Primigestante":"Cuadra"}
@@ -2166,7 +2178,7 @@ function paneEntr(){
   const ta=$("iv-a");let cv={};try{cv=JSON.parse(S.get(key(id,"cv"+i))||"{}")}catch(e){}
   const cvPinta=()=>{if(!x.campos)return;const r=cvCalc(x.campos,cv);document.querySelectorAll("[data-cv]").forEach(e=>{const k=e.dataset.cv;if(CAMPOS[x.campos].find(c=>c.k===k).auto){e.value=r.imc?coma(r.imc):""}else if(document.activeElement!==e)e.value=cv[k]||"";e.style.borderColor=r.flag[k]?"var(--miss)":"";e.style.borderWidth=r.flag[k]?"2px":"";
       const sm=document.querySelector(`[data-cvm="${k}"]`);if(sm){const t=r.m&&r.m[k];sm.textContent=t||sm.dataset.n;sm.style.color=!t?"var(--muted)":/^(Normal|Cuadra|Primigestante|Concuerda|IMC inicial|Grafícalo|Pregúntale)|ADECUADA$/.test(t)?"var(--accent)":"var(--miss)";sm.style.fontWeight=t?"700":"400"}});
-    const b=$("cv-al");b.hidden=!(x.campos==="antropoG"&&r.al.length);b.querySelector("ul").innerHTML=r.al.map(z=>`<li>${esc(z)}</li>`).join("");return r};
+    const b=$("cv-al");b.hidden=!((x.campos==="antropoG"||x.campos==="vitalesP")&&r.al.length);b.querySelector("ul").innerHTML=r.al.map(z=>`<li>${esc(z)}</li>`).join("");return r};
   let sx={};try{sx=JSON.parse(S.get(key(id,"sx"+i))||"{}")}catch(e){}
   const sxTxt=()=>x.sistemas?SISTEMAS[x.sistemas].filter(c=>(sx[c.k]||"").trim()).map(c=>c.l+": "+sx[c.k].trim().replace(/\.?$/,".")).join(" "):"";
   const sxPinta=()=>{if(!x.sistemas)return;SISTEMAS[x.sistemas].forEach(c=>{const v=(sx[c.k]||"").trim(),inp=document.querySelector(`[data-sx="${c.k}"]`),nb=document.querySelector(`[data-sxn="${c.k}"]`),rr=document.querySelector(`[data-sxr="${c.k}"]`),w=document.querySelector(`[data-sxw="${c.k}"]`);
