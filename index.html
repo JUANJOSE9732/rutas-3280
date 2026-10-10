@@ -936,7 +936,7 @@ function checks(m){try{return JSON.parse(S.get(key(m,"chk"))||"{}")}catch(e){ret
 function hasDraft(m){return !!(S.get(key(m,"dict"))||S.get(key(m,"nota"))||Object.keys(checks(m)).length)}
 
 /* ---------- PANEL ---------- */
-const VERSION_APP="2026-10-10 v88";
+const VERSION_APP="2026-10-10 v89";
 function home(){
   stopRec();st.view="home";
   const rm=["precon","prenatal","parto","rn","ive"],rp=["pinf","inf","adol","juv","adul","vej"];
@@ -1900,7 +1900,7 @@ Object.assign(IVX,{
  "rn::Examen físico inicial: permeabilidad esofágica y anal, temperatura":{c:["Normal|Examen físico inicial normal: esófago y ano permeables, sin anomalías congénitas visibles, temperatura dentro de lo normal.","Temperatura alterada|Temperatura fuera de 36,5 a 37,5 °C: señal de peligro; se corrige y se vigila.","Anomalía congénita|Se evidencia anomalía congénita; se notifica y se remite."],
   pauta:{t:"Qué revisar (p. 303)",p:["Esófago permeable: pasa la sonda sin resistencia y sin salivación excesiva.","Ano permeable: orificio en su sitio; vigila que bote meconio.","Temperatura de 36,5 a 37,5 °C. Fuera de ese rango es señal de peligro.","Sexo, paladar, extremidades, columna y defectos visibles.","Toda anomalía congénita se notifica (evento de interés en salud pública)."],r:"",b:""}},
  "rn::Antropometría":{campos:"antropoRN",c:[],
-  pauta:{t:"Qué medir (p. 303)",p:["Peso, talla, perímetro cefálico y perímetro torácico.","Compara con la edad gestacional: si no corresponde, anticipa riesgos (hipoglicemia, hipotermia)."],r:"",b:""}},
+  pauta:{t:"Qué medir (p. 303)",p:["Peso, talla, perímetro cefálico y perímetro torácico.","La app compara con los patrones de la OMS al nacer (Res. 2465 de 2016) según el sexo: z entre −1 y +1 es lo esperado; menos de −2 o más de +2 se remite.","Solo vale para bebés a término (37 a 41 semanas); los prematuros se grafican en curvas de Fenton o INTERGROWTH.","Si las medidas no corresponden con la edad gestacional, anticipa riesgos (hipoglicemia, hipotermia)."],r:"",b:""}},
  "rn::Signos vitales cada 6 horas":{campos:"vitalesRN",c:[],
   pauta:{t:"Qué es normal en el recién nacido",p:["Temperatura 36,5 a 37,5 °C (p. 303).","Frecuencia cardiaca 120 a 160 por minuto (puede bajar a 100 dormido).","Respiración 40 a 60 por minuto, sin hundir el pecho ni quejarse.","Saturación de 95 % o más.","Cada 6 horas mientras esté contigo (p. 305)."],r:"",b:""}},
  "rn::Tamizaje de cardiopatía: pulsioximetría pre y postductal a las 24 h":{widget:"pulsox",c:[],
@@ -1946,7 +1946,12 @@ Object.assign(IVX,{
 });
 /* casillas del recién nacido */
 CAMPOS.vitalesRN=[{k:"t",l:"Temperatura",u:"°C",ph:"36,8",n:"Normal 36,5 a 37,5"},{k:"fc",l:"Frec. cardiaca",u:"lpm",ph:"140",n:"Normal 120 a 160"},{k:"fr",l:"Frec. respiratoria",u:"rpm",ph:"48",n:"Normal 40 a 60"},{k:"spo2",l:"Saturación O₂",u:"%",ph:"97",n:"Normal 95 o más"}];
-CAMPOS.antropoRN=[{k:"peso",l:"Peso",u:"g",ph:"3200",n:"2.500 a 4.000 g"},{k:"talla",l:"Talla",u:"cm",ph:"50",n:""},{k:"pc",l:"Perímetro cefálico",u:"cm",ph:"34",n:""},{k:"pt",l:"Perímetro torácico",u:"cm",ph:"33",n:""}];
+CAMPOS.antropoRN=[{k:"eg",l:"Edad gestacional al nacer",u:"semanas",ph:"39",n:"Para saber si es a término"},{k:"peso",l:"Peso",u:"g",ph:"3200",n:"2.500 a 4.000 g"},{k:"talla",l:"Talla",u:"cm",ph:"50",n:""},{k:"pc",l:"Perímetro cefálico",u:"cm",ph:"34",n:""},{k:"pt",l:"Perímetro torácico",u:"cm",ph:"33",n:""}];
+/* Patrones OMS al nacer (Res. 2465 de 2016): -3, -2, -1, mediana, +1, +2, +3 DE */
+const OMS0={M:{peso:[2.1,2.5,2.9,3.3,3.9,4.4,5.0],talla:[44.2,46.1,48.0,49.9,51.8,53.7,55.6],pc:[30.7,31.9,33.2,34.5,35.7,37.0,38.3]},F:{peso:[2.0,2.4,2.8,3.2,3.7,4.2,4.8],talla:[43.6,45.4,47.3,49.1,51.0,52.9,54.7],pc:[30.3,31.5,32.7,33.9,35.1,36.2,37.4]}};
+function zOMS(v,t){if(v<=t[0])return -3-(t[0]-v)/(t[1]-t[0]);if(v>=t[6])return 3+(v-t[6])/(t[6]-t[5]);for(let i=0;i<6;i++)if(v<=t[i+1])return i-3+(v-t[i])/(t[i+1]-t[i]);return 0}
+function zTxt(z){const r=Math.round(z*10)/10;return (r<0?"−":r>0?"+":"")+coma(Math.abs(r).toFixed(1))}
+const lc1=t=>t.charAt(0).toLowerCase()+t.slice(1);
 const _cvBaseRN=cvCalc;
 cvCalc=function(tipo,v){
   if(tipo==="vitalesRN"){const t=nv(v.t),fc=nv(v.fc),fr=nv(v.fr),s=nv(v.spo2),m={},flag={},al=[],P=[];
@@ -1955,10 +1960,24 @@ cvCalc=function(tipo,v){
     if(fr!=null){P.push("FR "+fr+" rpm");if(fr>60){m.fr="Rápida: dificultad respiratoria";flag.fr="alto";al.push("Respiración de más de 60 por minuto: dificultad respiratoria. Busca tiraje y quejido; remitir.")}else if(fr<30){m.fr="Lenta: pausas";flag.fr="alto";al.push("Respiración lenta o con pausas: remitir.")}else m.fr="Normal"}
     if(s!=null){P.push("saturación "+s+" %");if(s<90){m.spo2="Baja: remitir";flag.spo2="alto";al.push("Saturación menor de 90 %: remitir (cardiopatía o problema respiratorio).")}else if(s<95)m.spo2="Límite: repetir";else m.spo2="Normal"}
     return {txt:P.length?"Signos vitales del recién nacido: "+P.join(", ")+".":"",flag,al,m}}
-  if(tipo==="antropoRN"){const p=nv(v.peso),ta=nv(v.talla),pc=nv(v.pc),pt=nv(v.pt),m={},flag={},al=[],P=[];
-    if(p!=null){const g=p<20?Math.round(p*1000):p;P.push("peso "+g+" g");if(g<2500){m.peso="Bajo peso al nacer";flag.peso="alto";al.push("Peso menor de 2.500 g: bajo peso al nacer. Riesgo de hipotermia e hipoglicemia: piel a piel, lactancia frecuente y valoración por medicina."+(g<2000?" Menor de 2.000 g: remitir.":""))}else if(g>4000){m.peso="Macrosomía";flag.peso="alto";al.push("Peso mayor de 4.000 g: riesgo de hipoglicemia; vigilar alimentación y valoración por medicina.")}else m.peso="Adecuado"}
-    if(ta!=null)P.push("talla "+coma(ta)+" cm");if(pc!=null){P.push("perímetro cefálico "+coma(pc)+" cm");if(pc<31||pc>38){m.pc="Revisar con la curva";al.push("Perímetro cefálico fuera del rango habitual (31 a 38 cm): grafícalo y valoración por medicina.")}}if(pt!=null)P.push("perímetro torácico "+coma(pt)+" cm");
-    return {txt:P.length?"Antropometría: "+P.join(", ")+".":"",flag,al,m}}
+  if(tipo==="antropoRN"){const eg=nv(v.eg),p=nv(v.peso),ta=nv(v.talla),pc=nv(v.pc),pt=nv(v.pt),m={},flag={},al=[],P=[],sx=pac()["GENERO"]==="M"?"M":pac()["GENERO"]==="F"?"F":null,T=sx?OMS0[sx]:null,term=eg==null||(eg>=37&&eg<42),sxT=sx==="M"?"niño":"niña";
+    if(eg!=null){P.push("edad gestacional al nacer "+coma(eg)+" semanas");if(eg<37){m.eg="Pretérmino"+(eg<32?" (muy prematuro)":"");flag.eg="alto";al.push("Recién nacido pretérmino ("+coma(eg)+" semanas): riesgo de hipotermia, hipoglicemia y problemas para mamar; valoración por medicina"+(eg<34?" y remisión":"")+". Sus medidas se grafican en curvas para prematuros (Fenton o INTERGROWTH), no en las de la OMS.")}else if(eg>=42){m.eg="Postérmino";flag.eg="alto";al.push("Recién nacido postérmino (42 semanas o más): vigilar hipoglicemia y signos de sufrimiento.")}else m.eg="A término"}
+    const cls=(k,val,lab,fmt)=>{if(!T||!term)return null;const z=zOMS(k==="peso"?val/1000:val,T[k]);let c,cl;
+      if(k==="pc"){c=z<-2?"Menor de −2 DE: posible microcefalia":z>2?"Mayor de +2 DE: posible macrocefalia":"Adecuado";cl=Math.abs(z)>2}
+      else if(k==="talla"){c=z<-2?"Talla baja para la edad":z<-1?"Riesgo de talla baja":"Adecuada";cl=z<-1}
+      else{c=z<-2?"Peso bajo para la edad":z<-1?"Riesgo de peso bajo":z>2?"Peso alto: valorar":"Adecuado";cl=z<-1||z>2}
+      return {z,c,cl,t:lab+" "+fmt+": z "+zTxt(z)+" ("+lc1(c)+", OMS "+sxT+")"}};
+    if(p!=null){const g=p<20?Math.round(p*1000):p;let cat=g<1000?"Extremadamente bajo peso":g<1500?"Muy bajo peso":g<2500?"Bajo peso al nacer":g>4000?"Macrosomía":"";
+      const r=cls("peso",g,"peso",g+" g");m.peso=[cat,r?"z "+zTxt(r.z)+": "+r.c:""].filter(Boolean).join(" · ")||"Peso adecuado al nacer";if(cat||(r&&r.cl))flag.peso="alto";
+      P.push(r?r.t:"peso "+g+" g"+(cat?" ("+cat.toLowerCase()+")":""));
+      if(g<2500)al.push(cat+" ("+g+" g): riesgo de hipotermia e hipoglicemia. Piel a piel, lactancia frecuente y valoración por medicina."+(g<2000?" Menor de 2.000 g: remitir.":""));
+      else if(g>4000)al.push("Macrosomía (más de 4.000 g): riesgo de hipoglicemia y trauma del parto; vigilar alimentación y valoración por medicina.")}
+    if(ta!=null){const r=cls("talla",ta,"talla",coma(ta)+" cm");m.talla=r?"z "+zTxt(r.z)+": "+r.c:"";if(r&&r.cl){flag.talla="alto";al.push("Talla con z "+zTxt(r.z)+": "+lc1(r.c)+"; verifica la medición (bebé estirado, en infantómetro) y valoración por medicina.")}P.push(r?r.t:"talla "+coma(ta)+" cm")}
+    if(pc!=null){const r=cls("pc",pc,"perímetro cefálico",coma(pc)+" cm");m.pc=r?"z "+zTxt(r.z)+": "+r.c:"";if(r&&r.cl){flag.pc="alto";al.push("Perímetro cefálico con z "+zTxt(r.z)+" ("+lc1(r.c)+"): repite la medición y remite a pediatría.")}P.push(r?r.t:"perímetro cefálico "+coma(pc)+" cm")}
+    if(pt!=null){P.push("perímetro torácico "+coma(pt)+" cm");if(pc!=null&&pt>pc+1)m.pt="Mayor que el cefálico: revisar";}
+    if(!sx&&(p!=null||ta!=null||pc!=null))al.push("Falta el sexo del bebé en sus datos: sin él no se puede comparar con los patrones de la OMS.");
+    if(eg==null&&(p!=null||ta!=null))al.push("Escribe la edad gestacional al nacer: los patrones de la OMS solo sirven para bebés a término (37 a 41 semanas).");
+    return {txt:P.length?"Antropometría al nacer: "+P.join(", ")+".":"",flag,al,m}}
   return _cvBaseRN(tipo,v)};
 const _cvTextoRN=cvDesdeTexto;cvDesdeTexto=function(tipo,t){if(tipo==="vitalesRN")return _cvTextoRN("vitales",t);if(tipo==="antropoRN")return {};return _cvTextoRN(tipo,t)};
 /* escalas por puntos: Apgar (dos tiempos) y Silverman-Anderson */
@@ -2283,7 +2302,7 @@ function paneEntr(){
   </div>`;
   const ta=$("iv-a");let cv={};try{cv=JSON.parse(S.get(key(id,"cv"+i))||"{}")}catch(e){}
   const cvPinta=()=>{if(!x.campos)return;const r=cvCalc(x.campos,cv);document.querySelectorAll("[data-cv]").forEach(e=>{const k=e.dataset.cv;if(CAMPOS[x.campos].find(c=>c.k===k).auto){e.value=r.imc?coma(r.imc):""}else if(document.activeElement!==e)e.value=cv[k]||"";e.style.borderColor=r.flag[k]?"var(--miss)":"";e.style.borderWidth=r.flag[k]?"2px":"";
-      const sm=document.querySelector(`[data-cvm="${k}"]`);if(sm){const t=r.m&&r.m[k];sm.textContent=t||sm.dataset.n;sm.style.color=!t?"var(--muted)":/^(Normal|Cuadra|Primigestante|Concuerda|IMC inicial|Grafícalo|Pregúntale)|ADECUADA$/.test(t)?"var(--accent)":"var(--miss)";sm.style.fontWeight=t?"700":"400"}});
+      const sm=document.querySelector(`[data-cvm="${k}"]`);if(sm){const t=r.m&&r.m[k];sm.textContent=t||sm.dataset.n;sm.style.color=!t?"var(--muted)":/^(Normal|Cuadra|Primigestante|Concuerda|IMC inicial|Grafícalo|Pregúntale|Adecuad|A término)|ADECUADA$/.test(t)?"var(--accent)":"var(--miss)";sm.style.fontWeight=t?"700":"400"}});
     const b=$("cv-al");b.hidden=!(["antropoG","vitalesP","vitalesRN","antropoRN"].includes(x.campos)&&r.al.length);b.querySelector("ul").innerHTML=r.al.map(z=>`<li>${esc(z)}</li>`).join("");return r};
   let sx={};try{sx=JSON.parse(S.get(key(id,"sx"+i))||"{}")}catch(e){}
   const sxTxt=()=>x.sistemas?SISTEMAS[x.sistemas].filter(c=>(sx[c.k]||"").trim()).map(c=>c.l+": "+sx[c.k].trim().replace(/\.?$/,".")).join(" "):"";
