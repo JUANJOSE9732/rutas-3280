@@ -535,15 +535,29 @@ const WIDGET={
 
 const PE_ALTO=["Trastorno hipertensivo en embarazo previo","Enfermedad renal crónica","Lupus o síndrome antifosfolípido","Diabetes tipo 1 o 2","Hipertensión crónica"],PE_MOD=["Primer embarazo","40 años o más","Intervalo entre embarazos mayor de 10 años","IMC de 35 o más en la primera consulta","Preeclampsia en la familia","Embarazo múltiple"];
 function peSugeridos(){const A=prenA,s=new Set(),pl=l=>plano(A(l)),co=pl("Complicaciones en embarazos anteriores"),en=pl("Enfermedades crónicas");
-  if(/preeclampsia|eclampsia|hellp/.test(co))s.add("a0");if(/renal/.test(en))s.add("a1");if(/autoinmune|lupus|antifosfolip/.test(en))s.add("a2");if(/diabetes/.test(en))s.add("a3");if(/hipertension cronica/.test(en))s.add("a4");
+  if(/preeclampsia|eclampsia|hellp/.test(co))s.add("a0");if(/renal/.test(en))s.add("a1");if(/autoinmune|lupus|antifosfolip/.test(en))s.add("a2");if(/diabetes/.test(en))s.add("a3");if(/hipertension cronica/.test(en))s.add("a4");{const ta=peTA(),w=semPren();if(ta&&(ta[0]>=140||ta[1]>=90)&&w!=null&&w<20)s.add("a4")}
   if(/primigestante|g1 p0 c0 a0/.test(pl("Fórmula obstétrica")))s.add("m0");const P=pac(),e=edadDe(P["FECHA NACIMIENTO"]),ed=e?e.y:(P.__edad?+P.__edad:null);if(ed!=null&&ed>=40)s.add("m1");
   if(/mas de 10 anos/.test(pl("Último parto")))s.add("m2");const an=A("Antropometría y ganancia de peso"),im=(an.match(/IMC inicial (\d+)/)||an.match(/IMC (\d+)/)||[])[1];if(im&&+im>=35)s.add("m3");
   if(/familiar de preeclampsia/.test(pl("Antecedentes familiares")))s.add("m4");if(/dos polos|gestacion multiple/.test(pl("Valoración obstétrica")))s.add("m5");return s}
+
+function peTA(){const t=prenA("Signos vitales"),m=t.match(/TA (\d{2,3})\/(\d{2,3})/);return m?[+m[1],+m[2]]:null}
+function peEvidencia(){const A=prenA,pl=l=>plano(A(l)),e={},P=pac(),ed=edadDe(P["FECHA NACIMIENTO"]),edad=ed?ed.y:(P.__edad?+P.__edad:null),w=semPren(),ta=peTA(),cut=t=>t.length>70?t.slice(0,67)+"…":t;
+  const co=A("Complicaciones en embarazos anteriores"),en=A("Enfermedades crónicas"),fo=A("Fórmula obstétrica"),up=A("Último parto"),fa=A("Antecedentes familiares"),an=A("Antropometría y ganancia de peso"),ob=A("Valoración obstétrica");
+  e.a0=co?"Registrado: "+cut(co):FO(l=>A(l)).previos===0?"Primera gestación: no aplica":"Sin dato en «Complicaciones en embarazos anteriores»";
+  const enT=en?"Registrado: "+cut(en):"Sin dato en «Enfermedades crónicas»";e.a1=e.a2=e.a3=enT;
+  e.a4=en?"Registrado: "+cut(en):"Sin dato en «Enfermedades crónicas»";if(ta)e.a4+=" · TA de hoy "+ta[0]+"/"+ta[1]+(ta[0]>=140||ta[1]>=90?(w!=null&&w<20?" antes de la semana 20 (sugiere hipertensión crónica)":""):"");
+  e.m0=fo?"Fórmula: "+fo.replace(/^Primigestante:\s*/,""):"Sin dato en «Fórmula obstétrica»";
+  e.m1=edad!=null?"Tiene "+edad+" años (de los datos de la persona)":"Sin fecha de nacimiento ni edad";
+  e.m2=up?"Registrado: "+cut(up):FO(l=>A(l)).partos===0?"Sin partos previos: no aplica":"Sin dato en «Último parto»";
+  const im=(an.match(/IMC inicial (\d+[,.]?\d*)/)||an.match(/IMC (\d+[,.]?\d*)/)||[])[1];e.m3=im?"IMC "+im+(/IMC inicial/.test(an)?" (inicial)":""):"Sin peso y talla en «Antropometría»";
+  e.m4=fa?"Registrado: "+cut(fa):"Sin dato en «Antecedentes familiares»";
+  e.m5=ob?"Registrado: "+cut(ob):"Sin dato en «Valoración obstétrica»";return e}
 function peCalc(o){const a=PE_ALTO.filter((_,i)=>o["a"+i]),m=PE_MOD.filter((_,i)=>o["m"+i]),ind=a.length>=1||m.length>=2;return {a,m,ind}}
 function peEfectivo(id){let m={};try{m=JSON.parse(S.get(key(id,"pe"))||"{}")||{}}catch(e){}const sg=peSugeridos(),o={};PE_ALTO.forEach((_,i)=>{const k="a"+i;if(m[k]===1||(m[k]!==0&&sg.has(k)))o[k]=1});PE_MOD.forEach((_,i)=>{const k="m"+i;if(m[k]===1||(m[k]!==0&&sg.has(k)))o[k]=1});return o}
 WIDGET.preecl={html:id=>{const o=peEfectivo(id),sg=peSugeridos();
-   const li=(k,t)=>`<li><input type="checkbox" id="pe${k}" data-pe="${k}" ${o[k]?"checked":""}><label for="pe${k}">${esc(t)}${sg.has(k)?' <small style="color:var(--accent);font-weight:700">sugerido</small>':""}</label></li>`;
-   return `<div class="risk"><span class="pill low" id="pe-p">Sin indicación</span></div><div class="btns" style="margin:0"><button type="button" class="btn" id="pe-sug" style="flex:none">Volver a marcar lo sugerido</button></div>
+   const ev=peEvidencia(),li=(k,t)=>`<li><input type="checkbox" id="pe${k}" data-pe="${k}" ${o[k]?"checked":""}><label for="pe${k}">${esc(t)}${sg.has(k)?' <small style="color:var(--accent);font-weight:700">sugerido</small>':""}<br><small class="note-src" style="font-weight:400">${esc(ev[k]||"")}</small></label></li>`;
+   const ta=peTA(),w=semPren(),alta=ta&&(ta[0]>=140||ta[1]>=90);
+   return `${alta&&(w==null||w>=20)?`<div class="box miss"><h3>Presión alta HOY: ${ta[0]}/${ta[1]}</h3><p style="margin:0">${w==null?"Sin edad gestacional registrada. ":"Con "+Math.floor(w)+" semanas, "}esto no es un criterio de riesgo: es sospecha de preeclampsia actual. ${ta[0]>=160||ta[1]>=110?"Con ≥ 160/110 llévala HOY a un servicio hospitalario.":"Repite la toma en reposo; si se confirma, remítela hoy a un servicio hospitalario (Res. 3280, p. 271)."} Pregunta por dolor de cabeza, ver luces, dolor en la boca del estómago e hinchazón.</p></div>`:""}<div class="risk"><span class="pill low" id="pe-p">Sin indicación</span></div><div class="btns" style="margin:0"><button type="button" class="btn" id="pe-sug" style="flex:none">Volver a marcar lo sugerido</button></div>
    <ul class="hh"><li class="grp">Criterios de ALTO riesgo (basta 1)</li>${PE_ALTO.map((t,i)=>li("a"+i,t)).join("")}<li class="grp">Criterios MODERADOS (se necesitan 2)</li>${PE_MOD.map((t,i)=>li("m"+i,t)).join("")}</ul><div class="box warn" id="pe-c"></div>`},
  txt:id=>{const o=peEfectivo(id);const r=peCalc(o),w=semPren();if(!r.a.length&&!r.m.length)return"Sin criterios de riesgo para preeclampsia.";
    return "Criterios de riesgo de preeclampsia: "+(r.a.length?"alto: "+r.a.join(", ").toLowerCase()+". ":"")+(r.m.length?"moderados: "+r.m.join(", ").toLowerCase()+". ":"")+(r.ind?"Cumple indicación de ácido acetilsalicílico 75–100 mg/día"+(w!=null&&w<12?" desde la semana 12":"")+" hasta el parto (Res. 3280); se remite a medicina para su formulación.":"No cumple indicación de ácido acetilsalicílico (1 criterio moderado); vigilancia de TA en cada control.")},
@@ -786,7 +800,7 @@ function checks(m){try{return JSON.parse(S.get(key(m,"chk"))||"{}")}catch(e){ret
 function hasDraft(m){return !!(S.get(key(m,"dict"))||S.get(key(m,"nota"))||Object.keys(checks(m)).length)}
 
 /* ---------- PANEL ---------- */
-const VERSION_APP="2026-10-09 v69";
+const VERSION_APP="2026-10-09 v70";
 function home(){
   stopRec();st.view="home";
   const rm=["precon","prenatal","parto","rn","ive"],rp=["pinf","inf","adol","juv","adul","vej"];
