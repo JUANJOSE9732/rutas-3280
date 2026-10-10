@@ -936,7 +936,7 @@ function checks(m){try{return JSON.parse(S.get(key(m,"chk"))||"{}")}catch(e){ret
 function hasDraft(m){return !!(S.get(key(m,"dict"))||S.get(key(m,"nota"))||Object.keys(checks(m)).length)}
 
 /* ---------- PANEL ---------- */
-const VERSION_APP="2026-10-10 v85";
+const VERSION_APP="2026-10-10 v86";
 function home(){
   stopRec();st.view="home";
   const rm=["precon","prenatal","parto","rn","ive"],rp=["pinf","inf","adol","juv","adul","vej"];
@@ -977,7 +977,7 @@ function home(){
   </section>
   ${drafts.length?`<section><p class="lab">Borradores guardados</p><div class="drafts">${drafts.map(d=>`<button data-mod="${d}"><span>${esc(M[d].title)}</span><span>Continuar →</span></button>`).join("")}</div></section>`:""}
   ${agendaHTML()}
-  <section class="route"><div class="route-head"><h2>Pacientes</h2><span>${Object.keys(pacientes()).length} registrados</span></div><div class="tiles"><button class="tile pc" id="t-pacs"><b>Ver pacientes</b><small>Historial, próximos controles y pendientes de cada persona</small></button></div></section>
+  <section class="route"><div class="route-head"><h2>Pacientes</h2><span>${Object.keys(pacientes()).length} registrados</span></div><div class="tiles"><button class="tile pc" id="t-pacs"><b>Ver pacientes</b><small>Historial, próximos controles y pendientes de cada persona</small></button><button class="tile pc" id="t-vbase"><b>Ver base de datos</b><small>${registrosTodos().length} registros guardados en el celular, como la hoja de Google</small></button></div></section>
   <section class="route"><div class="route-head"><h2>Ruta materno perinatal</h2><span>RIAMP</span></div><div class="tiles">${rm.map(tile).join("")}</div></section>
   <section class="route"><div class="route-head"><h2>Promoción y mantenimiento</h2><span>RPMS · cursos de vida</span></div><div class="tiles">${rp.map(tile).join("")}</div></section>
   <section class="route"><div class="route-head"><h2>Procedimientos y consejerías</h2></div><div class="tiles">${tile("proc")}</div></section>
@@ -985,7 +985,7 @@ function home(){
   <p class="foot" id="verlbl">Versión ${VERSION_APP}</p>
   <p class="foot">Contenido según la Resolución 3280 de 2018, con IVE actualizada a la Sentencia C-055 de 2022 y la Resolución 051 de 2023. Las semanas de vacunas se confirman con el lineamiento PAI vigente. Lo que dictas queda solo en este celular hasta que lo borres. Organizar la nota necesita internet.</p>`;
   document.querySelectorAll("[data-mod]").forEach(b=>b.onclick=()=>openMod(b.dataset.mod));
-  $("t-base").onclick=()=>{baseEdit=null;base({});window.scrollTo(0,0)};$("t-pacs").onclick=verPacientes;
+  $("t-base").onclick=()=>{baseEdit=null;base({});window.scrollTo(0,0)};$("t-pacs").onclick=verPacientes;$("t-vbase").onclick=verBase;
   document.querySelectorAll("[data-ag]").forEach(b=>b.onclick=()=>{if(b.dataset.armed!=="1"){b.dataset.armed="1";b.textContent="¿Seguro? Toca otra vez";return}setAgenda(agenda().map(x=>x.id===b.dataset.ag?Object.assign(x,{ok:hoy()}):x));home()});
   ["f-edad","f-uni","f-sexo","f-est"].forEach(i=>$(i).addEventListener("input",sugerir));
   const rapido=()=>{const P=pac(),v=parseFloat($("f-edad").value),u=$("f-uni").value;if(Number.isFinite(v)&&u==="a")P.__edad=String(v);else delete P.__edad;if(!P["GENERO"]||P.__sxr)Object.assign(P,{GENERO:$("f-sexo").value==="m"?"M":"F",__sxr:1});setPac(P)};
@@ -2592,6 +2592,40 @@ function finHTML(id){const r=S.get(key(id,"fin")),ff=s=>s?s.split("-").reverse()
 function finWire(id){const b=$("fin-go");if(!b)return;b.onclick=()=>{const r=finalizarConsulta(id);if(r.err){$("fin-st").textContent=r.err;return}const box=$("fin");box.outerHTML=finHTML(id);finWire(id);$("fin-st").textContent="Listo: guardada en Pacientes."};
   const v=$("fin-ver");if(v)v.onclick=()=>{const P=pac();verPaciente(pkey(P))}}
 function estadoP(x){const u=x.aten[x.aten.length-1];if(!u)return null;const px=[...x.aten].reverse().find(a=>a.prox);if(!px)return null;const cumplido=x.aten.some(a=>a.fecha>px.fecha);if(cumplido)return null;return Object.assign({px:px.prox,mot:px.mot},semaforo(px.prox)||{})}
+/* ---------- Base de datos local: ver lo guardado en el celular como tabla ---------- */
+function verBase(){stopRec();st.view="vbase";const ff=s=>/^\d{4}-\d{2}-\d{2}$/.test(s||"")?s.split("-").reverse().join("/"):(s||"");
+  const t=registrosTodos(),pend=new Set(cola().map(r=>r.id)),coms=[...new Set(t.map(r=>r.comunidad||"SIN COMUNIDAD"))].sort(),COLS=colsDe();
+  const CORTAS=[["FECHA","Fecha"],["NOMBRE COMPLETO","Nombre"],["DOCUMENTO ID.","Documento"],["EDAD","Edad"],["GENERO","Sexo"],["__com","Comunidad"],["CURSO DE VIDA","Curso de vida"],["FECHA PROXIMO CONTROL","Próximo control"],["SEMAFORO PROXIMO CONTROL","Semáforo"],["__est","Estado"]];
+  let fil={q:"",c:"",e:"",todas:false};try{fil=Object.assign(fil,JSON.parse(localStorage.getItem("dn2_vbase_f")||"{}"))}catch(e){}
+  $("app").innerHTML=`<div class="top"><button class="back" id="back">← Rutas</button><span class="tag pc">Base de datos</span></div>
+  <header><h1>Base de datos en este celular</h1><p class="sub">${t.length} registros guardados aquí (${t.length-pend.size} enviados a la hoja, ${pend.size} pendientes por enviar). Es la copia de respaldo: si falla Google Sheets, aquí está todo y se puede exportar a Excel.</p></header>
+  <input id="vb-q" placeholder="Buscar por nombre, documento, comunidad o cualquier dato" value="${esc(fil.q)}" style="margin-bottom:8px">
+  <div class="pgrid" style="margin-bottom:8px"><label class="bfl"><span>Comunidad</span><select id="vb-c"><option value="">Todas</option>${coms.map(c=>`<option ${fil.c===c?"selected":""}>${esc(c)}</option>`).join("")}</select></label>
+   <label class="bfl"><span>Estado</span><select id="vb-e"><option value="">Todos</option><option value="p" ${fil.e==="p"?"selected":""}>Pendientes por enviar</option><option value="s" ${fil.e==="s"?"selected":""}>Enviados</option><option value="v" ${fil.e==="v"?"selected":""}>Control vencido o próximo</option></select></label></div>
+  <label class="check" style="margin-bottom:8px"><input type="checkbox" id="vb-all" ${fil.todas?"checked":""}> Ver todas las columnas (en el orden de la hoja)</label>
+  <div class="btns" style="margin-bottom:8px"><button class="btn" id="vb-xls">Exportar a Excel</button><button class="btn" id="vb-sync">Enviar pendientes</button></div><p class="note-src" id="vb-st" style="margin:0 0 8px"></p>
+  <div id="vb-tab" style="overflow:auto;max-height:70vh;border:1px solid var(--line);border-radius:12px"></div><div id="vb-det"></div>`;
+  const pinta=()=>{const q=plano(fil.q),cols=fil.todas?COLS.map(k=>[k,k]).concat([["__est","ESTADO"]]):CORTAS;
+    const filas=t.filter(r=>{const d=r.datos,com=r.comunidad||"SIN COMUNIDAD";if(fil.c&&com!==fil.c)return false;const env=!pend.has(r.id);if(fil.e==="p"&&env)return false;if(fil.e==="s"&&!env)return false;
+      if(fil.e==="v"){const s=semTxt(d,t);if(s!=="VENCIDO"&&s!=="PRÓXIMO")return false}
+      return !q||plano(com+" "+Object.values(d).join(" ")).includes(q)}).sort((a,b)=>(b.datos.FECHA||"")<(a.datos.FECHA||"")?-1:1);
+    const val=(r,k)=>k==="__com"?(r.comunidad||""):k==="__est"?(pend.has(r.id)?"Pendiente":"Enviado"):k==="SEMAFORO PROXIMO CONTROL"?semTxt(r.datos,t):ff(r.datos[k]==null?"":String(r.datos[k]));
+    const col=v=>v==="VENCIDO"?"background:#fde2e1;color:#8a1c14":v==="PRÓXIMO"?"background:#fff4cc;color:#7a5a00":v==="AL DÍA"||v==="CUMPLIDO"?"background:#e3f4e8;color:#1d5e33":v==="Pendiente"?"background:#fff4cc;color:#7a5a00":"";
+    $("vb-tab").innerHTML=filas.length?`<table style="border-collapse:collapse;font-size:.82rem;min-width:100%"><thead><tr>${cols.map(([k,l])=>`<th style="position:sticky;top:0;background:var(--accent-soft);text-align:left;padding:6px 8px;white-space:nowrap;border-bottom:1px solid var(--line)">${esc(l)}</th>`).join("")}</tr></thead><tbody>${filas.map(r=>`<tr data-vr="${esc(r.id)}" style="cursor:pointer">${cols.map(([k])=>{const v=val(r,k);return `<td style="padding:6px 8px;border-bottom:1px solid var(--line);white-space:nowrap;max-width:260px;overflow:hidden;text-overflow:ellipsis;${col(v)}">${esc(v)}</td>`}).join("")}</tr>`).join("")}</tbody></table>`:`<p class="note-src" style="padding:12px;margin:0">${t.length?"Ningún registro con ese filtro.":"Todavía no hay registros guardados en este celular. Se guardan al tocar «Guardar y enviar» en la Base."}</p>`;
+    $("vb-st").textContent=filas.length+" de "+t.length+" registros. Toca una fila para ver el registro completo.";
+    document.querySelectorAll("[data-vr]").forEach(tr=>tr.onclick=()=>{const r=t.find(z=>z.id===tr.dataset.vr);if(!r)return;const d=r.datos;
+      $("vb-det").innerHTML=`<section class="tool" style="margin-top:10px"><h3>${esc(d["NOMBRE COMPLETO"]||"(sin nombre)")} · ${esc(ff(d.FECHA||""))}</h3><p class="note-src" style="margin:0">${esc(r.comunidad||"")} · ${pend.has(r.id)?"Pendiente por enviar":"Enviado a la hoja"} · registro ${esc(r.id)}</p>
+        <div style="display:grid;grid-template-columns:minmax(120px,40%) 1fr;gap:2px 10px;margin-top:8px;font-size:.88rem">${COLS.filter(k=>k==="SEMAFORO PROXIMO CONTROL"||(d[k]!=null&&d[k]!=="")).map(k=>`<span style="color:var(--muted)">${esc(k)}</span><span>${esc(k==="SEMAFORO PROXIMO CONTROL"?semTxt(d,t):ff(String(d[k])))}</span>`).join("")}</div>
+        <div class="btns" style="margin-top:8px">${pend.has(r.id)?'<button class="btn" id="vb-ed">Editar antes de enviar</button>':""}${d["NOMBRE COMPLETO"]||d["DOCUMENTO ID."]?'<button class="btn" id="vb-pac">Ver ficha del paciente</button>':""}</div></section>`;
+      if($("vb-ed"))$("vb-ed").onclick=()=>{baseEdit=r.id;base();window.scrollTo(0,0)};
+      if($("vb-pac"))$("vb-pac").onclick=()=>{const ident={};ID_KEYS.forEach(k=>{if(d[k]&&d[k]!=="N/A")ident[k]=d[k]});const k=pkey(ident);if(pacientes()[k])verPaciente(k);else $("vb-st").textContent="Esta persona todavía no tiene ficha en Pacientes."};
+      $("vb-det").scrollIntoView({behavior:"smooth",block:"start"})})};
+  const guarda=()=>{try{localStorage.setItem("dn2_vbase_f",JSON.stringify(fil))}catch(e){}pinta()};
+  $("vb-q").oninput=e=>{fil.q=e.target.value;guarda()};$("vb-c").onchange=e=>{fil.c=e.target.value;guarda()};$("vb-e").onchange=e=>{fil.e=e.target.value;guarda()};$("vb-all").onchange=e=>{fil.todas=e.target.checked;guarda()};
+  $("back").onclick=home;
+  $("vb-xls").onclick=async()=>{const r=await exportarExcel();$("vb-st").textContent=r==="vacio"?"No hay registros.":r==="ok"?"Listo: el Excel quedó descargado.":r==="no"?"Descarga cancelada.":"Aquí no se pudo descargar; ábrelo desde el celular."};
+  $("vb-sync").onclick=async()=>{$("vb-st").textContent=conf().url?"Enviando…":"Falta configurar la Conexión en la Base.";if(conf().url){await sync(true);verBase()}};
+  pinta();window.scrollTo(0,0)}
 function verPacientes(){stopRec();st.view="pacs";const ps=Object.entries(pacientes()).sort((a,b)=>(a[1].n||0)-(b[1].n||0)),ff=s=>s?s.split("-").reverse().join("/"):"";
   $("app").innerHTML=`<div class="top"><button class="back" id="back">← Rutas</button><span class="tag pc">Pacientes</span></div>
   <header><h1>Pacientes</h1><p class="sub">${ps.length} registrados en este celular. Cada consulta finalizada (o enviada a la base) se guarda aquí con su nota, sus próximas citas y sus pendientes.</p></header>
