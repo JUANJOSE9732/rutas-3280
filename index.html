@@ -936,7 +936,7 @@ function checks(m){try{return JSON.parse(S.get(key(m,"chk"))||"{}")}catch(e){ret
 function hasDraft(m){return !!(S.get(key(m,"dict"))||S.get(key(m,"nota"))||Object.keys(checks(m)).length)}
 
 /* ---------- PANEL ---------- */
-const VERSION_APP="2026-10-10 v90";
+const VERSION_APP="2026-10-10 v91";
 function home(){
   stopRec();st.view="home";
   const rm=["precon","prenatal","parto","rn","ive"],rp=["pinf","inf","adol","juv","adul","vej"];
@@ -2581,12 +2581,39 @@ function pendGrupos(x,primero,soloAbiertos){const ff=s=>s?s.split("-").reverse()
   x.pend.filter(z=>!soloAbiertos||!z.ok).forEach(z=>{const k=z.reg||"_";if(!G.has(k))G.set(k,{k,cons:z.cons||"Otros pendientes",fe:z.desde||"",it:[]});G.get(k).it.push(z)});
   return [...G.values()].sort((a,b)=>a.k===primero?-1:b.k===primero?1:(a.fe<b.fe?1:-1)).map(g=>({t:g.cons+" · "+ff(g.fe),it:g.it.sort((p,q)=>(q.cita||0)-(p.cita||0)||((p.f||"9")<(q.f||"9")?-1:1))}))}
 function pendItemHTML(z,check){const ff=s=>s?s.split("-").reverse().join("/"):"";return `<label style="display:flex;gap:10px;align-items:flex-start;margin:4px 0;${z.ok?"opacity:.55;text-decoration:line-through":""}">${check?`<input type="checkbox" style="width:20px;height:20px;flex:none;margin-top:2px" data-pz="${z.id}" ${z.ok?"checked":""}>`:"<span>•</span>"}<span>${z.cita?"📅 ":""}${z.f?"<b>"+esc(ff(z.f))+"</b> · ":""}${esc(z.t)}${z.ok?` <small class="note-src">(${z.auto?esc(z.auto):"hecho"} ${esc(ff(z.ok))})</small>`:""}</span></label>`}
+/* ---------- Próximo control sugerido según la Res. 3280, por módulo ---------- */
+function mesesEntre(a,b){const x=pD(a),y=pD(b);if(!x||!y)return null;let m=(y.getUTCFullYear()-x.getUTCFullYear())*12+(y.getUTCMonth()-x.getUTCMonth());if(y.getUTCDate()<x.getUTCDate())m--;return m}
+function isoMeses(iso,n){const d=pD(iso);if(!d)return"";d.setUTCMonth(d.getUTCMonth()+n);return d.toISOString().slice(0,10)}
+function proxNorma(mod,fe){const P=pac(),fn=P["FECHA NACIMIENTO"]&&pD(P["FECHA NACIMIENTO"])?P["FECHA NACIMIENTO"]:"",mo=fn?mesesEntre(fn,fe):null,y=mo!=null?Math.floor(mo/12):(P.__edad?+P.__edad:null),T=M[mod]?M[mod].title.toUpperCase():"",
+  R=(f,mot,por)=>({f:f&&f<fe?isoMas(fe,14):f,mot,por}),cum=a=>fn?isoMeses(fn,a*12):(y!=null?isoMeses(fe,(a-y)*12):"");
+  const txt=plano(ivCompose(mod)||"");
+  switch(mod){
+   case"precon":return R(isoMas(fe,30),"PRECONCEPCIONAL: CONTROL","Control al mes, con resultados de exámenes (estándar acordado).");
+   case"prenatal":{const s=semPren();if(s==null)return R(isoMas(fe,30),"PRENATAL: CONTROL","Mensual hasta la semana 36 (Res. 3280, 4.3.5).");const d=s>=34?15:30;return R(isoMas(fe,d),"PRENATAL: CONTROL",d===30?"Mensual hasta la semana 36 (4.3.5).":"Cada 15 días desde la semana 36; semanas 36, 38 y 40 por medicina (4.3.5).")}
+   case"parto":return R(isoMas(fe,3),"CONTROL POSPARTO","Control del puerperio y del recién nacido entre el día 3 y 5 (4.8 y 4.10.4.4).");
+   case"rn":{const n=fn||fe,d=Math.round((pD(fe)-pD(n))/864e5);return d<3?R(isoMas(n,3),"CONTROL RECIÉN NACIDO","Control del recién nacido entre el día 3 y 5 de vida (4.10.4.4)."):R(isoMeses(n,1),"PRIMERA INFANCIA: VALORACIÓN 1 MES","Primera valoración integral de primera infancia al mes de vida (RPMS, cuadro 1).")}
+   case"ive":return R(isoMas(fe,10),"IVE: CONTROL OPCIONAL","Control opcional a 1 o 2 semanas si ella lo desea; si inició método, el control es el del método (4.2.5.13).");
+   case"pinf":{const W=[[1,"1 mes"],[2,"2 a 3 meses"],[4,"4 a 5 meses"],[6,"6 a 8 meses"],[9,"9 a 11 meses"],[12,"12 a 18 meses"],[19,"19 a 23 meses"],[24,"24 a 29 meses"],[30,"30 a 35 meses"],[36,"3 años"],[48,"4 años"],[60,"5 años"]];
+     if(mo==null)return R(isoMeses(fe,3),"PRIMERA INFANCIA: VALORACIÓN","Falta la fecha de nacimiento para calcular la próxima valoración (RPMS, cuadro 1).");const w=W.find(x=>x[0]>mo);
+     return w?R(isoMeses(fn,w[0]),"PRIMERA INFANCIA: VALORACIÓN "+w[1].toUpperCase(),"Siguiente valoración integral a los "+w[1]+" (RPMS, cuadro 1: medicina 1, 4-5, 12-18, 24-29 meses, 3 y 5 años; enfermería 2-3, 6-8, 9-11, 19-23, 30-35 meses y 4 años)."):R(cum(6),"INFANCIA: VALORACIÓN 6 AÑOS","Pasa a infancia: valoración a los 6 años (RPMS, cuadro 2).")}
+   case"inf":{if(y==null)return R(isoMeses(fe,12),"INFANCIA: VALORACIÓN","Anual (RPMS, cuadro 2).");const a=y+1;return R(cum(a),(a<=11?"INFANCIA":"ADOLESCENCIA")+": VALORACIÓN "+a+" AÑOS","Valoración anual de los 6 a los 11 años, alternando medicina (6, 8, 10) y enfermería (7, 9, 11) (RPMS, cuadro 2).")}
+   case"adol":{if(y==null)return R(isoMeses(fe,12),"ADOLESCENCIA: VALORACIÓN","Anual (RPMS, cuadro 3).");const a=y+1;return a<=17?R(cum(a),"ADOLESCENCIA: VALORACIÓN "+a+" AÑOS","Valoración anual de los 12 a los 17 años, alternando medicina (12, 14, 16) y enfermería (13, 15, 17) (RPMS, cuadro 3)."):R(cum(21),"JUVENTUD: VALORACIÓN","Pasa a juventud: valoraciones hacia los 21 y 26 años (RPMS, cuadro 4).")}
+   case"juv":{const a=y==null?null:[21,26,29].find(z=>z>y);if(a==null)return R(isoMeses(fe,60),"JUVENTUD: VALORACIÓN","Dos valoraciones en la juventud, hacia los 21 y 26 años (RPMS, cuadro 4).");return R(cum(a),(a<29?"JUVENTUD":"ADULTEZ")+": VALORACIÓN "+a+" AÑOS",a<29?"Dos valoraciones en la juventud, hacia los 21 y 26 años (RPMS, cuadro 4).":"Pasa a adultez: una valoración en cada grupo de edad desde los 29 años (RPMS, cuadro 5).")}
+   case"adul":{const B=[29,35,40,45,50,53,56,60],a=y==null?null:B.find(z=>z>y);if(a==null)return R(isoMeses(fe,60),"ADULTEZ: VALORACIÓN","Una valoración en cada grupo de edad: 29-34, 35-39, 40-44, 45-49, 50-52, 53-55, 56-59 (RPMS, cuadro 5).");return R(cum(a),(a<60?"ADULTEZ":"VEJEZ")+": VALORACIÓN "+a+" AÑOS","Una valoración en cada grupo de edad: 29-34, 35-39, 40-44, 45-49, 50-52, 53-55, 56-59 años (RPMS, cuadro 5); la próxima al cumplir "+a+".")}
+   case"vej":return R(isoMeses(fe,36),"VEJEZ: VALORACIÓN","Una valoración cada 3 años (RPMS, cuadro 6).");
+   case"proc":{if(/implante/.test(txt))return R(isoMas(fe,30),"ANTICONCEPCIÓN: CONTROL IMPLANTE","Implante: control al mes, a los 3 meses y luego cada año (cuadro 2 de anticoncepción).");
+     if(/\bdiu\b|dispositivo/.test(txt))return R(isoMas(fe,30),"ANTICONCEPCIÓN: CONTROL DIU","DIU de intervalo: control al mes, a los 6 meses y luego cada año (cuadro 2).");
+     if(/inyectable|medroxiprogesterona|oral|pastilla|hormonal/.test(txt))return R(isoMas(fe,90),"ANTICONCEPCIÓN: CONTROL","Hormonales: control a los 3 meses y luego cada año (cuadro 2).");
+     if(/ligadura|pomeroy|vasectom|esterilizaci/.test(txt))return R(isoMas(fe,7),"ANTICONCEPCIÓN: CONTROL POSQUIRÚRGICO","Esterilización: control a la semana (cuadro 2).");
+     return R(isoMas(fe,365),"ANTICONCEPCIÓN: CONTROL","Métodos naturales o condón: control cada año (cuadro 2).")}}
+  return null}
 /* ---------- Finalizar consulta: guarda en Pacientes con citas y pendientes ---------- */
 function isoMas(iso,n){const d=pD(iso)||pD(hoy());d.setUTCDate(d.getUTCDate()+n);return d.toISOString().slice(0,10)}
 function citasDe(mod,fe){const q=ivFor(mod),a=ivAns(mod),A=l=>{const i=q.findIndex(z=>z.l===l||z.l.startsWith(l));return i>=0?(a[i]||""):""},C=[],add=(t,f,mot)=>C.push({t,f,mot});
   const pc=A("Próximo control"),pf=isoDeTxt(pc);
   if(pf)add("Próxima cita: "+pc.replace(/\s+/g," ").slice(0,140),pf,M[mod].title.toUpperCase()+": CONTROL");
   else if(/brigada/i.test(pc))add("Próxima cita: control en la próxima brigada (fecha por definir)","",M[mod].title.toUpperCase()+": CONTROL");
+  if(!pf&&!/brigada/i.test(pc)&&!["parto","rn"].includes(mod)){const sg=proxNorma(mod,fe);if(sg&&sg.f)add("Próxima cita sugerida por la norma: "+sg.por,sg.f,sg.mot)}
   if(mod==="parto"){add("Control posparto de la madre (día 3 a 5)",isoMas(fe,3),"CONTROL POSPARTO");add("Control del recién nacido (día 3 a 5)",isoMas(fe,3),"CONTROL RECIÉN NACIDO");
     const me=plano(A("Método anticonceptivo antes del alta"));
     if(/implante/.test(me))add("Control del implante (al mes)",isoMas(fe,30),"CONTROL ANTICONCEPCIÓN");
@@ -2775,7 +2802,8 @@ function extraerLocal(id,txt,f){const o={},M1=(re,i=1)=>{const m=txt.match(re);r
   if(/m[eé]todo|planific|implante|inyectable|DIU|anticonc/i.test(txt)&&["precon","parto","adol","juv","adul"].includes(id)){o["PLANIFICACION FAMILIAR O CONTROL"]="SI";o["PLANIFICACION FAMILIAR O CONTROL FECHA ULTIMO CONTROL"]=f}
   {const qq=ivFor(id),aa=ivAns(id),k=qq.findIndex(z=>z.l==="Próximo control"),t=k>=0?(aa[k]||""):"";
    let px=isoDeTxt(t);if(!px){const n=t.match(/en\s+(\d+|un|una|dos|tres|cuatro)\s+(semana|mes)/i);if(n){const w={un:1,una:1,dos:2,tres:3,cuatro:4}[n[1].toLowerCase()]||+n[1];const iso=d=>{const x=pD(f);x.setUTCDate(x.getUTCDate()+d);return x.toISOString().slice(0,10)};px=iso(/mes/i.test(n[2])?w*30:w*7)}}
-   if(px){o["FECHA PROXIMO CONTROL"]=px;o["MOTIVO PROXIMO CONTROL"]=(m.title+": "+(/lectura/i.test(t)?"lectura de exámenes":"control")).toUpperCase()}}
+   if(px){o["FECHA PROXIMO CONTROL"]=px;o["MOTIVO PROXIMO CONTROL"]=(m.title+": "+(/lectura/i.test(t)?"lectura de exámenes":"control")).toUpperCase()}
+   else if(!/brigada/i.test(t)){const sg=proxNorma(id,f);if(sg&&sg.f){o["FECHA PROXIMO CONTROL"]=sg.f;o["MOTIVO PROXIMO CONTROL"]=sg.mot}}}
   {const qq=ivFor(id),aa=ivAns(id),A=l=>{const k=qq.findIndex(z=>z.l===l);return k>=0?(aa[k]||""):""};
    const en=A("Enfermedades");if(/^\s*niega/i.test(en))["HTA","DIABETES","EPOC","CANCER","HIPER O HIPOTIROIDISMO"].forEach(k=>o[k]="NO");
    else if(en){if(/hipertens/i.test(en))o["HTA"]="SI";if(/diabetes/i.test(en))o["DIABETES"]="SI";if(/tiroid/i.test(en))o["HIPER O HIPOTIROIDISMO"]="SI"}
@@ -2911,6 +2939,7 @@ function base(pref,opts){
   const enVivo=()=>{if($("b-miss").hidden)return;const {falt}=revisar(form,false);const fk=new Set(falt.map(f=>f.k));
     form.querySelectorAll(".falta").forEach(w=>{if(!fk.has(w.dataset.wrap))w.classList.remove("falta")});mostrarFaltan(falt);
     if(!falt.length)$("b-st").textContent="Ya está completo. Toca Guardar y enviar."};
+  if(MD){try{const sg=proxNorma(MD,(form.querySelector('[data-f="FECHA"]')||{}).value||hoy()),w=form.querySelector('[data-wrap="FECHA PROXIMO CONTROL"]');if(sg&&w){const p=document.createElement("p");p.className="note-src";p.style.cssText="grid-column:1/-1;margin:2px 0 0;color:var(--accent)";p.textContent="Sugerido por la norma: "+(sg.f?sg.f.split("-").reverse().join("/")+" — ":"")+sg.por;w.after(p)}}catch(e){}}
   form.addEventListener("input",enVivo);form.addEventListener("change",enVivo);form.addEventListener("click",e=>{if(e.target.closest("[data-na-for],[data-multi] button"))setTimeout(enVivo,0)});
   if($("bd-id"))wireMic($("bd-id-mic"),$("bd-id"));wireMic($("bd-cl-mic"),$("bd-cl"));
   $("bd-go").onclick=async()=>{const st2=$("bd-st"),cl=$("bd-cl").value.trim(),idt=$("bd-id")?$("bd-id").value.trim():cl;stopRec();
