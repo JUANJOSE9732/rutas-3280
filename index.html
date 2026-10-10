@@ -936,7 +936,7 @@ function checks(m){try{return JSON.parse(S.get(key(m,"chk"))||"{}")}catch(e){ret
 function hasDraft(m){return !!(S.get(key(m,"dict"))||S.get(key(m,"nota"))||Object.keys(checks(m)).length)}
 
 /* ---------- PANEL ---------- */
-const VERSION_APP="2026-10-10 v105";
+const VERSION_APP="2026-10-10 v106";
 function home(){
   stopRec();st.view="home";
   const rm=["precon","prenatal","parto","rn","ive"],rp=["pinf","inf","adol","juv","adul","vej"];
@@ -3162,6 +3162,8 @@ function base(pref,opts){
   const form=$("bform");
   const recompute=()=>{const v=k=>{const e=form.querySelector(`[data-f="${CSS.escape(k)}"]`);return e?e.value:""};const set=(k,x)=>{const e=form.querySelector(`[data-f="${CSS.escape(k)}"]`);if(e)e.value=x};
     const ed=edadDe(v("FECHA NACIMIENTO"),v("FECHA"));
+    {const fi=form.querySelector('[data-f="FECHA NACIMIENTO"]');if(fi){let h=$("fn-edad");if(!h){h=document.createElement("p");h.id="fn-edad";h.className="note-src";h.style.cssText="margin:4px 0 0;font-weight:600;color:var(--accent)";const lab=fi.closest("label")||fi.parentElement;lab.appendChild(h)}
+      h.textContent=ed?(ed.y>=1?ed.y+(ed.y===1?" año":" años")+(ed.m?" y "+ed.m+(ed.m===1?" mes":" meses"):""):ed.tm>=1?ed.tm+(ed.tm===1?" mes":" meses")+" ("+ed.d+" días) de nacido":ed.d+(ed.d===1?" día":" días")+" de nacido")+" el día de la consulta"+(ed&&ed.d<7&&baseOpts&&baseOpts.mod==="pinf"?". Con menos de 7 días le toca el módulo Recién nacido.":ed&&ed.d<=28&&baseOpts&&baseOpts.mod==="pinf"?". Es recién nacido (hasta 28 días).":""):"";}}
     if(ed){if(ed.y>=1){set("EDAD",ed.y);set("AA / MM","AÑOS")}else if(ed.tm>=1){set("EDAD",ed.tm);set("AA / MM","MESES")}else{set("EDAD",ed.d);set("AA / MM","DÍAS")}set("CURSO DE VIDA",cursoVida(ed.y))}
     else{const e0=parseFloat(v("EDAD"));if(e0>=0&&!v("FECHA NACIMIENTO")){set("AA / MM","AÑOS");set("CURSO DE VIDA",cursoVida(e0))}else{set("EDAD","");set("AA / MM","");set("CURSO DE VIDA","")}}
     const p=parseFloat(v("PESO")),t=parseFloat(String(v("TALLA")).replace(",","."));const tm=t>3?t/100:t;
