@@ -472,7 +472,7 @@ function hhSugeridos(){const s=new Set(),ix=n=>HH.findIndex(h=>h[0]===n),add=n=>
   if(/hemorragia|retencion placentaria/.test(co))add("Retención placentaria o hemorragia posparto");if(/mas de 4\.?000/.test(co))add("RN de más de 4.000 g");if(/bajo peso|pretermino/.test(co))add("RN de menos de 2.500 g");
   if(/preeclampsia|eclampsia|hellp/.test(co))add("Hipertensión inducida por el embarazo previa");if(/muerte perinatal/.test(co))add("Mortinato o muerte neonatal");if(/prolongado o dificil/.test(co))add("Trabajo de parto prolongado o difícil");
   if(/cesarea/.test(co))add("Embarazo gemelar o cesárea previa");if(/cirugia uterina|ginecologica/.test(co))add("Cirugía ginecológica previa");
-  const en=plano(A("Enfermedades crónicas"));if(/renal/.test(en))add("Enfermedad renal crónica");if(/diabetes/.test(en))add("Diabetes mellitus");if(/cardiaca/.test(en))add("Enfermedad cardíaca");if(/autoinmune|lupus/.test(en))add("Enfermedad autoinmune");
+  const en=plano(A("Enfermedades crónicas"));if(/renal/.test(en))add("Enfermedad renal crónica");if(/diabetes/.test(en))add("Diabetes mellitus");if(/cardiaca/.test(en))add("Enfermedad cardíaca");if(/autoinmune|lupus/.test(en))add("Enfermedad autoinmune");if(/hipertension/.test(en))add("Hipertensión arterial");if(/anemia/.test(en))add("Anemia (Hb < 10 g/dl)");
   const sg=plano(A("Signos de alarma")),w=semPren();if(/sangrado/.test(sg))add(w!=null&&w>=20?"Hemorragia después de la semana 20":"Hemorragia antes de la semana 20");if(/salida de liquido/.test(sg))add("Ruptura prematura de membranas");
   if(w!=null&&w>=42)add("Embarazo de más de 42 semanas");
   const vt=A("Signos vitales").match(/TA (\d+)\/(\d+)/);if(vt&&(+vt[1]>=140||+vt[2]>=90))add("Hipertensión arterial");
@@ -523,13 +523,13 @@ const WIDGET={
      if(r.egFum!=null&&r.egEco!=null&&Math.abs(r.egFum-r.egEco)>(r.egEco<98?7:14))m.push("La FUM y la ecografía no coinciden por más de "+(r.egEco<98?"1 semana":"2 semanas")+": usa la ecografía (marca «FUM no confiable»).");
      al.hidden=!m.length;al.innerHTML=m.map(z=>`<p style="margin:0">${esc(z)}</p>`).join("")};
    document.querySelectorAll("[data-eg]").forEach(e=>e.addEventListener(e.type==="checkbox"?"change":"input",()=>{const k=e.dataset.eg;if(e.type==="checkbox"){if(e.checked)S.set(key(id,"eg_nofum"),"1");else S.del(key(id,"eg_nofum"))}else S.set(key(id,"eg_"+k),e.value);pinta();save()}));pinta()}},
- herrera:{html:id=>{let hh=null;try{hh=JSON.parse(S.get(key(id,"hh"))||"null")}catch(e){}const sug=hhSugeridos();if(!hh){hh={};sug.forEach(i=>hh[i]=1);S.set(key(id,"hh"),JSON.stringify(hh))}
+ herrera:{html:id=>{const ef=hhEfectivo(id),sug=hhSugeridos();
    return `<div class="risk"><span class="score" id="hh-s">0</span><span class="pill low" id="hh-p">Bajo riesgo</span></div>
    <div class="btns" style="margin:0"><button type="button" class="btn" id="hh-sug" style="flex:none">Volver a marcar lo sugerido</button></div>
-   <ul class="hh">${HH.map((h,i)=>h.length===1?`<li class="grp">${esc(h[0])}</li>`:`<li><input type="checkbox" id="h${i}" data-h="${i}" ${hh[i]?"checked":""}><label for="h${i}">${esc(h[0])}${sug.has(i)?' <small style="color:var(--accent);font-weight:700">sugerido</small>':""}</label><span class="pts">${h[1]} pt</span></li>`).join("")}</ul>`},
+   <ul class="hh">${HH.map((h,i)=>h.length===1?`<li class="grp">${esc(h[0])}</li>`:`<li><input type="checkbox" id="h${i}" data-h="${i}" ${ef[i]?"checked":""}><label for="h${i}">${esc(h[0])}${sug.has(i)?' <small style="color:var(--accent);font-weight:700">sugerido</small>':""}</label><span class="pts">${h[1]} pt</span></li>`).join("")}</ul>`},
   txt:id=>hhResumen(id)||"Escala de Herrera y Hurtado aplicada: 0 puntos (bajo riesgo).",
-  wire:(id,save)=>{const up=()=>{const o={};let s=0;document.querySelectorAll("[data-h]").forEach(c=>{if(c.checked){o[c.dataset.h]=1;s+=HH[+c.dataset.h][1]}});S.set(key(id,"hh"),JSON.stringify(o));$("hh-s").textContent=s;const hi=s>=3;$("hh-p").textContent=hi?"Alto riesgo: remitir a medicina y ginecobstetricia":"Bajo riesgo";$("hh-p").className="pill "+(hi?"high":"low");save()};
-   document.querySelectorAll("[data-h]").forEach(c=>c.onchange=up);$("hh-sug").onclick=()=>{const sg=hhSugeridos();document.querySelectorAll("[data-h]").forEach(c=>c.checked=sg.has(+c.dataset.h));up()};up()}}
+  wire:(id,save)=>{const up=()=>{const sg=hhSugeridos(),m={};let sc=0;document.querySelectorAll("[data-h]").forEach(c=>{const k=+c.dataset.h;if(c.checked!==sg.has(k))m[k]=c.checked?1:0;if(c.checked)sc+=HH[k][1]});S.set(key(id,"hh"),JSON.stringify(m));$("hh-s").textContent=sc;const hi=sc>=3;$("hh-p").textContent=hi?"Alto riesgo: remitir a medicina y ginecobstetricia":"Bajo riesgo";$("hh-p").className="pill "+(hi?"high":"low");save()};
+   document.querySelectorAll("[data-h]").forEach(c=>c.onchange=up);$("hh-sug").onclick=()=>{S.set(key(id,"hh"),"{}");const sg=hhSugeridos();document.querySelectorAll("[data-h]").forEach(c=>c.checked=sg.has(+c.dataset.h));up()};up()}}
 };
 
 
@@ -540,16 +540,17 @@ function peSugeridos(){const A=prenA,s=new Set(),pl=l=>plano(A(l)),co=pl("Compli
   if(/mas de 10 anos/.test(pl("Último parto")))s.add("m2");const an=A("Antropometría y ganancia de peso"),im=(an.match(/IMC inicial (\d+)/)||an.match(/IMC (\d+)/)||[])[1];if(im&&+im>=35)s.add("m3");
   if(/familiar de preeclampsia/.test(pl("Antecedentes familiares")))s.add("m4");if(/dos polos|gestacion multiple/.test(pl("Valoración obstétrica")))s.add("m5");return s}
 function peCalc(o){const a=PE_ALTO.filter((_,i)=>o["a"+i]),m=PE_MOD.filter((_,i)=>o["m"+i]),ind=a.length>=1||m.length>=2;return {a,m,ind}}
-WIDGET.preecl={html:id=>{let o=null;try{o=JSON.parse(S.get(key(id,"pe"))||"null")}catch(e){}const sg=peSugeridos();if(!o){o={};sg.forEach(k=>o[k]=1);S.set(key(id,"pe"),JSON.stringify(o))}
+function peEfectivo(id){let m={};try{m=JSON.parse(S.get(key(id,"pe"))||"{}")||{}}catch(e){}const sg=peSugeridos(),o={};PE_ALTO.forEach((_,i)=>{const k="a"+i;if(m[k]===1||(m[k]!==0&&sg.has(k)))o[k]=1});PE_MOD.forEach((_,i)=>{const k="m"+i;if(m[k]===1||(m[k]!==0&&sg.has(k)))o[k]=1});return o}
+WIDGET.preecl={html:id=>{const o=peEfectivo(id),sg=peSugeridos();
    const li=(k,t)=>`<li><input type="checkbox" id="pe${k}" data-pe="${k}" ${o[k]?"checked":""}><label for="pe${k}">${esc(t)}${sg.has(k)?' <small style="color:var(--accent);font-weight:700">sugerido</small>':""}</label></li>`;
    return `<div class="risk"><span class="pill low" id="pe-p">Sin indicación</span></div><div class="btns" style="margin:0"><button type="button" class="btn" id="pe-sug" style="flex:none">Volver a marcar lo sugerido</button></div>
    <ul class="hh"><li class="grp">Criterios de ALTO riesgo (basta 1)</li>${PE_ALTO.map((t,i)=>li("a"+i,t)).join("")}<li class="grp">Criterios MODERADOS (se necesitan 2)</li>${PE_MOD.map((t,i)=>li("m"+i,t)).join("")}</ul><div class="box warn" id="pe-c"></div>`},
- txt:id=>{let o={};try{o=JSON.parse(S.get(key(id,"pe"))||"{}")}catch(e){}const r=peCalc(o),w=semPren();if(!r.a.length&&!r.m.length)return"Sin criterios de riesgo para preeclampsia.";
+ txt:id=>{const o=peEfectivo(id);const r=peCalc(o),w=semPren();if(!r.a.length&&!r.m.length)return"Sin criterios de riesgo para preeclampsia.";
    return "Criterios de riesgo de preeclampsia: "+(r.a.length?"alto: "+r.a.join(", ").toLowerCase()+". ":"")+(r.m.length?"moderados: "+r.m.join(", ").toLowerCase()+". ":"")+(r.ind?"Cumple indicación de ácido acetilsalicílico 75–100 mg/día"+(w!=null&&w<12?" desde la semana 12":"")+" hasta el parto (Res. 3280); se remite a medicina para su formulación.":"No cumple indicación de ácido acetilsalicílico (1 criterio moderado); vigilancia de TA en cada control.")},
- wire:(id,save)=>{const up=()=>{const o={};document.querySelectorAll("[data-pe]").forEach(c=>{if(c.checked)o[c.dataset.pe]=1});S.set(key(id,"pe"),JSON.stringify(o));const r=peCalc(o),w=semPren();
+ wire:(id,save)=>{const up=()=>{const o={},m={},sg=peSugeridos();document.querySelectorAll("[data-pe]").forEach(c=>{const k=c.dataset.pe;if(c.checked)o[k]=1;if(c.checked!==sg.has(k))m[k]=c.checked?1:0});S.set(key(id,"pe"),JSON.stringify(m));const r=peCalc(o),w=semPren();
      $("pe-p").textContent=r.ind?"Indicación de aspirina: remitir a medicina":(r.a.length||r.m.length)?"1 moderado: sin indicación":"Sin criterios";$("pe-p").className="pill "+(r.ind?"high":"low");
      $("pe-c").innerHTML=r.ind?`<p style="margin:0"><b>Qué hacer:</b> ácido acetilsalicílico 75–100 mg cada noche ${w!=null&&w<12?"desde la semana 12 ":""}hasta el parto. Lo formula medicina: remítela con la indicación. Toma la TA en cada contacto y repasa con ella los signos de alarma (dolor de cabeza, ver luces, hinchazón, dolor en la boca del estómago).${w!=null&&w>=36?" Ya está cerca del término: confírmalo con medicina.":""}</p>`:`<p style="margin:0">${r.m.length?"Con 1 criterio moderado no está indicada la aspirina; vigila la TA en cada control.":"Sin criterios: control habitual de TA en cada consulta."}</p>`;save()};
-   document.querySelectorAll("[data-pe]").forEach(c=>c.onchange=up);$("pe-sug").onclick=()=>{const sg=peSugeridos();document.querySelectorAll("[data-pe]").forEach(c=>c.checked=sg.has(c.dataset.pe));up()};up()}};
+   document.querySelectorAll("[data-pe]").forEach(c=>c.onchange=up);$("pe-sug").onclick=()=>{S.set(key(id,"pe"),"{}");const sg=peSugeridos();document.querySelectorAll("[data-pe]").forEach(c=>c.checked=sg.has(c.dataset.pe));up()};up()}};
 /* ---------- Bloque fijo de educación PAMI (plantilla ESE) ---------- */
 const EDU_PAMI = `EDUCACIÓN
 Se brinda educación clara, comprensible y culturalmente respetuosa, explicada de manera verbal y reforzada con material educativo:
@@ -785,7 +786,7 @@ function checks(m){try{return JSON.parse(S.get(key(m,"chk"))||"{}")}catch(e){ret
 function hasDraft(m){return !!(S.get(key(m,"dict"))||S.get(key(m,"nota"))||Object.keys(checks(m)).length)}
 
 /* ---------- PANEL ---------- */
-const VERSION_APP="2026-10-09 v67";
+const VERSION_APP="2026-10-09 v68";
 function home(){
   stopRec();st.view="home";
   const rm=["precon","prenatal","parto","rn","ive"],rp=["pinf","inf","adol","juv","adul","vej"];
@@ -993,7 +994,8 @@ function paneHerr(){
   const hupd=()=>{const o={};let s=0;document.querySelectorAll("[data-h]").forEach(c=>{if(c.checked){o[c.dataset.h]=1;s+=HH[+c.dataset.h][1]}});S.set(key(id,"hh"),JSON.stringify(o));$("hh-s").textContent=s;const hi=s>=3;$("hh-p").textContent=hi?"Alto riesgo: medicina y ginecobstetricia":"Bajo riesgo";$("hh-p").className="pill "+(hi?"high":"low")};
   document.querySelectorAll("[data-h]").forEach(c=>c.onchange=hupd);hupd();
 }
-function hhResumen(id){let hh={};try{hh=JSON.parse(S.get(key(id,"hh"))||"{}")}catch(e){}const ks=Object.keys(hh);if(!ks.length)return"";let s=0;const it=ks.map(k=>{s+=HH[+k][1];return HH[+k][0]+" ("+HH[+k][1]+")"});return "Escala de Herrera y Hurtado aplicada: "+s+(s===1?" punto (":" puntos (")+(s>=3?"alto riesgo":"bajo riesgo")+"). Factores: "+it.join("; ")}
+function hhEfectivo(id){let m={};try{m=JSON.parse(S.get(key(id,"hh"))||"{}")||{}}catch(e){}const sg=id==="prenatal"?hhSugeridos():new Set(),o={};HH.forEach((h,i)=>{if(h.length>1&&(m[i]===1||(m[i]!==0&&sg.has(i))))o[i]=1});return o}
+function hhResumen(id){const hh=hhEfectivo(id);const ks=Object.keys(hh);if(!ks.length)return"";let s=0;const it=ks.map(k=>{s+=HH[+k][1];return HH[+k][0]+" ("+HH[+k][1]+")"});return "Escala de Herrera y Hurtado aplicada: "+s+(s===1?" punto (":" puntos (")+(s>=3?"alto riesgo":"bajo riesgo")+"). Factores: "+it.join("; ")}
 function marcados(id){const m=M[id],ck=checks(id),o=[];m.sections.forEach((s,i)=>s.items.forEach((it,j)=>{if(ck[i+"."+j])o.push(s.t+": "+(it.startsWith("Q:")?"Pregunta realizada – "+it.slice(2):it))}));return o}
 /* ---------- DICTADO CAMPO POR CAMPO ---------- */
 const NW={cero:0,un:1,uno:1,una:1,primero:1,dos:2,tres:3,cuatro:4,cinco:5,seis:6,siete:7,ocho:8,nueve:9,diez:10,once:11,doce:12,trece:13,catorce:14,quince:15,dieciseis:16,diecisiete:17,dieciocho:18,diecinueve:19,veinte:20,veintiun:21,veintiuno:21,veintidos:22,veintitres:23,veinticuatro:24,veinticinco:25,veintiseis:26,veintisiete:27,veintiocho:28,veintinueve:29,treinta:30,cuarenta:40,cincuenta:50,sesenta:60,setenta:70,ochenta:80,noventa:90,cien:100,ciento:100,doscientos:200,trescientos:300,cuatrocientos:400,quinientos:500,seiscientos:600,setecientos:700,ochocientos:800,novecientos:900};
@@ -1199,7 +1201,7 @@ function anLocal(id){const m=M[id],f=S.get(key(id,"fecha"))||hoy(),txt=[ivCompos
     else if(w!=null&&w>=35)PEN.push("Desde la semana 36 los controles (36, 38 y 40) los hace medicina: agendar con el médico");
     if(w!=null&&w>=28&&!A("Plan de parto"))PEN.push("Plan de parto del tercer trimestre (lugar, transporte, partera, cuidado de los hijos)");
     if(/pendientes de toma/.test(x))PEN.push("Exámenes prenatales pendientes de toma: asegurar la toma y la lectura")}
-  if(id==="prenatal"){let hh={};try{hh=JSON.parse(S.get(key(id,"hh"))||"{}")}catch(e){}let sc=0;Object.keys(hh).forEach(k=>sc+=HH[+k][1]);if(sc>=3)ruta("Control prenatal de alto riesgo","Herrera y Hurtado "+sc+" puntos","Remitir a medicina y ginecobstetricia; plan de parto institucional","pronto","Su embarazo necesita más cuidado; la vamos a remitir con el médico y el especialista.")}
+  if(id==="prenatal"){const hh=hhEfectivo(id);let sc=0;Object.keys(hh).forEach(k=>sc+=HH[+k][1]);if(sc>=3)ruta("Control prenatal de alto riesgo","Herrera y Hurtado "+sc+" puntos","Remitir a medicina y ginecobstetricia; plan de parto institucional","pronto","Su embarazo necesita más cuidado; la vamos a remitir con el médico y el especialista.")}
   const q=ivFor(id),a=ivAns(id);q.forEach((z,i)=>{const r=(a[i]||"").trim();if(/^no realizado/i.test(r))PEN.push(z.l+(r.replace(/^no realizado\.?\s*/i,"")?" — "+r.replace(/^no realizado\.?\s*/i,""):""))});
   const ck=checks(id);if(!IV[id])m.sections.forEach((sct,i)=>sct.items.forEach((it,j)=>{if(!ck[i+"."+j]&&PEN.length<12)PEN.push(sct.t+": "+(it.startsWith("Q:")?it.slice(2):it))}));
   const riesgo=R.some(r=>r.cuando==="hoy")?"alto":R.some(r=>r.cuando==="pronto")?"medio":"bajo";
