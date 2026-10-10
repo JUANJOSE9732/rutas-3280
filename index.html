@@ -936,7 +936,7 @@ function checks(m){try{return JSON.parse(S.get(key(m,"chk"))||"{}")}catch(e){ret
 function hasDraft(m){return !!(S.get(key(m,"dict"))||S.get(key(m,"nota"))||Object.keys(checks(m)).length)}
 
 /* ---------- PANEL ---------- */
-const VERSION_APP="2026-10-10 v86";
+const VERSION_APP="2026-10-10 v87";
 function home(){
   stopRec();st.view="home";
   const rm=["precon","prenatal","parto","rn","ive"],rp=["pinf","inf","adol","juv","adul","vej"];
@@ -2592,6 +2592,19 @@ function finHTML(id){const r=S.get(key(id,"fin")),ff=s=>s?s.split("-").reverse()
 function finWire(id){const b=$("fin-go");if(!b)return;b.onclick=()=>{const r=finalizarConsulta(id);if(r.err){$("fin-st").textContent=r.err;return}const box=$("fin");box.outerHTML=finHTML(id);finWire(id);$("fin-st").textContent="Listo: guardada en Pacientes."};
   const v=$("fin-ver");if(v)v.onclick=()=>{const P=pac();verPaciente(pkey(P))}}
 function estadoP(x){const u=x.aten[x.aten.length-1];if(!u)return null;const px=[...x.aten].reverse().find(a=>a.prox);if(!px)return null;const cumplido=x.aten.some(a=>a.fecha>px.fecha);if(cumplido)return null;return Object.assign({px:px.prox,mot:px.mot},semaforo(px.prox)||{})}
+/* ---------- Copia de seguridad completa (para guardar en el PC) y restauración ---------- */
+function respaldoObj(){return {app:"rutas3280",version:VERSION_APP,creado:new Date().toISOString(),archivo:archivo(),cola:cola(),pacientes:pacientes(),agenda:agenda(),coms:S.get("dn2_coms")||""}}
+async function respaldoDescargar(){const o=respaldoObj(),n=o.archivo.length+Object.keys(o.pacientes).length;if(!n)return"vacio";
+  const z=new Date(),p2=v=>String(v).padStart(2,"0");S.set("dn2_ultresp",hoy());
+  return guardarArchivo("Rutas3280_respaldo_"+hoy()+"_"+p2(z.getHours())+p2(z.getMinutes())+".json",new Blob([JSON.stringify(o)],{type:"application/json"}))}
+function respaldoUnir(o){if(!o||o.app!=="rutas3280")throw new Error("formato");const r={reg:0,pac:0};
+  const am=new Map(archivo().map(x=>[x.id,x]));(o.archivo||[]).forEach(x=>{if(!am.has(x.id))r.reg++;am.set(x.id,Object.assign({},x,am.get(x.id)||{}))});S.set("dn2_archivo",JSON.stringify([...am.values()]));
+  const cm=new Map(cola().map(x=>[x.id,x]));(o.cola||[]).forEach(x=>{if(!cm.has(x.id)&&!(o.archivo||[]).some(a=>a.id===x.id&&!o.cola))cm.set(x.id,x)});setCola([...cm.values()]);
+  const ps=pacientes();Object.entries(o.pacientes||{}).forEach(([k,y])=>{let x=ps[k];if(!x){r.pac++;const n=Object.values(ps).reduce((m,q)=>Math.max(m,q.n||0),0)+1;ps[k]=Object.assign({},y,{n});return}
+    Object.assign(x.ident,y.ident);const ar=new Map(x.aten.map(a=>[a.regid,a]));(y.aten||[]).forEach(a=>{if(!ar.has(a.regid))ar.set(a.regid,a)});x.aten=[...ar.values()].sort((p,q)=>p.fecha<q.fecha?-1:1);
+    const pr=new Map(x.pend.map(p=>[p.id,p]));(y.pend||[]).forEach(p=>{const c=pr.get(p.id);if(!c)pr.set(p.id,p);else if(p.ok&&!c.ok)c.ok=p.ok});x.pend=[...pr.values()]});setPacientes(ps);
+  const ag=new Map(agenda().map(a=>[a.id,a]));(o.agenda||[]).forEach(a=>{if(!ag.has(a.id))ag.set(a.id,a)});setAgenda([...ag.values()]);
+  const cs=new Set((S.get("dn2_coms")||"").split("|").filter(Boolean));String(o.coms||"").split("|").filter(Boolean).forEach(c=>cs.add(c));S.set("dn2_coms",[...cs].join("|"));return r}
 /* ---------- Base de datos local: ver lo guardado en el celular como tabla ---------- */
 function verBase(){stopRec();st.view="vbase";const ff=s=>/^\d{4}-\d{2}-\d{2}$/.test(s||"")?s.split("-").reverse().join("/"):(s||"");
   const t=registrosTodos(),pend=new Set(cola().map(r=>r.id)),coms=[...new Set(t.map(r=>r.comunidad||"SIN COMUNIDAD"))].sort(),COLS=colsDe();
@@ -2603,7 +2616,11 @@ function verBase(){stopRec();st.view="vbase";const ff=s=>/^\d{4}-\d{2}-\d{2}$/.t
   <div class="pgrid" style="margin-bottom:8px"><label class="bfl"><span>Comunidad</span><select id="vb-c"><option value="">Todas</option>${coms.map(c=>`<option ${fil.c===c?"selected":""}>${esc(c)}</option>`).join("")}</select></label>
    <label class="bfl"><span>Estado</span><select id="vb-e"><option value="">Todos</option><option value="p" ${fil.e==="p"?"selected":""}>Pendientes por enviar</option><option value="s" ${fil.e==="s"?"selected":""}>Enviados</option><option value="v" ${fil.e==="v"?"selected":""}>Control vencido o próximo</option></select></label></div>
   <label class="check" style="margin-bottom:8px"><input type="checkbox" id="vb-all" ${fil.todas?"checked":""}> Ver todas las columnas (en el orden de la hoja)</label>
-  <div class="btns" style="margin-bottom:8px"><button class="btn" id="vb-xls">Exportar a Excel</button><button class="btn" id="vb-sync">Enviar pendientes</button></div><p class="note-src" id="vb-st" style="margin:0 0 8px"></p>
+  <div class="btns" style="margin-bottom:8px"><button class="btn" id="vb-xls">Exportar a Excel</button><button class="btn" id="vb-sync">Enviar pendientes</button></div>
+  <details class="sec" style="margin-bottom:8px"><summary><span>Copia de seguridad para el PC</span><span class="cnt">${S.get("dn2_ultresp")?"última: "+esc(ff(S.get("dn2_ultresp"))):"nunca"}</span></summary><div style="padding:0 14px 14px">
+   <p class="note-src" style="margin:0 0 8px">Descarga un archivo con todo: registros, pacientes, pendientes y citas. Pásalo al PC (cable, Drive o WhatsApp a ti mismo) y guárdalo en una carpeta. Para recuperarlo en otro celular o en el PC, abre la app allí y toca Restaurar: se suma a lo que ya haya, sin borrar nada.</p>
+   <div class="btns"><button class="btn primary" id="vb-bk">Descargar copia completa</button><button class="btn" id="vb-rs">Restaurar desde archivo</button></div><input type="file" id="vb-file" accept=".json,application/json" hidden></div></details>
+  <p class="note-src" id="vb-st" style="margin:0 0 8px"></p>
   <div id="vb-tab" style="overflow:auto;max-height:70vh;border:1px solid var(--line);border-radius:12px"></div><div id="vb-det"></div>`;
   const pinta=()=>{const q=plano(fil.q),cols=fil.todas?COLS.map(k=>[k,k]).concat([["__est","ESTADO"]]):CORTAS;
     const filas=t.filter(r=>{const d=r.datos,com=r.comunidad||"SIN COMUNIDAD";if(fil.c&&com!==fil.c)return false;const env=!pend.has(r.id);if(fil.e==="p"&&env)return false;if(fil.e==="s"&&!env)return false;
@@ -2624,6 +2641,9 @@ function verBase(){stopRec();st.view="vbase";const ff=s=>/^\d{4}-\d{2}-\d{2}$/.t
   $("vb-q").oninput=e=>{fil.q=e.target.value;guarda()};$("vb-c").onchange=e=>{fil.c=e.target.value;guarda()};$("vb-e").onchange=e=>{fil.e=e.target.value;guarda()};$("vb-all").onchange=e=>{fil.todas=e.target.checked;guarda()};
   $("back").onclick=home;
   $("vb-xls").onclick=async()=>{const r=await exportarExcel();$("vb-st").textContent=r==="vacio"?"No hay registros.":r==="ok"?"Listo: el Excel quedó descargado.":r==="no"?"Descarga cancelada.":"Aquí no se pudo descargar; ábrelo desde el celular."};
+  $("vb-bk").onclick=async()=>{const r=await respaldoDescargar();$("vb-st").textContent=r==="vacio"?"No hay nada guardado todavía.":r==="ok"?"Copia descargada (archivo .json). Guárdala en el PC.":r==="no"?"Descarga cancelada.":"Aquí no se pudo descargar; ábrelo desde el celular."};
+  $("vb-rs").onclick=()=>$("vb-file").click();
+  $("vb-file").onchange=async e=>{const f=e.target.files[0];if(!f)return;try{const r=respaldoUnir(JSON.parse(await f.text()));verBase();$("vb-st").textContent="Copia restaurada: "+r.reg+" registros y "+r.pac+" pacientes nuevos sumados."}catch(err){$("vb-st").textContent="Ese archivo no es una copia de esta app."}};
   $("vb-sync").onclick=async()=>{$("vb-st").textContent=conf().url?"Enviando…":"Falta configurar la Conexión en la Base.";if(conf().url){await sync(true);verBase()}};
   pinta();window.scrollTo(0,0)}
 function verPacientes(){stopRec();st.view="pacs";const ps=Object.entries(pacientes()).sort((a,b)=>(a[1].n||0)-(b[1].n||0)),ff=s=>s?s.split("-").reverse().join("/"):"";
