@@ -936,7 +936,7 @@ function checks(m){try{return JSON.parse(S.get(key(m,"chk"))||"{}")}catch(e){ret
 function hasDraft(m){return !!(S.get(key(m,"dict"))||S.get(key(m,"nota"))||Object.keys(checks(m)).length)}
 
 /* ---------- PANEL ---------- */
-const VERSION_APP="2026-10-11 v123";
+const VERSION_APP="2026-10-11 v124";
 function home(){
   stopRec();st.view="home";
   const rm=["precon","prenatal","parto","rn","ive"],rp=["pinf","inf","adol","juv","adul","vej"];
@@ -2244,7 +2244,7 @@ function nutCampos(id,v,tipo){const P=pac(),sx=P["GENERO"]==="M"?"M":P["GENERO"]
   const _mod=tipo==="antropoPI"?"pinf":id,_rg={pinf:[0,72],inf:[72,144],adol:[144,216]}[_mod];if(_rg&&mm!=null&&(mm<_rg[0]||mm>=_rg[1]))r.al.unshift("Tiene "+edadTxtM(Math.floor(mm))+": esa edad no corresponde a este módulo ("+(M[_mod]?M[_mod].who:"")+"). Revisa la fecha de nacimiento o usa el módulo de su edad.");
   r.R.forEach(x=>{x.mal=!/adecuad|^Normal|No aplica/i.test(x.c)});const _it=nutInterp(r.R,mm,pb);
   const _zk=k=>{const q=r.R.find(x=>x.k===k);return q&&!q.imp?q.z:null},_H=sx&&P["FECHA NACIMIENTO"]?histZ(histAntro(fe),sx,P["FECHA NACIMIENTO"]):[],_cur={mm,p,t,zte:_zk("talla"),zag:mm<60.5?_zk("pt"):_zk("imc")},_tn=tendencia(_H,_cur);
-  if(_H.length){if(_tn.imp)_it.dx=_it.dx.map(x=>x.replace(/\.$/,"")+" (provisional: depende de una talla que hay que repetir).");_it.dx=_tn.dx.concat(_it.dx);_it.val=_tn.val.concat(_it.val.map(x=>/^Mira la tendencia/.test(x)?"La tendencia se calculó con "+_H.length+(_H.length===1?" control registrado":" controles registrados")+" en la app; complétala con los del carné que no estén aquí.":x));_it.hist=_tn.txt;_it.nH=_H.length}else _it.hist="";
+  if(_H.length){if(_tn.imp)_it.dx=_it.dx.map(x=>x.replace(/\.$/,"")+" (provisional: depende de "+(_tn.impT&&_tn.impP?"medidas":_tn.impT?"una talla":"un peso")+" que hay que repetir).");if(_tn.dx.length)_it.dx=_it.dx.filter(x=>!/^Estado nutricional adecuado/.test(x));_it.dx=_tn.dx.concat(_it.dx);_it.val=_tn.val.concat(_it.val.map(x=>/^Mira la tendencia/.test(x)?"La tendencia se calculó con "+_H.length+(_H.length===1?" control registrado":" controles registrados")+" en la app; complétala con los del carné que no estén aquí.":x));_it.hist=_tn.txt;_it.nH=_H.length}else _it.hist="";
   return {it:_it,g:{H:_H,sx,mm,p,t,pc,imc:(p!=null&&t!=null)?p/Math.pow(t/100,2):null},res:r.R,txt:P2.length?"Antropometría a los "+edadTxtM(Math.floor(mm))+": "+P2.join(", ")+". Escala: "+(mm<60.5?"Patrones de Crecimiento Infantil de la OMS 2006 (WHO Child Growth Standards), 0 a 5 años":"Referencia de Crecimiento de la OMS 2007 para niños en edad escolar y adolescentes, 5 a 19 años (WHO Growth Reference 2007)")+", puntaje Z, puntos de corte de la Res. 2465 de 2016. Clasificación: "+(cls.join("; ")||"sin datos suficientes")+". Impresión diagnóstica nutricional: "+(_it.hist?"Evolución: "+_it.hist+" ":"")+_it.dx.join(" ")+(_it.acc.length?" Plan: "+_it.acc.join(" "):"")+(_it.val.length?" Pendiente para confirmar: "+_it.val.map(x=>x.split(":")[0].split(".")[0].toLowerCase().replace("ftlc","FTLC").replace(/ si está disponible.*/,"")).join("; ")+".":""):"",flag,al:r.al,m,imc:im?im.v:null}}
 const _cvBaseNut=cvCalc;cvCalc=function(tipo,v){if(tipo==="antropoPI"||tipo==="antropoNNA"){const id=tipo==="antropoPI"?"pinf":(st&&st.mod)||"inf";const r=nutCampos(id,v,tipo);if(tipo==="antropoNNA")r.imc=r.imc;return r}return _cvBaseNut(tipo,v)};
 const _cvTextoNut=cvDesdeTexto;cvDesdeTexto=function(tipo,t){return (tipo==="antropoPI"||tipo==="antropoNNA")?_cvTextoNut("antropo",t):_cvTextoNut(tipo,t)};
@@ -2422,29 +2422,36 @@ function histZ(h,sx,fn){return h.map(r=>{const mm=mesesDec(fn,r.fecha);if(mm==nu
   if(m5){o.zpe=r.p!=null?whoZ("wfa",sx,mm,r.p,1):null;o.zte=r.t!=null?whoZ(ac?"len":"hei",sx,mm,r.t):null;o.zpt=r.p!=null&&r.t!=null?whoZ(ac?"wfl":"wfh",sx,Math.round(r.t*2)/2,r.p,1):null;o.zpc=r.pc!=null?whoZ("hcfa",sx,mm,r.pc):null;o.zag=o.zpt}
   else{o.zte=r.t!=null?whoZ("h07",sx,mm,r.t):null;o.zim=o.imc!=null?whoZ("b07",sx,mm,o.imc,1):null;o.zag=o.zim}return o}).filter(Boolean)}
 function fCorta(f){return f?f.split("-").reverse().join("/"):""}
-function tendencia(H,cur){const dx=[],val=[],acc=[];if(!H.length)return{dx,val,acc,txt:""};const u=H[H.length-1],meses=cur.mm-u.mm,txtM=meses>=1?Math.round(meses)+(Math.round(meses)===1?" mes":" meses"):Math.round(meses*30.4)+" días";
-  const L=[];L.push("Comparado con "+u.cons+" ("+fCorta(u.fecha)+", hace "+txtM+")");
-  // peso
-  if(u.p!=null&&cur.p!=null){const d=cur.p-u.p,pct=d/u.p*100;L.push("peso "+(d>=0?"+":"−")+coma(Math.abs(Math.round(d*100)/100))+" kg");
-    if(d<0&&cur.mm<216){dx.push("Perdió "+coma(Math.abs(Math.round(d*100)/100))+" kg desde el control anterior ("+fCorta(u.fecha)+"): en un niño en crecimiento la pérdida de peso es siempre una alerta.");val.push("Pregunta qué pasó en ese tiempo: diarrea, fiebre, malaria, cambios en la alimentación o en quién lo cuida.");}
-    else if(d===0&&meses>=2&&cur.mm<24)dx.push("No ganó peso en "+txtM+": estancamiento del peso (en menores de 2 años debe subir en cada control).")}
-  // talla y velocidad
-  let imp=false;
-  if(u.t!=null&&cur.t!=null){const d=cur.t-u.t,velA=meses>0?d/meses*12:0,maxV=cur.mm<6?45:cur.mm<12?30:cur.mm<24?18:cur.mm<48?13:12,dz=(cur.zte!=null&&u.zte!=null)?cur.zte-u.zte:0;
-    if(d>0&&meses>=1&&(velA>maxV*1.3||dz>2)){imp=true;L.push("talla "+"+"+coma(Math.round(d*10)/10)+" cm");dx.push("Cambio de talla imposible: +"+coma(Math.round(d*10)/10)+" cm en "+txtM+" ("+coma(Math.round(velA*10)/10)+" cm/año; a esta edad se crece como máximo unos "+Math.round(maxV)+" cm por año). Una de las dos medidas está mal, la de hoy o la de "+fCorta(u.fecha)+": repítela antes de sacar conclusiones.");val.push("Mientras no se corrija la talla, no interpretes el cambio de IMC ni de peso para la talla: dependen de la talla.");return {dx,val,acc,txt:L.join(", ")+".",imp:true}}
-    if(d<-1)val.push("La talla actual es menor que la anterior en "+coma(Math.abs(Math.round(d*10)/10))+" cm: alguna de las dos mediciones está mal; repítela.");
-    else if(meses>=6&&cur.mm>=36&&cur.mm<132){const v=d/meses*12;L.push("velocidad de crecimiento "+coma(Math.round(v*10)/10)+" cm/año");if(v<4){dx.push("Velocidad de crecimiento baja: "+coma(Math.round(v*10)/10)+" cm por año (lo esperado entre los 3 años y la pubertad es al menos 4 a 5 cm por año).");val.push("Una velocidad baja, aunque la talla aún esté en rango, sugiere un problema activo (nutricional, hipotiroidismo, enfermedad crónica): pediatría.")}}}
-  // cambio de z (cruce de canales)
-  const cz=(a,b,n)=>{if(a==null||b==null)return;const d=b-a;L.push(n+" z "+zFmt(a)+" → "+zFmt(b));if(d<=-1)dx.push(n.charAt(0).toUpperCase()+n.slice(1)+" bajó "+coma(Math.abs(Math.round(d*10)/10))+" DE (de z "+zFmt(a)+" a z "+zFmt(b)+") desde "+fCorta(u.fecha)+": cruzó hacia abajo al menos una línea de la gráfica; es un deterioro reciente"+(b>=-2?" aunque la clasificación actual parezca leve.":"."));else if(d>=1&&b>1&&!/talla/.test(n))dx.push(n.charAt(0).toUpperCase()+n.slice(1)+" subió "+coma(Math.round(d*10)/10)+" DE desde "+fCorta(u.fecha)+": ganancia de peso acelerada.");else if(d>=1&&/talla/.test(n))dx.push("La talla para la edad subió "+coma(Math.round(d*10)/10)+" DE desde "+fCorta(u.fecha)+": crecimiento de recuperación; confirma la medición.");else if(d>=0.5&&a<-1)dx.push(n.charAt(0).toUpperCase()+n.slice(1)+" mejoró de z "+zFmt(a)+" a z "+zFmt(b)+": hay recuperación.")};
-  if(!imp)cz(u.zte,cur.zte,"talla para la edad");cz(u.zag,cur.zag,cur.mm<60.5?"peso para la talla":"IMC para la edad");
-  // canal estable en talla baja
+function tendencia(H,cur){const dx=[],val=[],acc=[];if(!H.length)return{dx,val,acc,txt:""};const u=H[H.length-1],meses=Math.max(0,cur.mm-u.mm),txtM=meses>=1?Math.round(meses)+(Math.round(meses)===1?" mes":" meses"):Math.max(1,Math.round(meses*30.4))+" días";
+  const L=["Comparado con "+u.cons+" ("+fCorta(u.fecha)+", hace "+txtM+")"],r1=x=>coma(Math.abs(Math.round(x*10)/10)),sg=x=>x>=0?"+":"−";
+  let impT=false,impP=false;
+  // 1) talla: no puede bajar ni subir más de lo biológicamente posible
+  if(u.t!=null&&cur.t!=null){const d=cur.t-u.t,velA=meses>0?d/meses*12:0,maxV=cur.mm<6?45:cur.mm<12?30:cur.mm<24?18:cur.mm<48?13:cur.mm<228?12:2,dz=(cur.zte!=null&&u.zte!=null)?cur.zte-u.zte:0;
+    L.push("talla "+sg(d)+r1(d)+" cm");
+    if(d<-1.5){impT=true;dx.push("La talla de hoy es "+r1(d)+" cm menor que la de "+fCorta(u.fecha)+": la talla no disminuye, una de las dos medidas está mal. Repítela antes de sacar conclusiones.")}
+    else if(d>0&&meses>=1&&(velA>maxV*1.3||dz>2)){impT=true;dx.push("Cambio de talla imposible: +"+r1(d)+" cm en "+txtM+" ("+r1(velA)+" cm/año; a esta edad se crece como máximo unos "+Math.round(maxV)+" cm por año). Una de las dos medidas está mal, la de hoy o la de "+fCorta(u.fecha)+": repítela antes de sacar conclusiones.")}
+    else if(meses>=6&&cur.mm>=36&&cur.mm<132){const v=d/meses*12;L.push("velocidad de crecimiento "+r1(v)+" cm/año");if(v<4){dx.push("Velocidad de crecimiento baja: "+r1(v)+" cm por año (lo esperado entre los 3 años y la pubertad es al menos 4 a 5 cm por año).");val.push("Una velocidad baja, aunque la talla aún esté en rango, sugiere un problema activo (nutricional, hipotiroidismo, enfermedad crónica): pediatría.")}}}
+  // 2) peso: cambios fuera de lo posible
+  if(u.p!=null&&cur.p!=null){const d=cur.p-u.p,pct=d/u.p*100;L.push("peso "+sg(d)+coma(Math.abs(Math.round(d*100)/100))+" kg ("+sg(pct)+r1(pct)+" %)");
+    const lim=u.mm<24?null:meses<3?25:meses<12?45:null,kgA=meses>=3?d/meses*12:0,maxKg=cur.mm<24?null:cur.mm<120?8:cur.mm<192?14:8,dzA=(cur.zag!=null&&u.zag!=null)?cur.zag-u.zag:0;
+    if((lim&&Math.abs(pct)>lim)||(maxKg&&kgA>maxKg*1.2&&pct/Math.max(meses,1)*12>35)||(Math.abs(dzA)>3&&meses<=24)){impP=true;dx.push("Cambio de peso improbable: "+sg(pct)+r1(pct)+" % en "+txtM+". Revisa la báscula, la ropa y que el peso anterior sea de este mismo niño.")}
+    else if(d<0&&cur.mm<216){dx.push("Perdió "+coma(Math.abs(Math.round(d*100)/100))+" kg desde el control anterior ("+fCorta(u.fecha)+"): en un niño en crecimiento la pérdida de peso es siempre una alerta.");val.push("Pregunta qué pasó en ese tiempo: diarrea, fiebre, malaria, cambios en la alimentación o en quién lo cuida.")}
+    else if(Math.abs(d)<0.05&&meses>=2&&cur.mm<24)dx.push("No ganó peso en "+txtM+": estancamiento del peso (en menores de 2 años debe subir en cada control).")}
+  // 3) cambio de z (cruce de canales), solo con medidas confiables
+  const cz=(a,b,n,esTalla)=>{if(a==null||b==null)return;const d=b-a;L.push(n+" z "+zFmt(a)+" → "+zFmt(b));
+    if(d<=-1)dx.push(n.charAt(0).toUpperCase()+n.slice(1)+" bajó "+r1(d)+" DE (de z "+zFmt(a)+" a z "+zFmt(b)+") desde "+fCorta(u.fecha)+": cruzó hacia abajo al menos una línea de la gráfica; es un deterioro reciente"+(b>=-2?" aunque la clasificación actual parezca leve.":"."));
+    else if(d>=1&&esTalla)dx.push("La talla para la edad subió "+r1(d)+" DE desde "+fCorta(u.fecha)+": crecimiento de recuperación; confirma la medición.");
+    else if(d>=1&&b>1)dx.push(n.charAt(0).toUpperCase()+n.slice(1)+" subió "+r1(d)+" DE desde "+fCorta(u.fecha)+": ganancia de peso acelerada.");
+    else if(d>=0.5&&a<-1)dx.push(n.charAt(0).toUpperCase()+n.slice(1)+" mejoró de z "+zFmt(a)+" a z "+zFmt(b)+": hay recuperación.")};
+  if(!impT)cz(u.zte,cur.zte,"talla para la edad",1);
+  if(!impT&&!impP)cz(u.zag,cur.zag,cur.mm<60.5?"peso para la talla":"IMC para la edad",0);
+  if(impT||impP)val.push("Mientras no se corrija la medida, no interpretes la evolución: el IMC y el peso para la talla dependen de la talla y del peso.");
+  // 4) canal estable tras una caída (solo si no hubo deterioro reciente)
   const S=H.filter(h=>h.zte!=null).map(h=>({z:h.zte,f:h.fecha,mm:h.mm}));if(cur.zte!=null)S.push({z:cur.zte,f:null,mm:cur.mm});
-  if(cur.zte!=null&&cur.zte<-2&&S.length>=3){const i2=S.findIndex(q=>q.z<-2);const after=S.slice(i2);const est=after.every(q=>Math.abs(q.z-cur.zte)<0.5)&&(cur.mm-S[i2].mm)>=12;const iok=(()=>{for(let j=i2-1;j>=0;j--)if(S[j].z>=-1)return j;return -1})();
+  if(!impT&&cur.zte!=null&&cur.zte<-2&&S.length>=3&&!dx.some(x=>/talla para la edad bajó/i.test(x))){const i2=S.findIndex(q=>q.z<-2);const after=S.slice(i2);const est=after.every(q=>Math.abs(q.z-cur.zte)<0.5)&&(cur.mm-S[i2].mm)>=12;const iok=(()=>{for(let j=i2-1;j>=0;j--)if(S[j].z>=-1)return j;return -1})();
     if(est){dx.push((iok>=0?"La talla cayó entre los "+edadTxtM(Math.round(S[iok].mm))+" (z "+zFmt(S[iok].z)+") y los "+edadTxtM(Math.round(S[i2].mm))+" (z "+zFmt(S[i2].z)+"); desde entonces ":"La talla baja ")+"se mantiene estable en el mismo canal ("+edadTxtM(Math.round(cur.mm-S[i2].mm))+"): es un déficit antiguo que ya no está empeorando. La meta es que siga creciendo a velocidad normal y, con buena alimentación, recupere algo de canal.");
       val.unshift("Busca qué pasó en el periodo de la caída (infecciones, malaria, diarreas, falta de alimentos, cambios en la familia): esa es la causa más probable del retraso en talla.")}}
-  // antecedentes en notas
-  return {dx,val,acc,txt:L.join(", ")+"."}}
-
+  return {dx,val,acc,txt:L.join(", ")+".",imp:impT||impP,impT,impP}}
 function nutInterp(R,mm,pb){const z=k=>{const x=R.find(r=>r.k===k);return x&&!x.imp?x.z:null},m5=mm!=null&&mm<60.5,te=z("talla"),pt=z("pt"),pe=z("peso"),im=z("imc"),pc=z("pc"),dx=[],val=[],acc=[];
   if(R.some(r=>r.imp))return {dx:["Hay valores improbables: no se puede interpretar hasta corregir la medida o la fecha de nacimiento."],val:["Repite peso y talla con la técnica correcta y confirma la fecha de nacimiento en el registro civil o el carné."],acc:[]};
   const aguda=m5?pt:im,agSev=aguda!=null&&aguda<-3||(m5&&pb!=null&&mm>=6&&pb<11.5),agMod=!agSev&&(aguda!=null&&aguda<-2||(m5&&pb!=null&&mm>=6&&pb<12.5)),cron=te!=null&&te<-2,exc=aguda!=null&&aguda>2||(im!=null&&im>(m5?2:1));
@@ -2456,10 +2463,12 @@ function nutInterp(R,mm,pb){const z=k=>{const x=R.find(r=>r.k===k);return x&&!x.
   if(exc){dx.push((cron?"Doble carga nutricional: talla baja con exceso de peso. ":"")+"Exceso de peso ("+(aguda!=null&&aguda>3?"obesidad":aguda!=null&&aguda>2?(m5?"sobrepeso":"obesidad"):"sobrepeso")+").")}
   if(!dx.length&&te!=null&&te<-1)dx.push("Riesgo de talla baja (z "+zFmt(te)+"): aún no es retraso en talla, pero la tendencia hay que vigilarla.");
   if(!dx.length&&aguda!=null&&aguda<-1)dx.push("Riesgo de "+(m5?"desnutrición aguda":"delgadez")+" ("+lbl+" z "+zFmt(aguda)+").");
+  if(!dx.length&&m5&&aguda!=null&&aguda>1)dx.push("Riesgo de sobrepeso ("+lbl+" z "+zFmt(aguda)+"): vigila la alimentación y la ganancia de peso.");
+  if(!dx.length&&m5&&pe!=null&&pe<-1)dx.push("Riesgo de desnutrición global (peso para la edad z "+zFmt(pe)+"): revisa la alimentación y vigila la tendencia.");
   if(m5&&pe!=null&&pe<-2&&!agSev&&!agMod&&!cron)dx.push("Desnutrición global (peso para la edad z "+zFmt(pe)+") sin déficit claro en talla ni en peso para la talla: revisa las medidas; el peso para la edad mezcla los dos componentes.");
   if(pc!=null&&Math.abs(pc)>2)dx.push((pc<-2?"Microcefalia probable":"Macrocefalia probable")+" (perímetro cefálico z "+zFmt(pc)+"): no es un problema nutricional; requiere valoración del neurodesarrollo.");
   if(!dx.length)dx.push("Estado nutricional adecuado para la edad en los indicadores medidos.");
-  const hay=agSev||agMod||cron||exc||(te!=null&&te<-1)||(aguda!=null&&aguda<-1);
+  const hay=agSev||agMod||cron||exc||(te!=null&&te<-1)||(aguda!=null&&(aguda<-1||(m5&&aguda>1)))||(m5&&pe!=null&&pe<-1);
   if(hay){val.push("Repite peso y talla: báscula en cero, niño sin ropa ni zapatos, talla con tallímetro"+(mm!=null&&mm<24?" acostado (infantómetro, dos personas)":" de pie, talones, glúteos y cabeza contra la superficie")+". Confirma la fecha de nacimiento.");
     val.push("Mira la tendencia en el carné o en las consultas previas: si la curva viene cayendo o aplanada, el problema es real y está activo; si siempre ha estado en el mismo canal, puede ser constitucional.")}
   if(agSev||agMod){val.push("Examen: edema con fóvea en ambos pies (si hay, es desnutrición aguda severa sin importar el peso), emaciación (costillas y glúteos), cambios en cabello y piel, palidez de palmas, signos de deshidratación.");
