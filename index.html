@@ -936,7 +936,7 @@ function checks(m){try{return JSON.parse(S.get(key(m,"chk"))||"{}")}catch(e){ret
 function hasDraft(m){return !!(S.get(key(m,"dict"))||S.get(key(m,"nota"))||Object.keys(checks(m)).length)}
 
 /* ---------- PANEL ---------- */
-const VERSION_APP="2026-10-11 v118";
+const VERSION_APP="2026-10-11 v119";
 function home(){
   stopRec();st.view="home";
   const rm=["precon","prenatal","parto","rn","ive"],rp=["pinf","inf","adol","juv","adul","vej"];
@@ -1069,13 +1069,15 @@ function fLarga(iso){const d=pD(iso);return d?d.getUTCDate()+" de "+MES_TXT[d.ge
 function restarEdad(fe,a,m,d){const x=pD(fe);if(!x)return"";const y=new Date(Date.UTC(x.getUTCFullYear()-a,x.getUTCMonth()-m,1));const dim=new Date(Date.UTC(y.getUTCFullYear(),y.getUTCMonth()+1,0)).getUTCDate();y.setUTCDate(Math.min(x.getUTCDate(),dim));y.setUTCDate(y.getUTCDate()-d);return y.toISOString().slice(0,10)}
 function edadExacta(fn,fe){const a=pD(fn),b=pD(fe);if(!a||!b||a>b)return null;let y=b.getUTCFullYear()-a.getUTCFullYear(),m=b.getUTCMonth()-a.getUTCMonth(),d=b.getUTCDate()-a.getUTCDate();if(d<0){m--;d+=new Date(Date.UTC(b.getUTCFullYear(),b.getUTCMonth(),0)).getUTCDate()}if(m<0){y--;m+=12}return {y,m,d}}
 function edadBoxHTML(id){const fe=S.get(key(id,"fecha"))||hoy();return `<div class="bfl" id="eb-w" style="grid-column:1/-1;border:1px solid var(--line);border-radius:12px;padding:10px 12px">
-  <span>Edad exacta el día de la consulta (${esc(fCorta(fe))}) · puedes corregirla aquí o en la fecha de nacimiento</span>
+  <span>Edad exacta el día de la consulta · puedes corregirla aquí o en la fecha de nacimiento</span>
+  <label style="display:flex;align-items:center;gap:6px;margin-top:6px;font-size:.9rem">Fecha de esta consulta <input id="eb-fe" type="date" value="${esc(fe)}" style="width:auto"></label>
   <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:6px">
    <label style="display:flex;align-items:center;gap:4px"><input id="eb-a" type="number" inputmode="numeric" min="0" max="120" style="width:72px"> años</label>
    <label style="display:flex;align-items:center;gap:4px"><input id="eb-m" type="number" inputmode="numeric" min="0" max="11" style="width:64px"> meses</label>
    <label style="display:flex;align-items:center;gap:4px"><input id="eb-d" type="number" inputmode="numeric" min="0" max="30" style="width:64px"> días</label></div>
   <p class="note-src" id="eb-t" style="margin:6px 0 0;font-weight:600;color:var(--accent)"></p></div>`}
-function edadBoxWire(id,box){const fi=box.querySelector('[data-f="FECHA NACIMIENTO"]');if(!fi||!$("eb-w"))return;const fe=S.get(key(id,"fecha"))||hoy();
+function edadBoxWire(id,box){const fi=box.querySelector('[data-f="FECHA NACIMIENTO"]');if(!fi||!$("eb-w"))return;let fe=S.get(key(id,"fecha"))||hoy();
+  $("eb-fe").addEventListener("change",()=>{const v=$("eb-fe").value;if(!v)return;if(v>hoy()){$("eb-fe").value=fe;return}fe=v;S.set(key(id,"fecha"),v);pinta()});
   const pinta=()=>{const fn=fi.value,e=edadExacta(fn,fe);if(e){$("eb-a").value=e.y;$("eb-m").value=e.m;$("eb-d").value=e.d}else{$("eb-a").value="";$("eb-m").value="";$("eb-d").value=""}
     const r=id&&M[id]?rutasPara(e?e.y:null,(box.querySelector('[data-f="GENERO"]')||{}).value):[];
     $("eb-t").textContent=e?"Nació el "+fLarga(fn)+". "+(()=>{const q=[];if(e.y)q.push(e.y+(e.y===1?" año":" años"));if(e.m)q.push(e.m+(e.m===1?" mes":" meses"));if(e.d||!q.length)q.push(e.d+(e.d===1?" día":" días"));return q.length>1?q.slice(0,-1).join(", ")+" y "+q[q.length-1]:q[0]})()+" el día de la consulta."+(r.length&&!r.includes(id)&&id!=="rn"&&M[id].route!=="rm"?" Con esa edad le corresponde: "+r.map(x=>M[x]?M[x].title:x).join(" o ")+".":""):fn?"La fecha de nacimiento es posterior a la consulta: revísala.":"Escribe la fecha de nacimiento o la edad."};
@@ -3059,7 +3061,7 @@ function pacienteAtencion(mod,com,d,regid,ext){const ps=pacientes(),ident={};ID_
   const k=pkey(ident);let x=ps[k];if(!x){const n=Object.values(ps).reduce((m,y)=>Math.max(m,y.n||0),0)+1;x=ps[k]={n,creado:hoy(),ident:{},aten:[],pend:[]}}
   {const P0=pac();if(P0.__mad&&pkey(P0)===k)ident.__mad=P0.__mad}Object.assign(x.ident,ident);const fe=d["FECHA"]||hoy();
   const nota=mod?(S.get(key(mod,"nota"))||ivCompose(mod)||""):(d["OBSERVACION"]||"");
-  const a={antro:{p:d["PESO"]&&d["PESO"]!=="N/A"?d["PESO"]:null,t:d["TALLA"]&&d["TALLA"]!=="N/A"?d["TALLA"]:null},regid,fecha:fe,mod:mod||"",title:mod?M[mod].title:"Registro sin consulta",nota:String(nota).slice(0,4000),prox:d["FECHA PROXIMO CONTROL"]&&d["FECHA PROXIMO CONTROL"]!=="N/A"?d["FECHA PROXIMO CONTROL"]:"",mot:d["MOTIVO PROXIMO CONTROL"]||""};
+  const _ea=edadExacta(d["FECHA NACIMIENTO"]||ident["FECHA NACIMIENTO"],fe);const a={edadReg:_ea?(_ea.y?_ea.y+(_ea.y===1?" año":" años"):_ea.m?_ea.m+(_ea.m===1?" mes":" meses"):_ea.d+(_ea.d===1?" día":" días")):(ident.__edad?ident.__edad+" años":""),antro:{p:d["PESO"]&&d["PESO"]!=="N/A"?d["PESO"]:null,t:d["TALLA"]&&d["TALLA"]!=="N/A"?d["TALLA"]:null},regid,fecha:fe,mod:mod||"",title:mod?M[mod].title:"Registro sin consulta",nota:String(nota).slice(0,4000),prox:d["FECHA PROXIMO CONTROL"]&&d["FECHA PROXIMO CONTROL"]!=="N/A"?d["FECHA PROXIMO CONTROL"]:"",mot:d["MOTIVO PROXIMO CONTROL"]||""};
   if(mod==="prenatal"){try{const r=calcular({fum:S.get(key("prenatal","eg_fum"))||"",fum_confiable:!S.get(key("prenatal","eg_nofum")),eco_fecha:S.get(key("prenatal","eg_ecof"))||"",eco_semanas:(S.get(key("prenatal","eg_ecos"))||"")===""?null:S.get(key("prenatal","eg_ecos")),eco_dias:S.get(key("prenatal","eg_ecod"))||""},fe);if(r.eg!=null)a.eg=r.eg;a.fum=S.get(key("prenatal","eg_fum"))||"";a.primera=PRIM(prenA)}catch(e){}}
   else{const old=x.aten.find(z=>z.regid===regid);if(old){["eg","fum","primera"].forEach(k=>{if(old[k]!=null&&a[k]==null)a[k]=old[k]})}}
   x.aten=x.aten.filter(z=>z.regid!==regid).concat([a]).sort((p,q)=>p.fecha<q.fecha?-1:1);
@@ -3253,7 +3255,7 @@ function ejemploDamian(){const FN="2019-09-25",sx="M",ident={"NOMBRE COMPLETO":"
     const ed=m<1?Math.round(m*30.4)+" días":edadTxtM(m);
     const nota=(mod==="rn"?"Antropometría al nacer: peso "+Math.round(p*1000)+" g, talla "+coma(t)+" cm, perímetro cefálico "+coma(pc)+" cm.":"Antropometría a los "+ed+": peso "+coma(p)+" kg, talla "+coma(t)+" cm"+(pc!=null?", perímetro cefálico "+coma(pc)+" cm":"")+".")+" "+rel+" [EJEMPLO FICTICIO]";
     const title=M[mod].title;nOrd[title]=(nOrd[title]||0)+1;
-    aten.push({regid:"ej-dam-"+i,fecha:fe,mod,title,cons:title+" "+nOrd[title],nota,antro:{p:mod==="rn"?null:p,t},prox:"",mot:"",ejemplo:1})});
+    aten.push({edadReg:ed,regid:"ej-dam-"+i,fecha:fe,mod,title,cons:title+" "+nOrd[title],nota,antro:{p:mod==="rn"?null:p,t},prox:"",mot:"",ejemplo:1})});
   const ps=pacientes(),k=pkey(ident),old=ps[k],n=old?old.n:Object.values(ps).reduce((a,y)=>Math.max(a,y.n||0),0)+1;
   ps[k]={n,creado:aten[0].fecha,ident,aten,pend:[],ejemplo:1};setPacientes(ps);
   setPac(Object.assign({},ident));return k}
@@ -3288,7 +3290,7 @@ function verPaciente(k){const ps=pacientes(),x=ps[k];if(!x)return verPacientes()
    <p class="note-src" style="margin:6px 0 0">${x.aten.length} ${x.aten.length===1?"atención":"atenciones"} desde ${esc(ff(x.aten[0]?x.aten[0].fecha:x.creado))}${dias!=null?" · en promedio cada "+dias+" días":""}.</p></section>
   <section class="tool"><h3>Pendientes</h3><div id="pk-pen">${x.pend.length?pendGrupos(x,"",false).map(g=>`<div style="margin:6px 0"><p class="lab" style="margin:0 0 2px">${esc(g.t)}</p>${g.it.map(z=>pendItemHTML(z,true)).join("")}</div>`).join(""):`<p class="note-src" style="margin:0">No tiene pendientes.</p>`}</div>
    <div class="pdrow" style="margin-top:8px"><input id="pk-np" placeholder="Agregar pendiente: ej. traer carné de vacunas"><button class="btn" id="pk-add" style="flex:none">Agregar</button></div></section>
-  <section class="tool"><h3>Historial</h3>${x.aten.length?[...x.aten].reverse().map(a=>`<details class="sec"><summary><span>${esc(ff(a.fecha))} · ${esc(a.cons||a.title)}${a.prox?" · próximo "+esc(ff(a.prox)):""}</span></summary><pre style="white-space:pre-wrap;padding:0 14px 12px;margin:0;font-family:var(--f-body);font-size:.88rem">${esc(a.nota||"(sin nota)")}</pre></details>`).join(""):`<p class="note-src" style="margin:0">Sin atenciones.</p>`}
+  <section class="tool"><h3>Historial</h3>${x.aten.length?[...x.aten].reverse().map(a=>`<details class="sec"><summary><span>${esc(ff(a.fecha))} · ${esc(a.cons||a.title)}${(()=>{const e=a.edadReg||(()=>{const q=edadExacta(I["FECHA NACIMIENTO"],a.fecha);return q?(q.y?q.y+" años":q.m?q.m+" meses":q.d+" días"):""})();return e?" · a los "+esc(e):""})()}${a.prox?" · próximo "+esc(ff(a.prox)):""}</span></summary><pre style="white-space:pre-wrap;padding:0 14px 12px;margin:0;font-family:var(--f-body);font-size:.88rem">${esc(a.nota||"(sin nota)")}</pre></details>`).join(""):`<p class="note-src" style="margin:0">Sin atenciones.</p>`}
    <details class="sec" id="pk-ant"><summary><span>Agregar una atención anterior (de otra historia)</span></summary><div class="bgrid" style="padding:0 14px 14px">
     <label class="bfl"><span>Fecha</span><input type="date" id="pa-f"></label>
     <label class="bfl"><span>Atención</span><select id="pa-m"><option value="">Otra</option>${Object.keys(M).map(m=>`<option value="${m}">${esc(M[m].title)}</option>`).join("")}</select></label>
