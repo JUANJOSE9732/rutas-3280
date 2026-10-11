@@ -936,7 +936,7 @@ function checks(m){try{return JSON.parse(S.get(key(m,"chk"))||"{}")}catch(e){ret
 function hasDraft(m){return !!(S.get(key(m,"dict"))||S.get(key(m,"nota"))||Object.keys(checks(m)).length)}
 
 /* ---------- PANEL ---------- */
-const VERSION_APP="2026-10-11 v125";
+const VERSION_APP="2026-10-11 v126";
 function home(){
   stopRec();st.view="home";
   const rm=["precon","prenatal","parto","rn","ive"],rp=["pinf","inf","adol","juv","adul","vej"];
@@ -2548,6 +2548,53 @@ const _cvTextoA=cvDesdeTexto;cvDesdeTexto=function(tipo,t){return tipo==="antrop
 (function(){const CH=["Normal|IMC normal (18,5 a 24,9); sin riesgo por perímetro de cintura; tensión arterial normal.","Bajo peso|IMC menor de 18,5: bajo peso; se indaga pérdida de peso y causas, se remite a medicina.","Sobrepeso|IMC de 25 a 29,9: sobrepeso; consejería en alimentación y actividad física.","Obesidad|IMC de 30 o más: obesidad; se remite a medicina para valorar riesgo cardiometabólico."];
  const PA={t:"Cómo valorar (Res. 2465 de 2016)",p:["Peso con ropa liviana y sin zapatos; talla de pie.","IMC (OMS): menos de 18,5 bajo peso; 18,5 a 24,9 normal; 25 a 29,9 sobrepeso; 30 o más obesidad.","Perímetro de cintura en el punto medio entre la última costilla y la cresta ilíaca, al final de una espiración: riesgo desde 80 cm en mujeres y 90 cm en hombres.","Toma la tensión arterial en reposo; si está elevada, repite y remite."],r:"",b:""};
  [["juv","Estado nutricional, TA, hábitos"],["adul","Estado nutricional, TA, perímetro abdominal"],["vej","Estado nutricional, TA"]].forEach(([m,l])=>{IVX[m+"::"+l]={campos:"antropoA",keepc:1,c:CH,pauta:PA}})})();
+/* ---------- Cuadro de vacunación (vacuna × edad) con chequeo y sugeridos, guardado por persona ---------- */
+const VACS=[
+ ["bcg","BCG","RN",0,"i","Única"],["hbrn","Hepatitis B","RN",0,"i","Del recién nacido",1],
+ ["pen1","Pentavalente o hexavalente","2 m",2,"i","1.ª",84],["pen2","Pentavalente o hexavalente","4 m",4,"i","2.ª",84],["pen3","Pentavalente o hexavalente","6 m",6,"i","3.ª",84],
+ ["pol1","Polio","2 m",2,"i","1.ª"],["pol2","Polio","4 m",4,"i","2.ª"],["pol3","Polio","6 m",6,"i","3.ª"],["polr1","Polio","18 m",18,"i","1.er refuerzo"],["polr2","Polio","5 a",60,"i","2.º refuerzo"],
+ ["rot1","Rotavirus","2 m",2,"i","1.ª",4],["rot2","Rotavirus","4 m",4,"i","2.ª",8],
+ ["neu1","Neumococo","2 m",2,"i","1.ª",60],["neu2","Neumococo","4 m",4,"i","2.ª",60],["neur","Neumococo","12 m",12,"i","Refuerzo",60],
+ ["flu1","Influenza","6 m",6,"i","1.ª",24],["flu2","Influenza","7 m",7,"i","2.ª",24],["flu3","Influenza","12 m",12,"i","Anual hasta 23 m",24],
+ ["srp1","Triple viral (SRP)","12 m",12,"i","1.ª"],["srp2","Triple viral (SRP)","18 m",18,"i","2.ª"],
+ ["var1","Varicela","12 m",12,"i","1.ª"],["var2","Varicela","5 a",60,"i","2.ª"],
+ ["hepa","Hepatitis A","12 m",12,"i","Única"],
+ ["dptr1","DPT","18 m",18,"i","1.er refuerzo",84],["dptr2","DPT","5 a",60,"i","2.º refuerzo",84],
+ ["fa","Fiebre amarilla","18 m",18,"i","Única (Vaupés: zona de riesgo)"],
+ ["vph","VPH","9 a",108,"e","Según PAI vigente (niñas; revisa ampliación a niños)",216],
+ ["td","Td (tétanos y difteria)","10 a+",120,"e","Según antecedente; refuerzo cada 10 años"],
+ ["faa","Fiebre amarilla","1 a 59 a",12,"a","Única, si no la tiene",708],
+ ["tda","Td (tétanos y difteria)","Adulto",216,"a","Esquema completo; refuerzo cada 10 años"],
+ ["srpa","Sarampión y rubéola (SR)","Antes del embarazo",120,"p","Si no tiene 2 dosis o no tuvo las enfermedades"],
+ ["hba","Hepatitis B","Adulto",216,"p","Si no está vacunada y tiene riesgo"],
+ ["flug","Influenza","Gestación",null,"g","Desde la semana 14"],["tdap","Tdap","Gestación",null,"g","Desde la semana 26"],["tdg","Td (tétanos y difteria)","Gestación",null,"g","Según antecedente"],
+ ["flu60","Influenza","60 a y más",720,"a","Anual"]];
+const VAC_COLS=["RN","2 m","4 m","6 m","7 m","12 m","18 m","5 a","9 a","10 a+","1 a 59 a","Antes del embarazo","Adulto","Gestación","60 a y más"];
+function vacGrupos(id){return {rn:["rn"],pinf:["i"],inf:["i","e"],adol:["e","a"],juv:["a"],adul:["a"],vej:["a"],precon:["e","a","p"],prenatal:["g","a"],parto:["g"],ive:["a"]}[id]||["i","e","a"]}
+function vacKey(){try{return "vac::"+pkey(pac())}catch(e){return "vac::x"}}
+function vacGet(){try{return JSON.parse(S.get(vacKey())||"{}")||{}}catch(e){return{}}}
+function vacLista(id){const g=vacGrupos(id),P=pac();return VACS.filter(v=>g.includes("rn")?v[2]==="RN":g.includes(v[4])).filter(v=>!(v[4]==="p"||v[4]==="g")||P["GENERO"]!=="M")}
+function vacEstado(id){const L=vacLista(id),st=vacGet(),m=edadMesesMod(id),y=m==null?null:m/12,R=[];
+  L.forEach(v=>{const [k,n,col,mm,g,d,max]=v;let le=false;if(g==="g")le=["prenatal","parto"].includes(id);else if(mm!=null&&m!=null)le=m>=mm&&(max==null||m<max);if(k==="flu60")le=m!=null&&m>=720;
+    R.push({k,n,col,d,le,s:st[k]})});return R}
+WIDGET.vacunas={html:id=>{const R=vacEstado(id),cols=VAC_COLS.filter(c=>R.some(r=>r.col===c)),rows=[...new Set(R.map(r=>r.n))];
+  const sym={1:"✔",2:"✚",0:"✘"},bg=r=>r.s===1?"#d8efe0":r.s===2?"#d6e6fb":r.s===0?"#fde2e1":r.le?"#fff4cc":"transparent";
+  return `<p class="note-src" style="margin:0 0 6px">Toca cada casilla según el carné: <b>✔</b> la tiene · <b>✚</b> se aplica hoy · <b>✘</b> no la tiene · vacía: sin dato. En amarillo: le corresponde por edad. Se guarda en la persona y se ve en todos los módulos.</p>
+   <div style="overflow:auto;border:1px solid var(--line);border-radius:12px"><table style="border-collapse:collapse;font-size:.78rem;min-width:100%">
+   <thead><tr><th style="position:sticky;left:0;background:var(--accent-soft);text-align:left;padding:6px 8px;z-index:1">Vacuna \\ Edad</th>${cols.map(c=>`<th style="background:var(--accent-soft);padding:6px 6px;white-space:nowrap">${esc(c)}</th>`).join("")}</tr></thead>
+   <tbody>${rows.map(n=>`<tr><td style="position:sticky;left:0;background:var(--card,#fff);padding:6px 8px;font-weight:600;white-space:nowrap;border-top:1px solid var(--line)">${esc(n)}</td>${cols.map(c=>{const r=R.find(x=>x.n===n&&x.col===c);if(!r)return `<td style="border-top:1px solid var(--line)"></td>`;
+     return `<td style="border-top:1px solid var(--line);text-align:center;padding:2px"><button type="button" data-vk="${r.k}" title="${esc(r.d)}" style="width:100%;min-width:52px;border:1px solid var(--line);border-radius:8px;padding:6px 2px;background:${bg(r)};font-size:.95rem;cursor:pointer">${r.s!=null?sym[r.s]:"&nbsp;"}<small style="display:block;font-size:.6rem;opacity:.75">${esc((w=>/^(del|desde|según|si|esquema|anual)$/i.test(w)?(r.k==="hbrn"?"RN":/^anual/i.test(w)?"Anual":""):w)(r.d.split(/[ ,;]/)[0]))}</small></button></td>`}).join("")}</tr>`).join("")}</tbody></table></div>
+   <div class="box" id="vac-res" style="margin-top:10px"></div>`},
+ resumen:id=>{const R=vacEstado(id),tiene=R.filter(r=>r.s===1),hoyA=R.filter(r=>r.s===2),noT=R.filter(r=>r.le&&r.s===0),sd=R.filter(r=>r.le&&r.s==null),no=noT.concat(sd),rev=R.some(r=>r.s!=null),dd=r=>{const t=r.d.replace(/\s*\(.*\)/,"").replace(/\.$/,"");return t.charAt(0).toLowerCase()+t.slice(1)},nf=r=>r.n+" ("+dd(r)+")";
+  if(!rev)return {tiene,hoyA,no,noT,sd,rev,txt:""};
+  return {tiene,hoyA,no,noT,sd,rev,txt:(R.some(r=>r.s!=null)?"Se revisa el esquema de vacunación con el carné (PAI). ":"")+(tiene.length?"Tiene: "+tiene.map(nf).join(", ")+". ":"")+(hoyA.length?"Se aplica hoy: "+hoyA.map(nf).join(", ")+"; se registra en el carné y en PAIWEB. ":"")+(noT.length?"No tiene y le corresponde: "+noT.map(nf).join(", ")+"; se programa su aplicación. ":"")+(sd.length?"Sin dato en el carné: "+sd.map(nf).join(", ")+"; se verifica en PAIWEB. ":"")+(!no.length&&R.some(r=>r.le)?"Esquema completo para la edad. ":"")}},
+ txt:id=>WIDGET.vacunas.resumen(id).txt.trim(),
+ wire:(id,save)=>{const up=()=>{const r=WIDGET.vacunas.resumen(id),b=$("vac-res");b.innerHTML=`<h3>${!r.rev?"Marca las vacunas según el carné":r.no.length?(r.no.length===1?"Le falta 1 dosis":"Le faltan "+r.no.length+" dosis")+" o falta el dato":"Esquema al día para su edad"}</h3>${r.hoyA.length?`<p style="margin:4px 0"><b>Aplicar hoy:</b> ${esc(r.hoyA.map(x=>x.n+" "+x.d.replace(/\s*\(.*\)/,"").toLowerCase()).join(", "))}</p>`:""}${r.noT.length?`<p style="margin:4px 0"><b>Sugerido aplicar (no la tiene y le corresponde):</b> ${esc(r.noT.map(x=>x.n+" "+x.d.replace(/\s*\(.*\)/,"").toLowerCase()).join(", "))}</p>`:""}${r.sd.length?`<p style="margin:4px 0"><b>Le corresponden por edad (sin dato aún):</b> ${esc(r.sd.map(x=>x.n+" "+x.d.replace(/\s*\(.*\)/,"").toLowerCase()).join(", "))}</p>`:""}<p class="note-src" style="margin:4px 0 0">Edades según el esquema PAI de Colombia; confirma con el lineamiento vigente. Si un esquema se atrasó, no se reinicia: se continúa donde quedó.</p>`;save()};
+  document.querySelectorAll("[data-vk]").forEach(b=>b.onclick=()=>{const v=vacGet(),k=b.dataset.vk,nx={undefined:1,1:2,2:0,0:undefined}[v[k]];if(nx===undefined)delete v[k];else v[k]=nx;S.set(vacKey(),JSON.stringify(v));
+   const R=vacEstado(id),r=R.find(x=>x.k===k),sym={1:"✔",2:"✚",0:"✘"};b.style.background=r.s===1?"#d8efe0":r.s===2?"#d6e6fb":r.s===0?"#fde2e1":r.le?"#fff4cc":"transparent";b.firstChild.nodeValue=r.s!=null?sym[r.s]:" ";up()});up()}};
+const VAC_RE=/^(esquema de vacunaci|vacunaci[oó]n seg|vacunas del embarazo|vacunas pendientes de la gestaci|vacunas bcg)/i;
+const _ivForVac=ivFor;ivFor=function(id){const q=_ivForVac(id);if(q&&!q.some(x=>x&&x.widget==="vacunas")){const x=q.find(x=>x&&x.l&&VAC_RE.test(x.l));if(x){x.widget="vacunas";x.c=[];x.dyn=null}}return q};
+
 const _cvTextoP=cvDesdeTexto;cvDesdeTexto=function(tipo,t){return _cvTextoP(tipo==="vitalesP"?"vitales":tipo,t)};
 const _cvF=cvCalc;cvCalc=function(tipo,v){if(tipo!=="formula")return _cvF(tipo,v);
   const n=k=>{const x=nv(v[k]);return x==null?null:Math.round(x)},g=n("g"),p=n("p"),c=n("c"),a=n("a"),e=n("e"),mo=n("m"),vi=n("v"),o={},al=[],m={};
