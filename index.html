@@ -936,7 +936,7 @@ function checks(m){try{return JSON.parse(S.get(key(m,"chk"))||"{}")}catch(e){ret
 function hasDraft(m){return !!(S.get(key(m,"dict"))||S.get(key(m,"nota"))||Object.keys(checks(m)).length)}
 
 /* ---------- PANEL ---------- */
-const VERSION_APP="2026-10-11 v133";
+const VERSION_APP="2026-10-11 v134";
 function home(){
   stopRec();st.view="home";
   const rm=["precon","prenatal","parto","rn","ive"],rp=["pinf","inf","adol","juv","adul","vej"];
@@ -2770,6 +2770,148 @@ const _pendDeCons=pendDe;pendDe=function(mod){const q=ivFor(mod),labs=q.filter(x
 /* Posparto: chips específicos en lugar de Normal/Alterado */
 Object.assign(IVX["parto::Involución uterina y loquios"]||(IVX["parto::Involución uterina y loquios"]={}),{c:["Normal|Útero contraído, no doloroso, involucionando según los días posparto (al día 5 cerca de la mitad entre el ombligo y el pubis); loquios rojos u oscuros en cantidad normal, sin mal olor.","Subinvolución|Útero blando o más alto de lo esperado para los días posparto; se remite a medicina.","Útero doloroso con fiebre|Útero doloroso a la palpación, con fiebre o loquios fétidos: sospecha de endometritis; se remite urgente.","Sangrado aumentado|Sangrado abundante (empapa más de una toalla por hora) o con coágulos grandes: hemorragia posparto tardía; se activa traslado urgente."]});
 Object.assign(IVX["parto::Periné, episiotomía o herida de cesárea"]||(IVX["parto::Periné, episiotomía o herida de cesárea"]={}),{c:["Normal|Periné o herida limpia, bordes afrontados, sin enrojecimiento, calor, secreción ni dolor excesivo.","Infección|Herida con enrojecimiento, calor, dolor o secreción purulenta; se remite a medicina.","Dehiscencia|Herida abierta (dehiscencia); se cubre con gasa limpia y se remite.","Hematoma|Dolor intenso en el periné con masa o inflamación (hematoma); se remite.","Sin episiotomía ni cesárea|Parto vaginal sin desgarro ni episiotomía; periné sin alteraciones."]});
+
+/* ---------- Salud mental y consumo: cuándo aplicar y escalas con resultado automático (RQC, SRQ, Whooley, GAD-2, AUDIT, ASSIST) ---------- */
+const SRQ=["¿Tiene frecuentes dolores de cabeza?","¿Tiene mal apetito?","¿Duerme mal?","¿Se asusta con facilidad?","¿Sufre de temblor en las manos?","¿Se siente nervioso, tenso o aburrido?","¿Sufre de mala digestión?","¿No puede pensar con claridad?","¿Se siente triste?","¿Llora usted con mucha frecuencia?","¿Tiene dificultad para disfrutar sus actividades diarias?","¿Tiene dificultad para tomar decisiones?","¿Tiene dificultad para hacer su trabajo o estudio (sufre con él)?","¿Es incapaz de desempeñar un papel útil en su vida?","¿Ha perdido interés en las cosas?","¿Siente que usted es una persona inútil?","¿Ha tenido la idea de acabar con su vida?","¿Se siente cansado todo el tiempo?","¿Tiene sensaciones desagradables en el estómago?","¿Se cansa con facilidad?","¿Siente usted que alguien ha tratado de herirlo en alguna forma?","¿Es usted una persona mucho más importante de lo que piensan los demás?","¿Ha notado interferencias o algo raro en su pensamiento?","¿Oye voces sin saber de dónde vienen o que otras personas no pueden oír?","¿Ha tenido convulsiones, ataques o caídas al suelo con movimientos de brazos y piernas, mordedura de la lengua o pérdida del conocimiento?","¿Alguna vez le ha parecido a su familia, amigos, médico o sacerdote que usted bebía demasiado?","¿Alguna vez ha querido dejar de beber pero no ha podido?","¿Ha tenido alguna vez dificultades en el trabajo o el estudio a causa de la bebida (beber allí o faltar)?","¿Ha estado en riñas o lo han detenido estando borracho?","¿Le ha parecido alguna vez que usted bebía demasiado?"];
+const AUDIT=[["¿Con qué frecuencia consume alguna bebida alcohólica (incluida la chicha)?",["Nunca","Una vez al mes o menos","2 a 4 veces al mes","2 a 3 veces por semana","4 o más veces por semana"]],
+ ["¿Cuántos tragos suele tomar en un día de consumo normal?",["1 o 2","3 o 4","5 o 6","7 a 9","10 o más"]],
+ ["¿Con qué frecuencia toma 6 o más tragos en una sola ocasión?",0],["En el último año, ¿con qué frecuencia no pudo parar de beber una vez había empezado?",0],["En el último año, ¿con qué frecuencia no pudo hacer lo que se esperaba de usted porque había bebido?",0],["En el último año, ¿con qué frecuencia necesitó beber en ayunas para recuperarse de haber bebido mucho el día anterior?",0],["En el último año, ¿con qué frecuencia tuvo remordimiento o culpa después de beber?",0],["En el último año, ¿con qué frecuencia no pudo recordar lo que pasó la noche anterior porque había bebido?",0],
+ ["¿Usted u otra persona ha resultado herido porque usted había bebido?",1],["¿Algún familiar, amigo o personal de salud se ha preocupado por su forma de beber o le ha sugerido que deje de beber?",1]];
+const AUD_F=["Nunca","Menos de una vez al mes","Mensualmente","Semanalmente","A diario o casi a diario"],AUD_Y=["No","Sí, pero no en el último año","Sí, en el último año"];
+const ASS_S=[["t","Tabaco (cigarrillo, tabaco de mascar)"],["a","Bebidas alcohólicas"],["c","Marihuana"],["k","Cocaína o bazuco"],["e","Estimulantes tipo anfetamina o éxtasis"],["i","Inhalantes (pegante, gasolina, solventes, popper)"],["s","Sedantes o pastillas para dormir sin fórmula"],["h","Alucinógenos (LSD, hongos; yagé fuera del uso tradicional)"],["o","Opiáceos (heroína, morfina o codeína sin fórmula)"],["x","Otras"]];
+const ASS_Q=[["2","En los últimos 3 meses, ¿con qué frecuencia la consumió?",[["Nunca",0],["1 o 2 veces",2],["Cada mes",3],["Cada semana",4],["A diario o casi",6]]],
+ ["3","En los últimos 3 meses, ¿con qué frecuencia sintió un fuerte deseo o ansias de consumirla?",[["Nunca",0],["1 o 2 veces",3],["Cada mes",4],["Cada semana",5],["A diario o casi",6]]],
+ ["4","En los últimos 3 meses, ¿con qué frecuencia el consumo le causó problemas de salud, sociales, legales o de dinero?",[["Nunca",0],["1 o 2 veces",4],["Cada mes",5],["Cada semana",6],["A diario o casi",7]]],
+ ["5","En los últimos 3 meses, ¿con qué frecuencia dejó de hacer lo que se esperaba de usted por el consumo?",[["Nunca",0],["1 o 2 veces",5],["Cada mes",6],["Cada semana",7],["A diario o casi",8]]],
+ ["6","¿Un amigo, familiar u otra persona ha mostrado preocupación por su consumo?",[["No, nunca",0],["Sí, en los últimos 3 meses",6],["Sí, pero no en los últimos 3 meses",3]]],
+ ["7","¿Ha intentado alguna vez reducir o dejar de consumirla y no lo ha logrado?",[["No, nunca",0],["Sí, en los últimos 3 meses",6],["Sí, pero no en los últimos 3 meses",3]]]];
+const GAD2=["Sentirse nervioso, ansioso o con los nervios de punta","No poder dejar de preocuparse o no poder controlar la preocupación"],GAD_O=["Nunca","Varios días","Más de la mitad de los días","Casi todos los días"];
+const WHOO=["Durante el último mes, ¿se ha sentido a menudo preocupado por sentirse triste, deprimido o sin esperanza?","Durante el último mes, ¿se ha sentido a menudo preocupado por tener poco interés o placer en hacer las cosas?"];
+/* factores que obligan a aplicar el tamizaje, por momento de curso de vida (Res. 3280) */
+const SM_T={
+ adol:{tam:[["v","Lesiones o señales de violencia intrafamiliar o maltrato"],["sx","Violencia sexual o de género"],["m","Matoneo (violencia de pares)"],["l","Lesiones por consumo de sustancias"],["au","Autolesiones (cortes, quemaduras)"],["q","Quejas emocionales o de comportamiento en la anamnesis (tristeza, aislamiento, irritabilidad, insomnio)"]],
+  rut:[["pm","Padres o cuidadores con trastorno mental"],["pc","Padres o cuidadores con consumo problemático de sustancias"],["re","Bajo rendimiento escolar o problemas de aprendizaje"],["co","Problemas con la comida (deja de comer, come en exceso, vomita a propósito)"],["du","Duelo o pérdida significativa"],["fa","Disfunción familiar (APGAR familiar alterado)"]]},
+ ad:{tam:[["fm","Familiar con trastorno mental"],["fc","Hijos, pareja o familiar con consumo problemático de sustancias"],["fr","Bajo rendimiento o fracaso laboral o académico"],["co","Problemas con la comida"],["du","Duelo o pérdida significativa"],["fa","Disfunción familiar (APGAR familiar alterado)"],["q","Síntomas de tristeza, ansiedad, insomnio o irritabilidad en la anamnesis"]],
+  rut:[["v","Violencia de pareja, intrafamiliar, sexual o del conflicto armado"],["cu","Es cuidador de una persona dependiente (aplicar escala Zarit, Anexo 23)"]]},
+ vej:{tam:[["sd","Síntomas depresivos (pérdida de peso o apetito, insomnio, irritabilidad, aislamiento, quejas físicas sin causa)"],["de","Dependencia funcional"],["fc","Familiar con consumo problemático de sustancias"],["du","Duelo o pérdida significativa"],["fa","Disfunción familiar (APGAR familiar alterado)"]],
+  rut:[["me","Quejas de memoria, desorientación o cambios de conducta (aplicar Minimental, Anexo 28)"],["v","Maltrato, abandono o violencia"],["cu","Es cuidador de una persona dependiente (aplicar escala Zarit, Anexo 23)"]]}};
+function smGrp(id){return id==="adol"?"adol":id==="vej"?"vej":"ad"}
+function smGet(id){try{return JSON.parse(S.get(key(id,"sm"))||"{}")||{}}catch(e){return{}}}
+function smEdad(id){const m=edadMesesMod(id);return m==null?null:Math.floor(m/12)}
+function smCalc(id){const v=smGet(id),g=smGrp(id),T=SM_T[g],y=smEdad(id),R={};
+ R.tam=T.tam.filter(([k])=>v["f_"+k]===1);R.rut=T.rut.filter(([k])=>v["f_"+k]===1);
+ R.fMarc=[...T.tam,...T.rut].filter(([k])=>v["f_"+k]!==undefined).length;
+ R.sui=v.sui;R.alc=v.alc;R.spa=v.spa;
+ R.inst=g==="adol"?(y!=null&&y>=16?"SRQ":"RQC"):"WG";
+ R.indic=R.tam.length>0||R.rut.length>0||v.sui===1;
+ /* RQC */
+ const rq=RQC.map((t,i)=>v["r"+i]),rqM=rq.filter(x=>x!==undefined).length,rqS=RQC.filter((t,i)=>v["r"+i]===1);
+ R.rqc=rqM?{n:rqS.length,m:rqM,pos:rqS.length>0,conv:v.r2===1,items:rqS}:null;
+ /* SRQ */
+ const sq=SRQ.map((t,i)=>v["q"+i]),sqM=sq.filter(x=>x!==undefined).length;
+ if(sqM){const c=a=>a.filter(i=>v["q"+i]===1).length,r=(a,b)=>Array.from({length:b-a+1},(_,k)=>a+k);
+  const neu=c(r(0,19)),psi=c(r(20,23)),epi=v.q24===1,alc=c(r(25,29));R.srq={m:sqM,neu,psi,epi,alc,sui:v.q16===1,pos:neu>=11||psi>0||epi||alc>0}}else R.srq=null;
+ /* Whooley y GAD-2 */
+ const w=[v.w0,v.w1];R.who=w.some(x=>x!==undefined)?{pos:w.includes(1),ayuda:v.w2}:null;
+ const gd=[v.g0,v.g1];R.gad=gd.some(x=>x!==undefined)?{p:(v.g0||0)+(v.g1||0),pos:(v.g0||0)+(v.g1||0)>=3}:null;
+ /* AUDIT */
+ const au=AUDIT.map((q,i)=>v["a"+i]),auM=au.filter(x=>x!==undefined).length;
+ if(auM){const p=au.reduce((s,x)=>s+(x||0),0);const z=p<=7?[1,"zona I, consumo de bajo riesgo","Información sobre el consumo de alcohol y sus riesgos."]:p<=15?[2,"zona II, consumo de riesgo","Consejo breve para reducir el consumo y seguimiento."]:p<=19?[3,"zona III, consumo perjudicial","Consejo breve, intervención breve y seguimiento; remitir a la ruta de consumo de sustancias psicoactivas."]:[4,"zona IV, probable dependencia","Remitir a la ruta de consumo de sustancias psicoactivas para valoración diagnóstica y tratamiento."];
+  R.aud={p,m:auM,z:z[0],t:z[1],c:z[2],pos:p>=8}}else R.aud=null;
+ /* ASSIST */
+ R.ass=[];ASS_S.forEach(([k,n])=>{if(v["s1"+k]!==1)return;let p=0,nr=0;const nunca=v["s2"+k]===0;ASS_Q.forEach(([q,t,o])=>{if(q==="5"&&k==="t")return;if(nunca&&/[345]/.test(q))return;const x=v["s"+q+k];if(x===undefined)nr++;else p+=x});
+  const al=k==="a",niv=p>=27?3:(al?p>=11:p>=4)?2:1;R.ass.push({k,n,p,nr,niv,t:niv===3?"riesgo alto":niv===2?"riesgo moderado":"riesgo bajo"})});
+ R.iny=v.s8;
+ return R}
+function smTxt(id){const v=smGet(id),R=smCalc(id),g=smGrp(id),L=[],C=[];const lc=t=>t.split(" (")[0].toLowerCase();
+ if(!R.fMarc&&R.sui===undefined&&R.alc===undefined&&R.spa===undefined&&!R.rqc&&!R.srq&&!R.who&&!R.gad&&!R.aud&&!R.ass.length)return"";
+ const fs=[...R.tam,...R.rut];
+ L.push(fs.length?"Factores de riesgo para salud mental: "+fs.map(([k,t])=>lc(t)).join("; ")+".":R.fMarc?"Sin factores de riesgo para salud mental en la valoración.":"");
+ if(R.sui===1){L.push("Refiere ideas de muerte o de hacerse daño.");C.push("Riesgo suicida: no se deja solo, se activa la ruta de salud mental y se remite el mismo día a medicina o psicología.")}else if(R.sui===0)L.push("Niega ideas de muerte o de hacerse daño.");
+ if(R.inst==="RQC"&&R.rqc){L.push("Se aplica el RQC (Cuestionario de Reporte para Niños, Anexo 11): "+(R.rqc.pos?"positivo ("+R.rqc.n+" de 10 respuestas afirmativas: "+R.rqc.items.map(t=>t.replace(/[¿?]/g,"").replace(/^(El niño|Ha tenido el niño|Sufre el niño de|Parece)\s*/i,"").toLowerCase()).join("; ")+")":"negativo (0 de 10)")+(R.rqc.m<10?", "+(10-R.rqc.m)+" sin responder":"")+".");if(R.rqc.pos)C.push("RQC positivo: remitir a la ruta de problemas y trastornos mentales y epilepsia."+(R.rqc.conv?" Convulsiones o caídas sin razón: valoración médica prioritaria por posible epilepsia.":""))}
+ if(R.inst==="SRQ"&&R.srq){const s=R.srq,d=[];d.push(s.neu+" de 20 síntomas de ansiedad o depresión"+(s.neu>=11?" (positivo)":""));if(s.psi)d.push(s.psi+" de 4 síntomas psicóticos (positivo)");if(s.epi)d.push("convulsiones (positivo para epilepsia)");if(s.alc)d.push(s.alc+" de 5 preguntas de alcohol (positivo)");
+  L.push("Se aplica el SRQ (Cuestionario de Autorreporte de Síntomas, Anexo 12): "+(s.pos?"positivo":"negativo")+": "+d.join("; ")+(s.m<30?"; "+(30-s.m)+" preguntas sin responder":"")+".");
+  if(s.sui&&R.sui!==1)C.push("Respondió sí a la idea de acabar con su vida: no se deja solo y se remite el mismo día a medicina o psicología.");
+  if(s.neu>=11)C.push("Sospecha de trastorno depresivo o de ansiedad: remitir a la ruta de problemas y trastornos mentales.");if(s.psi)C.push("Síntomas psicóticos: remitir a medicina el mismo día o con prioridad.");if(s.epi)C.push("Posible epilepsia: remitir a medicina.");if(s.alc&&!R.aud)C.push("Preguntas de alcohol positivas: aplicar el AUDIT.")}
+ if(R.who){L.push("Preguntas Whooley (Anexo 21): "+(R.who.pos?"positivas (sospecha de depresión)"+(R.who.ayuda===1?"; desea recibir ayuda":R.who.ayuda===0?"; por ahora no desea ayuda":""):"negativas")+".");if(R.who.pos)C.push("Whooley positivo: remitir a la ruta de problemas y trastornos mentales para confirmar el diagnóstico.")}
+ if(R.gad){L.push("GAD-2 (Anexo 22): "+R.gad.p+" puntos, "+(R.gad.pos?"positivo (sospecha de trastorno de ansiedad)":"negativo")+".");if(R.gad.pos)C.push("GAD-2 positivo: remitir a la ruta de problemas y trastornos mentales.")}
+ if(R.alc===0)L.push("Niega consumo de alcohol en el último año.");
+ if(R.aud){L.push("Se aplica el AUDIT (Anexo 17): "+R.aud.p+" puntos, "+R.aud.t+(R.aud.m<10?" ("+(10-R.aud.m)+" preguntas sin responder)":"")+".");C.push("Alcohol: "+R.aud.c)}
+ if(R.spa===0)L.push("Niega consumo de tabaco u otras sustancias psicoactivas.");
+ if(R.ass.length){L.push("Se aplica el ASSIST (Anexo 16): "+R.ass.map(a=>a.n.split(" (")[0].toLowerCase()+" "+a.p+" puntos, "+a.t+(a.nr?" (incompleto)":"")).join("; ")+".");
+  const mo=R.ass.filter(a=>a.niv===2),al=R.ass.filter(a=>a.niv===3);
+  if(al.length)C.push("Riesgo alto ("+al.map(a=>a.n.split(" (")[0].toLowerCase()).join(", ")+"): intervención breve y remisión a la ruta de consumo de sustancias psicoactivas para tratamiento.");
+  if(mo.length)C.push("Riesgo moderado ("+mo.map(a=>a.n.split(" (")[0].toLowerCase()).join(", ")+"): intervención breve en la consulta y seguimiento"+(mo.some(a=>a.k==="t")?"; consejería para dejar de fumar":"")+".");
+  if(!mo.length&&!al.length)C.push("ASSIST de riesgo bajo: información sobre los riesgos del consumo.")}
+ if(R.iny===6){L.push("Refiere consumo de drogas inyectadas en los últimos 3 meses.");C.push("Uso de drogas inyectadas: riesgo alto; remitir a la ruta de consumo de sustancias, ofrecer pruebas de VIH, hepatitis B y C, y educar en no compartir jeringas.")}
+ if(R.rut.length)C.push(R.rut.map(([k,t])=>k==="v"||k==="sx"?"Violencia: activar la ruta de atención a víctimas de violencias y notificar (SIVIGILA).":k==="cu"?"Cuidador: aplicar escala Zarit y, si hay sobrecarga, remitir a la ruta de salud mental.":k==="me"?"Quejas cognitivas: aplicar Minimental y, si está alterado, remitir a medicina.":g==="adol"?"":"").filter(Boolean).join(" "));
+ if(g==="adol"&&R.rut.some(([k])=>k!=="v")){C.push("Factores de riesgo familiares, escolares, alimentarios o de duelo: remitir a la ruta de problemas y trastornos mentales y epilepsia (Res. 3280, p. 127).")}
+ if(R.tam.some(([k])=>k==="v"||k==="sx"))C.push("Violencia: activar la ruta de atención a víctimas de violencias y notificar (SIVIGILA)."+(g==="adol"&&R.tam.some(([k])=>k==="sx")?" Menor de edad con violencia sexual: denunciar y activar el protocolo de violencia sexual.":""));
+ if(R.tam.some(([k])=>k==="m"))C.push("Matoneo: orientar a la familia, informar al colegio y remitir a psicología.");
+ if(R.tam.some(([k])=>k==="au")&&R.sui!==1)C.push("Autolesiones: remitir el mismo día a medicina o psicología.");
+ if(R.indic&&!(R.inst==="RQC"?R.rqc:R.inst==="SRQ"?R.srq:(R.who||R.gad)))C.push("Hay factores de riesgo: falta aplicar el "+(R.inst==="WG"?"tamizaje Whooley y GAD-2":R.inst)+".");
+ const uniq=[...new Set(C.filter(Boolean))];
+ return L.filter(Boolean).join(" ")+(uniq.length?" Conducta: "+uniq.join(" "):"")}
+function smHTML(id){const v=smGet(id),R=smCalc(id),g=smGrp(id),T=SM_T[g],y=smEdad(id);
+ const yn=(k,t,neg)=>`<div style="display:flex;gap:6px;align-items:center;justify-content:space-between;border-bottom:1px solid var(--line);padding:5px 0"><span style="flex:1">${esc(t)}</span><span style="display:flex;gap:4px;flex:none"><button type="button" class="btn" data-sm="${k}" data-val="1" style="padding:4px 10px;font-size:.8rem;${v[k]===1?"background:var(--miss);color:#fff":""}">Sí</button><button type="button" class="btn" data-sm="${k}" data-val="0" style="padding:4px 10px;font-size:.8rem;${v[k]===0?"background:var(--accent);color:#fff":""}">No</button></span></div>`;
+ const sel=(k,t,opts)=>`<label style="display:flex;flex-direction:column;gap:3px;border-bottom:1px solid var(--line);padding:6px 0"><span>${esc(t)}</span><select data-sms="${k}" style="padding:6px;border-radius:8px;border:1px solid var(--line);${v[k]!==undefined&&v[k]>0?"border-color:var(--miss);border-width:2px":""}"><option value="">Elegir…</option>${opts.map(([l,p])=>`<option value="${p}" ${v[k]===p?"selected":""}>${esc(l)}${opts.length>3||p?" ("+p+")":""}</option>`).join("")}</select></label>`;
+ const sec=(tit,cnt,body,open)=>`<details class="sec" ${open?"open":""}><summary><span>${tit}</span>${cnt?`<span class="cnt">${cnt}</span>`:""}</summary><div style="padding:0 14px 14px">${body}</div></details>`;
+ const pill=(t,n)=>`<span class="pill ${n>=3?"high":n===2?"mid":"low"}" style="display:inline-block;margin-top:8px">${esc(t)}</span>`;
+ let h="";
+ /* 1. Cuándo aplicar */
+ h+=sec("1. ¿Hay factores de riesgo? (definen si se aplica el tamizaje)",R.indic?"tamizaje indicado":R.fMarc?"sin riesgo marcado":"",
+  `<p class="note-src" style="margin:0 0 6px">${g==="adol"?"Res. 3280, p. 127: si encuentras cualquiera de estos riesgos, aplica el "+(R.inst)+(y!=null?" (tiene "+y+" años: "+(R.inst==="RQC"?"RQC de 12 a 15":"SRQ desde los 16")+")":"")+".":g==="vej"?"Res. 3280, p. 154: si hay alguno de estos riesgos, aplica las preguntas Whooley y el GAD-2.":"Res. 3280, p. 137 y 144: si hay alguno de estos riesgos, aplica las preguntas Whooley y el GAD-2."}</p>
+  ${T.tam.map(([k,t])=>yn("f_"+k,t)).join("")}
+  <p class="note-src" style="margin:10px 0 4px;font-weight:700">${g==="adol"?"Además remiten directo a la ruta de salud mental:":"Activan otra ruta o instrumento:"}</p>${T.rut.map(([k,t])=>yn("f_"+k,t)).join("")}
+  ${yn("sui","Pregunta siempre: ¿ha pensado en quitarse la vida o en hacerse daño?")}
+  ${R.sui===1?`<div class="box miss" style="margin-top:8px"><h3>Urgente</h3><p style="margin:0">No lo dejes solo. Activa la ruta de salud mental y remite el mismo día a medicina o psicología.</p></div>`:""}`,true);
+ /* 2. Instrumento de salud mental */
+ const ind=R.indic?"Indicado":"Opcional: sin factores de riesgo marcados";
+ if(R.inst==="RQC"){const r=R.rqc;h+=sec("2. RQC: Cuestionario de Reporte para Niños (Anexo 11), 12 a 15 años",ind,
+   `<p class="note-src" style="margin:0 0 6px">Pregúntalo al adolescente y, si está, a su cuidador. Una o más respuestas «Sí» = positivo.</p>${RQC.map((t,i)=>yn("r"+i,(i+1)+". "+t.replace(/el niño/gi,"el adolescente"))).join("")}
+   ${r?pill(r.pos?"RQC positivo: "+r.n+" de 10":"RQC negativo"+(r.m<10?" ("+(10-r.m)+" sin responder)":""),r.pos?3:1):""}`,R.indic||!!r)}
+ if(R.inst==="SRQ"){const s=R.srq;h+=sec("2. SRQ: Cuestionario de Autorreporte de Síntomas (Anexo 12), desde 16 años",ind,
+   `<p class="note-src" style="margin:0 0 6px">Pregunta por el último mes. Lee las preguntas tal cual; el paciente responde sí o no.</p>
+   <p style="margin:6px 0 2px;font-weight:700">Preguntas 1 a 20: ansiedad y depresión</p>${SRQ.slice(0,20).map((t,i)=>yn("q"+i,(i+1)+". "+t)).join("")}
+   <p style="margin:10px 0 2px;font-weight:700">Preguntas 21 a 24: síntomas psicóticos</p>${SRQ.slice(20,24).map((t,i)=>yn("q"+(i+20),(i+21)+". "+t)).join("")}
+   <p style="margin:10px 0 2px;font-weight:700">Pregunta 25: convulsiones</p>${yn("q24","25. "+SRQ[24])}
+   <p style="margin:10px 0 2px;font-weight:700">Preguntas 26 a 30: alcohol</p>${SRQ.slice(25).map((t,i)=>yn("q"+(i+25),(i+26)+". "+t)).join("")}
+   <p class="note-src" style="margin:8px 0 0">Positivo: 11 o más «Sí» en las preguntas 1 a 20; o 1 o más en 21 a 24 (psicosis); o la 25 (epilepsia); o 1 o más en 26 a 30 (alcohol: aplica el AUDIT). La pregunta 17 positiva es riesgo suicida.</p>
+   ${s?pill("SRQ "+(s.pos?"positivo":"negativo")+": "+s.neu+"/20"+(s.psi?" · psicosis "+s.psi:"")+(s.epi?" · epilepsia":"")+(s.alc?" · alcohol "+s.alc:"")+(s.m<30?" ("+(30-s.m)+" sin responder)":""),s.pos?3:1):""}`,R.indic||!!s)}
+ if(R.inst==="WG"){const w=R.who,gd=R.gad;h+=sec("2. Preguntas Whooley (Anexo 21) y GAD-2 (Anexo 22)",ind,
+   `<p style="margin:0 0 2px;font-weight:700">Whooley: depresión</p>${WHOO.map((t,i)=>yn("w"+i,t)).join("")}${w&&w.pos?yn("w2","¿Es algo con lo que quisiera recibir ayuda?"):""}
+   <p class="note-src" style="margin:4px 0 0">Positivo si responde «Sí» a cualquiera de las dos.</p>${w?pill("Whooley "+(w.pos?"positivo":"negativo"),w.pos?3:1):""}
+   <p style="margin:12px 0 2px;font-weight:700">GAD-2: ansiedad. En las últimas 2 semanas, ¿con qué frecuencia le ha molestado…?</p>${GAD2.map((t,i)=>sel("g"+i,(i+1)+". "+t,GAD_O.map((l,p)=>[l,p]))).join("")}
+   <p class="note-src" style="margin:4px 0 0">Positivo con 3 o más puntos.</p>${gd?pill("GAD-2: "+gd.p+" puntos, "+(gd.pos?"positivo":"negativo"),gd.pos?3:1):""}`,R.indic||!!w||!!gd)}
+ /* 3. Consumo */
+ h+=sec("3. Consumo de alcohol, tabaco y otras sustancias","",
+  `<p class="note-src" style="margin:0 0 6px">Res. 3280: ante consumo de alcohol aplica el AUDIT (Anexo 17); ante consumo de tabaco u otras sustancias, el ASSIST (Anexo 16). En comunidades indígenas, el uso ritual o tradicional (mambe, yagé, chicha en ceremonia) se registra con respeto; el instrumento es para el consumo fuera de ese uso o cuando causa problemas.</p>
+  ${yn("alc","¿Ha tomado alcohol (incluida chicha o guarapo) en el último año?")}${yn("spa","¿Ha consumido tabaco u otra sustancia alguna vez (marihuana, bazuco, pegante, pastillas sin fórmula…)?")}`,true);
+ if(R.alc===1||(R.srq&&R.srq.alc)||R.aud){const a=R.aud;h+=sec("AUDIT: consumo de alcohol (Anexo 17)",a?a.p+" puntos":"indicado",
+   `<p class="note-src" style="margin:0 0 6px">Un trago = una cerveza, una copa de vino, un trago de aguardiente o un vaso de chicha fuerte. Si nunca bebe (pregunta 1), el puntaje es 0.</p>
+   ${AUDIT.map(([t,o],i)=>sel("a"+i,(i+1)+". "+t,(o===0?AUD_F:o===1?AUD_Y:o).map((l,p)=>[l,o===1?p*2:p]))).join("")}
+   <p class="note-src" style="margin:6px 0 0">0 a 7: bajo riesgo · 8 a 15: consumo de riesgo · 16 a 19: consumo perjudicial · 20 o más: probable dependencia.</p>
+   ${a?pill("AUDIT "+a.p+": "+a.t,a.z>=3?3:a.z===2?2:1):""}`,true)}
+ if(R.spa===1||R.ass.length){h+=sec("ASSIST: alcohol, tabaco y otras sustancias (Anexo 16)",R.ass.length?R.ass.length+" sustancia(s)":"indicado",
+   `<p style="margin:0 0 2px;font-weight:700">Pregunta 1: ¿alguna vez en la vida ha consumido…?</p>${ASS_S.map(([k,n])=>yn("s1"+k,n)).join("")}
+   ${R.ass.map(a=>{const nunca=v["s2"+a.k]===0;return `<div class="tool" style="margin-top:10px;padding:10px 12px"><b>${esc(a.n)}</b>${ASS_Q.filter(([q])=>!(q==="5"&&a.k==="t")&&!(nunca&&/[345]/.test(q))).map(([q,t,o])=>sel("s"+q+a.k,q+". "+t,o.map(([l,p])=>[l,p]))).join("")}${pill(a.p+" puntos: "+a.t+(a.nr?" (faltan "+a.nr+")":""),a.niv)}</div>`}).join("")}
+   ${R.ass.length?sel("s8","8. ¿Alguna vez ha consumido alguna droga por vía inyectada (uso no médico)?",[["No, nunca",0],["Sí, en los últimos 3 meses",6],["Sí, pero no en los últimos 3 meses",3]]):""}
+   <p class="note-src" style="margin:6px 0 0">Puntaje por sustancia = preguntas 2 a 7 (en tabaco no se pregunta la 5). Alcohol: 0-10 bajo, 11-26 moderado, 27 o más alto. Otras: 0-3 bajo, 4-26 moderado, 27 o más alto. Bajo: información · Moderado: intervención breve · Alto: intervención breve y remisión a tratamiento.</p>`,true)}
+ const t=smTxt(id);h+=`<div class="box ${/Conducta:/.test(t)?"warn":""}" style="margin-top:8px"><h3>Resultado para la nota</h3><p style="margin:0" id="sm-res">${esc(t||"Marca las respuestas.")}</p></div>`;
+ return `<div id="sm-w">${h}</div>`}
+WIDGET.smental={html:id=>smHTML(id),txt:id=>smTxt(id),
+ wire:(id,save)=>{const bind=()=>{const w=$("sm-w");if(!w)return;
+  w.querySelectorAll("[data-sm]").forEach(b=>b.onclick=()=>{const v=smGet(id),k=b.dataset.sm,val=+b.dataset.val;if(v[k]===val)delete v[k];else v[k]=val;S.set(key(id,"sm"),JSON.stringify(v));redraw()});
+  w.querySelectorAll("[data-sms]").forEach(s=>s.onchange=()=>{const v=smGet(id),k=s.dataset.sms;if(s.value==="")delete v[k];else v[k]=+s.value;S.set(key(id,"sm"),JSON.stringify(v));redraw()})};
+  const redraw=()=>{const w=$("sm-w"),open=[...w.querySelectorAll("details")].map(d=>d.open),y=window.scrollY;w.outerHTML=smHTML(id);const n=$("sm-w");[...n.querySelectorAll("details")].forEach((d,i)=>{if(open[i]!==undefined&&d.querySelector("summary").textContent)d.open=open[i]||d.open});window.scrollTo(0,y);bind();save()};
+  bind()}};
+(function(){const P=(t,p)=>({t,p,r:"",b:""});
+ const set=(k,ref,pp)=>{const x=IVX[k]||(IVX[k]={});x.widget="smental";delete x.c;x.pauta=P("Cuándo aplicar cada instrumento ("+ref+")",pp);x.dyn=null};
+ set("adol::Salud mental, consumo de sustancias, violencias","Res. 3280, p. 127",["RQC (12 a 15 años) o SRQ (desde 16): solo si identificas algún riesgo: lesiones por violencia intrafamiliar, sexual o matoneo, lesiones por consumo, autolesiones o quejas emocionales.","Padres con trastorno mental o consumo, bajo rendimiento escolar, problemas de aprendizaje o con la comida, duelo o disfunción familiar: remite a la ruta de salud mental (y conviene aplicar el tamizaje).","ASSIST: ante cualquier consumo de tabaco u otras sustancias. AUDIT: ante consumo de alcohol. Para saberlo, haz las dos preguntas filtro del paso 3.","Pregunta siempre por ideas de muerte: preguntar no las induce."]);
+ set("juv::Salud mental, consumo, violencias","Res. 3280, p. 137",["Whooley y GAD-2: si hay familiar con trastorno mental o consumo, fracaso laboral o académico, problemas con la comida, duelo o disfunción familiar.","ASSIST ante consumo de tabaco u otras sustancias; AUDIT ante consumo de alcohol.","Zarit si es cuidador de una persona dependiente. Violencias: ruta y notificación."]);
+ set("adul::Hábitos, salud mental, violencias, consumo","Res. 3280, p. 144",["Whooley y GAD-2: si hay familiar con trastorno mental o consumo, fracaso laboral, problemas con la comida, duelo o disfunción familiar.","ASSIST ante consumo de tabaco u otras sustancias; AUDIT ante consumo de alcohol.","Zarit si es cuidador. Violencias: ruta y notificación."]);
+ set("vej::Cognición y estado de ánimo","Res. 3280, p. 154",["Whooley y GAD-2: si hay síntomas depresivos, dependencia, familiar con consumo, duelo o disfunción familiar.","Minimental (Anexo 28) si hay quejas de memoria o desorientación.","ASSIST y AUDIT ante consumo. Zarit al cuidador."]);
+})();
 
 const _cvTextoP=cvDesdeTexto;cvDesdeTexto=function(tipo,t){return _cvTextoP(tipo==="vitalesP"?"vitales":tipo,t)};
 const _cvF=cvCalc;cvCalc=function(tipo,v){if(tipo!=="formula")return _cvF(tipo,v);
