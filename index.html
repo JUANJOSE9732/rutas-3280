@@ -936,7 +936,7 @@ function checks(m){try{return JSON.parse(S.get(key(m,"chk"))||"{}")}catch(e){ret
 function hasDraft(m){return !!(S.get(key(m,"dict"))||S.get(key(m,"nota"))||Object.keys(checks(m)).length)}
 
 /* ---------- PANEL ---------- */
-const VERSION_APP="2026-10-10 v111";
+const VERSION_APP="2026-10-11 v112";
 function home(){
   stopRec();st.view="home";
   const rm=["precon","prenatal","parto","rn","ive"],rp=["pinf","inf","adol","juv","adul","vej"];
@@ -2196,7 +2196,8 @@ function nutCalc(sx,meses,p,t,pc,pb,edadDias){const R=[],al=[];if(!sx||meses==nu
     if(pb!=null&&meses>=6){const c=pb<11.5?"Desnutrición aguda severa (perímetro braquial menor de 11,5 cm)":pb<12.5?"Desnutrición aguda moderada (perímetro braquial de 11,5 a 12,4 cm)":"Perímetro braquial adecuado";R.push({k:"pb",ind:"Perímetro braquial",z:null,c})}}
   else{if(t!=null){const z=whoZ("h07",sx,meses,t);if(z!=null)R.push({k:"talla",ind:"Talla para la edad",z,c:clasNut("te",z)})}
     if(p!=null&&t!=null){const imc=p/Math.pow(t/100,2),z=whoZ("b07",sx,meses,imc,1);if(z!=null)R.push({k:"imc",ind:"IMC para la edad",z,c:clasNut("imc",z,0),v:Math.round(imc*10)/10})}}
-  R.forEach(r=>{const c=r.c;if(/severa/.test(c))al.push(r.ind+": "+c.toLowerCase()+". Remisión el mismo día (ruta de desnutrición aguda, Res. 2350 de 2020).");
+  R.forEach(r=>{if(r.z!=null&&Math.abs(r.z)>5){r.c="Valor improbable (z "+zFmt(r.z)+"): revisa la medida, la unidad o la fecha de nacimiento";r.imp=1}});
+  R.forEach(r=>{const c=r.c;if(r.imp){al.push(r.ind+": "+c+".");return}if(/severa/.test(c))al.push(r.ind+": "+c.toLowerCase()+". Remisión el mismo día (ruta de desnutrición aguda, Res. 2350 de 2020).");
     else if(/moderada/.test(c))al.push(r.ind+": "+c.toLowerCase()+". Remitir a medicina hoy para manejo de desnutrición aguda.");
     else if(/^Desnutrición global|Talla baja|^Delgadez/.test(c))al.push(r.ind+": "+c.toLowerCase()+". Remitir a medicina y a la ruta de alteraciones nutricionales.");
     else if(/factor de riesgo/.test(c))al.push(r.ind+": "+c.toLowerCase()+". Repite la medición y remite a pediatría.");
@@ -2213,7 +2214,9 @@ function nutCampos(id,v,tipo){const P=pac(),sx=P["GENERO"]==="M"?"M":P["GENERO"]
   if(tipo==="antropoNNA"&&p!=null&&!m.peso&&mm!=null&&mm>=60)m.peso="Desde los 5 años el peso se valora con el IMC";const im=byK("imc")[0];if(im&&tipo==="antropoNNA"){m.imc="IMC "+coma(im.v)+" · z "+zFmt(im.z)+" "+im.c;if(!/adecuad/i.test(im.c))flag.imc="alto"}
   if(p!=null)P2.push("peso "+coma(p)+" kg");if(t!=null)P2.push("talla "+coma(t)+" cm");if(pc!=null)P2.push("perímetro cefálico "+coma(pc)+" cm");if(pb!=null)P2.push("perímetro braquial "+coma(pb)+" cm");
   const cls=r.R.filter(x=>!/^No aplica/.test(x.c)).map(x=>x.ind+(x.z!=null?" z "+zFmt(x.z):"")+": "+x.c.toLowerCase());
-  return {txt:P2.length?"Antropometría a los "+edadTxtM(Math.floor(mm))+": "+P2.join(", ")+". Escala: "+(mm<60.5?"Patrones de Crecimiento Infantil de la OMS 2006 (0 a 5 años)":"Referencia de Crecimiento de la OMS 2007 (5 a 19 años)")+", puntaje Z, puntos de corte de la Res. 2465 de 2016. Clasificación: "+(cls.join("; ")||"sin datos suficientes")+".":"",flag,al:r.al,m,imc:im?im.v:null}}
+  const _mod=tipo==="antropoPI"?"pinf":id,_rg={pinf:[0,72],inf:[72,144],adol:[144,216]}[_mod];if(_rg&&mm!=null&&(mm<_rg[0]||mm>=_rg[1]))r.al.unshift("Tiene "+edadTxtM(Math.floor(mm))+": esa edad no corresponde a este módulo ("+(M[_mod]?M[_mod].who:"")+"). Revisa la fecha de nacimiento o usa el módulo de su edad.");
+  r.R.forEach(x=>{x.mal=!/adecuad|^Normal|No aplica/i.test(x.c)});
+  return {g:{sx,mm,p,t,pc,imc:(p!=null&&t!=null)?p/Math.pow(t/100,2):null},res:r.R,txt:P2.length?"Antropometría a los "+edadTxtM(Math.floor(mm))+": "+P2.join(", ")+". Escala: "+(mm<60.5?"Patrones de Crecimiento Infantil de la OMS 2006 (0 a 5 años)":"Referencia de Crecimiento de la OMS 2007 (5 a 19 años)")+", puntaje Z, puntos de corte de la Res. 2465 de 2016. Clasificación: "+(cls.join("; ")||"sin datos suficientes")+".":"",flag,al:r.al,m,imc:im?im.v:null}}
 const _cvBaseNut=cvCalc;cvCalc=function(tipo,v){if(tipo==="antropoPI"||tipo==="antropoNNA"){const id=tipo==="antropoPI"?"pinf":(st&&st.mod)||"inf";const r=nutCampos(id,v,tipo);if(tipo==="antropoNNA")r.imc=r.imc;return r}return _cvBaseNut(tipo,v)};
 const _cvTextoNut=cvDesdeTexto;cvDesdeTexto=function(tipo,t){return (tipo==="antropoPI"||tipo==="antropoNNA")?_cvTextoNut("antropo",t):_cvTextoNut(tipo,t)};
 Object.assign(IVX,{
@@ -2346,6 +2349,44 @@ IVX["inf::Test de la figura humana de Goodenough (si hay quejas escolares)"]={wi
  si:A=>{const d=A("Desarrollo y desempeño escolar");return /problema|goodenough|bajo rendimiento|aprendizaje|comportamiento/i.test(d)},
  siTxt:"No aplica: sin quejas de rendimiento escolar, aprendizaje, comportamiento o vida social.",
  pauta:{t:"Cuándo y cómo se aplica (Res. 3280, p. 118, Anexo 9)",p:["Solo si hay quejas sobre el rendimiento escolar, el aprendizaje o la vida social del niño (del colegio o de los padres). Se aplica en la misma consulta.","Validez: de 3 a 10 años. Requisitos: que vea y pueda dibujar, que esté tranquilo y entienda la instrucción; hoja blanca, lápiz y borrador, sin modelo ni ayuda, sin límite de tiempo.","Califica 1 punto por cada ítem presente (Anexo 9). Edad mental = 3 + puntos ÷ 4. CI = edad mental ÷ edad cronológica × 100.","CI menor de 70: sugestivo de déficit cognitivo; 70 a 79: limítrofe; 80 a 89: normal bajo; 90 a 109: normal; 110 o más: normal alto.","Sugestivo de déficit, lenguaje tardío o familiares con problemas de aprendizaje → valoración integral por pediatría. Las quejas escolares igual se remiten a pediatría."],r:"",b:""}};
+
+/* ---------- Gráfica de crecimiento OMS con el punto del paciente ---------- */
+function whoVal(ind,sx,x,z){const l=whoLMS(WHO[ind+sx],x);if(!l)return null;const [L,M,S]=l;return Math.abs(L)<1e-6?M*Math.exp(S*z):M*Math.pow(1+L*S*z,1/L)}
+function nutIndicadores(g){const L=[],m=g.mm,sx=g.sx,m5=m<60.5,E06="Patrones de Crecimiento Infantil OMS 2006",E07="Referencia de Crecimiento OMS 2007";
+  const edadInd=(a,b)=>x=>x<24?a:b;
+  if(m5){if(g.p!=null)L.push({k:"pe",t:"Peso para la edad",u:"kg",esc:E06,ind:()=>"wfa",x0:0,x1:60,xs:1,xv:m,yv:g.p,xl:"Edad"});
+    if(g.t!=null)L.push({k:"te",t:m<24?"Longitud para la edad":"Talla para la edad",u:"cm",esc:E06,ind:edadInd("len","hei"),x0:0,x1:60,xs:1,xv:m,yv:g.t,xl:"Edad"});
+    if(g.p!=null&&g.t!=null){const ac=m<24;L.push({k:"pt",t:ac?"Peso para la longitud":"Peso para la talla",u:"kg",esc:E06,ind:()=>ac?"wfl":"wfh",x0:ac?45:65,x1:ac?110:120,xs:.5,xv:Math.round(g.t*2)/2,yv:g.p,xl:"Talla (cm)"})}
+    if(g.pc!=null)L.push({k:"pc",t:"Perímetro cefálico para la edad",u:"cm",esc:E06,ind:()=>"hcfa",x0:0,x1:60,xs:1,xv:m,yv:g.pc,xl:"Edad"})}
+  else{if(g.t!=null)L.push({k:"te",t:"Talla para la edad",u:"cm",esc:E07,ind:()=>"h07",x0:60,x1:228,xs:1,xv:m,yv:g.t,xl:"Edad"});
+    if(g.imc!=null)L.push({k:"imc",t:"IMC para la edad",u:"kg/m²",esc:E07,ind:()=>"b07",x0:60,x1:228,xs:1,xv:m,yv:g.imc,xl:"Edad"})}
+  return L}
+function nutSVG(I,sx,res){const W=340,H=250,ml=34,mr=34,mt=10,mb=30,Z=[-3,-2,-1,0,1,2,3],cur={};
+  for(const z of Z){cur[z]=[];for(let x=I.x0;x<=I.x1+1e-9;x+=I.xs){const v=whoVal(I.ind(x),sx,x,z);if(v!=null)cur[z].push([x,v])}}
+  let ymin=Infinity,ymax=-Infinity;[-3,3].forEach(z=>cur[z].forEach(([x,v])=>{ymin=Math.min(ymin,v);ymax=Math.max(ymax,v)}));
+  const pin=I.xv>=I.x0&&I.xv<=I.x1;if(pin){ymin=Math.min(ymin,I.yv);ymax=Math.max(ymax,I.yv)}const pad=(ymax-ymin)*.04;ymin-=pad;ymax+=pad;
+  const X=x=>ml+(x-I.x0)/(I.x1-I.x0)*(W-ml-mr),Y=v=>mt+(1-(v-ymin)/(ymax-ymin))*(H-mt-mb);
+  const path=z=>cur[z].map(([x,v],i)=>(i?"L":"M")+X(x).toFixed(1)+" "+Y(v).toFixed(1)).join(" ");
+  const band=(a,b,col)=>cur[a].length?`<path d="${path(a)} ${cur[b].slice().reverse().map(([x,v])=>"L"+X(x).toFixed(1)+" "+Y(v).toFixed(1)).join(" ")} Z" fill="${col}" stroke="none"/>`:"";
+  const stl={"-3":"#7a1c14","-2":"#c0392b","-1":"#d68910","0":"#1d6b4f","1":"#d68910","2":"#c0392b","3":"#7a1c14"};
+  const lines=Z.map(z=>`<path d="${path(z)}" fill="none" stroke="${stl[z]}" stroke-width="${z===0?1.8:1.1}" ${Math.abs(z)===1?'stroke-dasharray="4 3"':""}/>${cur[z].length?`<text x="${W-mr+3}" y="${(Y(cur[z][cur[z].length-1][1])+3).toFixed(1)}" font-size="9" fill="${stl[z]}">${z>0?"+"+z:z===0?"0":"−"+(-z)}</text>`:""}`).join("");
+  const yt=[];const st=(ymax-ymin)>60?20:(ymax-ymin)>25?5:(ymax-ymin)>10?2:1;for(let v=Math.ceil(ymin/st)*st;v<=ymax;v+=st)yt.push(v);
+  const xt=[];if(I.xl==="Edad"){const sp=I.x1-I.x0;const stp=sp>100?24:sp>30?12:3;for(let x=Math.ceil(I.x0/stp)*stp;x<=I.x1;x+=stp)xt.push([x,x<24&&sp<=30?x+" m":(x/12)+" a"])}else{for(let x=Math.ceil(I.x0/10)*10;x<=I.x1;x+=10)xt.push([x,String(x)])}
+  const grid=yt.map(v=>`<line x1="${ml}" x2="${W-mr}" y1="${Y(v)}" y2="${Y(v)}" stroke="currentColor" stroke-opacity=".08"/><text x="${ml-4}" y="${Y(v)+3}" font-size="9" text-anchor="end" fill="currentColor" fill-opacity=".6">${v}</text>`).join("")+xt.map(([x,l])=>`<line x1="${X(x)}" x2="${X(x)}" y1="${mt}" y2="${H-mb}" stroke="currentColor" stroke-opacity=".08"/><text x="${X(x)}" y="${H-mb+12}" font-size="9" text-anchor="middle" fill="currentColor" fill-opacity=".6">${l}</text>`).join("");
+  const pt=pin?`<circle cx="${X(I.xv)}" cy="${Y(I.yv)}" r="5.5" fill="${res&&res.mal?"#c0392b":"#1d6b4f"}" stroke="#fff" stroke-width="2"/><text x="${X(I.xv)+(X(I.xv)>W/2?-8:8)}" y="${Y(I.yv)-8}" font-size="10" font-weight="700" text-anchor="${X(I.xv)>W/2?"end":"start"}" fill="currentColor">${coma(Math.round(I.yv*10)/10)} ${I.u}</text>`:"";
+  return `<svg viewBox="0 0 ${W} ${H}" width="100%" role="img" aria-label="${esc(I.t)}" style="display:block;max-width:560px">${band(-2,2,"rgba(29,107,79,.07)")}${grid}${lines}<line x1="${ml}" x2="${W-mr}" y1="${H-mb}" y2="${H-mb}" stroke="currentColor" stroke-opacity=".3"/><text x="${(ml+W-mr)/2}" y="${H-4}" font-size="9" text-anchor="middle" fill="currentColor" fill-opacity=".7">${esc(I.xl)}${I.xl==="Edad"?" (m = meses, a = años)":""}</text><text x="6" y="${mt+4}" font-size="9" fill="currentColor" fill-opacity=".7">${esc(I.u)}</text>${pt}</svg>
+   ${pin?"":`<p class="note-src" style="margin:4px 0 0;color:var(--miss)">El valor queda fuera de la gráfica (${I.xl==="Edad"?"edad fuera del rango de esta escala":"talla fuera del rango"}).</p>`}`}
+function nutGraf(tipo,r){const box=$("cv-graf");if(!box)return;if(!["antropoPI","antropoNNA"].includes(tipo)||!r||!r.g||r.g.mm==null||!r.g.sx){box.innerHTML="";return}
+  const L=nutIndicadores(r.g);if(!L.length){box.innerHTML="";return}
+  const resDe=I=>(r.res||[]).find(x=>x.k===I.k||(I.k==="pe"&&x.k==="peso")||(I.k==="te"&&x.k==="talla")),malo=L.find(i=>{const q=resDe(i);return q&&q.mal});
+  const sel=box.dataset.sel&&L.some(i=>i.k===box.dataset.sel)?box.dataset.sel:(malo||L[0]).k,I=L.find(i=>i.k===sel),res=resDe(I);
+  const sxT=r.g.sx==="F"?"Niñas":"Niños";
+  box.innerHTML=`<section class="tool" style="margin-top:10px;padding:12px"><h3 style="margin:0 0 2px;font-size:1rem">${esc(I.t)} · ${sxT}</h3><p class="note-src" style="margin:0 0 6px">Escala: ${esc(I.esc)} (Res. 2465 de 2016)</p>
+   <div class="btns" style="margin:0 0 6px;gap:6px">${L.map(i=>`<button type="button" class="btn" data-gk="${i.k}" style="padding:4px 10px;font-size:.78rem;${i.k===sel?"background:var(--accent);color:#fff":""}">${esc(i.t.replace(" para la ","/").replace("Perímetro cefálico","PC"))}</button>`).join("")}</div>
+   ${nutSVG(I,r.g.sx,res)}
+   ${res?`<p style="margin:6px 0 0;font-weight:700;color:${res.mal?"var(--miss)":"var(--accent)"}">Resultado: ${res.z!=null?"z "+zFmt(res.z)+" · ":""}${esc(res.c)}</p>`:""}
+   <p class="note-src" style="margin:4px 0 0">Líneas: 0 = mediana (verde); ±1 DE (naranja punteada); ±2 DE (roja); ±3 DE (roja oscura). Franja verde: entre −2 y +2.</p></section>`;
+  box.querySelectorAll("[data-gk]").forEach(b=>b.onclick=()=>{box.dataset.sel=b.dataset.gk;nutGraf(tipo,r)})}
 
 const _cvTextoP=cvDesdeTexto;cvDesdeTexto=function(tipo,t){return _cvTextoP(tipo==="vitalesP"?"vitales":tipo,t)};
 const _cvF=cvCalc;cvCalc=function(tipo,v){if(tipo!=="formula")return _cvF(tipo,v);
@@ -2628,7 +2669,7 @@ function paneEntr(){
         <input data-sx="${c.k}" placeholder="Hallazgo (o toca Normal)">
         <p class="note-src" data-sxr="${c.k}" style="margin:0;color:var(--miss);font-weight:700" hidden>${esc(c.r)}</p></div>`).join("")}</div>`:""}
     ${x.campos?`<div class="pgrid" id="cv">${CAMPOS[x.campos].map(c=>`<label class="bfl"><span>${esc(c.l)}${c.u?" ("+esc(c.u)+")":""}</span><input data-cv="${c.k}" inputmode="decimal" placeholder="${esc(c.ph||"")}" ${c.auto?'readonly style="background:var(--accent-soft)"':""}><small data-cvm="${c.k}" data-n="${esc(c.n||"")}" style="font-size:.74rem;line-height:1.3;min-height:1.3em;color:var(--muted)">${esc(c.n||"")}</small></label>`).join("")}</div>
-      <div class="box warn" id="cv-al" hidden><h3>Qué hacer</h3><ul style="margin:0;padding-left:20px"></ul></div>`:""}
+      <div class="box warn" id="cv-al" hidden><h3>Qué hacer</h3><ul style="margin:0;padding-left:20px"></ul></div><div id="cv-graf"></div>`:""}
     ${x.widget?WIDGET[x.widget].html(id):""}
     <label for="iv-a" class="lab" style="margin:0">${x.widget?"Observaciones (opcional)":x.sistemas?"Otras observaciones del examen (opcional)":x.campos?(/vitales/.test(x.campos)?"Observaciones, o dicta los valores (por ejemplo: «tensión 120 sobre 80, frecuencia cardiaca 78, temperatura 36,5»)":"Observaciones (opcional), o dicta los valores"):x.t==="do"?"Hallazgo: toca una opción o dicta lo que encontraste":"Respuesta: toca una opción o dicta lo que respondió"}</label>
     <textarea id="iv-a" style="min-height:${x.campos||x.sistemas||x.widget?70:120}px">${esc(x.campos||x.sistemas||x.widget?(S.get(key(id,"cvo"+i))||""):(a[i]||(x.def?(typeof x.def==="function"?x.def(l=>{const k=q.findIndex(z=>z.l===l);return k<0?"":(a[k]||"")}):x.def).replace(/\{\+(\d+)\}/g,(_,n)=>fMas(S.get(key(id,"fecha"))||hoy(),+n)):"")))}</textarea>
@@ -2640,7 +2681,7 @@ function paneEntr(){
   const ta=$("iv-a");let cv={};try{cv=JSON.parse(S.get(key(id,"cv"+i))||"{}")}catch(e){}
   const cvPinta=()=>{if(!x.campos)return;const r=cvCalc(x.campos,cv);document.querySelectorAll("[data-cv]").forEach(e=>{const k=e.dataset.cv;if(CAMPOS[x.campos].find(c=>c.k===k).auto){e.value=r.imc?coma(r.imc):""}else if(document.activeElement!==e)e.value=cv[k]||"";e.style.borderColor=r.flag[k]?"var(--miss)":"";e.style.borderWidth=r.flag[k]?"2px":"";
       const sm=document.querySelector(`[data-cvm="${k}"]`);if(sm){const t=r.m&&r.m[k];sm.textContent=t||sm.dataset.n;sm.style.color=!t?"var(--muted)":/^(Normal|Cuadra|Primigestante|Concuerda|IMC inicial|Grafícalo|Pregúntale|Adecuad|A término)|ADECUADA$/.test(t)?"var(--accent)":"var(--miss)";sm.style.fontWeight=t?"700":"400"}});
-    const b=$("cv-al");b.hidden=!(["antropoG","vitalesP","vitalesRN","antropoRN","antropoPI","antropoNNA"].includes(x.campos)&&r.al.length);b.querySelector("ul").innerHTML=r.al.map(z=>`<li>${esc(z)}</li>`).join("");return r};
+    const b=$("cv-al");b.hidden=!(["antropoG","vitalesP","vitalesRN","antropoRN","antropoPI","antropoNNA"].includes(x.campos)&&r.al.length);b.querySelector("ul").innerHTML=r.al.map(z=>`<li>${esc(z)}</li>`).join("");try{nutGraf(x.campos,r)}catch(e){console.warn(e)}return r};
   let sx={};try{sx=JSON.parse(S.get(key(id,"sx"+i))||"{}")}catch(e){}
   const sxTxt=()=>x.sistemas?SISTEMAS[x.sistemas].filter(c=>(sx[c.k]||"").trim()).map(c=>c.l+": "+sx[c.k].trim().replace(/\.?$/,".")).join(" "):"";
   const sxPinta=()=>{if(!x.sistemas)return;SISTEMAS[x.sistemas].forEach(c=>{const v=(sx[c.k]||"").trim(),inp=document.querySelector(`[data-sx="${c.k}"]`),nb=document.querySelector(`[data-sxn="${c.k}"]`),rr=document.querySelector(`[data-sxr="${c.k}"]`),w=document.querySelector(`[data-sxw="${c.k}"]`);
