@@ -936,7 +936,7 @@ function checks(m){try{return JSON.parse(S.get(key(m,"chk"))||"{}")}catch(e){ret
 function hasDraft(m){return !!(S.get(key(m,"dict"))||S.get(key(m,"nota"))||Object.keys(checks(m)).length)}
 
 /* ---------- PANEL ---------- */
-const VERSION_APP="2026-10-11 v127";
+const VERSION_APP="2026-10-11 v128";
 function home(){
   stopRec();st.view="home";
   const rm=["precon","prenatal","parto","rn","ive"],rp=["pinf","inf","adol","juv","adul","vej"];
@@ -2576,14 +2576,14 @@ function vacGet(){try{return JSON.parse(S.get(vacKey())||"{}")||{}}catch(e){retu
 function vacLista(id){const g=vacGrupos(id),P=pac();return VACS.filter(v=>g.includes("rn")?v[2]==="RN":g.includes(v[4])).filter(v=>!(v[4]==="p"||v[4]==="g")||P["GENERO"]!=="M")}
 function vacEstado(id){const L=vacLista(id),st=vacGet(),m=edadMesesMod(id),y=m==null?null:m/12,R=[];
   L.forEach(v=>{const [k,n,col,mm,g,d,max]=v;let le=false;if(g==="g")le=["prenatal","parto"].includes(id);else if(mm!=null&&m!=null)le=m>=mm&&(max==null||m<max);if(k==="flu60")le=m!=null&&m>=720;
-    R.push({k,n,col,d,le,s:st[k]})});return R}
+    R.push({k,n,col,d,le,s:st[k],fut:g!=="g"&&mm!=null&&m!=null&&m<mm,pas:max!=null&&m!=null&&m>=max&&g!=="g"})});return R}
 WIDGET.vacunas={html:id=>{const R=vacEstado(id),cols=VAC_COLS.filter(c=>R.some(r=>r.col===c)),rows=[...new Set(R.map(r=>r.n))];
   const sym={1:"✔",2:"✚",0:"✘"},bg=r=>r.s===1?"#d8efe0":r.s===2?"#d6e6fb":r.s===0?"#fde2e1":r.le?"#fff4cc":"transparent";
-  return `<p class="note-src" style="margin:0 0 6px">Toca cada casilla según el carné: <b>✔</b> la tiene · <b>✚</b> se aplica hoy · <b>✘</b> no la tiene · vacía: sin dato. En amarillo: le corresponde por edad. Se guarda en la persona y se ve en todos los módulos.</p>
+  return `<p class="note-src" style="margin:0 0 6px">Toca cada casilla según el carné: <b>✔</b> la tiene · <b>✚</b> se aplica hoy · <b>✘</b> no la tiene · vacía: sin dato. En amarillo: le corresponde por edad. «Aún no»: todavía no tiene la edad. «Ya no»: pasó la edad para esa dosis. Se guarda en la persona y se ve en todos los módulos.</p>
    <div style="overflow:auto;border:1px solid var(--line);border-radius:12px"><table style="border-collapse:collapse;font-size:.78rem;min-width:100%">
    <thead><tr><th style="position:sticky;left:0;background:var(--accent-soft);text-align:left;padding:6px 8px;z-index:1">Vacuna \\ Edad</th>${cols.map(c=>`<th style="background:var(--accent-soft);padding:6px 6px;white-space:nowrap">${esc(c)}</th>`).join("")}</tr></thead>
    <tbody>${rows.map(n=>`<tr><td style="position:sticky;left:0;background:var(--card,#fff);padding:6px 8px;font-weight:600;white-space:nowrap;border-top:1px solid var(--line)">${esc(n)}</td>${cols.map(c=>{const r=R.find(x=>x.n===n&&x.col===c);if(!r)return `<td style="border-top:1px solid var(--line)"></td>`;
-     return `<td style="border-top:1px solid var(--line);text-align:center;padding:2px"><button type="button" data-vk="${r.k}" title="${esc(r.d)}" style="width:100%;min-width:52px;border:1px solid var(--line);border-radius:8px;padding:6px 2px;background:${bg(r)};font-size:.95rem;cursor:pointer">${r.s!=null?sym[r.s]:"&nbsp;"}<small style="display:block;font-size:.6rem;opacity:.75">${esc((w=>/^(del|desde|según|si|esquema|anual)$/i.test(w)?(r.k==="hbrn"?"RN":/^anual/i.test(w)?"Anual":""):w)(r.d.split(/[ ,;]/)[0]))}</small></button></td>`}).join("")}</tr>`).join("")}</tbody></table></div>
+     return `<td style="border-top:1px solid var(--line);text-align:center;padding:2px"><button type="button" data-vk="${r.k}" title="${esc(r.d)}" style="width:100%;min-width:52px;border:1px solid var(--line);border-radius:8px;padding:6px 2px;background:${bg(r)};font-size:.95rem;cursor:pointer;${(r.fut||r.pas)&&r.s==null?"opacity:.45;border-style:dashed":""}">${r.s!=null?sym[r.s]:"&nbsp;"}<small style="display:block;font-size:.6rem;opacity:.75">${r.fut&&r.s==null?"aún no":r.pas&&r.s==null?"ya no":esc((w=>/^(del|desde|según|si|esquema|anual)$/i.test(w)?(r.k==="hbrn"?"RN":/^anual/i.test(w)?"Anual":""):w)(r.d.split(/[ ,;]/)[0]))}</small></button></td>`}).join("")}</tr>`).join("")}</tbody></table></div>
    <div class="box" id="vac-res" style="margin-top:10px"></div>`},
  resumen:id=>{const R=vacEstado(id),tiene=R.filter(r=>r.s===1),hoyA=R.filter(r=>r.s===2),noT=R.filter(r=>r.le&&r.s===0),sd=R.filter(r=>r.le&&r.s==null),no=noT.concat(sd),rev=R.some(r=>r.s!=null),dd=r=>{const t=r.d.replace(/\s*\(.*\)/,"").replace(/\.$/,"");return t.charAt(0).toLowerCase()+t.slice(1)},nf=r=>r.n+" ("+dd(r)+")";
   if(!rev)return {tiene,hoyA,no,noT,sd,rev,txt:""};
