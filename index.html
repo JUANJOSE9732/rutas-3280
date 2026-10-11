@@ -936,7 +936,7 @@ function checks(m){try{return JSON.parse(S.get(key(m,"chk"))||"{}")}catch(e){ret
 function hasDraft(m){return !!(S.get(key(m,"dict"))||S.get(key(m,"nota"))||Object.keys(checks(m)).length)}
 
 /* ---------- PANEL ---------- */
-const VERSION_APP="2026-10-11 v120";
+const VERSION_APP="2026-10-11 v121";
 function home(){
   stopRec();st.view="home";
   const rm=["precon","prenatal","parto","rn","ive"],rp=["pinf","inf","adol","juv","adul","vej"];
@@ -1120,10 +1120,10 @@ function renderMod(){
   <div class="top"><button class="back" id="back">← Rutas</button><span class="tag ${m.route}">${routeName}</span></div>
   <header><h1>${esc(m.title)}</h1><p class="sub">${esc(m.who)}</p></header>
   <div class="pacbar">${pac()["NOMBRE COMPLETO"]?`<b>${esc(pac()["NOMBRE COMPLETO"])}</b>${pacResumen().map(x=>`<span>${x}</span>`).join("")}`:"<span>Persona sin identificar</span>"}<button class="lnk" id="pac-cambiar">${pac()["NOMBRE COMPLETO"]?"Corregir":"Identificar"}</button></div>
-  ${(()=>{const P=pac(),e=edadDe(P["FECHA NACIMIENTO"]),y=e?e.y:(P.__edad?+P.__edad:null);if(y==null)return"";const r=rutasPara(y,P["GENERO"]);let msg="";
-    if(m.route==="rp"&&id!=="proc"&&!r.includes(id))msg="Tiene "+y+" años: no corresponde a "+m.title.toLowerCase()+" ("+m.who+"). Le corresponde: "+r.filter(z=>M[z]&&M[z].route==="rp").map(z=>M[z].title).join(", ")+". Revisa la fecha de nacimiento o cambia de módulo.";
+  ${(()=>{const P=pac(),_fm=S.get(key(id,"fecha"))||hoy(),e=edadDe(P["FECHA NACIMIENTO"],_fm),y=e?e.y:(P.__edad?+P.__edad:null);if(y==null)return"";const r=rutasPara(y,P["GENERO"]);let msg="";
+    if(m.route==="rp"&&id!=="proc"&&!r.includes(id))msg="Tiene "+y+" años: no corresponde a "+m.title.toLowerCase()+" ("+m.who+"). Le corresponde: "+r.filter(z=>M[z]&&M[z].route==="rp").map(z=>M[z].title).join(", ")+". Revisa la fecha de nacimiento o cambia de módulo. Si estás registrando una consulta de otra fecha, cámbiala en Datos → «Fecha de esta consulta» (hoy dice "+fLarga(_fm)+").";
     else if(["precon","prenatal","parto","ive"].includes(id)&&(P["GENERO"]==="M"||y<10||y>55))msg=P["GENERO"]==="M"?"La persona está registrada como hombre y este módulo es materno.":"Tiene "+y+" años: revisa la fecha de nacimiento o el módulo.";
-    else if(id==="rn"&&P["FECHA NACIMIENTO"]&&pD(P["FECHA NACIMIENTO"])&&(pD(hoy())-pD(P["FECHA NACIMIENTO"]))/864e5>28)msg="Tiene más de 28 días: ya no es recién nacido; usa primera infancia.";
+    else if(id==="rn"&&P["FECHA NACIMIENTO"]&&pD(P["FECHA NACIMIENTO"])&&(pD(_fm)-pD(P["FECHA NACIMIENTO"]))/864e5>28)msg="Tiene más de 28 días: ya no es recién nacido; usa primera infancia.";
     return msg?`<div class="box warn" style="margin:8px 0"><h3>Revisa la persona o el módulo</h3><p style="margin:0">${esc(msg)}</p></div>`:""})()}
   ${m.facts.length?`<div class="facts">${m.facts.map(([k,v])=>`<span class="chip"><b>${esc(k)}</b>${esc(v)}</span>`).join("")}</div>`:""}
   <div class="tabs" role="tablist">${tabs.map(([k,l],i)=>`<button role="tab" data-tab="${k}" aria-selected="${st.tab===k}"><span class="stepn ${hecho[k]?"ok":""}">${hecho[k]?"✓":i+1}</span><span>${l}</span></button>`).join("")}</div>
@@ -3397,7 +3397,7 @@ function setPac(o){S.set("dn2_pac",JSON.stringify(o))}
 function identDe(){const o=Object.assign({},pac());delete o.__com;if(o.__edad&&!o["FECHA NACIMIENTO"])o["EDAD"]=o.__edad;delete o.__edad;delete o.__sxr;delete o.__mad;return o}
 function pacCom(){return pac().__com||""}
 function pacEdad(ref){const P=pac(),e=edadDe(P["FECHA NACIMIENTO"],ref);return e?(e.y>=1?e.y+" años":e.tm>=1?e.tm+(e.tm===1?" mes":" meses"):e.d+(e.d===1?" día":" días")):""}
-function pacResumen(){const P=pac(),b=[];if(P["TIPO"]||P["DOCUMENTO ID."])b.push(esc((P["TIPO"]||"")+" "+(P["DOCUMENTO ID."]||"")));const e=pacEdad();if(e)b.push(e);if(P["GENERO"])b.push(P["GENERO"]==="F"?"mujer":"hombre");if(P.__com)b.push(esc(P.__com));if(P.__mad&&P.__mad.nom)b.push(esc(madTxt(P)));if(P["ETNIA"])b.push(esc(P["PUEBLO"]||P["ETNIA"].toLowerCase()));return b}
+function pacResumen(){const P=pac(),b=[];if(P["TIPO"]||P["DOCUMENTO ID."])b.push(esc((P["TIPO"]||"")+" "+(P["DOCUMENTO ID."]||"")));const _fr=(typeof st!=="undefined"&&st.view==="mod"&&st.mod)?S.get(key(st.mod,"fecha")):null,e=pacEdad(_fr||undefined)+(_fr&&_fr!==hoy()?" (al "+fCorta(_fr)+")":"");if(e)b.push(e);if(P["GENERO"])b.push(P["GENERO"]==="F"?"mujer":"hombre");if(P.__com)b.push(esc(P.__com));if(P.__mad&&P.__mad.nom)b.push(esc(madTxt(P)));if(P["ETNIA"])b.push(esc(P["PUEBLO"]||P["ETNIA"].toLowerCase()));return b}
 function perfilNota(f){const P=pac(),b=[];const e=pacEdad(f);if(e)b.push(e);if(P["GENERO"])b.push(P["GENERO"]==="F"?"mujer":"hombre");if(P.__com)b.push("comunidad "+P.__com);if(P["ETNIA"])b.push(P["ETNIA"]==="INDIGENA"?"indígena"+(P["PUEBLO"]?" "+P["PUEBLO"].toLowerCase():""):P["ETNIA"].toLowerCase());if(P["ROL EN EL HOGAR"])b.push(P["ROL EN EL HOGAR"].toLowerCase());return b.join(", ")}
 function base(pref,opts){
   stopRec();st.view="base";baseOpts=opts||{};const c=conf(),q=cola();
