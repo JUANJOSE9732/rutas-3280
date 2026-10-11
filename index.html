@@ -936,7 +936,7 @@ function checks(m){try{return JSON.parse(S.get(key(m,"chk"))||"{}")}catch(e){ret
 function hasDraft(m){return !!(S.get(key(m,"dict"))||S.get(key(m,"nota"))||Object.keys(checks(m)).length)}
 
 /* ---------- PANEL ---------- */
-const VERSION_APP="2026-10-11 v129";
+const VERSION_APP="2026-10-11 v130";
 function home(){
   stopRec();st.view="home";
   const rm=["precon","prenatal","parto","rn","ive"],rp=["pinf","inf","adol","juv","adul","vej"];
@@ -2604,7 +2604,7 @@ function odoGet(){try{return JSON.parse(S.get(odoKey())||"{}")||{}}catch(e){retu
 function odoPer(f,m){return f==="o"||f==="s"?(m<12?0:Math.floor(m/12)):Math.floor(m/6)}
 function odoLbl(f,i){if(f==="o"||f==="s")return i===0?"6-11 m":i+" a";const a=Math.floor(i/2);return a+(i%2?" a ½":" a")}
 function odoCeldas(id){const v=ODO_VENT[id]||[6,216],m=edadMesesMod(id),cur={};ODO_FILAS.forEach(([f])=>cur[f]=m==null?null:odoPer(f,m));
-  const cols=[];for(let mm=v[0];mm<v[1];mm+=6)cols.push(mm);return {v,m,cur,cols}}
+  const cols=[];for(let mm=6;mm<v[1];mm+=6)cols.push(mm);return {v,m,cur,cols}}
 function odoEstado(id,f,i){const st=odoGet(),k=f+":"+i,s=st[k],c=odoCeldas(id).cur[f];return {k,s,act:c===i,pas:c!=null&&i<c,fut:c==null||i>c}}
 function odoResumen(id){const st=odoGet(),m=edadMesesMod(id),R={};if(m==null)return null;
   ODO_FILAS.forEach(([f,n,ini,fr])=>{if(m<ini){R[f]={n,ini,nada:1};return}const c=odoPer(f,m),i0=odoPer(f,ini);let hech=0,tot=0,falt=[];for(let i=i0;i<=c;i++){tot++;const s=st[f+":"+i];if(s===1||s===2)hech++;else if(i<c&&f!=="s")falt.push(odoLbl(f,i))}
@@ -2613,8 +2613,8 @@ WIDGET.odonto={html:id=>{const {cols,cur}=odoCeldas(id),st=odoGet(),sym={1:"✔"
   const cel=(f,mm)=>{const sem=!(f==="o"||f==="s"),ini=ODO_FILAS.find(x=>x[0]===f)[2];if(mm<ini&&!(f==="o"&&mm===6))return `<td style="border-top:1px solid var(--line)"></td>`;if(!sem&&mm%12!==0&&mm!==6)return `<td style="border-top:1px solid var(--line)"></td>`;
     const i=sem?Math.floor(mm/6):(mm<12?0:mm/12),e=odoEstado(id,f,i);if(e.s===2&&e.pas)e.s=1;const bg=e.s===1?"#d8efe0":e.s===2?"#d6e6fb":e.s===0?"#fde2e1":e.act&&f!=="s"?"#fff4cc":e.pas&&f!=="s"?"#f6eaea":"transparent";
     return `<td style="border-top:1px solid var(--line);text-align:center;padding:2px"><button type="button" data-ok="${e.k}" style="width:100%;min-width:46px;border:1px solid var(--line);border-radius:8px;padding:6px 2px;background:${bg};font-size:.95rem;cursor:pointer;${e.fut&&e.s==null?"opacity:.45;border-style:dashed":""}">${e.s!=null?sym[e.s]:"&nbsp;"}<small style="display:block;font-size:.58rem;opacity:.75">${e.act?"ahora":e.fut&&e.s==null?"aún no":e.pas&&e.s==null&&f!=="s"?"¿?":""}</small></button></td>`};
-  return `<p class="note-src" style="margin:0 0 6px">Marca según el carné o la historia: <b>✔</b> se hizo · <b>✚</b> se hace hoy · <b>✘</b> no se hizo. Amarillo: le toca en este periodo. Rosado con «¿?»: periodo ya pasado sin dato. Se guarda en la persona y continúa en los demás módulos.</p>
-   <div style="overflow:auto;border:1px solid var(--line);border-radius:12px"><table style="border-collapse:collapse;font-size:.76rem;min-width:100%"><thead><tr><th style="position:sticky;left:0;background:var(--accent-soft);text-align:left;padding:6px 8px;z-index:1">Actividad \\ Edad</th>${cols.map(mm=>`<th style="background:var(--accent-soft);padding:6px 4px;white-space:nowrap">${mm<12?"6 m":odoLbl("b",Math.floor(mm/6))}</th>`).join("")}</tr></thead>
+  return `<p class="note-src" style="margin:0 0 6px">Marca según el carné o la historia: <b>✔</b> se hizo · <b>✚</b> se hace hoy · <b>✘</b> no se hizo. Amarillo: le toca en este periodo. Rosado con «¿?»: periodo ya pasado sin dato. Se guarda en la persona y continúa en los demás módulos. Columnas grises: edades de módulos anteriores (historial); desliza a la izquierda para verlas.</p>
+   <div id="odo-scroll" style="overflow:auto;border:1px solid var(--line);border-radius:12px"><table style="border-collapse:collapse;font-size:.76rem;min-width:100%"><thead><tr><th style="position:sticky;left:0;background:var(--accent-soft);text-align:left;padding:6px 8px;z-index:1">Actividad \\ Edad</th>${cols.map(mm=>`<th style="background:${mm<(ODO_VENT[id]||[0])[0]?"var(--line)":"var(--accent-soft)"};padding:6px 4px;white-space:nowrap" title="${mm<(ODO_VENT[id]||[0])[0]?"Antes de este módulo":""}">${mm<12?"6 m":odoLbl("b",Math.floor(mm/6))}</th>`).join("")}</tr></thead>
    <tbody>${ODO_FILAS.map(([f,n,ini,fr])=>`<tr><td style="position:sticky;left:0;background:var(--card,#fff);padding:6px 8px;font-weight:600;white-space:nowrap;border-top:1px solid var(--line)">${esc(n)}<small style="display:block;font-weight:400;opacity:.7">${esc(fr)}</small></td>${cols.map(mm=>cel(f,mm)).join("")}</tr>`).join("")}</tbody></table></div>
    <div class="box" id="odo-res" style="margin-top:10px"></div>`},
  txt:id=>{const R=odoResumen(id);if(!R)return"";const st=odoGet();if(!Object.keys(st).length)return"";const L=[],hoyL=[],pend=[];
@@ -2624,6 +2624,7 @@ WIDGET.odonto={html:id=>{const {cols,cur}=odoCeldas(id),st=odoGet(),sym={1:"✔"
    const lin=ODO_FILAS.map(([f])=>{const r=R[f];if(r.nada)return `<li>${esc(r.n)}: desde los ${r.ini<12?r.ini+" meses":r.ini/12+" años"}.</li>`;if(f==="s")return `<li>${esc(r.n)}: según criterio de odontología${r.hech?" (registrados "+r.hech+")":""}.</li>`;
      return `<li><b>${esc(r.n)}:</b> ${r.hech} de ${r.tot} ${r.fr==="semestral"?"semestres":"años"} desde que le corresponde · este periodo: ${r.act===1?"ya se hizo":r.act===2?"se hace hoy":r.act===0?"no se hizo":"<b>le toca</b>"}${r.falt.length?` · sin registro: ${esc(r.falt.join(", "))}`:""}</li>`}).join("");
    b.innerHTML=`<h3>Línea del tiempo</h3><ul style="margin:0;padding-left:20px">${lin}</ul><p class="note-src" style="margin:6px 0 0">Odontología una vez al año desde los 6 meses; barniz de flúor y profilaxis cada 6 meses desde el año; sellantes desde los 3 años según criterio (Res. 3280).</p>`;save()};
+  {const sc=$("odo-scroll"),a=sc&&[...sc.querySelectorAll("[data-ok]")].find(b=>/ahora/.test(b.textContent));if(sc&&a){const st=sc.querySelector("td");sc.scrollLeft=Math.max(0,a.closest("td").offsetLeft-(st?st.offsetWidth:0)-a.closest("td").offsetWidth*2)}}
   document.querySelectorAll("[data-ok]").forEach(b=>b.onclick=()=>{const v=odoGet(),k=b.dataset.ok,nx={undefined:1,1:2,2:0,0:undefined}[v[k]];if(nx===undefined)delete v[k];else v[k]=nx;S.set(odoKey(),JSON.stringify(v));renderMod()});up()}};
 const _ivForOdo=ivFor;ivFor=function(id){const q=_ivForOdo(id);if(!ODO_VENT[id]||!q)return q;if(!q.some(x=>x&&x.widget==="odonto")){const g=q.find(x=>x&&x.l&&/barniz|fl[uú]or y profilaxis/i.test(x.l));if(g){g.widget="odonto";g.c=[];g.dyn=null;g.si=()=>{const m=edadMesesMod(id);return m==null||m>=6};g.siTxt="No aplica: menor de 6 meses; la primera consulta de odontología es a los 6 meses.";g.l=g.l}}
   const g=q.find(x=>x&&x.widget==="odonto");if(g)q.forEach(x=>{if(x&&x!==g&&x.l&&/odontolog[ií]a anual|^sellantes/i.test(x.l)&&!x._odoSkip){x._odoSkip=1;x.si=()=>false;x.siTxt=()=>"Registrado en el cuadro de salud bucal (pregunta «"+g.l+"»)."}});return q};
