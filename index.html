@@ -287,7 +287,7 @@ const M = {
   facts:[["Medicina","6, 8, 10 años"],["Enfermería","7, 9, 11 años"],["Odontología","anual"]],
   alerts:["Alteración visual o auditiva → remitir","Sospecha de maltrato o abuso → ruta de violencia"],
   sections:[
-   {t:"Valoración",items:["Crecimiento y estado nutricional","Desarrollo y desempeño escolar","Test de la figura humana de Goodenough (si hay quejas escolares)","Agudeza visual y audición","Salud mental, violencias, acoso","Esquema de vacunación"]},
+   {t:"Valoración",items:["Crecimiento y estado nutricional","Desarrollo y desempeño escolar","Test de la figura humana de Goodenough-Harris (obligatorio si hay quejas escolares, opcional si no)","Agudeza visual y audición","Salud mental, violencias, acoso","Esquema de vacunación"]},
    {t:"Detección temprana",items:["Tamizaje de anemia (hemoglobina y hematocrito) una vez entre los 10 y 13 años, solo niñas"]},
    {t:"Protección específica",items:["Vacunación según PAI (VPH a los 9 años según PAI vigente)","Barniz de flúor y profilaxis dos veces al año","Sellantes según necesidad"]},
    {t:"Educación",items:["Educación individual y familiar","Al menos dos ciclos educativos"]}
@@ -936,7 +936,7 @@ function checks(m){try{return JSON.parse(S.get(key(m,"chk"))||"{}")}catch(e){ret
 function hasDraft(m){return !!(S.get(key(m,"dict"))||S.get(key(m,"nota"))||Object.keys(checks(m)).length)}
 
 /* ---------- PANEL ---------- */
-const VERSION_APP="2026-10-11 v124";
+const VERSION_APP="2026-10-11 v125";
 function home(){
   stopRec();st.view="home";
   const rm=["precon","prenatal","parto","rn","ive"],rp=["pinf","inf","adol","juv","adul","vej"];
@@ -2353,31 +2353,41 @@ const GDH_IT=[["Cabeza presente"],["Piernas presentes"],["Brazos presentes"],["T
 const GDH_IND=["Quejas del colegio sobre rendimiento escolar o aprendizaje","Los padres refieren problemas de aprendizaje o de comportamiento","Problemas en la vida social (no juega, aislado)","Lenguaje que apareció tarde o familiares con problemas de aprendizaje"];
 const GDH_COND=["Tiene entre 3 y 10 años (validez del test; con 11 años el resultado es solo orientativo)","Ve bien (o usa sus gafas) y puede mover la mano con la que escribe","Está tranquilo, sin fiebre ni enfermedad aguda, y entiende el idioma de la instrucción","Hoja blanca tamaño carta, lápiz negro y borrador; sin modelos, dibujos ni ayuda","Instrucción: «Dibuja una persona completa, lo mejor que puedas». Sin límite de tiempo"];
 function gdhGet(id){try{return JSON.parse(S.get(key(id,"gdh"))||"{}")||{}}catch(e){return{}}}
-function gdhCalc(id){const v=gdhGet(id),pts=GDH_IT.filter((t,i)=>v["i"+i]).length,P=pac(),fe=S.get(key(id,"fecha"))||hoy(),e=edadDe(P["FECHA NACIMIENTO"],fe);
-  const ind=GDH_IND.filter((t,i)=>v["n"+i]),cond=GDH_COND.filter((t,i)=>v["c"+i]),hecho=!!v.hecho;
+function gdhQueja(id){try{const q=ivFor(id),a=ivAns(id),k=q.findIndex(z=>/^Desarrollo y desempeño escolar/.test(z.l));return k>=0?(a[k]||""):""}catch(e){return""}}
+function gdhCalc(id){const v=gdhGet(id),P=pac(),fe=S.get(key(id,"fecha"))||hoy(),e=edadDe(P["FECHA NACIMIENTO"],fe);
+  const ptsItems=GDH_IT.filter((t,i)=>v["i"+i]).length,rapido=v.total!=null&&v.total!=="",pts=rapido?Math.max(0,Math.min(GDH_IT.length,+v.total)):ptsItems;
+  const ind=GDH_IND.filter((t,i)=>v["n"+i]),cond=GDH_COND.filter((t,i)=>v["c"+i]),hecho=!!v.hecho||rapido;
+  const queja=/problema|goodenough|bajo rendimiento|aprendizaje|comportamiento|repit|perdi[oó] (el )?a[ñn]o/i.test(gdhQueja(id));
   const ec=e?e.d/365.25:null,em=3+pts/4,ci=ec?Math.round(em/ec*100):null;
   const cl=ci==null?"":ci<70?"Sugestivo de déficit cognitivo":ci<80?"Limítrofe":ci<90?"Normal bajo":ci<110?"Normal":"Normal alto";
-  return {pts,em,ec,ci,cl,ind,cond,hecho,y:e?e.y:null}}
-function anosMeses(x){if(x==null)return"";const a=Math.floor(x),m=Math.round((x-a)*12);return a+" años"+(m?" y "+m+(m===1?" mes":" meses"):"")}
-WIDGET.gdh={html:id=>{const v=gdhGet(id),cb=(k,t)=>`<label class="check" style="margin:4px 0"><input type="checkbox" data-gd="${k}" ${v[k]?"checked":""}> ${esc(t)}</label>`;
-  return `<details class="sec" open><summary><span>1. ¿Está indicado? (Res. 3280, p. 118)</span><span class="cnt">al menos uno</span></summary><div style="padding:0 14px 14px">${GDH_IND.map((t,i)=>cb("n"+i,t)).join("")}<p class="note-src" style="margin:4px 0 0">Si no hay ninguna queja, no se aplica.</p></div></details>
-   <details class="sec" open><summary><span>2. Condiciones para aplicarlo</span><span class="cnt">todas</span></summary><div style="padding:0 14px 14px">${GDH_COND.map((t,i)=>cb("c"+i,t)).join("")}</div></details>
-   <details class="sec" ${v.hecho?"open":""}><summary><span>3. Calificación del dibujo: 1 punto por cada ítem presente (lista de referencia; verifícala con el Anexo 9)</span><span class="cnt" id="gd-n"></span></summary><div style="padding:0 14px 14px">${cb("hecho","El niño terminó el dibujo")}${GDH_IT.map((t,i)=>cb("i"+i,(i+1)+". "+t[0])).join("")}
-    <p class="note-src" style="margin:6px 0 0">Edad mental = 3 años + (puntos ÷ 4). Cociente intelectual = edad mental ÷ edad cronológica × 100. Verifica los criterios de cada ítem con el Anexo 9.</p></div></details>
+  // decisión: ¿debo aplicarlo?
+  let dec,decTxt;const y=e?e.y:null;
+  if(y!=null&&(y<3||y>11)){dec="no";decTxt="No aplica por edad: el test está validado de 3 a 10 años."}
+  else if(ind.length||queja){dec="si";decTxt="Indicado (Res. 3280, p. 118): hay quejas"+(queja?" registradas en «Desarrollo y desempeño escolar»":"")+(ind.length?" ("+ind.join("; ").toLowerCase()+")":"")+". Se debe aplicar en esta misma consulta."+(y===11?" Con 11 años el resultado es solo orientativo.":"")}
+  else{dec="opc";decTxt="No indicado: no hay quejas de rendimiento escolar, aprendizaje, comportamiento ni vida social. Puedes aplicarlo de forma opcional si tienes alguna duda sobre el desarrollo."}
+  return {pts,em,ec,ci,cl,ind,cond,hecho,rapido,y,dec,decTxt,queja}}
+function anosMeses(x){if(x==null)return"";const a=Math.floor(x),m=Math.round((x-a)*12);return a+(a===1?" año":" años")+(m?" y "+m+(m===1?" mes":" meses"):"")}
+WIDGET.gdh={html:id=>{const v=gdhGet(id),r=gdhCalc(id),cb=(k,t)=>`<label class="check" style="margin:4px 0"><input type="checkbox" data-gd="${k}" ${v[k]?"checked":""}> ${esc(t)}</label>`;
+  return `<div class="box ${r.dec==="si"?"miss":""}" id="gd-dec" style="margin:0 0 10px"><h3>¿Debo aplicarlo?</h3><p style="margin:0" id="gd-dect">${esc(r.decTxt)}</p>
+    <ul style="margin:8px 0 0;padding-left:20px;font-size:.88rem"><li><b>Obligatorio</b> si hay quejas del colegio o de los padres sobre rendimiento escolar, aprendizaje, comportamiento o vida social.</li><li><b>Opcional</b> si no hay quejas pero tienes dudas sobre el desarrollo.</li><li><b>No aplicar</b> si tiene menos de 3 o más de 10 años, no ve o no puede mover la mano, está enfermo o no entiende la instrucción: en ese caso remite a pediatría.</li></ul></div>
+   <details class="sec" ${r.dec!=="opc"?"open":""}><summary><span>1. Quejas que lo indican</span><span class="cnt">marca las que haya</span></summary><div style="padding:0 14px 14px">${GDH_IND.map((t,i)=>cb("n"+i,t)).join("")}</div></details>
+   <details class="sec" ${r.dec!=="opc"||v.opc?"open":""}><summary><span>2. Condiciones para aplicarlo</span><span class="cnt">todas</span></summary><div style="padding:0 14px 14px">${GDH_COND.map((t,i)=>cb("c"+i,t)).join("")}</div></details>
+   <details class="sec" open><summary><span>3. Calificación</span><span class="cnt" id="gd-n"></span></summary><div style="padding:0 14px 14px">
+    <label class="bfl" style="max-width:320px"><span>Forma rápida: puntaje total del dibujo (si ya lo calificaste en papel)</span><input id="gd-total" type="number" inputmode="numeric" min="0" max="${GDH_IT.length}" value="${esc(v.total??"")}" placeholder="0 a ${GDH_IT.length}"></label>
+    <p class="note-src" style="margin:6px 0">O marca uno por uno los ítems presentes (1 punto cada uno; verifica los criterios con el Anexo 9):</p>
+    ${cb("hecho","El niño terminó el dibujo")}<details style="margin-top:4px"><summary style="cursor:pointer;font-weight:600">Ver los ${GDH_IT.length} ítems</summary>${GDH_IT.map((t,i)=>cb("i"+i,(i+1)+". "+t[0])).join("")}</details>
+    <p class="note-src" style="margin:6px 0 0">Edad mental = 3 años + (puntos ÷ 4). Cociente intelectual = edad mental ÷ edad cronológica × 100.</p></div></details>
    <div class="risk"><span class="pill low" id="gd-p">Marca la indicación y las condiciones</span></div><p class="note-src" id="gd-c" style="margin:4px 0 0"></p>`},
- txt:id=>{const r=gdhCalc(id);if(!r.ind.length&&!r.hecho)return"";if(!r.hecho)return "Indicación para test de Goodenough: "+r.ind.join(", ").toLowerCase()+". Test no aplicado en esta consulta.";
-  return "Se aplica el test de la figura humana de Goodenough (Anexo 9) por "+(r.ind.join(", ").toLowerCase()||"indicación del profesional")+". Puntaje: "+r.pts+" de "+GDH_IT.length+". Edad mental: "+anosMeses(r.em)+"; edad cronológica: "+anosMeses(r.ec)+"; cociente intelectual: "+r.ci+" ("+r.cl.toLowerCase()+")."+(r.ci<80?" Se remite a valoración integral por pediatría para ampliación diagnóstica.":" Por las quejas escolares se remite a pediatría para estudio y manejo (Res. 3280, p. 118).")+(r.y!=null&&r.y>10?" Resultado orientativo: el test está validado hasta los 10 años.":"")+(r.cond.length<GDH_COND.length?" Nota: no se cumplieron todas las condiciones de aplicación.":"")},
- wire:(id,save)=>{const up=()=>{const r=gdhCalc(id),p=$("gd-p"),c=$("gd-c");$("gd-n").textContent=r.pts+" de "+GDH_IT.length;
-   if(!r.ind.length){p.textContent="Sin indicación: no se aplica";p.className="pill low";c.textContent="Solo se aplica si hay quejas de rendimiento escolar, aprendizaje, comportamiento o vida social.";}
-   else if(r.cond.length<GDH_COND.length&&!r.hecho){p.textContent="Indicado: faltan "+(GDH_COND.length-r.cond.length)+" condiciones";p.className="pill high";c.textContent="Revisa las condiciones antes de pedir el dibujo; si no se pueden cumplir, remite a pediatría.";}
-   else if(!r.hecho){p.textContent="Listo para aplicar";p.className="pill low";c.textContent="Pide el dibujo y marca los ítems presentes.";}
+ txt:id=>{const r=gdhCalc(id);if(!r.hecho)return r.dec==="si"?"Test de la figura humana de Goodenough indicado por "+(r.ind.join(", ").toLowerCase()||"quejas escolares")+"; no aplicado en esta consulta"+(r.cond.length<GDH_COND.length?" (no se cumplen las condiciones de aplicación); se remite a pediatría.":"."):r.dec==="no"?"Test de Goodenough no aplica por edad.":"Test de Goodenough no indicado: sin quejas de rendimiento escolar, aprendizaje, comportamiento ni vida social.";
+  return "Se aplica el test de la figura humana de Goodenough (Anexo 9)"+(r.dec==="si"?" por "+(r.ind.join(", ").toLowerCase()||"quejas escolares"):" de forma opcional, sin quejas escolares")+". Puntaje: "+r.pts+" de "+GDH_IT.length+". Edad mental: "+anosMeses(r.em)+"; edad cronológica: "+anosMeses(r.ec)+"; cociente intelectual: "+r.ci+" ("+r.cl.toLowerCase()+")."+(r.ci<80?" Se remite a valoración integral por pediatría para ampliación diagnóstica.":r.dec==="si"?" Por las quejas escolares se remite a pediatría para estudio y manejo (Res. 3280, p. 118).":" Resultado sin alteración.")+(r.y!=null&&r.y>10?" Resultado orientativo: el test está validado hasta los 10 años.":"")+(r.cond.length<GDH_COND.length?" Nota: no se cumplieron todas las condiciones de aplicación.":"")},
+ wire:(id,save)=>{const up=()=>{const r=gdhCalc(id),p=$("gd-p"),c=$("gd-c");$("gd-n").textContent=r.pts+" de "+GDH_IT.length;$("gd-dect").textContent=r.decTxt;$("gd-dec").className="box "+(r.dec==="si"?"miss":"");
+   if(r.dec==="no"&&!r.hecho){p.textContent="No aplica por edad";p.className="pill low";c.textContent="";}
+   else if(!r.hecho){p.textContent=r.dec==="si"?(r.cond.length<GDH_COND.length?"Indicado: faltan "+(GDH_COND.length-r.cond.length)+" condiciones":"Indicado: listo para aplicar"):"Opcional: no indicado";p.className="pill "+(r.dec==="si"&&r.cond.length<GDH_COND.length?"high":"low");c.textContent=r.dec==="si"?"Pide el dibujo y califícalo (puntaje total o ítem por ítem).":"Si decides aplicarlo, escribe el puntaje total o marca los ítems.";}
    else if(r.ci==null){p.textContent=r.pts+" puntos";p.className="pill low";c.textContent="Falta la fecha de nacimiento para calcular el cociente.";}
-   else{p.textContent="CI "+r.ci+": "+r.cl;p.className="pill "+(r.ci<80?"high":"low");c.textContent="Edad mental "+anosMeses(r.em)+" · edad cronológica "+anosMeses(r.ec)+". "+(r.ci<80?"Remitir a valoración integral por pediatría.":"Por las quejas escolares, igual se remite a pediatría.")}save()};
-  document.querySelectorAll("[data-gd]").forEach(b=>b.onchange=()=>{const v=gdhGet(id);if(b.checked)v[b.dataset.gd]=1;else delete v[b.dataset.gd];S.set(key(id,"gdh"),JSON.stringify(v));up()});up()}};
-IVX["inf::Test de la figura humana de Goodenough (si hay quejas escolares)"]={widget:"gdh",
- si:A=>{const d=A("Desarrollo y desempeño escolar");return /problema|goodenough|bajo rendimiento|aprendizaje|comportamiento/i.test(d)},
- siTxt:"No aplica: sin quejas de rendimiento escolar, aprendizaje, comportamiento o vida social.",
- pauta:{t:"Cuándo y cómo se aplica (Res. 3280, p. 118, Anexo 9)",p:["Solo si hay quejas sobre el rendimiento escolar, el aprendizaje o la vida social del niño (del colegio o de los padres). Se aplica en la misma consulta.","Validez: de 3 a 10 años. Requisitos: que vea y pueda dibujar, que esté tranquilo y entienda la instrucción; hoja blanca, lápiz y borrador, sin modelo ni ayuda, sin límite de tiempo.","Califica 1 punto por cada ítem presente (Anexo 9). Edad mental = 3 + puntos ÷ 4. CI = edad mental ÷ edad cronológica × 100.","CI menor de 70: sugestivo de déficit cognitivo; 70 a 79: limítrofe; 80 a 89: normal bajo; 90 a 109: normal; 110 o más: normal alto.","Sugestivo de déficit, lenguaje tardío o familiares con problemas de aprendizaje → valoración integral por pediatría. Las quejas escolares igual se remiten a pediatría."],r:"",b:""}};
+   else{p.textContent="CI "+r.ci+": "+r.cl;p.className="pill "+(r.ci<80?"high":"low");c.textContent="Edad mental "+anosMeses(r.em)+" · edad cronológica "+anosMeses(r.ec)+". "+(r.ci<80?"Remitir a valoración integral por pediatría.":r.dec==="si"?"Por las quejas escolares, igual se remite a pediatría.":"Sin alteración.")}save()};
+  document.querySelectorAll("[data-gd]").forEach(b=>b.onchange=()=>{const v=gdhGet(id);if(b.checked)v[b.dataset.gd]=1;else delete v[b.dataset.gd];S.set(key(id,"gdh"),JSON.stringify(v));up()});
+  $("gd-total").addEventListener("input",()=>{const v=gdhGet(id),x=$("gd-total").value;if(x==="")delete v.total;else v.total=Math.max(0,Math.min(GDH_IT.length,+x));S.set(key(id,"gdh"),JSON.stringify(v));up()});up()}};
+IVX["inf::Test de la figura humana de Goodenough-Harris (obligatorio si hay quejas escolares, opcional si no)"]={widget:"gdh",pauta:{t:"Cuándo y cómo se aplica (Res. 3280, p. 118, Anexo 9)",p:["Solo si hay quejas sobre el rendimiento escolar, el aprendizaje o la vida social del niño (del colegio o de los padres). Se aplica en la misma consulta.","Validez: de 3 a 10 años. Requisitos: que vea y pueda dibujar, que esté tranquilo y entienda la instrucción; hoja blanca, lápiz y borrador, sin modelo ni ayuda, sin límite de tiempo.","Califica 1 punto por cada ítem presente (Anexo 9). Edad mental = 3 + puntos ÷ 4. CI = edad mental ÷ edad cronológica × 100.","CI menor de 70: sugestivo de déficit cognitivo; 70 a 79: limítrofe; 80 a 89: normal bajo; 90 a 109: normal; 110 o más: normal alto.","Sugestivo de déficit, lenguaje tardío o familiares con problemas de aprendizaje → valoración integral por pediatría. Las quejas escolares igual se remiten a pediatría."],r:"",b:""}};
 
 /* ---------- Gráfica de crecimiento OMS con el punto del paciente ---------- */
 function whoVal(ind,sx,x,z){const l=whoLMS(WHO[ind+sx],x);if(!l)return null;const [L,M,S]=l;return Math.abs(L)<1e-6?M*Math.exp(S*z):M*Math.pow(1+L*S*z,1/L)}
