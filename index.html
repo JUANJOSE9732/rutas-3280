@@ -936,7 +936,7 @@ function checks(m){try{return JSON.parse(S.get(key(m,"chk"))||"{}")}catch(e){ret
 function hasDraft(m){return !!(S.get(key(m,"dict"))||S.get(key(m,"nota"))||Object.keys(checks(m)).length)}
 
 /* ---------- PANEL ---------- */
-const VERSION_APP="2026-10-11 v126";
+const VERSION_APP="2026-10-11 v127";
 function home(){
   stopRec();st.view="home";
   const rm=["precon","prenatal","parto","rn","ive"],rp=["pinf","inf","adol","juv","adul","vej"];
@@ -2593,7 +2593,8 @@ WIDGET.vacunas={html:id=>{const R=vacEstado(id),cols=VAC_COLS.filter(c=>R.some(r
   document.querySelectorAll("[data-vk]").forEach(b=>b.onclick=()=>{const v=vacGet(),k=b.dataset.vk,nx={undefined:1,1:2,2:0,0:undefined}[v[k]];if(nx===undefined)delete v[k];else v[k]=nx;S.set(vacKey(),JSON.stringify(v));
    const R=vacEstado(id),r=R.find(x=>x.k===k),sym={1:"✔",2:"✚",0:"✘"};b.style.background=r.s===1?"#d8efe0":r.s===2?"#d6e6fb":r.s===0?"#fde2e1":r.le?"#fff4cc":"transparent";b.firstChild.nodeValue=r.s!=null?sym[r.s]:" ";up()});up()}};
 const VAC_RE=/^(esquema de vacunaci|vacunaci[oó]n seg|vacunas del embarazo|vacunas pendientes de la gestaci|vacunas bcg)/i;
-const _ivForVac=ivFor;ivFor=function(id){const q=_ivForVac(id);if(q&&!q.some(x=>x&&x.widget==="vacunas")){const x=q.find(x=>x&&x.l&&VAC_RE.test(x.l));if(x){x.widget="vacunas";x.c=[];x.dyn=null}}return q};
+const _ivForVac=ivFor;ivFor=function(id){const q=_ivForVac(id);if(q&&!q.some(x=>x&&x.widget==="vacunas")){const x=q.find(x=>x&&x.l&&VAC_RE.test(x.l));if(x){x.widget="vacunas";x.c=[];x.dyn=null}}
+  const g=(q||[]).find(x=>x&&x.widget==="vacunas");if(g)(q||[]).forEach(x=>{if(x&&x!==g&&x.l&&/vacun/i.test(x.l)&&!/tamiz/i.test(x.l)&&!x._vacSkip){x._vacSkip=1;x.si=()=>false;x.siTxt=()=>{const r=WIDGET.vacunas.resumen(id);return r.hoyA&&r.hoyA.length?"Se aplican hoy según el cuadro de vacunación: "+r.hoyA.map(v=>v.n).join(", ")+"; registradas en el carné y en PAIWEB.":"Registrado en el cuadro de vacunación (pregunta «"+g.l+"»)."}}});return q};
 
 const _cvTextoP=cvDesdeTexto;cvDesdeTexto=function(tipo,t){return _cvTextoP(tipo==="vitalesP"?"vitales":tipo,t)};
 const _cvF=cvCalc;cvCalc=function(tipo,v){if(tipo!=="formula")return _cvF(tipo,v);
