@@ -936,7 +936,7 @@ function checks(m){try{return JSON.parse(S.get(key(m,"chk"))||"{}")}catch(e){ret
 function hasDraft(m){return !!(S.get(key(m,"dict"))||S.get(key(m,"nota"))||Object.keys(checks(m)).length)}
 
 /* ---------- PANEL ---------- */
-const VERSION_APP="2026-10-11 v114";
+const VERSION_APP="2026-10-11 v115";
 function home(){
   stopRec();st.view="home";
   const rm=["precon","prenatal","parto","rn","ive"],rp=["pinf","inf","adol","juv","adul","vej"];
@@ -1168,7 +1168,7 @@ function hhResumen(id){const hh=hhEfectivo(id);const ks=Object.keys(hh);if(!ks.l
 function marcados(id){const m=M[id],ck=checks(id),o=[];m.sections.forEach((s,i)=>s.items.forEach((it,j)=>{if(ck[i+"."+j])o.push(s.t+": "+(it.startsWith("Q:")?"Pregunta realizada – "+it.slice(2):it))}));return o}
 /* ---------- DICTADO CAMPO POR CAMPO ---------- */
 const NW={cero:0,un:1,uno:1,una:1,primero:1,dos:2,tres:3,cuatro:4,cinco:5,seis:6,siete:7,ocho:8,nueve:9,diez:10,once:11,doce:12,trece:13,catorce:14,quince:15,dieciseis:16,diecisiete:17,dieciocho:18,diecinueve:19,veinte:20,veintiun:21,veintiuno:21,veintidos:22,veintitres:23,veinticuatro:24,veinticinco:25,veintiseis:26,veintisiete:27,veintiocho:28,veintinueve:29,treinta:30,cuarenta:40,cincuenta:50,sesenta:60,setenta:70,ochenta:80,noventa:90,cien:100,ciento:100,doscientos:200,trescientos:300,cuatrocientos:400,quinientos:500,seiscientos:600,setecientos:700,ochocientos:800,novecientos:900};
-function plano(t){return String(t||"").toLowerCase().normalize("NFD").replace(/[̀-ͯ]/g,"").replace(/[¿?¡!«»"]/g," ").trim()}
+function plano(t){return String(t||"").toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g,"").replace(/[¿?¡!«»"]/g," ").trim()}
 /* agrupa las palabras de número según la gramática ("mil novecientos noventa y nueve" = 1999; "uno dos tres" = 1|2|3) */
 function grupos(t){const tk=plano(t).replace(/[.,;:]/g," ").split(/\s+/).filter(Boolean),out=[];let g=null,y=false;
   const flush=()=>{if(g){out.push({n:g.tot+g.part});g=null}y=false};
@@ -3460,7 +3460,7 @@ function parseClinLocal(t,f){const o={};const neg=re=>{const m=t.match(new RegEx
   const ctl=(k,re)=>{if(o[k]==="SI"){const m=t.match(new RegExp("(?:"+re+")[^,.;]{0,25}?(no\\s+)?(?:est[aá]\\s+)?en\\s+control","i"));if(m)o[k+" EN CONTROL"]=m[1]?"NO":"SI"}};
   ctl("HTA","hipertens|HTA");ctl("DIABETES","diab[eé]t");ctl("EPOC","EPOC");
   if(o["HIPER O HIPOTIROIDISMO"]==="SI"){const m=t.match(/tiroid[^,.;]{0,25}?(no\s+)?en\s+control/i);if(m)o["TIROIDES EN CONTROL"]=m[1]?"NO":"SI"}
-  const plain=t.normalize("NFD").replace(/[̀-ͯ]/g,"");
+  const plain=t.normalize("NFD").replace(/[\u0300-\u036f]/g,"");
   const can=plain.match(/canalizad[oa]\s+a\s+([^.;]+)/i);if(can){const map={"MEDICINA GENERAL":/medicin/i,"ENFERMERIA":/enfermer/i,"PSICOLOGIA":/psicolog/i,"VACUNACION":/vacun/i,"ODONTOLOGIA":/odonto/i,"CITOLOGIA":/citolog/i};const sel=Object.keys(map).filter(k=>map[k].test(can[1]));if(sel.length)o["CANALIZADO A"]=sel.join(", ")}
   if(/sin\s+servicios\s+sociales|no\s+(?:requiere|necesita)\s+servicios\s+sociales/i.test(plain))o["SERVICIOS SOCIALES"]="NINGUNO";
   const br=t.match(/brigada\s+([^,.;]+)/i);if(br)o["BRIGADA"]=br[1].trim().toUpperCase();
