@@ -936,7 +936,7 @@ function checks(m){try{return JSON.parse(S.get(key(m,"chk"))||"{}")}catch(e){ret
 function hasDraft(m){return !!(S.get(key(m,"dict"))||S.get(key(m,"nota"))||Object.keys(checks(m)).length)}
 
 /* ---------- PANEL ---------- */
-const VERSION_APP="2026-10-11 v117";
+const VERSION_APP="2026-10-11 v118";
 function home(){
   stopRec();st.view="home";
   const rm=["precon","prenatal","parto","rn","ive"],rp=["pinf","inf","adol","juv","adul","vej"];
@@ -1063,15 +1063,34 @@ function madHTML(id){if(!madAplica(id))return"";const m=pac().__mad||{},ps=Objec
    <p class="note-src" style="grid-column:1/-1;margin:0">Sirve sobre todo cuando el niño todavía no tiene documento (recién nacido): queda en la nota como «Hijo de …» y enlaza las dos fichas en Pacientes.</p></div></details>`}
 function madWire(){const n=$("mad-nom");if(!n)return;n.addEventListener("change",()=>{const mm=n.value.match(/^(.*?)\s+—\s+(\S+)\s+(\S+)\s*$/);if(mm){n.value=mm[1];$("mad-tip").value=mm[2]||"CC";$("mad-doc").value=mm[3]||""}})}
 function madLeer(o){const n=$("mad-nom");if(!n)return;const nom=n.value.trim().toUpperCase(),doc=$("mad-doc").value.replace(/\D/g,"");if(nom||doc)o.__mad={rel:$("mad-rel").value,nom,tip:$("mad-tip").value,doc};else delete o.__mad}
+/* ---------- Edad exacta editable en Datos (sincronizada con la fecha de nacimiento) ---------- */
+const MES_TXT=["enero","febrero","marzo","abril","mayo","junio","julio","agosto","septiembre","octubre","noviembre","diciembre"];
+function fLarga(iso){const d=pD(iso);return d?d.getUTCDate()+" de "+MES_TXT[d.getUTCMonth()]+" de "+d.getUTCFullYear():""}
+function restarEdad(fe,a,m,d){const x=pD(fe);if(!x)return"";const y=new Date(Date.UTC(x.getUTCFullYear()-a,x.getUTCMonth()-m,1));const dim=new Date(Date.UTC(y.getUTCFullYear(),y.getUTCMonth()+1,0)).getUTCDate();y.setUTCDate(Math.min(x.getUTCDate(),dim));y.setUTCDate(y.getUTCDate()-d);return y.toISOString().slice(0,10)}
+function edadExacta(fn,fe){const a=pD(fn),b=pD(fe);if(!a||!b||a>b)return null;let y=b.getUTCFullYear()-a.getUTCFullYear(),m=b.getUTCMonth()-a.getUTCMonth(),d=b.getUTCDate()-a.getUTCDate();if(d<0){m--;d+=new Date(Date.UTC(b.getUTCFullYear(),b.getUTCMonth(),0)).getUTCDate()}if(m<0){y--;m+=12}return {y,m,d}}
+function edadBoxHTML(id){const fe=S.get(key(id,"fecha"))||hoy();return `<div class="bfl" id="eb-w" style="grid-column:1/-1;border:1px solid var(--line);border-radius:12px;padding:10px 12px">
+  <span>Edad exacta el día de la consulta (${esc(fCorta(fe))}) · puedes corregirla aquí o en la fecha de nacimiento</span>
+  <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:6px">
+   <label style="display:flex;align-items:center;gap:4px"><input id="eb-a" type="number" inputmode="numeric" min="0" max="120" style="width:72px"> años</label>
+   <label style="display:flex;align-items:center;gap:4px"><input id="eb-m" type="number" inputmode="numeric" min="0" max="11" style="width:64px"> meses</label>
+   <label style="display:flex;align-items:center;gap:4px"><input id="eb-d" type="number" inputmode="numeric" min="0" max="30" style="width:64px"> días</label></div>
+  <p class="note-src" id="eb-t" style="margin:6px 0 0;font-weight:600;color:var(--accent)"></p></div>`}
+function edadBoxWire(id,box){const fi=box.querySelector('[data-f="FECHA NACIMIENTO"]');if(!fi||!$("eb-w"))return;const fe=S.get(key(id,"fecha"))||hoy();
+  const pinta=()=>{const fn=fi.value,e=edadExacta(fn,fe);if(e){$("eb-a").value=e.y;$("eb-m").value=e.m;$("eb-d").value=e.d}else{$("eb-a").value="";$("eb-m").value="";$("eb-d").value=""}
+    const r=id&&M[id]?rutasPara(e?e.y:null,(box.querySelector('[data-f="GENERO"]')||{}).value):[];
+    $("eb-t").textContent=e?"Nació el "+fLarga(fn)+". "+(()=>{const q=[];if(e.y)q.push(e.y+(e.y===1?" año":" años"));if(e.m)q.push(e.m+(e.m===1?" mes":" meses"));if(e.d||!q.length)q.push(e.d+(e.d===1?" día":" días"));return q.length>1?q.slice(0,-1).join(", ")+" y "+q[q.length-1]:q[0]})()+" el día de la consulta."+(r.length&&!r.includes(id)&&id!=="rn"&&M[id].route!=="rm"?" Con esa edad le corresponde: "+r.map(x=>M[x]?M[x].title:x).join(" o ")+".":""):fn?"La fecha de nacimiento es posterior a la consulta: revísala.":"Escribe la fecha de nacimiento o la edad."};
+  const desdeEdad=()=>{const a=+$("eb-a").value||0,m=+$("eb-m").value||0,d=+$("eb-d").value||0;if($("eb-a").value===""&&$("eb-m").value===""&&$("eb-d").value==="")return;fi.value=restarEdad(fe,a,m,d);fi.dispatchEvent(new Event("input",{bubbles:true}));fi.dispatchEvent(new Event("change",{bubbles:true}));pinta()};
+  ["eb-a","eb-m","eb-d"].forEach(k=>$(k).addEventListener("change",desdeEdad));fi.addEventListener("input",pinta);fi.addEventListener("change",pinta);pinta()}
+
 function paneId(){const id=st.mod,P=pac(),d=identDe(),ks=idCampos(id);if(M[id].route==="rm"&&id!=="rn"&&!d["GENERO"])d["GENERO"]="F";
   const dl=k=>{const o=[...new Set(hist(k).concat(OPC[k]||[]))];return o.length?`<datalist id="dl-${k.replace(/\W/g,"")}">${o.map(v=>`<option value="${esc(v)}">`).join("")}</datalist>`:""};
   $("pane").innerHTML=`<section class="tool"><h3>Datos de la persona</h3><p class="note-src" style="margin:0">Se llenan una sola vez y sirven para la historia, la base de datos y los demás módulos. Lo obligatorio lleva *. Toca una casilla para ver opciones.</p>
    <div class="bgrid" id="id-f"><label class="bfl" for="id-com"><span>Comunidad o vereda *</span><input id="id-com" list="dl-__com" value="${esc(P.__com||S.get("dn2_ultcom")||"")}" placeholder="QUERARÍ">${dl("__com")}</label>
    ${ALLF.filter(f=>ks.includes(f.k)).map(f=>campo(f,d)).join("")}
-   ${madHTML(id)}<label class="bfl" for="id-edad" id="id-edadw"><span>Edad en años (solo si no sabe la fecha de nacimiento)</span><input id="id-edad" type="number" inputmode="numeric" min="0" max="120" value="${esc(P.__edad||"")}"></label></div>
+   ${edadBoxHTML(id)}${madHTML(id)}<label class="bfl" for="id-edad" id="id-edadw"><span>Edad en años (solo si no sabe la fecha de nacimiento)</span><input id="id-edad" type="number" inputmode="numeric" min="0" max="120" value="${esc(P.__edad||"")}"></label></div>
    <div class="box miss" id="id-miss" hidden><h3>Falta</h3><ul></ul></div>
    <div class="btns"><button class="btn primary" type="button" id="id-go">Guardar y seguir a las preguntas →</button></div><p class="status" id="id-st"></p></section>`;
-  const box=$("id-f");wireNA(box);madWire();
+  const box=$("id-f");wireNA(box);madWire();edadBoxWire(id,box);
   ["EAPB NOMBRE","PUEBLO"].forEach(k=>{const e=box.querySelector(`[data-f="${k}"]`),h=dl(k);if(e&&h){e.setAttribute("list","dl-"+k.replace(/\W/g,""));e.insertAdjacentHTML("afterend",h)}});
   const rec=()=>{box.querySelectorAll("[data-wrap]").forEach(w=>{if(w.dataset.if)w.hidden=(box.querySelector(`[data-f="${CSS.escape(w.dataset.if)}"]`)||{}).value!==w.dataset.ifv});
     const fn=(box.querySelector('[data-f="FECHA NACIMIENTO"]')||{}).value;$("id-edadw").hidden=!!fn};
