@@ -936,7 +936,7 @@ function checks(m){try{return JSON.parse(S.get(key(m,"chk"))||"{}")}catch(e){ret
 function hasDraft(m){return !!(S.get(key(m,"dict"))||S.get(key(m,"nota"))||Object.keys(checks(m)).length)}
 
 /* ---------- PANEL ---------- */
-const VERSION_APP="2026-10-11 v135";
+const VERSION_APP="2026-10-13 v136";
 function home(){
   stopRec();st.view="home";
   const rm=["precon","prenatal","parto","rn","ive"],rp=["pinf","inf","adol","juv","adul","vej"];
@@ -3009,6 +3009,333 @@ WIDGET.charlaPF={html:id=>pfHTML(id),txt:id=>pfTxt(id),
  add("adol","Asesoría en anticoncepción y control");add("juv","Asesoría y suministro de anticoncepción");add("adul","Anticoncepción y preservativos");
  add("parto","Método anticonceptivo antes del alta");add("ive","Asesoría y provisión anticonceptiva post-IVE");
  add("precon","Anticoncepción hasta decidir");add("prenatal","Anticoncepción posparto");
+})();
+
+/* ============ v136: instrumentos de medición — juventud, adultez y vejez ============
+   WIDGET.funcional — Barthel (Anexo 25) + Lawton-Brody (Anexo 26) + Fried (Anexo 27)
+   WIDGET.caidas    — Levántate y anda + factores de riesgo de caída
+   WIDGET.cogvej    — tamizaje mental (smental) + Minimental (Anexo 28)
+   WIDGET.apoyo     — APGAR familiar + Zarit reducida (Anexo 23) + signos de maltrato
+   WIDGET.findrisc  — FINDRISC (Anexo 18) + tablas OMS (Anexo 19)                      */
+(function(){
+ if(typeof IVX!=="object"||typeof WIDGET!=="object")return;
+ const G=(id,k)=>{try{return JSON.parse(S.get(key(id,k))||"{}")||{}}catch(e){return{}}};
+ const SV=(id,k,v)=>S.set(key(id,k),JSON.stringify(v));
+ const sex=()=>{try{return pac()["GENERO"]}catch(e){return""}};
+ /* busca la talla escrita en la antropometría de esta misma consulta */
+ const tallaCm=id=>{for(let i=0;i<60;i++){try{const v=JSON.parse(S.get(key(id,"cv"+i))||"null");if(v&&v.talla!=null&&v.talla!==""){const t=nv(v.talla);if(t!=null)return t<3?Math.round(t*100):Math.round(t)}}catch(e){}}return null};
+
+ /* barra de puntaje con los tramos del instrumento y la marca del valor */
+ function barra(val,max,T){
+  const seg=T.map(t=>`<div style="flex:${t.h-t.l};background:${t.col};height:100%"></div>`).join("");
+  const pos=val==null?null:Math.max(0,Math.min(100,val/max*100));
+  return `<div style="margin:8px 0 2px"><div style="position:relative;height:15px;border-radius:8px;overflow:hidden;display:flex">${seg}`+
+   (pos==null?"":`<div style="position:absolute;left:calc(${pos}% - 2px);top:-4px;width:4px;height:23px;background:#0f172a;border:2px solid #fff;border-radius:2px;box-shadow:0 0 0 1px #0f172a"></div>`)+
+   `</div><div style="display:flex;font-size:10.5px;opacity:.72;margin-top:3px">${T.map(t=>`<div style="flex:${t.h-t.l};text-align:center">${esc(t.n)}</div>`).join("")}</div></div>`}
+
+ function items(id,sk,P){const v=G(id,sk);
+  return P.map(([k,l,ops,nota])=>`<div class="tool" style="padding:8px 10px;gap:4px">
+   <b style="font-size:13px">${esc(l)}</b>${nota?`<div style="font-size:11px;opacity:.72;line-height:1.35">${esc(nota)}</div>`:""}
+   <select data-gr="${sk}.${k}" style="width:100%"><option value="" ${v[k]===undefined||v[k]===""?"selected":""}>— sin calificar</option>${ops.map(([t,p])=>`<option value="${p}" ${v[k]===String(p)?"selected":""}>${esc(t)} · ${p}</option>`).join("")}</select></div>`).join("")}
+ const suma=(v,P)=>P.filter(([k])=>v[k]!==undefined&&v[k]!=="").reduce((a,[k])=>a+ +v[k],0);
+ const hechos=(v,P)=>P.filter(([k])=>v[k]!==undefined&&v[k]!=="").length;
+ /* refresca puntaje, pastilla y barra de una escala */
+ function pinta(id,sk,P,I,T,MX){
+  const v={};document.querySelectorAll(`[data-gr^="${sk}."]`).forEach(e=>{if(e.value!=="")v[e.dataset.gr.slice(sk.length+1)]=e.value});
+  const prev=G(id,sk);Object.keys(prev).forEach(k=>{if(k.slice(0,2)==="__")v[k]=prev[k]});SV(id,sk,v);
+  const n=hechos(v,P),p=suma(v,P),r=I(p);
+  const sc=document.querySelector(`[data-grs="${sk}"]`),pp=document.querySelector(`[data-grp="${sk}"]`),bb=document.querySelector(`[data-grb="${sk}"]`);
+  if(!n){if(sc)sc.textContent="–";if(pp){pp.textContent="Califica los ítems";pp.className="pill low"}if(bb)bb.innerHTML=barra(null,MX,T);return v}
+  if(sc)sc.textContent=p;
+  if(pp){pp.textContent=p+"/"+MX+": "+r.t+(n<P.length?" (faltan "+(P.length-n)+")":"");pp.className="pill "+r.c}
+  if(bb)bb.innerHTML=barra(p,MX,T);return v}
+ const cab=(sk,txt)=>`<div class="risk" style="margin-top:8px"><span class="score" data-grs="${sk}">–</span><span class="pill low" data-grp="${sk}">${esc(txt)}</span></div><div data-grb="${sk}"></div>`;
+
+ /* ========== 1. BARTHEL — actividades básicas (0 a 100) ========== */
+ const BAR=[
+  ["com","Comer",[["Independiente: usa los cubiertos solo",10],["Necesita ayuda para cortar o untar",5],["Dependiente: lo alimentan",0]]],
+  ["tra","Trasladarse de la cama al asiento",[["Independiente",15],["Necesita mínima ayuda o supervisión",10],["Necesita gran ayuda (una o dos personas)",5],["Dependiente: no se sienta solo",0]]],
+  ["ase","Aseo personal (lavarse la cara, peinarse, afeitarse, dientes)",[["Independiente",5],["Necesita ayuda",0]]],
+  ["ret","Uso del sanitario",[["Independiente: entra, se limpia y se viste solo",10],["Necesita algo de ayuda",5],["Dependiente",0]]],
+  ["ban","Bañarse o ducharse",[["Independiente: entra y sale solo",5],["Dependiente",0]]],
+  ["des","Desplazarse (caminar)",[["Independiente más de 50 metros",15],["Camina 50 metros con ayuda de una persona o bastón",10],["Independiente en silla de ruedas 50 metros",5],["Inmóvil",0]]],
+  ["esc","Subir y bajar escaleras",[["Independiente",10],["Necesita ayuda o supervisión",5],["Incapaz",0]]],
+  ["ves","Vestirse y desvestirse",[["Independiente: botones, cremalleras, cordones",10],["Necesita ayuda pero hace la mitad solo",5],["Dependiente",0]]],
+  ["hec","Control de deposiciones",[["Continente",10],["Un accidente ocasional por semana",5],["Incontinente o necesita enemas",0]]],
+  ["ori","Control de orina",[["Continente, o maneja su sonda solo",10],["Un accidente ocasional en 24 horas",5],["Incontinente, o sonda manejada por otro",0]]]];
+ const BARI=p=>p===100?{c:"low",t:"independiente"}:p>=91?{c:"low",t:"dependencia leve"}:p>=61?{c:"high",t:"dependencia moderada"}:p>=21?{c:"high",t:"dependencia severa"}:{c:"high",t:"dependencia total"};
+ const BART=[{l:0,h:21,n:"Total",col:"#b91c1c"},{l:21,h:61,n:"Severa",col:"#ea580c"},{l:61,h:91,n:"Moderada",col:"#ca8a04"},{l:91,h:100,n:"Leve",col:"#65a30d"},{l:100,h:101,n:"",col:"#16a34a"}];
+
+ /* ========== 2. LAWTON-BRODY — actividades instrumentales (0 a 8) ========== */
+ const LAW=[
+  ["tel","Usar el teléfono o el radioteléfono",[["Lo usa solo: marca y contesta",1],["No lo usa, o necesita que le marquen",0]]],
+  ["cmp","Hacer las compras",[["Compra solo lo que necesita",1],["Necesita que lo acompañen, o no compra",0]]],
+  ["coc","Preparar la comida",[["Planea y cocina solo",1],["Necesita que le preparen la comida",0]]],
+  ["cas","Cuidado de la casa o de la maloca",[["La mantiene solo o con ayuda ocasional",1],["No participa en el cuidado de la casa",0]]],
+  ["rop","Lavar la ropa",[["Lava su ropa solo",1],["Necesita que le laven la ropa",0]]],
+  ["tpt","Usar transporte (bus, canoa, moto)",[["Viaja solo o usa transporte público",1],["No viaja solo, o necesita acompañante",0]]],
+  ["med","Manejo de sus medicamentos",[["Toma la dosis correcta a la hora correcta, solo",1],["Necesita que se los preparen o se los den",0]]],
+  ["din","Manejo del dinero",[["Maneja su dinero y sus cuentas solo",1],["Necesita ayuda, o no maneja dinero",0]]]];
+ const LAWI=p=>p===8?{c:"low",t:"independiente para las actividades instrumentales"}:p>=6?{c:"low",t:"dependencia instrumental leve"}:p>=4?{c:"high",t:"dependencia instrumental moderada"}:p>=2?{c:"high",t:"dependencia instrumental severa"}:{c:"high",t:"dependencia instrumental total"};
+ const LAWT=[{l:0,h:2,n:"Total",col:"#b91c1c"},{l:2,h:4,n:"Severa",col:"#ea580c"},{l:4,h:6,n:"Moderada",col:"#ca8a04"},{l:6,h:8,n:"Leve",col:"#65a30d"},{l:8,h:9,n:"",col:"#16a34a"}];
+
+ /* ========== 3. FRIED — fragilidad (0 a 5 criterios) ========== */
+ const FRI=[
+  ["pes","Pérdida de peso no intencional",[["No",0],["Sí: bajó 4,5 kg o más (o el 5 % del peso) en el último año sin proponérselo",1]],"Pregunta: ¿ha bajado de peso en el último año sin hacer dieta?"],
+  ["ago","Agotamiento",[["No",0],["Sí: tres o más días por semana",1]],"Pregunta: en la última semana, ¿sintió que todo lo que hacía era un esfuerzo, o que no podía seguir adelante?"],
+  ["act","Baja actividad física",[["No: camina, trabaja la chagra, pesca o hace oficio con regularidad",0],["Sí: pasa la mayor parte del día sentado o acostado",1]]],
+  ["mar","Lentitud de la marcha",[["No: camina los 4,6 metros dentro del límite",0],["Sí: tarda más del límite para su talla",1]],"Cronometra 4,6 metros caminando a su paso normal, con su bastón si lo usa."],
+  ["deb","Debilidad (fuerza de prensión)",[["No: aprieta su mano con fuerza",0],["Sí: apretón débil, o no puede destapar un frasco",1]],"Con dinamómetro si lo tienes; si no, el apretón de manos y la capacidad de destapar un frasco."]];
+ const FRII=p=>p===0?{c:"low",t:"robusto, sin criterios de fragilidad"}:p<=2?{c:"high",t:"prefrágil"}:{c:"high",t:"frágil"};
+ const FRIT=[{l:0,h:1,n:"Robusto",col:"#16a34a"},{l:1,h:3,n:"Prefrágil",col:"#ca8a04"},{l:3,h:6,n:"Frágil",col:"#b91c1c"}];
+
+ WIDGET.funcional={
+  html:id=>{const t=tallaCm(id),lim=t==null?null:((sex()==="M"?t<=173:t<=159)?7:6);
+   return `<p class="note-src" style="margin:0 0 8px">Res. 3280, p. 151-152: la funcionalidad se valora con el <b>índice de Barthel</b> (Anexo 25, actividades básicas), la <b>escala de Lawton-Brody</b> (Anexo 26, actividades instrumentales) y los <b>criterios de Linda Fried</b> (Anexo 27, fragilidad). Califica lo que la persona <b>hace de verdad</b>, no lo que podría hacer.</p>
+   <details open><summary><b>1 · Índice de Barthel</b> — actividades básicas · 0 a 100</summary>
+    <div style="display:flex;flex-direction:column;gap:6px;margin-top:6px">${items(id,"bar",BAR)}</div>${cab("bar","Califica las 10 actividades")}</details>
+   <details><summary><b>2 · Escala de Lawton-Brody</b> — actividades instrumentales · 0 a 8</summary>
+    <div style="display:flex;flex-direction:column;gap:6px;margin-top:6px">${items(id,"law",LAW)}</div>${cab("law","Califica las 8 actividades")}</details>
+   <details><summary><b>3 · Criterios de Linda Fried</b> — fragilidad · 0 a 5</summary>
+    <p class="note-src" style="margin:6px 0">${lim==null?"Registra primero la talla en «Estado nutricional, TA» para saber el límite de marcha de esta persona.":"Talla "+t+" cm: el límite de la prueba de marcha para esta persona es <b>"+lim+" segundos</b> en 4,6 metros."}</p>
+    <div style="display:flex;flex-direction:column;gap:6px">${items(id,"fri",FRI)}</div>${cab("fri","Califica los 5 criterios")}</details>`},
+  txt:id=>{const L=[],vb=G(id,"bar"),vl=G(id,"law"),vf=G(id,"fri");
+   if(hechos(vb,BAR)){const p=suma(vb,BAR),inc=hechos(vb,BAR)<BAR.length;
+    L.push("Índice de Barthel (Anexo 25): "+p+"/100"+(inc?" (incompleto)":"")+", "+BARI(p).t+".");
+    if(BARI(p).t!=="independiente"&&BARI(p).t!=="dependencia leve")L.push(BARI(p).t==="dependencia moderada"?"Dependencia moderada: se educa en autocuidado y actividad física, se orienta al cuidador y se remite a medicina.":"Se remite a medicina, se valora la sobrecarga del cuidador y se educa a la familia en movilización y prevención de úlceras por presión.")}
+   if(hechos(vl,LAW)){const p=suma(vl,LAW),inc=hechos(vl,LAW)<LAW.length;
+    L.push("Escala de Lawton-Brody (Anexo 26): "+p+"/8"+(inc?" (incompleto)":"")+", "+LAWI(p).t+".");
+    const per=LAW.filter(([k])=>vl[k]==="0").map(([k,l])=>l.toLowerCase());
+    if(per.length)L.push("Requiere apoyo en: "+per.join(", ")+"; se involucra a la familia en esas actividades.")}
+   if(hechos(vf,FRI)){const p=suma(vf,FRI),inc=hechos(vf,FRI)<FRI.length;
+    L.push("Criterios de Linda Fried (Anexo 27): "+p+"/5"+(inc?" (incompleto)":"")+", "+FRII(p).t+".");
+    const cr=FRI.filter(([k])=>vf[k]==="1").map(([k,l])=>l.toLowerCase());
+    if(cr.length)L.push("Criterios presentes: "+cr.join(", ")+".");
+    L.push(p===0?"Se refuerza la actividad física y la alimentación adecuada.":p<=2?"Prefragilidad: se indican ejercicios de fuerza, caminata diaria y proteína en cada comida; se controla en la siguiente consulta.":"Fragilidad: se remite a medicina para valoración geriátrica integral.")}
+   return L.join(" ")},
+  wire:(id,save)=>{const up=()=>{pinta(id,"bar",BAR,BARI,BART,100);pinta(id,"law",LAW,LAWI,LAWT,8);pinta(id,"fri",FRI,FRII,FRIT,5);save()};
+   document.querySelectorAll("[data-gr]").forEach(e=>e.addEventListener("change",up));up()}};
+
+ /* ========== 4. CAÍDAS — Levántate y anda + factores de riesgo ========== */
+ const TUGI=t=>t<10?{c:"low",t:"normal (menos de 10 segundos): sin riesgo de caídas"}:t<12?{c:"low",t:"10 a 11 segundos: en el límite; se refuerza la actividad física"}:t<=20?{c:"high",t:"12 a 20 segundos: riesgo de caídas; se remite a medicina y a fisioterapia"}:{c:"high",t:"más de 20 segundos: riesgo alto de caídas y de dependencia; se remite a medicina"};
+ const CAF=[["cai","Se cayó una o más veces en el último año"],["dos","Se cayó dos o más veces, o la caída le causó una lesión"],["mar","Marcha inestable, se agarra de las paredes o de los muebles"],["bas","Usa bastón, caminador o necesita que alguien lo sostenga"],["vis","Ve mal, no usa las gafas que necesita o tiene catarata"],["hip","Se marea o ve oscuro al pararse (hipotensión al cambiar de posición)"],["med","Toma medicamentos que dan sueño o bajan la presión (sedantes, antihipertensivos, hipoglucemiantes)"],["pol","Toma cinco o más medicamentos al día"],["pie","Dolor en los pies, uñas largas, deformidades o calzado inadecuado"],["cas","Riesgos en la vivienda: pisos lisos o mojados, escaleras sin pasamanos, poca luz, tapetes sueltos, hamaca alta"],["inc","Tiene que levantarse de noche a orinar varias veces"],["mie","Tiene miedo de caerse y por eso sale menos"]];
+ WIDGET.caidas={
+  html:id=>{const v=G(id,"tug"),f=G(id,"caf");
+   return `<p class="note-src" style="margin:0 0 8px">Res. 3280, p. 152: en toda persona de 60 años o más se valora el riesgo de caída. La prueba de referencia es <b>Levántate y anda</b> (Timed Up and Go); además se buscan los factores de riesgo de la persona, de sus medicamentos y de su vivienda.</p>
+   <div class="tool" style="padding:8px 10px;gap:6px"><b style="font-size:13px">Prueba Levántate y anda (Timed Up and Go)</b>
+    <div style="font-size:11px;opacity:.72;line-height:1.4">Sentado en una silla con espaldar y apoyabrazos: a la orden se levanta <b>sin apoyarse en los brazos</b>, camina 3 metros a su paso normal, da la vuelta, regresa y se sienta. Cronometra desde que despega la espalda del espaldar hasta que vuelve a apoyarla. Puede usar su bastón; no lo ayudes.</div>
+    <label class="bfl" style="margin-top:4px"><span>Tiempo (segundos)</span><input data-tug="seg" inputmode="decimal" placeholder="11" value="${esc(v.seg||"")}"></label>
+    <div class="risk"><span class="score" data-tugs>–</span><span class="pill low" data-tugp>Escribe el tiempo</span></div>
+    <div data-tugb></div>
+    <label class="bfl" style="margin-top:4px"><input type="checkbox" data-tugna ${v.na?"checked":""}> <span>No se puede hacer la prueba (no se levanta, está en cama o no colabora)</span></label></div>
+   <details open style="margin-top:8px"><summary><b>Factores de riesgo</b> — marca lo que encuentres</summary>
+    <div style="display:flex;flex-direction:column;gap:4px;margin-top:6px">${CAF.map(([k,l])=>`<label class="bfl"><input type="checkbox" data-caf="${k}" ${f[k]?"checked":""}> <span>${esc(l)}</span></label>`).join("")}</div>
+    <div class="risk" style="margin-top:8px"><span class="pill low" data-cafp>Sin factores marcados</span></div></details>`},
+  txt:id=>{const v=G(id,"tug"),f=G(id,"caf"),L=[];
+   const t=nv(v.seg);
+   if(v.na)L.push("No se pudo realizar la prueba Levántate y anda porque la persona no se levanta sola o no colabora: se considera de alto riesgo de caída y de dependencia; se remite a medicina.");
+   else if(t!=null)L.push("Prueba Levántate y anda: "+coma(t)+" segundos, "+TUGI(t).t+".");
+   const N={cai:"una caída en el último año",dos:"dos o más caídas o caída con lesión",mar:"marcha inestable",bas:"usa bastón o caminador",vis:"déficit visual no corregido",hip:"mareo al ponerse de pie",med:"medicamentos sedantes o hipotensores",pol:"polifarmacia (cinco o más medicamentos)",pie:"problemas en los pies o calzado inadecuado",cas:"riesgos en la vivienda",inc:"se levanta de noche a orinar varias veces",mie:"miedo a caerse"};
+   const mk=CAF.map(([k])=>k).filter(k=>f[k]);
+   if(mk.length){L.push("Factores de riesgo de caída: "+mk.map(k=>N[k]).join(", ")+".");
+    if(f.med||f.pol)L.push("Se remite a medicina para revisar los medicamentos.");
+    if(f.cas)L.push("Se orienta a la familia para corregir los riesgos de la vivienda: pasamanos, iluminación, retirar tapetes, piso seco y antideslizante.");
+    if(f.vis)L.push("Se remite a optometría u oftalmología.");
+    if(f.dos||f.hip)L.push("Se remite a medicina para estudiar la causa de las caídas.")}
+   if(!L.length)return"";
+   const alto=v.na||(t!=null&&t>=12)||f.dos||mk.length>=3;
+   L.push(alto?"Riesgo alto de caída: se remite a medicina y a fisioterapia, se educa a la persona y a la familia en prevención y se controla en la próxima consulta.":"Se educa en prevención de caídas: calzado cerrado y antideslizante, levantarse despacio, buena iluminación y actividad física regular.");
+   return L.join(" ")},
+  wire:(id,save)=>{const up=()=>{
+    const e=document.querySelector('[data-tug="seg"]'),na=document.querySelector("[data-tugna]");
+    const v={seg:e?e.value:"",na:na&&na.checked?1:0};SV(id,"tug",v);
+    const t=nv(v.seg),sc=document.querySelector("[data-tugs]"),pp=document.querySelector("[data-tugp]"),bb=document.querySelector("[data-tugb]");
+    const T=[{l:0,h:10,n:"Normal",col:"#16a34a"},{l:10,h:12,n:"Límite",col:"#ca8a04"},{l:12,h:20,n:"Riesgo",col:"#ea580c"},{l:20,h:30,n:"Alto",col:"#b91c1c"}];
+    if(v.na){if(sc)sc.textContent="–";if(pp){pp.textContent="No se pudo hacer la prueba: se considera de alto riesgo";pp.className="pill high"}if(bb)bb.innerHTML=""}
+    else if(t==null){if(sc)sc.textContent="–";if(pp){pp.textContent="Escribe el tiempo";pp.className="pill low"}if(bb)bb.innerHTML=barra(null,30,T)}
+    else{const r=TUGI(t);if(sc)sc.textContent=coma(t);if(pp){pp.textContent=coma(t)+" s: "+r.t;pp.className="pill "+r.c}if(bb)bb.innerHTML=barra(Math.min(t,30),30,T)}
+    const f={};document.querySelectorAll("[data-caf]").forEach(x=>{if(x.checked)f[x.dataset.caf]=1});SV(id,"caf",f);
+    const n=Object.keys(f).length,cp=document.querySelector("[data-cafp]");
+    if(cp){cp.textContent=n?n+" factor"+(n>1?"es":"")+" de riesgo marcado"+(n>1?"s":"")+(n>=3?": riesgo alto":""):"Sin factores marcados";cp.className="pill "+(n>=3||f.dos?"high":n?"low":"low")}
+    save()};
+   const ti=document.querySelector('[data-tug="seg"]');if(ti)ti.addEventListener("input",up);
+   document.querySelectorAll("[data-caf],[data-tugna]").forEach(e=>e.addEventListener("change",up));
+   up()}};
+
+ /* ========== 5. MINIMENTAL (MMSE, 0 a 30) ========== */
+ const MMS=[
+  ["ori","Orientación en el tiempo",[["0",0],["1",1],["2",2],["3",3],["4",4],["5",5]],"Un punto por acierto: año, época del año (verano o invierno amazónico), fecha del mes, día de la semana, mes."],
+  ["orl","Orientación en el lugar",[["0",0],["1",1],["2",2],["3",3],["4",4],["5",5]],"Un punto por acierto: país o departamento, municipio o comunidad, sitio donde está, parte del sitio, nombre del puesto de salud."],
+  ["fij","Fijación — tres palabras",[["0",0],["1",1],["2",2],["3",3]],"Di despacio tres palabras de su entorno (por ejemplo: canoa, pescado, casa) y pídele que las repita. Un punto por cada una en el primer intento. Repítelas hasta que las aprenda."],
+  ["cal","Atención y cálculo",[["0",0],["1",1],["2",2],["3",3],["4",4],["5",5]],"Restar 7 desde 100, cinco veces (93, 86, 79, 72, 65). Si no maneja números, pídele deletrear MUNDO al revés: O-D-N-U-M."],
+  ["rec","Recuerdo diferido",[["0",0],["1",1],["2",2],["3",3]],"Pídele que repita las tres palabras de antes. Un punto por cada una."],
+  ["nom","Nombrar dos objetos",[["0",0],["1",1],["2",2]],"Muéstrale un lápiz y un reloj y pídele que los nombre."],
+  ["rep","Repetir una frase",[["0",0],["1",1]],"«Ni sí, ni no, ni pero», o una frase equivalente en su lengua. Un solo intento."],
+  ["ord","Orden de tres pasos",[["0",0],["1",1],["2",2],["3",3]],"«Tome este papel con la mano derecha, dóblelo por la mitad y póngalo en el suelo». Un punto por paso."],
+  ["lee","Leer y obedecer",[["0",0],["1",1]],"Escribe CIERRE LOS OJOS en letra grande y pídele que lo lea y lo haga. Si no sabe leer, deja este ítem sin calificar."],
+  ["esc","Escribir una frase",[["0",0],["1",1]],"Que escriba una frase con sentido (sujeto y verbo). Si no sabe escribir, deja este ítem sin calificar."],
+  ["dib","Copiar los dos pentágonos",[["0",0],["1",1]],"Dos pentágonos cruzados. Se da el punto si los dos tienen cinco lados y se cruzan en dos puntos."]];
+ const ESCOL=[["Sin escolaridad: no lee ni escribe",17],["1 a 4 años de escuela",20],["5 a 8 años de escuela",22],["Más de 8 años de escuela",24]];
+ function mmHTML(id){const v=G(id,"mms");
+  return `<details style="margin-top:10px"><summary><b>Minimental (MMSE, Anexo 28)</b> — solo si hay quejas de memoria o desorientación</summary>
+  <p class="note-src" style="margin:6px 0">Res. 3280, p. 154: aplica el Minimental cuando la persona o su familia refieren olvidos, desorientación o cambios en el comportamiento. El puntaje se interpreta <b>según su escolaridad</b>: con el mismo puntaje, en una persona sin escuela puede ser normal y en una con bachillerato, alterado.</p>
+  <div class="tool" style="padding:8px 10px;gap:6px"><b style="font-size:13px">Escolaridad de la persona</b>
+   <select data-mmse style="width:100%"><option value="">— elige la escolaridad para poder interpretarlo</option>${ESCOL.map(([l,p])=>`<option value="${p}" ${v.__esc===String(p)?"selected":""}>${esc(l)} — alterado si saca ${p} o menos</option>`).join("")}</select>
+   <div style="font-size:11px;opacity:.72;line-height:1.4">En personas indígenas cuya primera lengua no es el español, el Minimental <b>pierde validez</b>: aplícalo con intérprete, cambia los objetos y las referencias por los de su entorno, y nunca diagnostiques deterioro solo con el puntaje.</div>
+   <label class="bfl" style="margin-top:4px"><input type="checkbox" data-mmna ${v.__na?"checked":""}> <span>No se aplica (barrera de idioma, analfabetismo, sordera o ceguera, o no colabora)</span></label></div>
+  <div style="display:flex;flex-direction:column;gap:6px;margin-top:8px">${items(id,"mms",MMS)}</div>${cab("mms","Califica los ítems")}</details>`}
+ function mmTxt(id){const v=G(id,"mms");
+  if(v.__na)return "No se aplica el Minimental por barrera de idioma, analfabetismo, déficit sensorial o falta de colaboración; la cognición se valora con el relato de la familia y se remite a medicina si refieren cambios.";
+  const n=hechos(v,MMS);if(!n)return"";
+  const p=suma(v,MMS),co=v.__esc?+v.__esc:null;
+  let t="Minimental (Anexo 28): "+p+"/30"+(n<MMS.length?" (incompleto)":"")+(co!=null?", punto de corte "+co+" para su escolaridad":"")+".";
+  if(co!=null)t+=p<=co?" Puntaje por debajo del corte: sospecha de deterioro cognitivo; se remite a medicina y se descartan causas reversibles (hipotiroidismo, déficit de vitamina B12, depresión, medicamentos sedantes).":" Sin sospecha de deterioro cognitivo por el puntaje.";
+  return t}
+ function mmWire(id,save){const up=()=>{
+   const es=document.querySelector("[data-mmse]"),na=document.querySelector("[data-mmna]");
+   const v=pinta(id,"mms",MMS,p=>({c:"low",t:""}),[],30);
+   if(es)v.__esc=es.value;if(na)v.__na=na.checked?1:0;SV(id,"mms",v);
+   const n=hechos(v,MMS),p=suma(v,MMS),co=v.__esc?+v.__esc:null;
+   const sc=document.querySelector('[data-grs="mms"]'),pp=document.querySelector('[data-grp="mms"]'),bb=document.querySelector('[data-grb="mms"]');
+   const T=co==null?[{l:0,h:30,n:"Elige la escolaridad para interpretar el puntaje",col:"#94a3b8"}]:[{l:0,h:co+1,n:"Alterado",col:"#b91c1c"},{l:co+1,h:31,n:"Normal",col:"#16a34a"}];
+   if(v.__na){if(sc)sc.textContent="–";if(pp){pp.textContent="No se aplica el Minimental";pp.className="pill low"}if(bb)bb.innerHTML=""}
+   else if(!n){if(sc)sc.textContent="–";if(pp){pp.textContent="Califica los ítems";pp.className="pill low"}if(bb)bb.innerHTML=barra(null,30,T)}
+   else{if(sc)sc.textContent=p;
+    if(pp){if(co==null){pp.textContent=p+"/30: elige la escolaridad para interpretarlo";pp.className="pill low"}
+     else{const alt=p<=co;pp.textContent=p+"/30 (corte "+co+"): "+(alt?"por debajo del corte, sospecha de deterioro cognitivo":"sin sospecha de deterioro")+(n<MMS.length?" (faltan "+(MMS.length-n)+")":"");pp.className="pill "+(alt?"high":"low")}}
+    if(bb)bb.innerHTML=barra(p,30,T)}
+   save()};
+  document.querySelectorAll('[data-gr^="mms."],[data-mmse],[data-mmna]').forEach(e=>e.addEventListener("change",up));up()}
+ /* el ítem de vejez conserva el tamizaje de salud mental y le suma el Minimental */
+ const SM=WIDGET.smental;
+ WIDGET.cogvej={
+  html:id=>SM.html(id)+mmHTML(id),
+  txt:id=>[SM.txt(id),mmTxt(id)].filter(Boolean).join(" "),
+  wire:(id,save)=>{SM.wire(id,save);mmWire(id,save)}};
+
+ /* ========== 6. APGAR FAMILIAR + ZARIT + MALTRATO ========== */
+ const OA=[["Casi siempre",2],["A veces",1],["Casi nunca",0]];
+ const APG=[
+  ["ada","Adaptación",OA,"¿Está satisfecho con la ayuda que recibe de su familia cuando tiene un problema?"],
+  ["par","Participación",OA,"¿Conversan entre ustedes los problemas que tienen en casa?"],
+  ["cre","Crecimiento",OA,"¿Las decisiones importantes se toman en conjunto en la casa?"],
+  ["afe","Afecto",OA,"¿Está satisfecho con el tiempo que usted y su familia pasan juntos?"],
+  ["res","Resolución",OA,"¿Siente que su familia lo quiere?"]];
+ const APGI=p=>p>=7?{c:"low",t:"familia funcional"}:p>=4?{c:"high",t:"disfunción familiar leve"}:{c:"high",t:"disfunción familiar grave"};
+ const APGT=[{l:0,h:4,n:"Grave",col:"#b91c1c"},{l:4,h:7,n:"Leve",col:"#ca8a04"},{l:7,h:11,n:"Funcional",col:"#16a34a"}];
+ const OZ=[["Nunca",0],["Rara vez",1],["Algunas veces",2],["Bastantes veces",3],["Casi siempre",4]];
+ const ZAR=[
+  ["z1","¿Siente que, por el tiempo que dedica a cuidarlo, ya no le queda tiempo para usted?",OZ],
+  ["z2","¿Se siente agobiado por tratar de cumplir con el cuidado y con sus otras responsabilidades?",OZ],
+  ["z3","¿Cree que cuidarlo afecta de forma negativa su relación con sus amigos o con el resto de la familia?",OZ],
+  ["z4","¿Se siente agotado cuando tiene que estar junto a la persona que cuida?",OZ],
+  ["z5","¿Siente que su salud se ha dañado por cuidarlo?",OZ],
+  ["z6","¿Siente que ha perdido el control de su vida desde que él o ella se enfermó?",OZ],
+  ["z7","En general, ¿se siente muy sobrecargado por tener que cuidarlo?",OZ]];
+ const ZARI=p=>p<=7?{c:"low",t:"sin sobrecarga"}:p<17?{c:"high",t:"sobrecarga leve"}:{c:"high",t:"sobrecarga intensa"};
+ const ZART=[{l:0,h:8,n:"Sin sobrecarga",col:"#16a34a"},{l:8,h:17,n:"Leve",col:"#ca8a04"},{l:17,h:29,n:"Intensa",col:"#b91c1c"}];
+ const MAL=[["l","Lesiones sin explicación clara, o que no coinciden con lo que cuentan"],["d","Descuido: suciedad, ropa inadecuada, úlceras por presión, deshidratación, desnutrición"],["m","No le dan los medicamentos, o no lo llevan a las citas"],["e","Le quitan la pensión, el subsidio o sus pertenencias"],["p","Lo insultan, lo amenazan, lo humillan o lo aíslan"],["a","Lo dejan solo largos periodos sin quien lo cuide"],["s","Le teme a la persona que lo cuida, o no habla delante de ella"]];
+ WIDGET.apoyo={
+  html:id=>{const vm=G(id,"mal");
+   return `<p class="note-src" style="margin:0 0 8px">Res. 3280, p. 153-154: se valoran la red de apoyo con el <b>APGAR familiar</b> y, cuando hay un cuidador de una persona dependiente, la <b>escala de Zarit</b> (Anexo 23). Ante cualquier signo de maltrato o abandono se activa la ruta de violencias y se notifica.</p>
+   <details open><summary><b>APGAR familiar</b> — 0 a 10 · se lo preguntas a la persona mayor, a solas</summary>
+    <div style="display:flex;flex-direction:column;gap:6px;margin-top:6px">${items(id,"apg",APG)}</div>${cab("apg","Califica las 5 preguntas")}</details>
+   <details><summary><b>Escala de Zarit reducida</b> — sobrecarga del cuidador · 0 a 28 · se la preguntas al cuidador</summary>
+    <p class="note-src" style="margin:6px 0">Aplícala cuando la persona mayor depende de alguien para sus actividades. Pregúntale al cuidador, no a la persona mayor.</p>
+    <div style="display:flex;flex-direction:column;gap:6px">${items(id,"zar",ZAR)}</div>${cab("zar","Califica las 7 preguntas")}</details>
+   <details><summary><b>Signos de alarma de maltrato</b> — marca lo que encuentres</summary>
+    <p class="note-src" style="margin:6px 0">Pregunta a solas, sin el cuidador presente. Un solo signo basta para activar la ruta.</p>
+    <div style="display:flex;flex-direction:column;gap:4px">${MAL.map(([k,l])=>`<label class="bfl"><input type="checkbox" data-mal="${k}" ${vm[k]?"checked":""}> <span>${esc(l)}</span></label>`).join("")}</div>
+    <div class="risk" style="margin-top:8px"><span class="pill low" data-malp>Sin signos marcados</span></div></details>`},
+  txt:id=>{const L=[],va=G(id,"apg"),vz=G(id,"zar"),vm=G(id,"mal");
+   if(hechos(va,APG)){const p=suma(va,APG);L.push("APGAR familiar: "+p+"/10"+(hechos(va,APG)<APG.length?" (incompleto)":"")+", "+APGI(p).t+".");
+    if(p<7)L.push("Se remite a orientación familiar y se trabaja con la familia el acompañamiento a la persona mayor.")}
+   if(hechos(vz,ZAR)){const p=suma(vz,ZAR);L.push("Escala de Zarit reducida aplicada al cuidador (Anexo 23): "+p+"/28"+(hechos(vz,ZAR)<ZAR.length?" (incompleto)":"")+", "+ZARI(p).t+".");
+    if(ZARI(p).t==="sobrecarga intensa")L.push("Sobrecarga intensa del cuidador: se remite a la ruta de salud mental, se busca repartir el cuidado con otros familiares y se educa al cuidador en su propio autocuidado.");
+    else if(ZARI(p).t==="sobrecarga leve")L.push("Sobrecarga leve: se orienta al cuidador en descanso, reparto de tareas y señales de agotamiento.")}
+   const N={l:"lesiones sin explicación",d:"descuido en el cuidado",m:"no le dan los medicamentos ni lo llevan a las citas",e:"maltrato económico",p:"maltrato psicológico",a:"abandono",s:"temor a la persona que lo cuida"};
+   const mk=MAL.map(([k])=>k).filter(k=>vm[k]);
+   if(mk.length)L.push("Signos de alarma de maltrato: "+mk.map(k=>N[k]).join(", ")+". Se activa la ruta de atención a víctimas de violencias, se notifica al SIVIGILA y se informa a la comisaría de familia o a la autoridad indígena según el caso.");
+   return L.join(" ")},
+  wire:(id,save)=>{const up=()=>{
+    pinta(id,"apg",APG,APGI,APGT,10);pinta(id,"zar",ZAR,ZARI,ZART,28);
+    const vm={};document.querySelectorAll("[data-mal]").forEach(e=>{if(e.checked)vm[e.dataset.mal]=1});SV(id,"mal",vm);
+    const n=Object.keys(vm).length,mp=document.querySelector("[data-malp]");
+    if(mp){mp.textContent=n?n+" signo"+(n>1?"s":"")+" de maltrato: activa la ruta de violencias y notifica":"Sin signos marcados";mp.className="pill "+(n?"high":"low")}
+    save()};
+   document.querySelectorAll("[data-gr],[data-mal]").forEach(e=>e.addEventListener("change",up));up()}};
+
+ /* ========== 7. FINDRISC + TABLAS OMS ========== */
+ const FDR=[
+  ["edad","Edad",[["Menos de 45 años",0],["45 a 54 años",2],["55 a 64 años",3],["Más de 64 años",4]]],
+  ["imc","Índice de masa corporal",[["Menos de 25",0],["25 a 30",1],["Más de 30",3]],"Tómalo del estado nutricional de esta misma consulta."],
+  ["cint","Perímetro de cintura",[["Hombre menos de 94 cm · Mujer menos de 80 cm",0],["Hombre 94 a 102 cm · Mujer 80 a 88 cm",3],["Hombre más de 102 cm · Mujer más de 88 cm",4]],"Medido en el punto medio entre la última costilla y la cresta ilíaca, al final de una espiración."],
+  ["act","¿Hace al menos 30 minutos de actividad física al día?",[["Sí: chagra, pesca, caminar, oficio de la casa",0],["No",2]]],
+  ["fru","¿Come frutas o verduras todos los días?",[["Sí, todos los días",0],["No todos los días",1]]],
+  ["hta","¿Ha tomado medicamentos para la presión alta?",[["No",0],["Sí",2]]],
+  ["glu","¿Alguna vez le han encontrado el azúcar alto en la sangre?",[["No",0],["Sí: en un examen, en el embarazo o durante una enfermedad",5]],"Incluye la diabetes gestacional."],
+  ["fam","¿Tiene familiares con diabetes?",[["No",0],["Sí: abuelos, tíos o primos",3],["Sí: padres, hermanos o hijos",5]]]];
+ const FDRI=p=>p<7?{c:"low",t:"riesgo bajo — 1 de cada 100 desarrollará diabetes en 10 años"}:p<12?{c:"low",t:"riesgo ligeramente elevado — 1 de cada 25 en 10 años"}:p<15?{c:"high",t:"riesgo moderado — 1 de cada 6 en 10 años"}:p<21?{c:"high",t:"riesgo alto — 1 de cada 3 en 10 años"}:{c:"high",t:"riesgo muy alto — 1 de cada 2 en 10 años"};
+ const FDRT=[{l:0,h:7,n:"Bajo",col:"#16a34a"},{l:7,h:12,n:"Ligero",col:"#65a30d"},{l:12,h:15,n:"Moder.",col:"#ca8a04"},{l:15,h:21,n:"Alto",col:"#ea580c"},{l:21,h:27,n:"Muy alto",col:"#b91c1c"}];
+ const OMS=[["","— aún no calculado"],["<10","Menos del 10 % — riesgo bajo"],["10-20","10 a menos del 20 % — riesgo moderado"],["20-30","20 a menos del 30 % — riesgo alto"],["30+","30 % o más — riesgo muy alto"]];
+ WIDGET.findrisc={
+  html:id=>{const v=G(id,"fdr"),m=st&&st.mod,juv=m==="juv";
+   return `<p class="note-src" style="margin:0 0 8px">El riesgo se calcula con dos instrumentos: el <b>FINDRISC</b> (Anexo 18) estima el riesgo de <b>diabetes</b> a 10 años, y las <b>tablas de la OMS</b> (Anexo 19) estiman el riesgo <b>cardiovascular</b> a 10 años. También sirve la calculadora «Conoce tu riesgo» del Ministerio.<br>${juv?"<b>En juventud</b> solo se ordenan los exámenes si el riesgo cardiovascular es medio o mayor, o el riesgo de diabetes es moderado o alto.":"<b>En adultez y vejez</b> los exámenes van cada 5 años a todas las personas, independientemente del puntaje; estos instrumentos definen además la intensidad de la intervención."}</p>
+   <details open><summary><b>FINDRISC</b> — riesgo de diabetes a 10 años · 0 a 26</summary>
+    <div style="display:flex;flex-direction:column;gap:6px;margin-top:6px">${items(id,"fdr",FDR)}</div>${cab("fdr","Califica las 8 preguntas")}</details>
+   <details><summary><b>Tablas de la OMS</b> — riesgo cardiovascular a 10 años</summary>
+    <p class="note-src" style="margin:6px 0">Busca en la tabla de la OMS para las Américas (Anexo 19) el cruce de: <b>sexo</b>, <b>si fuma</b>, <b>si tiene diabetes</b>, <b>edad</b>, <b>presión sistólica</b> y <b>colesterol total</b>. Si no tienes el colesterol, usa la versión de la tabla que no lo pide. Luego marca aquí el color o el rango que te dio.</p>
+    <select data-oms style="width:100%">${OMS.map(([val,l])=>`<option value="${val}" ${v.__oms===val?"selected":""}>${esc(l)}</option>`).join("")}</select>
+    <div class="risk" style="margin-top:8px"><span class="pill low" data-omsp>Aún no calculado</span></div></details>`},
+  txt:id=>{const v=G(id,"fdr"),L=[],n=hechos(v,FDR);
+   if(n){const p=suma(v,FDR);
+    L.push("FINDRISC (Anexo 18): "+p+"/26"+(n<FDR.length?" (incompleto)":"")+", "+FDRI(p).t+".");
+    L.push(p>=12?"Se ordena glicemia basal en ayunas y se brinda consejería intensiva en alimentación y actividad física.":"Se refuerzan la alimentación saludable y la actividad física; se vuelve a calcular en la siguiente valoración.")}
+   if(v.__oms){const M={"<10":"bajo, menos del 10 %","10-20":"moderado, del 10 al 20 %","20-30":"alto, del 20 al 30 %","30+":"muy alto, 30 % o más"};
+    L.push("Riesgo cardiovascular a 10 años por las tablas de la OMS (Anexo 19): "+M[v.__oms]+".");
+    if(v.__oms!=="<10")L.push("Se ordenan glicemia basal, perfil lipídico, creatinina y uroanálisis, y se remite a la ruta de alteraciones cardio-cerebro-vasculares y metabólicas.")}
+   return L.join(" ")},
+  wire:(id,save)=>{const up=()=>{
+    const v=pinta(id,"fdr",FDR,FDRI,FDRT,26);
+    const o=document.querySelector("[data-oms]");if(o){v.__oms=o.value;SV(id,"fdr",v)}
+    const op=document.querySelector("[data-omsp]");
+    if(op){const M={"<10":"Riesgo bajo: se refuerzan hábitos saludables","10-20":"Riesgo moderado: exámenes y consejería intensiva","20-30":"Riesgo alto: exámenes y remisión a la ruta cardio-cerebro-vascular","30+":"Riesgo muy alto: exámenes y remisión prioritaria"};
+     op.textContent=v.__oms?M[v.__oms]:"Aún no calculado";op.className="pill "+(v.__oms&&v.__oms!=="<10"?"high":"low")}
+    save()};
+   document.querySelectorAll('[data-gr^="fdr."],[data-oms]').forEach(e=>e.addEventListener("change",up));up()}};
+
+ /* ========== ENGANCHE A LOS ÍTEMS ========== */
+ const P=(t,p)=>({t,p,r:"",b:""});
+ const put=(k,w,pt,pp)=>{const x=IVX[k];if(!x)return;x.widget=w;delete x.c;x.dyn=null;if(pt)x.pauta=P(pt,pp)};
+ put("vej::Funcionalidad (actividades básicas e instrumentales)","funcional","Cómo se mide (Res. 3280, p. 151-152)",
+  ["Barthel (Anexo 25): 10 actividades básicas, 0 a 100. 100 independiente · 91-99 leve · 61-90 moderada · 21-60 severa · 20 o menos total.",
+   "Lawton-Brody (Anexo 26): 8 actividades instrumentales, 0 a 8. Detecta el deterioro antes que el Barthel.",
+   "Fried (Anexo 27): 5 criterios de fragilidad. 0 robusto · 1-2 prefrágil · 3 o más frágil.",
+   "Califica lo que la persona hace de verdad, no lo que podría hacer. Verifica con la familia si hay duda."]);
+ put("vej::Riesgo de caídas","caidas","Cómo se mide (Res. 3280, p. 152)",
+  ["Levántate y anda: se levanta sin apoyar los brazos, camina 3 metros, da la vuelta y se sienta. Menos de 10 s normal · 12 a 20 s riesgo · más de 20 s riesgo alto.",
+   "Una caída previa es el factor de riesgo más fuerte para la siguiente: pregunta siempre por caídas en el último año.",
+   "Revisa los medicamentos: los sedantes, los antihipertensivos y la polifarmacia son causa corregible de caída.",
+   "Mira la vivienda con la familia: pasamanos, iluminación, piso seco, retirar tapetes y la altura de la hamaca o de la cama."]);
+ put("vej::Maltrato, abandono, red de apoyo","apoyo","Cómo se mide (Res. 3280, p. 153-154)",
+  ["APGAR familiar: 5 preguntas, 0 a 10. 7-10 funcional · 4-6 disfunción leve · 0-3 disfunción grave. Pregúntalo a solas.",
+   "Zarit reducida (Anexo 23): 7 preguntas al cuidador, 0 a 28. 17 o más es sobrecarga intensa.",
+   "Pregunta por maltrato sin el cuidador presente. Un solo signo basta para activar la ruta de violencias y notificar.",
+   "Vivir solo no es por sí mismo maltrato, pero sí un riesgo: orienta a Colombia Mayor, centro día y a la autoridad indígena."]);
+ const RCVP=["FINDRISC (Anexo 18): 8 preguntas, 0 a 26. Menos de 7 bajo · 7-11 ligero · 12-14 moderado · 15-20 alto · más de 20 muy alto.",
+  "Tablas de la OMS (Anexo 19): cruzan sexo, tabaquismo, diabetes, edad, presión sistólica y colesterol total. Hay versión sin colesterol.",
+  "Juventud: los exámenes se ordenan solo con riesgo medio o mayor, o riesgo de diabetes moderado o alto.",
+  "Adultez y vejez: glicemia, perfil lipídico, creatinina y uroanálisis cada 5 años a todas las personas.",
+  "Resultados alterados: ruta de alteraciones cardio-cerebro-vasculares y metabólicas."];
+ [["juv","Riesgo cardiovascular según clasificación: glicemia, perfil lipídico, creatinina, uroanálisis","Cómo se calcula (Res. 3280, p. 136)"],
+  ["adul","Riesgo cardiovascular y metabólico quinquenal: glicemia, perfil lipídico, creatinina, uroanálisis","Cómo se calcula (Res. 3280, p. 136 y 145)"],
+  ["vej","Riesgo cardiovascular: glicemia, perfil lipídico, creatinina, uroanálisis","Cómo se calcula (Res. 3280, p. 136 y 155)"]]
+ .forEach(([m,l,t])=>put(m+"::"+l,"findrisc",t,RCVP));
+ put("vej::Cognición y estado de ánimo","cogvej","Cuándo aplicar cada instrumento (Res. 3280, p. 154)",
+  ["Whooley (depresión) y GAD-2 (ansiedad): si hay síntomas depresivos, dependencia funcional, familiar con consumo, duelo o disfunción familiar.",
+   "Minimental (Anexo 28): si la persona o la familia refieren olvidos, desorientación o cambios de comportamiento. El corte depende de la escolaridad.",
+   "ASSIST (Anexo 16) ante consumo de sustancias; AUDIT (Anexo 17) ante consumo de alcohol.",
+   "Confusión de inicio reciente o que fluctúa en el día: piensa en delirium (infección, deshidratación, medicamento) y remite el mismo día."]);
 })();
 
 const _cvTextoP=cvDesdeTexto;cvDesdeTexto=function(tipo,t){return _cvTextoP(tipo==="vitalesP"?"vitales":tipo,t)};
