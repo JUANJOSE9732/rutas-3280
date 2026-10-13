@@ -936,7 +936,7 @@ function checks(m){try{return JSON.parse(S.get(key(m,"chk"))||"{}")}catch(e){ret
 function hasDraft(m){return !!(S.get(key(m,"dict"))||S.get(key(m,"nota"))||Object.keys(checks(m)).length)}
 
 /* ---------- PANEL ---------- */
-const VERSION_APP="2026-10-13 v138";
+const VERSION_APP="2026-10-13 v139";
 function home(){
   stopRec();st.view="home";
   const rm=["precon","prenatal","parto","rn","ive"],rp=["pinf","inf","adol","juv","adul","vej"];
@@ -4450,6 +4450,117 @@ async function sync(manual){
   finally{syncing=false;if(st.view==="base")syncTxt();if(st.view==="home"){const h=$("bq");if(h)h.textContent=cola().length?cola().length+" pendientes":"al día"}}
 }
 window.addEventListener("online",()=>sync(false));
+
+/* ===== v139: tablero de captación — a quién buscar, comunidad por comunidad =====
+   Cruza la agenda (próximos controles) con los pendientes abiertos de cada paciente
+   y los agrupa por comunidad, que es como se planea un viaje por el río.          */
+(function(){
+ if(typeof agenda!=="function"||typeof pacientes!=="function")return;
+ const ff=s=>s?s.split("-").reverse().join("/"):"";
+ const GRP=[["pinf","Primera infancia",0,5],["inf","Infancia",6,11],["adol","Adolescencia",12,17],
+            ["juv","Juventud",18,28],["adul","Adultez",29,59],["vej","Vejez",60,200]];
+ const grupoDe=y=>{if(y==null)return null;const g=GRP.find(z=>y>=z[2]&&y<=z[3]);return g?g[1]:null};
+ const dias=px=>{const h=pD(hoy()),p=pD(px);return p?Math.round((p-h)/864e5):null};
+
+ /* arma la lista de trabajo: una fila por persona, con lo que le falta */
+ function capFilas(){
+  const ps=pacientes(),porDoc={},porNom={};
+  Object.entries(ps).forEach(([k,x])=>{
+   const I=x.ident||{},d=I["DOCUMENTO ID."];
+   if(d&&d!=="N/A")porDoc[d]=k;
+   const n=String(I["NOMBRE COMPLETO"]||"").trim().toUpperCase();if(n)porNom[n]=k});
+  const F=new Map();
+  const fila=(k,com,nom,tel)=>{
+   if(!F.has(k))F.set(k,{k,com:com||"SIN COMUNIDAD",nom:nom||"Sin nombre",tel:tel||"",
+     dd:null,prox:"",mot:"",pend:[],edad:null,grupo:null,agid:""});
+   return F.get(k)};
+  /* 1. controles de la agenda que siguen abiertos */
+  agenda().filter(a=>!a.ok&&a.prox).forEach(a=>{
+   const k=(a.doc&&porDoc[a.doc])||porNom[String(a.nom||"").trim().toUpperCase()]||("ag:"+a.id);
+   const f=fila(k,a.com,a.nom,a.tel),d=dias(a.prox);
+   if(f.dd==null||(d!=null&&d<f.dd)){f.dd=d;f.prox=a.prox;f.mot=a.mot||"";f.agid=a.id}
+   if(!f.tel&&a.tel)f.tel=a.tel;if(!f.com||f.com==="SIN COMUNIDAD")f.com=a.com||f.com});
+  /* 2. pendientes abiertos de cada paciente */
+  Object.entries(ps).forEach(([k,x])=>{
+   const ab=(x.pend||[]).filter(z=>!z.ok);if(!ab.length)return;
+   const I=x.ident||{},f=fila(k,x.com||I.__com,I["NOMBRE COMPLETO"],I["TELEFONO"]);
+   f.pend=ab.map(z=>({t:z.t,desde:z.desde||""}))});
+  /* 3. edad y grupo de curso de vida */
+  F.forEach(f=>{const x=ps[f.k];if(!x)return;
+   const I=x.ident||{};if(!f.com||f.com==="SIN COMUNIDAD")f.com=x.com||I.__com||f.com;
+   const e=edadDe(I["FECHA NACIMIENTO"]);f.edad=e?e.y:(I.__edad?+I.__edad:null);
+   f.grupo=grupoDe(f.edad)});
+  return [...F.values()]}
+
+ /* clasifica cada fila: vencido, esta semana, al día, o solo pendientes */
+ const clase=f=>f.dd==null?(f.pend.length?"pen":"ok"):f.dd<0?"ven":f.dd<=7?"sem":"ok";
+ const ORD={ven:0,sem:1,pen:2,ok:3};
+
+ function capHTML(){
+  const F=capFilas();
+  if(!F.length)return `<div class="box"><h3>Todavía no hay a quién buscar</h3><p style="margin:0">El tablero se llena solo a medida que registra consultas: cada una deja una fecha de próximo control y, si quedó algo sin cerrar, un pendiente.</p></div>`;
+  const com={};F.forEach(f=>{(com[f.com]=com[f.com]||[]).push(f)});
+  const n=(L,c)=>L.filter(f=>clase(f)===c).length;
+  const orden=Object.keys(com).sort((a,b)=>{
+   const A=com[a],B=com[b];return (n(B,"ven")-n(A,"ven"))||(n(B,"sem")-n(A,"sem"))||(B.length-A.length)||(a<b?-1:1)});
+  const tot={ven:0,sem:0,pen:0,ok:0};F.forEach(f=>tot[clase(f)]++);
+  const pill=f=>{const c=clase(f);
+   return c==="ven"?`<span class="pill high">Vencido hace ${-f.dd} día${f.dd===-1?"":"s"}</span>`:
+          c==="sem"?`<span class="pill high">${f.dd===0?"Es hoy":"Faltan "+f.dd+" día"+(f.dd===1?"":"s")}</span>`:
+          c==="pen"?`<span class="pill low">Solo pendientes</span>`:
+                    `<span class="pill low">Faltan ${f.dd} días</span>`};
+  const persona=f=>`<div class="agi" style="align-items:flex-start">
+   <b class="sem ${clase(f)==="ven"?"r":clase(f)==="sem"?"a":"v"}"></b>
+   <div style="flex:1;min-width:0">
+    <b>${esc(f.nom)}</b>
+    <small>${esc([f.grupo||(f.edad!=null?f.edad+" años":""),f.tel?"tel. "+f.tel:""].filter(Boolean).join(" · "))}</small>
+    ${f.prox?`<small>${esc(f.mot||"Próximo control")} · ${ff(f.prox)}</small>`:""}
+    ${f.pend.length?`<small style="color:var(--miss)">${f.pend.length} pendiente${f.pend.length>1?"s":""}: ${esc(f.pend.map(p=>p.t).join(" · "))}</small>`:""}
+   </div>
+   <div style="display:flex;flex-direction:column;gap:4px;align-items:flex-end">${pill(f)}
+    ${f.k.slice(0,3)==="ag:"?"":`<button class="btn" data-cap-pk="${esc(f.k)}" style="padding:4px 10px;font-size:.78rem">Abrir</button>`}</div></div>`;
+  return `<div class="risk" style="margin-bottom:10px">
+   <span class="pill ${tot.ven?"high":"low"}">${tot.ven} vencido${tot.ven===1?"":"s"}</span>
+   <span class="pill ${tot.sem?"high":"low"}">${tot.sem} esta semana</span>
+   <span class="pill ${tot.pen?"high":"low"}">${tot.pen} solo pendientes</span>
+   <span class="pill low">${tot.ok} al día</span></div>
+  ${orden.map(c=>{const L=com[c].slice().sort((a,b)=>(ORD[clase(a)]-ORD[clase(b)])||((a.dd==null?9e9:a.dd)-(b.dd==null?9e9:b.dd))||(a.nom<b.nom?-1:1));
+   const v=n(L,"ven"),s=n(L,"sem"),p=n(L,"pen");
+   const res=[v?v+" vencido"+(v===1?"":"s"):"",s?s+" esta semana":"",p?p+" con pendientes":""].filter(Boolean).join(" · ")||"todos al día";
+   const gr={};L.forEach(f=>{if(clase(f)==="ok")return;const g=f.grupo||"Sin edad registrada";gr[g]=(gr[g]||0)+1});
+   const porG=GRP.map(z=>z[1]).concat(["Sin edad registrada"]).filter(g=>gr[g]).map(g=>g.toLowerCase()+" "+gr[g]).join(", ");
+   return `<details class="sec" ${v||s?"open":""}><summary><span>${esc(c)}</span><span class="note-src">${esc(res)}</span></summary>
+    <div style="padding:0 14px 14px">
+     ${porG?`<p class="note-src" style="margin:0 0 8px">Por grupo: ${esc(porG)}.</p>`:""}
+     <div class="agl">${L.map(persona).join("")}</div></div></details>`}).join("")}`}
+
+ function verCaptacion(){
+  if(typeof stopRec==="function")stopRec();
+  st.view="cap";
+  $("app").innerHTML=`<div class="top"><button class="back" id="back">← Rutas</button><span class="tag pc">Captación</span></div>
+  <header><h1>A quién buscar</h1><p class="sub">Sale de sus propias consultas: quién tiene el control vencido, quién lo tiene esta semana y a quién le quedó algo sin cerrar. Agrupado por comunidad, para planear el viaje.</p></header>
+  <div id="cap-l">${capHTML()}</div>
+  <div class="box" style="margin-top:14px"><h3>Cómo usarlo</h3>
+   <p style="margin:0 0 6px">Las comunidades salen ordenadas por cuántos vencidos tienen, así que la primera de la lista es por donde conviene empezar.</p>
+   <p style="margin:0 0 6px">Un <b>pendiente</b> es algo que ya se hizo a medias: un examen tomado que nadie leyó, una remisión sin verificar. No necesita consulta nueva, solo cerrarlo.</p>
+   <p style="margin:0">Esta pantalla solo ve lo que usted ya atendió. La gente de la comunidad que nunca ha entrado no aparece aquí: esa se busca con el censo.</p></div>`;
+  $("back").onclick=home;
+  document.querySelectorAll("[data-cap-pk]").forEach(b=>b.onclick=()=>verPaciente(b.dataset.capPk));
+  window.scrollTo(0,0)}
+ window.verCaptacion=verCaptacion;window.capFilas=capFilas;window.capHTML=capHTML;
+
+ /* botón en el inicio, junto a «Ver pacientes» */
+ const _home=home;
+ home=function(){_home.apply(this,arguments);
+  try{
+   const t=$("t-pacs");if(!t||$("t-cap"))return;
+   const F=capFilas(),v=F.filter(f=>clase(f)==="ven").length,s=F.filter(f=>clase(f)==="sem").length;
+   const b=document.createElement("button");b.className="tile pc";b.id="t-cap";
+   b.innerHTML=`<b>A quién buscar</b><small>${v||s?(v?v+" vencido"+(v===1?"":"s"):"")+(v&&s?" · ":"")+(s?s+" esta semana":""):"Controles y pendientes por comunidad"}</small>`;
+   t.parentNode.insertBefore(b,t);
+   b.onclick=verCaptacion;
+  }catch(e){}};
+})();
 
 /* ---------- arranque ---------- */
 home();sync(false);
