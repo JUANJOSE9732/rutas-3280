@@ -936,7 +936,7 @@ function checks(m){try{return JSON.parse(S.get(key(m,"chk"))||"{}")}catch(e){ret
 function hasDraft(m){return !!(S.get(key(m,"dict"))||S.get(key(m,"nota"))||Object.keys(checks(m)).length)}
 
 /* ---------- PANEL ---------- */
-const VERSION_APP="2026-10-13 v136";
+const VERSION_APP="2026-10-13 v138";
 function home(){
   stopRec();st.view="home";
   const rm=["precon","prenatal","parto","rn","ive"],rp=["pinf","inf","adol","juv","adul","vej"];
@@ -4182,6 +4182,42 @@ ${lst}
 
 HISTORIA:
 """${txt.slice(0,20000)}"""`}
+/* ===== v137: conecta a la base lo que los instrumentos ya calculan =====
+   RIESGO CARDIOVASCULAR  <- FINDRISC y tablas de la OMS (dato estructurado del widget)
+   CANALIZADO A           <- remisiones explícitas que la propia nota declara          */
+(function(){
+ if(typeof extraerLocal!=="function")return;
+ const _ext=extraerLocal;
+ /* lee el widget de riesgo del módulo, no el texto: cero falsos positivos */
+ const rcvDe=id=>{let v=null;try{v=JSON.parse(S.get(key(id,"fdr"))||"null")}catch(e){}
+  if(!v)return null;
+  if(v.__oms)return v.__oms==="<10"?"NO":"SI";               // la tabla de la OMS manda
+  const P=["edad","imc","cint","act","fru","hta","glu","fam"].filter(k=>v[k]!==undefined&&v[k]!=="");
+  if(!P.length)return null;
+  const p=P.reduce((a,k)=>a+ +v[k],0);
+  return p>=12?"SI":null;   // sin tabla de la OMS, solo afirma el riesgo, nunca lo descarta
+ };
+ /* remisiones que la nota declara de forma literal */
+ const CAN=[
+  [/se remite a medicina|remite a medicina|remite el mismo d[ií]a|valoraci[oó]n geri[aá]trica integral|ruta de alteraciones cardio-cerebro-vasculares|se remite a la ruta de v[ií]as|remite a m[eé]dico/i,"MEDICINA GENERAL"],
+  [/ruta de salud mental|ruta de problemas y trastornos mentales|remite a psicolog[ií]a|ruta de consumo de sustancias/i,"PSICOLOGIA"],
+  [/se remite a odontolog[ií]a|remite prioritario a odontolog[ií]a|remite a odontolog[ií]a/i,"ODONTOLOGIA"],
+  [/se remite a colposcopia|se ordena citolog[ií]a|se programa la citolog[ií]a|se realiza tamizaje de cuello uterino hoy/i,"CITOLOGIA"],
+  [/esquema de vacunaci[oó]n incompleto|se remite a vacunaci[oó]n|se aplican? las? vacunas? pendientes?|se completa el esquema/i,"VACUNACION"]];
+ /* descarta las frases negadas antes de buscar remisiones */
+ const afirmado=t=>String(t||"").split(/(?<=[.;])\s+|\n/)
+   .filter(fr=>!/\bno\s+(se\s+)?(remite|requiere|necesita|amerita)|sin\s+remisi[oó]n|no\s+acepta\s+la\s+remisi[oó]n/i.test(fr))
+   .join(" ");
+ extraerLocal=function(id,txt,f){
+  const o=_ext(id,txt,f);
+  try{
+   if(!o["RIESGO CARDIOVASCULAR"]){const r=rcvDe(id);if(r)o["RIESGO CARDIOVASCULAR"]=r}
+   if(!o["CANALIZADO A"]){const t2=afirmado(txt),s=CAN.filter(([re])=>re.test(t2)).map(x=>x[1]);
+    if(s.length)o["CANALIZADO A"]=[...new Set(s)].join(", ")}
+  }catch(e){}
+  return o};
+})();
+
 async function enviarBase(id){
   const msg=t=>{const s=$("status")||$("iv-st");if(s)s.textContent=t};
   const f=($("fecha")&&$("fecha").value)||S.get(key(id,"fecha"))||hoy(),txt=fuenteHC(id);
@@ -4397,8 +4433,10 @@ function revisar(form,marcar){const datos={},falt=[];if(marcar)form.querySelecto
 function mostrarFaltan(falt){const mb=$("b-miss");if(!mb)return;if(!falt.length){mb.hidden=true;return}mb.hidden=false;
   mb.querySelector("h3").textContent=`No se puede enviar: ${falt.length===1?"falta 1 dato":"faltan "+falt.length+" datos"} de la tabla de variables`;
   mb.querySelector("ul").innerHTML=falt.map(f=>`<li>${esc(f.l)}${f.inc?" — <b>la fecha está incompleta</b> (día, mes y año)":""}${f.mal?" — <b>revisa: "+esc(f.mal)+"</b>":""} <span class="note-src">(${esc(f.k)})</span></li>`).join("")}
+var syncErr="";
 function syncTxt(){const el=$("syncTxt");if(!el)return;const c=conf(),n=cola().length;
   el.textContent=!c.url?"Falta configurar la conexión con tu Google Sheets (botón Conexión). Mientras tanto los registros quedan guardados en el celular.":
+   (syncErr&&n)?syncErr+` (${n} pendiente${n>1?"s":""} guardado${n>1?"s":""} en el celular).`:
    n?`${n} registro(s) pendientes por enviar. Se envían solos cuando hay señal.`:"Todo enviado. La hoja está al día."}
 async function sync(manual){
   const c=conf(),q=cola();if(syncing||!q.length||!c.url){syncTxt();return}
@@ -4406,9 +4444,9 @@ async function sync(manual){
   syncing=true;if($("syncTxt"))$("syncTxt").textContent="Enviando…";
   try{const r=await fetch(c.url,{method:"POST",headers:{"Content-Type":"text/plain;charset=utf-8"},body:JSON.stringify({clave:c.key,registros:q})});
     const j=await r.json();
-    if(j.ok){const ok=new Set(j.ids||[]);setCola(cola().filter(x=>!ok.has(x.id)));if(st.view==="base"&&!baseEdit)base({});const s=$("b-st");if(s)s.textContent=`Enviado a la hoja (${ok.size}).`}
-    else if($("syncTxt"))$("syncTxt").textContent=j.error==="clave"?"La clave no coincide con la del script. Revísala en Conexión.":"La hoja respondió con error: "+(j.error||"");
-  }catch(e){if($("syncTxt"))$("syncTxt").textContent=`No se pudo enviar (${cola().length} pendientes). Se reintenta al volver la señal.`+(location.hostname.endsWith("claude.ai")||!window.fetch?"":"")}
+    if(j.ok){syncErr="";const ok=new Set(j.ids||[]);setCola(cola().filter(x=>!ok.has(x.id)));if(st.view==="base"&&!baseEdit)base({});const s=$("b-st");if(s)s.textContent=`Enviado a la hoja (${ok.size}).`}
+    else{syncErr=j.error==="clave"?"La clave no coincide con la del script: los registros no se están enviando. Revísala en Conexión.":"La hoja respondió con error: "+(j.error||"")+". Los registros no se están enviando.";if($("syncTxt"))$("syncTxt").textContent=syncErr;}
+  }catch(e){syncErr="";if($("syncTxt"))$("syncTxt").textContent=`No se pudo enviar (${cola().length} pendientes). Se reintenta al volver la señal.`+(location.hostname.endsWith("claude.ai")||!window.fetch?"":"")}
   finally{syncing=false;if(st.view==="base")syncTxt();if(st.view==="home"){const h=$("bq");if(h)h.textContent=cola().length?cola().length+" pendientes":"al día"}}
 }
 window.addEventListener("online",()=>sync(false));
