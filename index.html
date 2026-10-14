@@ -936,7 +936,7 @@ function checks(m){try{return JSON.parse(S.get(key(m,"chk"))||"{}")}catch(e){ret
 function hasDraft(m){return !!(S.get(key(m,"dict"))||S.get(key(m,"nota"))||Object.keys(checks(m)).length)}
 
 /* ---------- PANEL ---------- */
-const VERSION_APP="2026-10-14 v144";
+const VERSION_APP="2026-10-14 v145";
 function home(){
   stopRec();st.view="home";
   const rm=["precon","prenatal","parto","rn","ive"],rp=["pinf","inf","adol","juv","adul","vej"];
@@ -3225,8 +3225,8 @@ WIDGET.charlaPF={html:id=>pfHTML(id),txt:id=>pfTxt(id),
   ["dib","Copiar los dos pentágonos",[["0",0],["1",1]],"Dos pentágonos cruzados. Se da el punto si los dos tienen cinco lados y se cruzan en dos puntos."]];
  const ESCOL=[["Sin escolaridad: no lee ni escribe",17],["1 a 4 años de escuela",20],["5 a 8 años de escuela",22],["Más de 8 años de escuela",24]];
  function mmHTML(id){const v=G(id,"mms");
-  return `<details style="margin-top:10px"><summary><b>Minimental (MMSE, Anexo 28)</b> — solo si hay quejas de memoria o desorientación</summary>
-  <p class="note-src" style="margin:6px 0">Res. 3280, p. 154: aplica el Minimental cuando la persona o su familia refieren olvidos, desorientación o cambios en el comportamiento. El puntaje se interpreta <b>según su escolaridad</b>: con el mismo puntaje, en una persona sin escuela puede ser normal y en una con bachillerato, alterado.</p>
+  return `<details open style="margin-top:10px"><summary><b>Minimental (MMSE, Anexo 28)</b> — obligatorio en la valoración de vejez</summary>
+  <p class="note-src" style="margin:6px 0">El Minimental es <b>obligatorio</b> en la valoración integral de vejez, no solo ante quejas de memoria: buena parte del deterioro temprano no lo reporta ni la persona ni su familia. El puntaje se interpreta <b>según su escolaridad</b>: con el mismo puntaje, en una persona sin escuela puede ser normal y en una con bachillerato, alterado.</p>
   <div class="tool" style="padding:8px 10px;gap:6px"><b style="font-size:13px">Escolaridad de la persona</b>
    <select data-mmse style="width:100%"><option value="">— elige la escolaridad para poder interpretarlo</option>${ESCOL.map(([l,p])=>`<option value="${p}" ${v.__esc===String(p)?"selected":""}>${esc(l)} — alterado si saca ${p} o menos</option>`).join("")}</select>
    <div style="font-size:11px;opacity:.72;line-height:1.4">En personas indígenas cuya primera lengua no es el español, el Minimental <b>pierde validez</b>: aplícalo con intérprete, cambia los objetos y las referencias por los de su entorno, y nunca diagnostiques deterioro solo con el puntaje.</div>
@@ -3381,7 +3381,7 @@ WIDGET.charlaPF={html:id=>pfHTML(id),txt:id=>pfTxt(id),
  .forEach(([m,l,t])=>put(m+"::"+l,"findrisc",t,RCVP));
  put("vej::Cognición y estado de ánimo","cogvej","Cuándo aplicar cada instrumento (Res. 3280, p. 154)",
   ["Whooley (depresión) y GAD-2 (ansiedad): si hay síntomas depresivos, dependencia funcional, familiar con consumo, duelo o disfunción familiar.",
-   "Minimental (Anexo 28): si la persona o la familia refieren olvidos, desorientación o cambios de comportamiento. El corte depende de la escolaridad.",
+   "Minimental (Anexo 28): obligatorio en toda valoración de vejez. El punto de corte depende de la escolaridad.",
    "ASSIST (Anexo 16) ante consumo de sustancias; AUDIT (Anexo 17) ante consumo de alcohol.",
    "Confusión de inicio reciente o que fluctúa en el día: piensa en delirium (infección, deshidratación, medicamento) y remite el mismo día."]);
 })();
@@ -4775,6 +4775,199 @@ window.addEventListener("online",()=>sync(false));
    b.onclick=e=>{const v=G(id);if(v.__pcauto){delete v.__pcauto;S.set(key(id,"dev"),JSON.stringify(v))}
     if(anterior)anterior.call(b,e)}});
   save()};
+})();
+
+/* ===== v145: cuestionario VALE — valoración auditiva y comunicativa de 0 a 12 años =====
+   Instrumento OBLIGATORIO de la RPMS en primera infancia, infancia y adolescencia
+   temprana. Doce rangos de edad con tres categorías (comprensión, expresión,
+   interacción) más el ítem vestibular desde los 3 años, precedidos por los factores
+   de riesgo (menores de 2 años) y las condiciones estructurales.
+   La redacción de las preguntas es aproximada: verifícala contra el instrumento. */
+(function(){
+ if(typeof WIDGET!=="object"||typeof IVX!=="object")return;
+
+ /* [mesesDesde, nombre, {c, e, i}] — los doce rangos del instrumento */
+ const VR=[
+  [0,"0 a 3 meses",{c:"¿Reacciona ante ruidos fuertes que ocurren fuera de donde está mirando?",
+    e:"¿Su llanto es diferente según lo que necesita, y succiona bien al alimentarse?",
+    i:"¿Mira a la cara de quien le habla?"}],
+  [4,"4 a 6 meses",{c:"¿Voltea la cabeza hacia sonidos que le son familiares?",
+    e:"¿Intenta imitar sonidos y repite sílabas?",
+    i:"¿Responde con sonidos o sonrisas cuando juegan con él o ella?"}],
+  [7,"7 a 9 meses",{c:"¿Muestra interés cuando le cantan o le conversan?",
+    e:"¿Usa sonidos, sílabas, palabras o gestos para pedir algo?",
+    i:"¿Usa balbuceos, señas, sonrisas o llanto para llamar la atención?"}],
+  [10,"10 a 12 meses",{c:"¿Presta atención cuando le hablan?",
+    e:"¿Intenta imitar palabras nuevas, y come papillas u otros alimentos sin atorarse?",
+    i:"¿Señala o emite sonidos para conseguir lo que quiere?"}],
+  [13,"13 a 15 meses",{c:"¿Muestra partes del cuerpo que conoce cuando se lo piden?",
+    e:"¿Reproduce sonidos de animales y de objetos?",
+    i:"¿Trae objetos para jugar con alguien?"}],
+  [16,"16 a 18 meses",{c:"¿Ejecuta órdenes sencillas, como señalar a personas conocidas?",
+    e:"¿Nombra objetos de uso cotidiano?",
+    i:"¿Pide lo que quiere con palabras, sílabas, sonidos o gestos?"}],
+  [19,"19 a 24 meses",{c:"¿Entiende y ejecuta las órdenes que se le dan?",
+    e:"¿Dice cada vez más palabras, incluidas «yo», «mío», «no», «arriba», «abajo», y nombres de objetos y acciones?",
+    i:"¿Combina sonidos, palabras, gestos y miradas para interactuar?"}],
+  [25,"25 a 36 meses",{c:"¿Usa posesivos como «mío», «tuyo» o «suyo»?",
+    e:"¿Se mueve o canta con la música, y mastica alimentos duros sin atorarse?",
+    i:"¿Muestra interés por comunicarse y jugar con otros niños?"}],
+  [37,"3 años 1 mes a 4 años",{c:"Después de un cuento, ¿responde preguntas de qué, cómo y cuándo?",
+    e:"¿Hace preguntas ante situaciones nuevas?",
+    i:"¿Expresa sentimientos e ideas a las personas cercanas?"}],
+  [49,"4 años 1 mes a 5 años",{c:"¿Sabe y repite rondas, canciones o cuentos cortos?",
+    e:"¿Usa frases de al menos cuatro palabras para contar lo que le pasó?",
+    i:"¿Responde a saludos, despedidas y expresiones como «gracias» o «por favor»?"}],
+  [61,"5 años 1 mes a 9 años",{c:"¿Cumple varias indicaciones dadas al mismo tiempo, en el orden correcto?",
+    e:"¿Se le entiende claramente al hablar y pronuncia bien todos los sonidos?",
+    i:"¿Sostiene conversaciones con familiares y con desconocidos, da su opinión y trata de convencer?"}],
+  [109,"9 años 1 mes a 12 años 11 meses",{c:"¿Identifica errores en frases absurdas, se ríe de ellos e intenta corregirlos?",
+    e:"¿Explica el porqué de situaciones, sentimientos y pensamientos con palabras abstractas?",
+    i:"¿Conversa sobre distintos temas, escucha las ideas de otros y expresa acuerdo o desacuerdo con argumentos?"}]];
+ /* ítem vestibular: dos rangos, desde los 3 años */
+ const VV=[[36,"3 a 5 años","¿Disfruta columpiarse, girar y saltar, y camina derecho sin inclinarse ni caerse a cada rato?"],
+           [61,"5 años 1 mes a 12 años 11 meses","¿Disfruta dar vueltas sin caerse, pone las manos para protegerse al tropezar y le gustan los movimientos en distintas direcciones, velocidades y alturas?"]];
+ const RIE=[["r1","Bajo peso al nacer, menor de 1.500 g"],
+            ["r2","Nació antes de las 30 semanas (prematuro extremo)"],
+            ["r3","Estuvo más de 30 días en cuidados intensivos neonatales"],
+            ["r4","Alguna complicación antes, durante o poco después del nacimiento"],
+            ["r5","Tiene algún diagnóstico de salud"]];
+ const EST=["Orejas","Labios","Lengua","Nariz","Paladar","Ojos","Dientes (según la edad)","Cuello","Hombros"];
+ const CAT=[["c","Comprensión"],["e","Expresión"],["i","Interacción"]];
+
+ const G=id=>{try{return JSON.parse(S.get(key(id,"vale"))||"{}")||{}}catch(e){return{}}};
+ const SV=(id,v)=>S.set(key(id,"vale"),JSON.stringify(v));
+ const idxR=m=>{if(m==null)return -1;let i=VR.length-1;while(i>0&&VR[i][0]>m)i--;return i};
+ const idxV=m=>{if(m==null||m<36)return -1;return (m>=61)?1:0};
+
+ /* la cascada del instrumento: ante un NO se pregunta la misma categoría en el rango anterior */
+ function cadena(id,m){
+  const v=G(id),i0=idxR(m),out=[];
+  if(i0<0)return out;
+  CAT.forEach(([k])=>{
+   let i=i0;
+   while(i>=0){
+    out.push({cat:k,rango:i,q:VR[i][2][k],nom:VR[i][1],val:v[k+i]});
+    if(v[k+i]!==0)break;          /* solo baja de rango mientras la respuesta sea NO */
+    i--}});
+  return out}
+
+ function calc(id,m){
+  const v=G(id),ca=cadena(id,m);
+  const rie=RIE.filter(([k])=>v[k]===1);
+  const est=EST.filter((t,i)=>v["e"+i+"_p"]===0||v["e"+i+"_i"]===0);
+  const neg=ca.filter(x=>x.val===0);
+  const iv=idxV(m),vest=iv>=0?v["v"+iv]:undefined;
+  const negV=vest===0?1:0;
+  const total=neg.length+negV;
+  const menor2=m!=null&&m<24;
+  const remite=(menor2&&rie.length>0)||est.length>0||total>=2;
+  return {rie,est,neg,total,vest,iv,ca,remite,urgente:total>=2,menor2,
+   sinNada:!rie.length&&!est.length&&!ca.some(x=>x.val!==undefined)&&vest===undefined};}
+
+ const btn=(k,val,on)=>`<button type="button" class="btn" data-va="${k}" data-val="${val}" style="padding:4px 10px;font-size:.8rem;${on?(val===0?"background:var(--miss);color:#fff;border-color:var(--miss)":"background:var(--accent);color:#fff;border-color:var(--accent)"):""}">${val===1?"Sí":"No"}</button>`;
+ const fila=(k,t,v,nota)=>`<div style="display:flex;gap:6px;align-items:flex-start;justify-content:space-between;border-bottom:1px solid var(--line);padding:5px 0">
+  <span style="flex:1">${esc(t)}${nota?`<br><small class="note-src">${esc(nota)}</small>`:""}</span>
+  <span style="display:flex;gap:4px;flex:none">${btn(k,1,v===1)}${btn(k,0,v===0)}</span></div>`;
+
+ function html(id){
+  const m=edadMesesMod(id),v=G(id),r=calc(id,m),i0=idxR(m),iv=idxV(m);
+  if(m==null)return `<div class="box"><h3>Falta la fecha de nacimiento</h3><p style="margin:0">El VALE se aplica por rango de edad: escribe la fecha de nacimiento en Datos para mostrar las preguntas que corresponden.</p></div>`;
+  if(m>155)return `<div class="box"><h3>No aplica por edad</h3><p style="margin:0">El VALE cubre de 0 a 12 años 11 meses.</p></div>`;
+  const porCat={};r.ca.forEach(x=>{(porCat[x.cat]=porCat[x.cat]||[]).push(x)});
+  return `<p class="note-src" style="margin:0 0 8px">Instrumento <b>obligatorio</b> de la RPMS. Responde el acompañante y tú verificas por observación. <b>La redacción es aproximada: contrástala con el instrumento oficial de tu institución.</b></p>
+  ${r.menor2?`<details class="sec" open><summary><span>1 · Factores de riesgo</span><span class="cnt">menores de 2 años</span></summary><div style="padding:0 14px 14px">
+   ${RIE.map(([k,t])=>fila(k,t,v[k])).join("")}
+   <p class="note-src" style="margin:6px 0 0">Un solo «sí» aquí obliga a continuar la valoración y a remitir.</p></div></details>`:""}
+  <details class="sec" ${r.est.length?"open":""}><summary><span>${r.menor2?"2":"1"} · Condiciones estructurales</span><span class="cnt">míralas tú</span></summary><div style="padding:0 14px 14px">
+   <p class="note-src" style="margin:0 0 6px">¿Está presente y en buen estado? Un «no» en cualquiera obliga a remitir.</p>
+   ${EST.map((t,i)=>`<div style="border-bottom:1px solid var(--line);padding:5px 0">
+    <div style="display:flex;gap:6px;align-items:center;justify-content:space-between"><span style="flex:1"><b>${esc(t)}</b> · presente</span>
+     <span style="display:flex;gap:4px">${btn("e"+i+"_p",1,v["e"+i+"_p"]===1)}${btn("e"+i+"_p",0,v["e"+i+"_p"]===0)}</span></div>
+    <div style="display:flex;gap:6px;align-items:center;justify-content:space-between;margin-top:3px"><span style="flex:1;opacity:.8">sin alteración</span>
+     <span style="display:flex;gap:4px">${btn("e"+i+"_i",1,v["e"+i+"_i"]===1)}${btn("e"+i+"_i",0,v["e"+i+"_i"]===0)}</span></div></div>`).join("")}</div></details>
+  <details class="sec" open><summary><span>${r.menor2?"3":"2"} · Comprensión, expresión e interacción</span><span class="cnt">${i0>=0?esc(VR[i0][1]):""}</span></summary><div style="padding:0 14px 14px">
+   ${CAT.map(([k,nom])=>`<p class="lab" style="margin:8px 0 2px">${esc(nom)}</p>
+    ${(porCat[k]||[]).map((x,n)=>fila(k+x.rango,x.q,x.val,n?"Rango anterior ("+x.nom+"), porque la respuesta de arriba fue no":"")).join("")}`).join("")}
+   <p class="note-src" style="margin:8px 0 0">Si la respuesta de un rango es «no», el instrumento manda preguntar esa misma categoría en el rango anterior, hasta obtener un «sí».</p></div></details>
+  ${iv>=0?`<details class="sec" open><summary><span>${r.menor2?"4":"3"} · Vestibular</span><span class="cnt">${esc(VV[iv][1])}</span></summary><div style="padding:0 14px 14px">${fila("v"+iv,VV[iv][2],v["v"+iv])}</div></details>`:""}
+  <div class="risk" style="margin-top:8px"><span class="pill low" id="va-p">Marca las respuestas</span></div>
+  <p class="note-src" id="va-c" style="margin:4px 0 0"></p>`}
+
+ function txt(id){
+  const m=edadMesesMod(id);if(m==null||m>155)return"";
+  const r=calc(id,m);if(r.sinNada)return"";
+  const L=[],N={c:"comprensión",e:"expresión",i:"interacción"};
+  L.push("Cuestionario VALE (valoración auditiva y comunicativa) aplicado"+(idxR(m)>=0?", rango "+VR[idxR(m)][1]:"")+".");
+  if(r.menor2)L.push(r.rie.length?"Factores de riesgo: "+r.rie.map(x=>x[1].toLowerCase()).join(", ")+"."
+                                 :"Sin factores de riesgo perinatales.");
+  L.push(r.est.length?"Condiciones estructurales alteradas: "+r.est.map(t=>t.split(" (")[0].toLowerCase()).join(", ")+"."
+                    :"Condiciones estructurales presentes y sin alteraciones.");
+  if(r.neg.length){
+   const porCat={};r.neg.forEach(x=>{(porCat[x.cat]=porCat[x.cat]||[]).push(x.nom)});
+   L.push("Respuestas negativas en: "+Object.keys(porCat).map(k=>N[k]+" ("+porCat[k].join(", ")+")").join("; ")+".");
+  } else if(r.ca.some(x=>x.val!==undefined)) L.push("Comprensión, expresión e interacción acordes a la edad.");
+  if(r.vest===0)L.push("Ítem vestibular negativo.");
+  else if(r.vest===1)L.push("Ítem vestibular acorde a la edad.");
+  L.push("Total de respuestas negativas: "+r.total+".");
+  if(r.remite)L.push("Se remite a fonoaudiología y audiología"+(r.urgente?", de forma urgente por dos o más respuestas negativas":"")+".");
+  else L.push("No cumple criterios de remisión por el VALE.");
+  return L.join(" ")}
+
+ function wire(id,save){
+  const up=()=>{
+   const m=edadMesesMod(id),r=calc(id,m),p=$("va-p"),c=$("va-c");
+   if(!p)return;
+   if(r.sinNada){p.textContent="Marca las respuestas";p.className="pill low";if(c)c.textContent="";save();return}
+   p.textContent=r.remite?(r.urgente?"Remisión urgente a fonoaudiología y audiología":"Remisión a fonoaudiología y audiología")
+                        :"Sin criterios de remisión"+(r.total?" ("+r.total+" negativa"+(r.total>1?"s":"")+")":"");
+   p.className="pill "+(r.remite?"high":"low");
+   if(c){const m2=[];
+    if(r.menor2&&r.rie.length)m2.push("Factor de riesgo perinatal presente.");
+    if(r.est.length)m2.push("Alteración estructural: "+r.est.join(", ").toLowerCase()+".");
+    if(r.total>=2)m2.push("Dos o más respuestas negativas: riesgo mayor.");
+    c.textContent=m2.join(" ")}
+   save()};
+  const pinta=()=>{document.querySelectorAll("[data-va]").forEach(b=>{
+    const v=G(id),on=v[b.dataset.va]===+b.dataset.val,si=+b.dataset.val===1;
+    b.style.background=on?(si?"var(--accent)":"var(--miss)"):"";
+    b.style.color=on?"#fff":"";b.style.borderColor=on?(si?"var(--accent)":"var(--miss)"):""})};
+  const redibuja=()=>{const w=$("va-w");if(!w)return;const y=window.scrollY;
+    w.innerHTML=html(id);window.scrollTo(0,y);bind();up()};
+  const bind=()=>{document.querySelectorAll("[data-va]").forEach(b=>b.onclick=()=>{
+    const v=G(id),k=b.dataset.va,val=+b.dataset.val;
+    if(v[k]===val)delete v[k];else v[k]=val;SV(id,v);
+    if(/^[cei]\d/.test(k))redibuja();else{pinta();up()}})};
+  bind();pinta();up()}
+
+ WIDGET.vale={html:id=>`<div id="va-w">${html(id)}</div>`,txt,wire};
+
+ /* ===== el ítem, en los módulos donde el instrumento es obligatorio ===== */
+ const P=(t,p)=>({t,p,r:"",b:""});
+ const PAUTA=P("Cómo se aplica (instrumento obligatorio de la RPMS)",[
+  "Menores de 2 años: primero los factores de riesgo. Un solo «sí» obliga a continuar y a remitir.",
+  "Desde los 2 años: empieza por las condiciones estructurales, que las miras tú. Un «no» en cualquiera obliga a remitir.",
+  "Luego las preguntas del rango de edad en comprensión, expresión e interacción; desde los 3 años se suma el ítem vestibular.",
+  "Si una respuesta es «no», se pregunta esa misma categoría en el rango anterior, hasta obtener un «sí». La app lo hace sola.",
+  "Dos o más respuestas negativas: remisión urgente a fonoaudiología y audiología."]);
+
+ const ITEM={widget:"vale",pauta:PAUTA};
+ /* primera infancia e infancia: ítem propio; en infancia convive con la agudeza visual */
+ if(!IVX["pinf::Audición y comunicación (VALE)"])IVX["pinf::Audición y comunicación (VALE)"]=Object.assign({},ITEM);
+ if(!IVX["inf::Audición y comunicación (VALE)"])IVX["inf::Audición y comunicación (VALE)"]=Object.assign({},ITEM);
+ if(!IVX["adol::Audición y comunicación (VALE)"])IVX["adol::Audición y comunicación (VALE)"]=Object.assign({},ITEM,{
+   si:()=>{const m=edadMesesMod("adol");return m==null||m<=155},
+   siTxt:"No aplica por edad: el VALE cubre hasta los 12 años 11 meses."});
+
+ /* lo inserta en la lista de preguntas de cada módulo, en el bloque de valoración */
+ [["pinf","Desarrollo con EAD-3"],["inf","Agudeza visual y audición"],["adol","Crecimiento y estado nutricional"]].forEach(([mod,despues])=>{
+  try{const M_=M[mod];if(!M_)return;
+   const sec=M_.sections.find(s=>s.items.some(x=>x===despues))||M_.sections[0];
+   if(sec.items.includes("Audición y comunicación (VALE)"))return;
+   const k=sec.items.indexOf(despues);
+   if(k>=0)sec.items.splice(k+1,0,"Audición y comunicación (VALE)");
+   else sec.items.push("Audición y comunicación (VALE)");
+  }catch(e){}});
 })();
 
 /* ---------- arranque ---------- */
