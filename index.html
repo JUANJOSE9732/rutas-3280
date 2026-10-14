@@ -936,7 +936,7 @@ function checks(m){try{return JSON.parse(S.get(key(m,"chk"))||"{}")}catch(e){ret
 function hasDraft(m){return !!(S.get(key(m,"dict"))||S.get(key(m,"nota"))||Object.keys(checks(m)).length)}
 
 /* ---------- PANEL ---------- */
-const VERSION_APP="2026-10-13 v140";
+const VERSION_APP="2026-10-13 v141";
 function home(){
   stopRec();st.view="home";
   const rm=["precon","prenatal","parto","rn","ive"],rp=["pinf","inf","adol","juv","adul","vej"];
@@ -2548,6 +2548,49 @@ const _cvBaseA=cvCalc;cvCalc=function(tipo,v){if(tipo!=="antropoA")return _cvBas
   const c=nv(v.cint),sx=pac()["GENERO"];if(c!=null){const lim=sx==="M"?90:80,alto=c>=lim;r.m.cint=alto?"Riesgo cardiometabólico":"Sin riesgo por cintura";if(alto){r.flag.cint="alto";r.al.push("Perímetro de cintura de "+c+" cm (riesgo desde "+lim+" cm en "+(sx==="M"?"hombres":"mujeres")+"): riesgo cardiometabólico; tensión arterial, glicemia y perfil lipídico.")}r.txt=(r.txt?r.txt.replace(/\.$/,""):"")+(r.txt?", ":"")+"perímetro de cintura "+c+" cm ("+(alto?"riesgo cardiometabólico":"sin riesgo")+").";}
   return r};
 const _cvTextoA=cvDesdeTexto;cvDesdeTexto=function(tipo,t){return tipo==="antropoA"?_cvTextoA("antropo",t):_cvTextoA(tipo,t)};
+/* ===== v141: perímetro de muñeca y contextura corporal (adultos) =====
+   Índice de complexión r = talla (cm) / perímetro de muñeca (cm), razón de Grant;
+   puntos de corte de Nowak y Schulz (1987): hombres >10,4 pequeña · 9,6 a 10,4
+   mediana · <9,6 grande; mujeres >11,0 pequeña · 10,1 a 11,0 mediana · <10,1 grande.
+   Es COMPLEMENTARIO y no reclasifica a nadie: el estado nutricional se sigue
+   clasificando por IMC (Res. 2465 de 2016), que es lo que exige la norma.       */
+(function(){
+ if(typeof CAMPOS!=="object"||!CAMPOS.antropoA)return;
+ if(!CAMPOS.antropoA.some(c=>c.k==="mun"))
+  CAMPOS.antropoA.push({k:"mun",l:"Perímetro de muñeca",u:"cm",ph:"16",
+   n:"Opcional. En la parte más delgada de la muñeca que menos usa, debajo del hueso que sobresale"});
+
+ const CX=(r,sx)=>sx==="M"
+  ? (r>10.4?"pequeña":r>=9.6?"mediana":"grande")
+  : (r>11.0?"pequeña":r>=10.1?"mediana":"grande");
+ /* lo que la contextura significa para leer el IMC, sin cambiar su clasificación */
+ const LEE={
+  "pequeña":"el IMC tiende a subestimar la grasa corporal; en el límite alto de lo normal, confirma con el perímetro de cintura",
+  "mediana":"el IMC se lee tal cual",
+  "grande":"el IMC tiende a sobrestimar la grasa corporal; en sobrepeso leve, confirma con el perímetro de cintura antes de concluir"};
+
+ const _base=cvCalc;
+ cvCalc=function(tipo,v){
+  const r=_base(tipo,v);
+  if(tipo!=="antropoA")return r;
+  try{
+   const mu=nv(v.mun);if(mu==null||mu<=0)return r;
+   if(mu<8||mu>30){r.m.mun="Medida fuera de lo esperado: revísala, se mide en centímetros";return r}
+   let t=nv(v.talla);
+   if(t==null||t<=0){r.m.mun="Falta la talla: sin ella no se puede calcular la contextura";return r}
+   if(t<3)t=t*100;                        /* acepta 1,62 o 162 */
+   const sx=pac()["GENERO"];
+   if(sx!=="M"&&sx!=="F"){r.m.mun="Falta el sexo en los datos de la persona: sin él no se puede clasificar la contextura";return r}
+   const ind=Math.round(t/mu*100)/100,cx=CX(ind,sx);
+   r.m.mun="Contextura "+cx+" (índice "+coma(ind.toFixed(2))+")";
+   r.txt=(r.txt?r.txt.replace(/\.$/,"")+", ":"")+
+    "perímetro de muñeca "+coma(mu)+" cm, índice de complexión "+coma(ind.toFixed(2))+
+    " (talla sobre muñeca): contextura "+cx+". Dato complementario: el estado nutricional se clasifica por IMC (Res. 2465 de 2016).";
+   r.al.push("Contextura "+cx+": "+LEE[cx]+".");
+  }catch(e){}
+  return r};
+})();
+
 (function(){const CH=["Normal|IMC normal (18,5 a 24,9); sin riesgo por perímetro de cintura; tensión arterial normal.","Bajo peso|IMC menor de 18,5: bajo peso; se indaga pérdida de peso y causas, se remite a medicina.","Sobrepeso|IMC de 25 a 29,9: sobrepeso; consejería en alimentación y actividad física.","Obesidad|IMC de 30 o más: obesidad; se remite a medicina para valorar riesgo cardiometabólico."];
  const PA={t:"Cómo valorar (Res. 2465 de 2016)",p:["Peso con ropa liviana y sin zapatos; talla de pie.","IMC (OMS): menos de 18,5 bajo peso; 18,5 a 24,9 normal; 25 a 29,9 sobrepeso; 30 o más obesidad.","Perímetro de cintura en el punto medio entre la última costilla y la cresta ilíaca, al final de una espiración: riesgo desde 80 cm en mujeres y 90 cm en hombres.","Toma la tensión arterial en reposo; si está elevada, repite y remite."],r:"",b:""};
  [["juv","Estado nutricional, TA, hábitos"],["adul","Estado nutricional, TA, perímetro abdominal"],["vej","Estado nutricional, TA"]].forEach(([m,l])=>{IVX[m+"::"+l]={campos:"antropoA",keepc:1,c:CH,pauta:PA}})})();
@@ -3633,7 +3676,7 @@ function paneEntr(){
   </div>`;
   const ta=$("iv-a");let cv={};try{cv=JSON.parse(S.get(key(id,"cv"+i))||"{}")}catch(e){}
   const cvPinta=()=>{if(!x.campos)return;const r=cvCalc(x.campos,cv);document.querySelectorAll("[data-cv]").forEach(e=>{const k=e.dataset.cv;if(CAMPOS[x.campos].find(c=>c.k===k).auto){e.value=r.imc?coma(r.imc):""}else if(document.activeElement!==e)e.value=cv[k]||"";e.style.borderColor=r.flag[k]?"var(--miss)":"";e.style.borderWidth=r.flag[k]?"2px":"";
-      const sm=document.querySelector(`[data-cvm="${k}"]`);if(sm){const t=r.m&&r.m[k];sm.textContent=t||sm.dataset.n;sm.style.color=!t?"var(--muted)":/^(Normal|Cuadra|Primigestante|Concuerda|IMC inicial|Grafícalo|Pregúntale|Adecuad|A término)|ADECUADA$/.test(t)?"var(--accent)":"var(--miss)";sm.style.fontWeight=t?"700":"400"}});
+      const sm=document.querySelector(`[data-cvm="${k}"]`);if(sm){const t=r.m&&r.m[k];sm.textContent=t||sm.dataset.n;sm.style.color=!t?"var(--muted)":/^(Normal|Cuadra|Primigestante|Concuerda|IMC inicial|Grafícalo|Pregúntale|Adecuad|A término|Contextura)|ADECUADA$/.test(t)?"var(--accent)":"var(--miss)";sm.style.fontWeight=t?"700":"400"}});
     const b=$("cv-al");b.hidden=!(["antropoG","vitalesP","vitalesRN","antropoRN","antropoPI","antropoNNA","antropoA"].includes(x.campos)&&r.al.length);b.querySelector("ul").innerHTML=r.al.map(z=>`<li>${esc(z)}</li>`).join("");try{nutGraf(x.campos,r)}catch(e){console.warn(e)}return r};
   let sx={};try{sx=JSON.parse(S.get(key(id,"sx"+i))||"{}")}catch(e){}
   const sxTxt=()=>x.sistemas?SISTEMAS[x.sistemas].filter(c=>(sx[c.k]||"").trim()).map(c=>c.l+": "+sx[c.k].trim().replace(/\.?$/,".")).join(" "):"";
