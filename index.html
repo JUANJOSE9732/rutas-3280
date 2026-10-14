@@ -936,7 +936,7 @@ function checks(m){try{return JSON.parse(S.get(key(m,"chk"))||"{}")}catch(e){ret
 function hasDraft(m){return !!(S.get(key(m,"dict"))||S.get(key(m,"nota"))||Object.keys(checks(m)).length)}
 
 /* ---------- PANEL ---------- */
-const VERSION_APP="2026-10-14 v145";
+const VERSION_APP="2026-10-14 v146";
 function home(){
   stopRec();st.view="home";
   const rm=["precon","prenatal","parto","rn","ive"],rp=["pinf","inf","adol","juv","adul","vej"];
@@ -3384,6 +3384,8 @@ WIDGET.charlaPF={html:id=>pfHTML(id),txt:id=>pfTxt(id),
    "Minimental (Anexo 28): obligatorio en toda valoración de vejez. El punto de corte depende de la escolaridad.",
    "ASSIST (Anexo 16) ante consumo de sustancias; AUDIT (Anexo 17) ante consumo de alcohol.",
    "Confusión de inicio reciente o que fluctúa en el día: piensa en delirium (infección, deshidratación, medicamento) y remite el mismo día."]);
+ /* se exportan para que el APGAR familiar de los demás momentos use la MISMA escala */
+ window.__ESC={G,SV,items,pinta,cab,suma,hechos,APG,APGI,APGT};
 })();
 
 const _cvTextoP=cvDesdeTexto;cvDesdeTexto=function(tipo,t){return _cvTextoP(tipo==="vitalesP"?"vitales":tipo,t)};
@@ -4967,6 +4969,69 @@ window.addEventListener("online",()=>sync(false));
    const k=sec.items.indexOf(despues);
    if(k>=0)sec.items.splice(k+1,0,"Audición y comunicación (VALE)");
    else sec.items.push("Audición y comunicación (VALE)");
+  }catch(e){}});
+})();
+
+/* ===== v146: APGAR familiar en todos los momentos del curso de vida =====
+   La 3280 valora la dinámica familiar en cada momento, no solo en vejez. El
+   instrumento ya estaba montado dentro del bloque de apoyo de vejez; aquí se
+   reutiliza LA MISMA escala (window.__ESC) para primera infancia, infancia,
+   adolescencia, juventud y adultez, de modo que un puntaje signifique lo
+   mismo en los seis módulos.                                                */
+(function(){
+ const E=window.__ESC; if(!E||typeof WIDGET!=="object")return;
+ const {G,SV,items,pinta,cab,suma,hechos,APG,APGI,APGT}=E;
+
+ /* a quién se le pregunta en cada momento */
+ const QUIEN={
+  pinf:["al cuidador o cuidadora","Se le pregunta a quien cuida al niño o la niña, sobre su propia familia."],
+  inf :["al cuidador o cuidadora","Se le pregunta a quien cuida al niño o la niña, sobre su propia familia."],
+  adol:["al o la adolescente, a solas","Pregúntale a solas, sin el acompañante: muchas respuestas cambian si la familia está delante."],
+  juv :["a la persona, a solas",""],
+  adul:["a la persona, a solas",""]};
+
+ WIDGET.apgarfam={
+  html:id=>{const q=QUIEN[id]||["a la persona",""];
+   return `<p class="note-src" style="margin:0 0 8px">APGAR familiar de Smilkstein, 5 preguntas, <b>0 a 2 puntos cada una, total 0 a 10</b>. Se le pregunta ${esc(q[0])}.${q[1]?" "+esc(q[1]):""}</p>
+   <details open><summary><b>APGAR familiar</b> — 0 a 10</summary>
+    <div style="display:flex;flex-direction:column;gap:6px;margin-top:6px">${items(id,"apg",APG)}</div>${cab("apg","Califica las 5 preguntas")}</details>
+   <p class="note-src" style="margin:8px 0 0">Si tu institución usa el anexo con 5 opciones por pregunta (0 a 4, total 0 a 20), dímelo: los puntos de corte son otros y hay que cambiarlos.</p>`},
+  txt:id=>{const va=G(id,"apg");
+   if(!hechos(va,APG))return "";
+   const p=suma(va,APG),inc=hechos(va,APG)<APG.length,L=[];
+   L.push("APGAR familiar: "+p+"/10"+(inc?" (incompleto)":"")+", "+APGI(p).t+".");
+   if(p<4)L.push("Disfunción familiar grave: se remite a psicología y trabajo social, y se indaga por violencia intrafamiliar.");
+   else if(p<7)L.push("Disfunción familiar leve: se orienta a la familia y se deja como motivo de seguimiento en el próximo control.");
+   return L.join(" ")},
+  wire:(id,save)=>{const up=()=>{pinta(id,"apg",APG,APGI,APGT,10);save()};
+   document.querySelectorAll('[data-gr^="apg."]').forEach(e=>e.addEventListener("change",up));up()}};
+
+ /* el ítem, con la pauta propia de cada momento */
+ const PAUTA={t:"Cómo se aplica",p:[
+  "Son 5 preguntas: adaptación, participación, crecimiento, afecto y resolución.",
+  "Cada una vale de 0 a 2: casi nunca 0, a veces 1, casi siempre 2. El total va de 0 a 10 y la app lo suma.",
+  "7 a 10: familia funcional · 4 a 6: disfunción leve · 0 a 3: disfunción grave.",
+  "«Familia» es con quien vive y de quien depende, no necesariamente los padres biológicos.",
+  "Pregúntalo a solas siempre que se pueda: delante de la familia las respuestas se maquillan.",
+  "Un APGAR alterado no es un diagnóstico: es la puerta para indagar violencia, consumo, abandono o duelo."],r:"",b:""};
+
+ const ETQ="Dinámica familiar (APGAR familiar)";
+ const DONDE=[
+  ["pinf","Familia: familiograma, red de apoyo, cuidado"],
+  ["inf","Salud mental, violencias, acoso"],
+  ["adol","Salud mental, consumo de sustancias, violencias"],
+  ["juv","Salud mental, consumo, violencias"],
+  ["adul","Hábitos, salud mental, violencias, consumo"]];
+
+ DONDE.forEach(([m])=>{if(!IVX[m+"::"+ETQ])IVX[m+"::"+ETQ]={widget:"apgarfam",c:[],pauta:PAUTA}});
+
+ /* se inserta justo después del ítem de familia o salud mental de cada módulo */
+ DONDE.forEach(([mod,despues])=>{
+  try{const M_=M[mod];if(!M_)return;
+   const sec=M_.sections.find(s=>s.items.some(x=>x===despues))||M_.sections[0];
+   if(sec.items.includes(ETQ))return;
+   const k=sec.items.indexOf(despues);
+   if(k>=0)sec.items.splice(k+1,0,ETQ); else sec.items.push(ETQ);
   }catch(e){}});
 })();
 
