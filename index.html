@@ -936,7 +936,7 @@ function checks(m){try{return JSON.parse(S.get(key(m,"chk"))||"{}")}catch(e){ret
 function hasDraft(m){return !!(S.get(key(m,"dict"))||S.get(key(m,"nota"))||Object.keys(checks(m)).length)}
 
 /* ---------- PANEL ---------- */
-const VERSION_APP="2026-10-14 v142";
+const VERSION_APP="2026-10-14 v143";
 function home(){
   stopRec();st.view="home";
   const rm=["precon","prenatal","parto","rn","ive"],rp=["pinf","inf","adol","juv","adul","vej"];
@@ -2183,7 +2183,9 @@ WIDGET.desarrollo={html:id=>{const v=devGet(id),m=edadMesesMod(id),g=devGrupo(m)
    <p class="lab" style="margin:10px 0 4px">Otros hallazgos</p>${ck("pc","Perímetro cefálico por debajo de −2 o por encima de +2 DE")}${ck("fen","3 o más alteraciones físicas (ojos separados, orejas bajas, pliegue palmar único, etc.)")}
    <p class="lab" style="margin:10px 0 4px">Factores de riesgo</p>${DEV_FR.map((t,i)=>ck("f"+i,t)).join("")}`}</div></details>
    <div class="risk"><span class="pill low" id="dv-p">Marca los hitos</span></div><p class="note-src" id="dv-c" style="margin:4px 0 0"></p>`},
- txt:id=>{const r=devCalc(id);if(r.nivel<0)return"";const L=[];if(r.eadTxt)L.push("EAD-3: "+r.eadTxt+".");if(r.aiTxt)L.push("Vigilancia del desarrollo AIEPI: "+r.aiTxt.toLowerCase()+(r.noPrev.length?"; no cumple hitos de la edad anterior: "+r.noPrev.join(", ").toLowerCase():"")+(r.noCur.length?"; no cumple hitos de su edad: "+r.noCur.join(", ").toLowerCase():"")+(r.fr.length?"; factores de riesgo: "+r.fr.join(", ").toLowerCase():"")+".");L.push("Clasificación: "+r.dict+". Conducta: "+r.cond);return L.join(" ")},
+ txt:id=>{const r=devCalc(id);if(r.nivel<0)return"";const L=[];if(r.eadTxt)L.push("EAD-3: "+r.eadTxt+".");if(r.aiTxt)L.push("Vigilancia del desarrollo AIEPI: "+r.aiTxt.toLowerCase()+(r.noPrev.length?"; no cumple hitos de la edad anterior: "+r.noPrev.join(", ").toLowerCase():"")+(r.noCur.length?"; no cumple hitos de su edad: "+r.noCur.join(", ").toLowerCase():"")+(r.fr.length?"; factores de riesgo: "+r.fr.join(", ").toLowerCase():"")+".");
+  if(r.sinMarcar)L.push("Valoración incompleta: quedaron "+r.sinMarcar+" hito"+(r.sinMarcar===1?"":"s")+" sin verificar, así que la clasificación es provisional.");
+  L.push("Clasificación: "+r.dict+". Conducta: "+r.cond);return L.join(" ")},
  wire:(id,save)=>{const up=()=>{const r=devCalc(id),p=$("dv-p");p.textContent=r.nivel<0?"Marca los hitos o el resultado de la EAD-3":r.dict+(r.sinMarcar?" ("+r.sinMarcar+" hitos sin marcar)":"");p.className="pill "+(r.nivel>=2?"high":"low");$("dv-c").textContent=r.cond||"";save()};
   document.querySelectorAll("[data-dv]").forEach(b=>b.onclick=()=>{const v=devGet(id),k=b.dataset.dv,val=+b.dataset.val;if(v[k]===val)delete v[k];else v[k]=val;S.set(key(id,"dev"),JSON.stringify(v));document.querySelectorAll(`[data-dv="${k}"]`).forEach(x=>{const on=v[k]===+x.dataset.val;x.style.background=on?dvCol(k,+x.dataset.val):"";x.style.color=on?"#fff":""});up()});
   document.querySelectorAll("[data-ead]").forEach(e=>e.onchange=()=>{const v=devGet(id);if(e.value)v["e_"+e.dataset.ead]=e.value;else delete v["e_"+e.dataset.ead];S.set(key(id,"dev"),JSON.stringify(v));up()});up()}};
