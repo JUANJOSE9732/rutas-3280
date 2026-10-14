@@ -936,7 +936,7 @@ function checks(m){try{return JSON.parse(S.get(key(m,"chk"))||"{}")}catch(e){ret
 function hasDraft(m){return !!(S.get(key(m,"dict"))||S.get(key(m,"nota"))||Object.keys(checks(m)).length)}
 
 /* ---------- PANEL ---------- */
-const VERSION_APP="2026-10-14 v143";
+const VERSION_APP="2026-10-14 v144";
 function home(){
   stopRec();st.view="home";
   const rm=["precon","prenatal","parto","rn","ive"],rp=["pinf","inf","adol","juv","adul","vej"];
@@ -4711,6 +4711,70 @@ window.addEventListener("online",()=>sync(false));
   "RQC positivo (una o más afirmativas) → ruta de problemas y trastornos mentales. Convulsiones o caídas sin razón → valoración médica prioritaria por posible epilepsia.",
   "Violencia o maltrato → ruta de víctimas de violencias y notificación. Consumo → ruta de SPA.",
   "En niñas indígenas, pregunta con respeto por prácticas nocivas (mutilación genital, matrimonio infantil)."],r:"",b:""};
+})();
+
+/* ===== v144: el perímetro cefálico del desarrollo se toma de la antropometría =====
+   La app ya calcula el z del perímetro cefálico contra el patrón de la OMS en la
+   pregunta de crecimiento. En la de desarrollo volvía a preguntarlo de memoria, dos
+   pantallas después. Ahora trae el valor medido, lo muestra y responde solo; el
+   profesional puede cambiarlo si la medida no es confiable.                        */
+(function(){
+ if(typeof WIDGET!=="object"||!WIDGET.desarrollo)return;
+
+ /* busca el perímetro cefálico escrito en la antropometría de esta consulta */
+ function pcDe(id){
+  for(let i=0;i<60;i++){
+   try{const v=JSON.parse(S.get(key(id,"cv"+i))||"null");
+    if(v&&v.pc!=null&&v.pc!==""){const n=nv(v.pc);if(n!=null&&n>0)return n}}catch(e){}}
+  return null}
+
+ /* z del perímetro cefálico para la edad, con el mismo patrón que usa crecimiento */
+ function pcZ(id){
+  const pc=pcDe(id);if(pc==null)return null;
+  const m=edadMesesMod(id),sx=(pac()||{})["GENERO"];
+  if(m==null||(sx!=="M"&&sx!=="F"))return {pc,z:null};
+  let z=null;try{z=whoZ("hcfa",sx,m,pc)}catch(e){}
+  return {pc,z}}
+
+ const _html=WIDGET.desarrollo.html,_txt=WIDGET.desarrollo.txt,_wire=WIDGET.desarrollo.wire;
+ const G=id=>{try{return JSON.parse(S.get(key(id,"dev"))||"{}")||{}}catch(e){return{}}};
+
+ /* deja respondido el ítem a partir de la medida, sin pisar lo que el profesional marcó */
+ function sembrar(id){
+  const r=pcZ(id);if(!r||r.z==null)return null;
+  const v=G(id),alt=r.z< -2||r.z>2;
+  if(v.pc===undefined){v.pc=alt?1:0;v.__pcauto=1;S.set(key(id,"dev"),JSON.stringify(v))}
+  return r}
+
+ const linea=r=>{
+  if(!r)return `<p class="note-src" style="margin:2px 0 0">No has registrado el perímetro cefálico en «Crecimiento»: márcalo aquí a mano o vuelve y mídelo.</p>`;
+  if(r.z==null)return `<p class="note-src" style="margin:2px 0 0">Perímetro cefálico ${coma(r.pc)} cm. Falta la fecha de nacimiento o el sexo para calcular el z: márcalo a mano.</p>`;
+  const alt=r.z< -2||r.z>2;
+  return `<p class="note-src" style="margin:2px 0 0;${alt?"color:var(--miss);font-weight:700":""}">Medido en «Crecimiento»: ${coma(r.pc)} cm, z ${zFmt(r.z)} · ${alt?(r.z>2?"por encima de +2 DE":"por debajo de −2 DE")+": factor de riesgo para el neurodesarrollo":"dentro de lo normal"}. Respondido solo; cámbialo si la medida no es confiable.</p>`};
+
+ WIDGET.desarrollo.html=id=>{
+  sembrar(id);
+  const r=pcZ(id);
+  const h=_html(id);
+  /* la línea va justo debajo del ítem del perímetro cefálico */
+  return h.replace(/(data-dv="pc"[\s\S]*?<\/span><\/div>)/, '$1'+linea(r))};
+
+ WIDGET.desarrollo.txt=id=>{
+  const t=_txt(id);if(!t)return t;
+  const v=G(id),r=pcZ(id);
+  if(v.pc===1&&r&&r.z!=null)
+   return t.replace(/Vigilancia del desarrollo AIEPI: ([^.]*)\./,
+    (m0,a)=>"Vigilancia del desarrollo AIEPI: "+a+"; perímetro cefálico "+coma(r.pc)+" cm, z "+zFmt(r.z)+".");
+  return t};
+
+ WIDGET.desarrollo.wire=(id,save)=>{
+  _wire(id,save);
+  /* al cambiarlo a mano deja de ser automático, para no volver a pisarlo */
+  document.querySelectorAll('[data-dv="pc"]').forEach(b=>{
+   const anterior=b.onclick;
+   b.onclick=e=>{const v=G(id);if(v.__pcauto){delete v.__pcauto;S.set(key(id,"dev"),JSON.stringify(v))}
+    if(anterior)anterior.call(b,e)}});
+  save()};
 })();
 
 /* ---------- arranque ---------- */
