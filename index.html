@@ -936,7 +936,7 @@ function checks(m){try{return JSON.parse(S.get(key(m,"chk"))||"{}")}catch(e){ret
 function hasDraft(m){return !!(S.get(key(m,"dict"))||S.get(key(m,"nota"))||Object.keys(checks(m)).length)}
 
 /* ---------- PANEL ---------- */
-const VERSION_APP="2026-10-13 v139";
+const VERSION_APP="2026-10-13 v140";
 function home(){
   stopRec();st.view="home";
   const rm=["precon","prenatal","parto","rn","ive"],rp=["pinf","inf","adol","juv","adul","vej"];
@@ -2220,8 +2220,11 @@ function nutCalc(sx,meses,p,t,pc,pb,edadDias){const R=[],al=[];if(!sx||meses==nu
     if(p!=null&&t!=null){const z=whoZ(acost?"wfl":"wfh",sx,Math.round(t*2)/2,p,1);if(z!=null)R.push({k:"pt",ind:"Peso para la talla",z,c:clasNut("pt",z)});
       const imc=p/Math.pow(t/100,2),zi=whoZ(acost?"bmi0":"bmi2",sx,meses,imc,1);if(zi!=null)R.push({k:"imc",ind:"IMC para la edad",z:zi,c:clasNut("imc",zi,1),v:Math.round(imc*10)/10})}
     if(pc!=null){const z=whoZ("hcfa",sx,meses,pc);if(z!=null)R.push({k:"pc",ind:"Perímetro cefálico para la edad",z,c:clasNut("pc",z)})}
-    if(pb!=null&&meses>=6){const c=pb<11.5?"Desnutrición aguda severa (perímetro braquial menor de 11,5 cm)":pb<12.5?"Desnutrición aguda moderada (perímetro braquial de 11,5 a 12,4 cm)":"Perímetro braquial adecuado";R.push({k:"pb",ind:"Perímetro braquial",z:null,c})}}
-  else{if(t!=null){const z=whoZ("h07",sx,meses,t);if(z!=null)R.push({k:"talla",ind:"Talla para la edad",z,c:clasNut("te",z)})}
+    if(pb!=null&&meses<6){R.push({k:"pb",ind:"Perímetro braquial",z:null,c:"No se interpreta a esta edad: el perímetro braquial solo tiene puntos de corte de 6 a 59 meses (Res. 2465 de 2016). Clasifica con peso para la talla."})}
+    else if(pb!=null&&meses>=60){R.push({k:"pb",ind:"Perímetro braquial",z:null,c:"No se interpreta a esta edad: el perímetro braquial solo tiene puntos de corte de 6 a 59 meses (Res. 2465 de 2016). Clasifica con peso para la talla."})}
+    else if(pb!=null){const c=pb<11.5?"Desnutrición aguda severa (perímetro braquial menor de 11,5 cm)":pb<12.5?"Desnutrición aguda moderada (perímetro braquial de 11,5 a 12,4 cm)":"Perímetro braquial adecuado";R.push({k:"pb",ind:"Perímetro braquial",z:null,c})}}
+  else{if(pb!=null)R.push({k:"pb",ind:"Perímetro braquial",z:null,c:"No se interpreta a esta edad: el perímetro braquial solo tiene puntos de corte de 6 a 59 meses (Res. 2465 de 2016). Clasifica con peso para la talla."});
+    if(t!=null){const z=whoZ("h07",sx,meses,t);if(z!=null)R.push({k:"talla",ind:"Talla para la edad",z,c:clasNut("te",z)})}
     if(p!=null&&t!=null){const imc=p/Math.pow(t/100,2),z=whoZ("b07",sx,meses,imc,1);if(z!=null)R.push({k:"imc",ind:"IMC para la edad",z,c:clasNut("imc",z,0),v:Math.round(imc*10)/10})}}
   R.forEach(r=>{if(r.z!=null&&Math.abs(r.z)>5){r.c="Valor improbable (z "+zFmt(r.z)+"): revisa la medida, la unidad o la fecha de nacimiento";r.imp=1}});
   R.forEach(r=>{const c=r.c;if(r.imp){al.push(r.ind+": "+c+".");return}if(/severa/.test(c))al.push(r.ind+": "+c.toLowerCase()+". Remisión el mismo día (ruta de desnutrición aguda, Res. 2350 de 2020).");

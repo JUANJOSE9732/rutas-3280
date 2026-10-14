@@ -12,7 +12,7 @@ const res=await p.evaluate(()=>{
  const ok=(c,m)=>{if(!c)fails.push(m)};
  const setup=(id,edad,sx)=>{
   localStorage.clear();
-  const d=new Date();d.setUTCFullYear(d.getUTCFullYear()-edad);
+  const d=pD(hoy());d.setUTCFullYear(d.getUTCFullYear()-edad);
   setPac({'NOMBRE COMPLETO':'Prueba','TIPO':'CC','DOCUMENTO ID.':'1','FECHA NACIMIENTO':d.toISOString().slice(0,10),'GENERO':sx,'__com':'Q'});
   st.mod=id;st.view="mod";S.set(key(id,"fecha"),hoy());};
  const put=(id,k,o)=>S.set(key(id,k),JSON.stringify(o));

@@ -13,7 +13,7 @@ const R=await p.evaluate(()=>{
 
  /* --- monta una consulta de vejez con los instrumentos llenos --- */
  localStorage.clear();
- const d=new Date();d.setUTCFullYear(d.getUTCFullYear()-78);
+ const d=pD(hoy());d.setUTCFullYear(d.getUTCFullYear()-78);
  const FN=d.toISOString().slice(0,10),F=hoy();
  setPac({'NOMBRE COMPLETO':'MARIA YEPES','TIPO':'CC','DOCUMENTO ID.':'11223344','FECHA NACIMIENTO':FN,
          'GENERO':'F','__com':'MITÚ','ETNIA':'INDIGENA','PUEBLO':'CUBEO'});
@@ -162,7 +162,7 @@ const R=await p.evaluate(()=>{
 
  /* ===== 8. ADULTEZ: el FINDRISC también llega ===== */
  localStorage.clear();
- const d2=new Date();d2.setUTCFullYear(d2.getUTCFullYear()-52);
+ const d2=pD(hoy());d2.setUTCFullYear(d2.getUTCFullYear()-52);
  setPac({'NOMBRE COMPLETO':'JORGE MEJIA','TIPO':'CC','DOCUMENTO ID.':'55667788',
          'FECHA NACIMIENTO':d2.toISOString().slice(0,10),'GENERO':'M','__com':'MITÚ'});
  st.mod='adul';st.tab='entr';S.set(key('adul','fecha'),F);

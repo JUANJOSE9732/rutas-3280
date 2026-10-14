@@ -53,7 +53,7 @@ await p.goto('file://' + require('path').join(__dirname, '..', 'index.html'));
 // --- monta una consulta de vejez completa y abre el formulario base ---
 const F = await p.evaluate(([url, clave]) => {
   localStorage.clear();
-  const d = new Date(); d.setUTCFullYear(d.getUTCFullYear() - 78);
+  const d = pD(hoy()); d.setUTCFullYear(d.getUTCFullYear() - 78);
   const F = hoy();
   S.set('dn2_conf', JSON.stringify({ url, key: clave, who: 'JUAN JOSE' }));
   setPac({ 'NOMBRE COMPLETO': 'MARIA YEPES', 'TIPO': 'CC', 'DOCUMENTO ID.': '11223344',
