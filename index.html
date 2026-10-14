@@ -936,7 +936,7 @@ function checks(m){try{return JSON.parse(S.get(key(m,"chk"))||"{}")}catch(e){ret
 function hasDraft(m){return !!(S.get(key(m,"dict"))||S.get(key(m,"nota"))||Object.keys(checks(m)).length)}
 
 /* ---------- PANEL ---------- */
-const VERSION_APP="2026-10-13 v141";
+const VERSION_APP="2026-10-14 v142";
 function home(){
   stopRec();st.view="home";
   const rm=["precon","prenatal","parto","rn","ive"],rp=["pinf","inf","adol","juv","adul","vej"];
@@ -4606,6 +4606,109 @@ window.addEventListener("online",()=>sync(false));
    t.parentNode.insertBefore(b,t);
    b.onclick=verCaptacion;
   }catch(e){}};
+})();
+
+/* ===== v142: en infancia, primero los riesgos; el RQC solo si algo aparece =====
+   El protocolo de la RPMS valora la salud mental explorando riesgos psicosociales
+   y aplica el instrumento estructurado "de encontrarse preocupaciones o quejas".
+   MinSalud titula estos instrumentos "sugeridos en la valoración integral", no
+   obligatorios. Antes la app abría las 10 preguntas del RQC en toda consulta.    */
+(function(){
+ if(typeof WIDGET!=="object"||!WIDGET.rqc||typeof RQC_X==="undefined")return;
+
+ /* riesgos que el protocolo nombra para infancia, además de los que ya había */
+ const NUEVOS=[
+  ["p","Padre o madre con trastorno mental o consumo problemático"],
+  ["e","Bajo rendimiento escolar, problemas de aprendizaje o de comportamiento"],
+  ["c","Problemas con la comida: come muy poco, demasiado, o le preocupa su cuerpo"]];
+ NUEVOS.forEach(n=>{if(!RQC_X.some(x=>x[0]===n[0]))RQC_X.push(n)});
+
+ const CONDX={
+  v:"Señales de violencia: activar la ruta de atención a víctimas de violencias y notificar (SIVIGILA).",
+  a:"Acoso escolar: orientar a la familia, informar al colegio y remitir a psicología.",
+  s:"Consumo de sustancias: remitir a la ruta de consumo de sustancias psicoactivas.",
+  d:"Duelo o pérdida: remitir a psicología.",
+  p:"Padre o madre con trastorno mental o consumo: valorar el entorno del niño y remitir a trabajo social o psicología.",
+  e:"Dificultades escolares: aplicar el test de Goodenough, descartar déficit visual o auditivo y remitir a psicología.",
+  c:"Problemas con la comida: valorar el estado nutricional y remitir a psicología y nutrición."};
+
+ const G=id=>{try{return JSON.parse(S.get(key(id,"rqc"))||"{}")||{}}catch(e){return{}}};
+ const riesgos=id=>{const v=G(id);return RQC_X.filter(([k])=>v[k]===1)};
+ const rqcMarc=id=>{const v=G(id);return RQC.filter((t,i)=>v["q"+i]!==undefined).length};
+ const rqcSi=id=>{const v=G(id);return RQC.filter((t,i)=>v["q"+i]===1)};
+ /* el tamizaje se cierra sin instrumento solo si el profesional lo declara */
+ const sinRiesgo=id=>G(id).__sr===1;
+
+ const _html=WIDGET.rqc.html,_wire=WIDGET.rqc.wire;
+
+ WIDGET.rqc.html=id=>{
+  const v=G(id),R=riesgos(id),hay=R.length>0,marc=rqcMarc(id);
+  const ck=(k,t)=>`<div style="display:flex;gap:6px;align-items:center;justify-content:space-between;border-bottom:1px solid var(--line);padding:5px 0">
+   <span style="flex:1">${esc(t)}</span><span style="display:flex;gap:4px;flex:none">
+   <button type="button" class="btn" data-rq="${k}" data-val="1" style="padding:4px 10px;font-size:.8rem;${v[k]===1?"background:var(--miss);color:#fff;border-color:var(--miss)":""}">Sí</button>
+   <button type="button" class="btn" data-rq="${k}" data-val="0" style="padding:4px 10px;font-size:.8rem;${v[k]===0?"background:var(--accent);color:#fff;border-color:var(--accent)":""}">No</button></span></div>`;
+  return `<p class="note-src" style="margin:0 0 8px">La valoración de salud mental empieza por preguntar <b>estos riesgos</b>. El RQC es un instrumento <b>sugerido</b> (MinSalud, instrumentos sugeridos en la valoración integral), no una tarea de toda consulta: se aplica cuando alguno de los riesgos aparece, o cuando el cuidador refiere una preocupación.</p>
+  <details class="sec" open><summary><span>1 · Riesgos psicosociales</span><span class="cnt">${R.length?R.length+" marcado"+(R.length>1?"s":""):"pregúntalos siempre"}</span></summary>
+   <div style="padding:0 14px 14px">${RQC_X.map(([k,t])=>ck(k,t)).join("")}
+   <label class="bfl" style="margin-top:8px"><input type="checkbox" data-rqsr ${v.__sr?"checked":""}> <span>Sin ninguno de estos riesgos y sin preocupaciones del cuidador: no se aplica el RQC</span></label></div></details>
+  <details class="sec" ${hay?"open":""}><summary><span>2 · RQC, Cuestionario de Reporte para Niños (Anexo 11)</span><span class="cnt">${hay?"se sugiere aplicarlo":marc?marc+" de 10":"solo si hay riesgo"}</span></summary>
+   <div style="padding:0 14px 14px">
+    <p class="note-src" style="margin:0 0 8px">${hay?"Hay un riesgo marcado: conviene aplicarlo. Son 10 preguntas al cuidador, de sí o no.":"No hace falta si no marcaste ningún riesgo. Puedes aplicarlo igual si el cuidador refiere alguna preocupación."}</p>
+    ${RQC.map((t,i)=>ck("q"+i,(i+1)+". "+t)).join("")}
+    <p class="note-src" style="margin:6px 0 0">Una o más respuestas afirmativas = RQC positivo. Verifica la redacción con el Anexo 11 de tu institución.</p></div></details>
+  <div class="risk"><span class="pill low" id="rq-p">Marca las respuestas</span></div><p class="note-src" id="rq-c" style="margin:4px 0 0"></p>`};
+
+ WIDGET.rqc.txt=id=>{
+  const R=riesgos(id),marc=rqcMarc(id),si=rqcSi(id),L=[];
+  if(!R.length&&!marc&&!sinRiesgo(id))return"";
+  if(!R.length)L.push("Valoración de salud mental: sin señales de violencia, acoso escolar, consumo, duelo, dificultades escolares ni problemas con la comida; el cuidador no refiere preocupaciones.");
+  else L.push("Riesgos psicosociales identificados: "+R.map(([k,t])=>t.split(":")[0].split(" (")[0].toLowerCase()).join(", ")+".");
+  if(marc){
+   L.push("Se aplica el RQC (Anexo 11): "+(si.length
+     ? "positivo, "+si.length+" de 10 respuestas afirmativas ("+si.map(t=>t.replace(/[¿?]/g,"").toLowerCase()).join("; ")+")"
+     : "negativo, 0 de 10")+(marc<10?" (quedaron "+(10-marc)+" preguntas sin marcar)":"")+".");
+   if(si.length)L.push("Se remite a la ruta de problemas y trastornos mentales y epilepsia (psicología o medicina)."+
+     (G(id).q2===1?" Las convulsiones o caídas sin razón requieren valoración médica prioritaria por posible epilepsia.":""));
+  } else if(!R.length) L.push("No se aplica el RQC: instrumento sugerido, sin riesgos ni preocupaciones que lo indiquen.");
+  else L.push("Queda pendiente aplicar el RQC por los riesgos identificados.");
+  R.forEach(([k])=>{if(CONDX[k])L.push(CONDX[k])});
+  return L.join(" ")};
+
+ WIDGET.rqc.wire=(id,save)=>{
+  const up=()=>{
+   const R=riesgos(id),marc=rqcMarc(id),si=rqcSi(id),p=$("rq-p"),c=$("rq-c");
+   if(!p)return;
+   if(!R.length&&!marc&&!sinRiesgo(id)){p.textContent="Marca las respuestas";p.className="pill low";if(c)c.textContent="";save();return}
+   let t,cl="low";
+   if(si.length){t="RQC positivo: "+si.length+" de 10"+(R.length?" · "+R.length+" riesgo"+(R.length>1?"s":""):"");cl="high"}
+   else if(R.length){t=R.length+" riesgo"+(R.length>1?"s":"")+(marc?" · RQC negativo":" · se sugiere aplicar el RQC");cl="high"}
+   else if(marc){t="RQC negativo (0 de 10)"}
+   else{t="Sin riesgos: no se requiere el RQC"}
+   p.textContent=t+(marc&&marc<10?" ("+(10-marc)+" sin marcar)":"");p.className="pill "+cl;
+   if(c)c.textContent=R.map(([k])=>CONDX[k]||"").filter(Boolean).join(" ");
+   save()};
+  document.querySelectorAll("[data-rq]").forEach(b=>b.onclick=()=>{
+   const v=G(id),k=b.dataset.rq,val=+b.dataset.val;
+   if(v[k]===val)delete v[k];else v[k]=val;
+   if(k[0]!=="q"&&val===1)delete v.__sr;          /* marcar un riesgo anula el "sin riesgos" */
+   S.set(key(id,"rqc"),JSON.stringify(v));
+   b.parentNode.querySelectorAll("[data-rq]").forEach(z=>{
+    const on=v[z.dataset.rq]===+z.dataset.val;
+    z.style.background=on?(+z.dataset.val===1?"var(--miss)":"var(--accent)"):"";
+    z.style.color=on?"#fff":"";z.style.borderColor=on?(+z.dataset.val===1?"var(--miss)":"var(--accent)"):""});
+   up()});
+  const sr=document.querySelector("[data-rqsr]");
+  if(sr)sr.onchange=()=>{const v=G(id);if(sr.checked)v.__sr=1;else delete v.__sr;S.set(key(id,"rqc"),JSON.stringify(v));up()};
+  up()};
+
+ /* la pauta deja de ordenar el RQC como tarea fija */
+ const x=IVX["inf::Salud mental, violencias, acoso"];
+ if(x)x.pauta={t:"Cómo valorar (Res. 3280, p. 120)",p:[
+  "Primero pregunta los riesgos psicosociales: violencia o maltrato, acoso escolar, consumo, duelo, padres con trastorno mental o consumo, dificultades escolares, problemas con la comida.",
+  "El RQC (Anexo 11) es un instrumento sugerido, no una tarea de toda consulta: aplícalo si aparece un riesgo o si el cuidador refiere una preocupación. Son 10 preguntas al cuidador.",
+  "RQC positivo (una o más afirmativas) → ruta de problemas y trastornos mentales. Convulsiones o caídas sin razón → valoración médica prioritaria por posible epilepsia.",
+  "Violencia o maltrato → ruta de víctimas de violencias y notificación. Consumo → ruta de SPA.",
+  "En niñas indígenas, pregunta con respeto por prácticas nocivas (mutilación genital, matrimonio infantil)."],r:"",b:""};
 })();
 
 /* ---------- arranque ---------- */
