@@ -936,7 +936,7 @@ function checks(m){try{return JSON.parse(S.get(key(m,"chk"))||"{}")}catch(e){ret
 function hasDraft(m){return !!(S.get(key(m,"dict"))||S.get(key(m,"nota"))||Object.keys(checks(m)).length)}
 
 /* ---------- PANEL ---------- */
-const VERSION_APP="2026-10-14 v147";
+const VERSION_APP="2026-10-14 v148";
 function home(){
   stopRec();st.view="home";
   const rm=["precon","prenatal","parto","rn","ive"],rp=["pinf","inf","adol","juv","adul","vej"];
@@ -5180,6 +5180,22 @@ window.addEventListener("online",()=>sync(false));
 
  /* primera pregunta del bloque de valoración */
  MODS.forEach(m=>{try{const sec=M[m]&&M[m].sections[0];if(!sec||sec.items.includes(ETQ))return;mover(m);sec.items.unshift(ETQ)}catch(e){}});
+ /* v148: el esquema de vacunación va justo después de la enfermedad actual.
+    Las respuestas guardadas se reordenan por posición para no desordenarse. */
+ const VAC="Esquema de vacunación";
+ const permutar=(id,perm)=>{const fl=key(id,"eav2");if(S.get(fl))return;
+  try{let a=null;try{a=JSON.parse(S.get(key(id,"iv"))||"null")}catch(e){}
+   const nv=i=>perm[i]==null?+i:perm[i];
+   if(a&&Object.keys(a).length){const n={};Object.keys(a).forEach(i=>n[nv(+i)]=a[i]);S.set(key(id,"iv"),JSON.stringify(n));
+    const tmp={};Object.keys(perm).forEach(i=>["cv","cvo","sx"].forEach(t=>{const x=S.get(key(id,t+i));if(x!=null){tmp[t+perm[i]]=x;S.del(key(id,t+i))}}));
+    Object.keys(tmp).forEach(k=>S.set(key(id,k),tmp[k]));
+    const vi=S.get(key(id,"ivi"));if(vi!=null)S.set(key(id,"ivi"),String(nv(+vi)))}
+   let c=null;try{c=JSON.parse(S.get(key(id,"chk"))||"null")}catch(e){}
+   if(c&&Object.keys(c).length){const n={};Object.keys(c).forEach(k=>{const q=k.split(".");n[q[0]==="0"?"0."+nv(+q[1]):k]=c[k]});S.set(key(id,"chk"),JSON.stringify(n))}
+  }catch(e){}S.set(fl,"1")};
+ MODS.forEach(m=>{try{const it=M[m].sections[0].items,k=it.indexOf(VAC),e=it.indexOf(ETQ);if(k<0||e<0||k===e+1)return;
+  const antes=it.slice();it.splice(k,1);it.splice(it.indexOf(ETQ)+1,0,VAC);
+  const perm={};antes.forEach((l,i)=>{const j=it.indexOf(l);if(j!==i)perm[i]=j});permutar(m,perm)}catch(e){}});
 
  /* bloque propio en la nota y alerta si hay signo de peligro */
  const _ivForEA=ivFor;ivFor=function(id){const q=_ivForEA(id);if(MODS.includes(id)&&q){const x=q.find(z=>z&&z.widget==="enfactual");

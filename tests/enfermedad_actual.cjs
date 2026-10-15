@@ -13,7 +13,7 @@ const R=await p.evaluate(()=>{
  const W=WIDGET.enfactual;
  /* 1. es la primera pregunta en ambos módulos */
  ['pinf','inf'].forEach(m=>{const q=ivFor(m);ok(q[0].widget==='enfactual','primera pregunta de '+m+' no es Enfermedad actual');ok(q[0].b==='Motivo y enfermedad actual','bloque propio en '+m);
-  ok(q.filter(z=>z.widget==='enfactual').length===1,'duplicada en '+m);ok(q.some(z=>z.widget==='vacunas'),'se perdió vacunas en '+m)});
+  ok(q.filter(z=>z.widget==='enfactual').length===1,'duplicada en '+m);ok(q.some(z=>z.widget==='vacunas'),'se perdió vacunas en '+m);ok(q[1].widget==='vacunas','v148: vacunas debía ir de segunda en '+m+', está: '+q[1].l)});
  ok(!ivFor('adol').some(z=>z.widget==='enfactual'),'no debía estar en adolescencia');
  /* 2. sin tocar nada no escribe */
  monta('pinf',1,'M');ok(W.txt('pinf')==='','sin tocar no debía escribir');
