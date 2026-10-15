@@ -936,7 +936,7 @@ function checks(m){try{return JSON.parse(S.get(key(m,"chk"))||"{}")}catch(e){ret
 function hasDraft(m){return !!(S.get(key(m,"dict"))||S.get(key(m,"nota"))||Object.keys(checks(m)).length)}
 
 /* ---------- PANEL ---------- */
-const VERSION_APP="2026-10-14 v146";
+const VERSION_APP="2026-10-14 v147";
 function home(){
   stopRec();st.view="home";
   const rm=["precon","prenatal","parto","rn","ive"],rp=["pinf","inf","adol","juv","adul","vej"];
@@ -5033,6 +5033,165 @@ window.addEventListener("online",()=>sync(false));
    const k=sec.items.indexOf(despues);
    if(k>=0)sec.items.splice(k+1,0,ETQ); else sec.items.push(ETQ);
   }catch(e){}});
+})();
+
+/* ===== v147: Enfermedad actual en primera infancia e infancia =====
+   Plantilla para el campo «Enfermedad actual» de la historia clínica en el
+   control de crecimiento y desarrollo (valoración integral, Res. 3280). Es la
+   primera pregunta de la entrevista; en «Exportar la historia» salen
+   «Motivo de consulta» y «Enfermedad actual» listos para pegar en esos campos. */
+(function(){
+ if(typeof WIDGET!=="object"||typeof M!=="object")return;
+ const MODS=["pinf","inf"],ETQ="Enfermedad actual",K="ea";
+ const G=id=>{try{return JSON.parse(S.get(key(id,K))||"{}")||{}}catch(e){return{}}};
+ const SV=(id,v)=>S.set(key(id,K),JSON.stringify(v));
+ const tit=s=>String(s||"").toLowerCase().replace(/(^|[\s(-])([a-záéíóúñü])/g,(a,b,c)=>b+c.toUpperCase());
+ const lista=a=>a.length<2?a.join(""):a.slice(0,-1).join(", ")+" y "+a[a.length-1];
+
+ const PAR=[["","Elige"],["madre","Madre"],["padre","Padre"],["abuela","Abuela"],["abuelo","Abuelo"],["tia","Tía"],["tio","Tío"],["hermana","Hermana mayor"],["hermano","Hermano mayor"],["cuidadora","Cuidadora"],["cuidador","Cuidador"],["docente","Docente"],["otro","Otro"]];
+ const SUJ={madre:"su madre",padre:"su padre",abuela:"su abuela",abuelo:"su abuelo",tia:"su tía",tio:"su tío",hermana:"su hermana mayor",hermano:"su hermano mayor",cuidadora:"su cuidadora",cuidador:"su cuidador",docente:"su docente"};
+ const FEM=new Set(["madre","abuela","tia","hermana","cuidadora"]);
+ const MOT=[["prog","Control programado"],["busq","Captado en búsqueda activa o brigada"],["rem","Remitido por agente o promotor"]];
+ const SX=[["fiebre","Fiebre"],["tos","Tos o gripa"],["resp","Dificultad para respirar"],["diarrea","Diarrea"],["vomito","Vómito"],["oido","Dolor o supuración de oído"],["piel","Lesiones en la piel"],["otro","Otro"]];
+ const SXT={fiebre:"fiebre",tos:"tos y rinorrea",resp:"dificultad para respirar",diarrea:"deposiciones diarreicas",vomito:"vómito",oido:"otalgia u otorrea",piel:"lesiones en piel"};
+ /* signos generales de peligro de AIEPI (menores de 5 años) */
+ const PEL=[["beber","No puede beber o tomar el pecho","no puede beber ni tomar el pecho","puede beber y tomar el pecho"],["vomita","Vomita todo","vomita todo","no vomita todo"],["conv","Convulsiones en esta enfermedad","convulsiones","sin convulsiones"],["letar","Letárgico o inconsciente","letárgico o inconsciente","no está letárgico ni inconsciente"]];
+ const LAC=[["","Elige"],["excl","Lactancia materna exclusiva"],["comp","Leche materna y alimentación complementaria"],["fam","Ya no lacta: dieta familiar"],["form","Fórmula o leche de vaca"]];
+ const LACT={excl:"recibe lactancia materna exclusiva",comp:"recibe leche materna y alimentación complementaria",fam:"ya no lacta y consume la dieta familiar",form:"recibe fórmula o leche de vaca"};
+
+ const sexo=()=>{const g=pac()["GENERO"];return g==="F"?"F":g==="M"?"M":""};
+ const edadTxt=id=>{const P=pac(),e=edadDe(P["FECHA NACIMIENTO"],S.get(key(id,"fecha"))||hoy());if(!e)return"";
+  if(e.y>=1)return e.y+(e.y===1?" año":" años")+(e.m&&e.y<6?" y "+e.m+(e.m===1?" mes":" meses"):"");
+  return e.tm>=1?e.tm+(e.tm===1?" mes":" meses"):e.d+(e.d===1?" día":" días")};
+ const def=id=>{const v=G(id),m=pac().__mad||{};return Object.assign({nom:m.nom?tit(m.nom):"",mot:"prog"},v)};
+ const peligroAplica=id=>{if(id!=="pinf")return false;const m=edadMesesMod(id);return m==null||m<60};
+ const tocado=v=>!!(v.est||v.par||v.nom_ed||v.lac||v.ape||v.sue||v.eli||v.esc||PEL.some(([k])=>v["p_"+k]!=null));
+
+ function motivoTxt(id){return id==="pinf"?"CONTROL DE CRECIMIENTO Y DESARROLLO - VALORACIÓN INTEGRAL DE PRIMERA INFANCIA (RES. 3280 DE 2018)":"VALORACIÓN INTEGRAL DE INFANCIA - CONTROL DE CRECIMIENTO Y DESARROLLO (RES. 3280 DE 2018)"}
+
+ function txt(id){const v=def(id);if(!tocado(G(id)))return"";
+  const P=pac(),sx=sexo(),ni=sx==="F"?"la niña":sx==="M"?"el niño":"el niño o la niña",o=sx==="F"?"a":"o",L=[];
+  /* identificación y motivo */
+  let s="Paciente"+(sx?" de sexo "+(sx==="F"?"femenino":"masculino"):"")+(edadTxt(id)?", de "+edadTxt(id)+" de edad":", de ____ de edad");
+  if(P["PUEBLO"])s+=", del pueblo "+tit(P["PUEBLO"]);else if(P["ETNIA"]&&!/ningun|^n\/?a$/i.test(P["ETNIA"]))s+=", de pertenencia étnica "+String(P["ETNIA"]).toLowerCase();
+  s+=", procedente de "+(P.__com&&P.__com!=="EJEMPLO"?"la comunidad de "+tit(P.__com):"____");
+  const suj=SUJ[v.par]||(v.par==="otro"?"":"");
+  s+=", quien asiste en compañía de "+(suj&&v.nom?suj+", "+v.nom+",":suj?suj:v.nom?v.nom+(v.par==="otro"&&v.parTxt?" ("+v.parTxt.toLowerCase()+")":""):"____");
+  s+=" a "+(id==="pinf"?"control de crecimiento y desarrollo (valoración integral de primera infancia)":"valoración integral de infancia (control de crecimiento y desarrollo)")+" de la Ruta de Promoción y Mantenimiento de la Salud";
+  if(v.mot==="busq")s+=", captad"+o+" en búsqueda activa durante la brigada";else if(v.mot==="rem")s+=", remitid"+o+" por el agente o promotor de salud";
+  L.push(s+".");
+  if(id==="inf"){if(v.esc==="no")L.push("No asiste a la escuela.");else if(v.grado)L.push("Cursa "+v.grado.toLowerCase().replace(/\.$/,"")+".")}
+  /* estado actual */
+  const quien=suj?suj.charAt(0).toUpperCase()+suj.slice(1):v.nom?"El acompañante":"El acompañante";
+  if(v.est==="asin")L.push(quien+" refiere que "+ni+" se encuentra asintomátic"+o+", sin fiebre, tos, diarrea ni vómito en los últimos 15 días.");
+  else if(v.est==="sint"){const t=SX.filter(([k])=>v["s_"+k]&&k!=="otro").map(([k])=>SXT[k]);if(v.s_otro&&v.sOtro)t.push(v.sOtro.toLowerCase());
+   L.push(quien+" refiere cuadro clínico de "+(v.dias?v.dias+(String(v.dias)==="1"?" día":" días"):"____ días")+" de evolución consistente en "+(t.length?lista(t):"____")+"."+(v.desc?" "+v.desc.trim().replace(/\.?$/,"."):""))}
+  else L.push("Estado actual: ____.");
+  /* signos generales de peligro (AIEPI, menores de 5 años) */
+  if(peligroAplica(id)){const si=PEL.filter(([k])=>v["p_"+k]===1),no=PEL.filter(([k])=>v["p_"+k]===0);
+   if(si.length)L.push("Presenta signo general de peligro: "+lista(si.map(z=>z[2]))+". Se clasifica como enfermedad muy grave (AIEPI) y se remite de urgencia a medicina.");
+   else if(no.length===PEL.length)L.push("Niega signos generales de peligro: "+lista(PEL.map(z=>z[3]))+".");
+   else L.push("Signos generales de peligro (AIEPI): ____.")}
+  /* alimentación, sueño y eliminación */
+  const al=[];if(id==="pinf"&&v.lac)al.push(LACT[v.lac]);if(v.ape)al.push(v.ape==="bueno"?"con buen apetito":"con apetito disminuido");
+  if(al.length){const a=al.join(", ");L.push(a.charAt(0).toUpperCase()+a.slice(1)+".")}
+  const se=[];if(v.sue)se.push(v.sue==="ok"?"sueño tranquilo":"sueño alterado");if(v.eli)se.push(v.eli==="ok"?"diuresis y deposiciones de características normales":"alteración en la diuresis o las deposiciones");
+  if(se.length){const a=se.join("; ");L.push(a.charAt(0).toUpperCase()+a.slice(1)+".")}
+  return L.join(" ")}
+
+ const sel=(k,opts,val)=>`<select data-ea="${k}">${opts.map(([a,b])=>`<option value="${a}" ${String(val||"")===a?"selected":""}>${esc(b)}</option>`).join("")}</select>`;
+ const sn=(k,t,val)=>`<div style="display:flex;gap:6px;align-items:center;justify-content:space-between;border-bottom:1px solid var(--line);padding:5px 0"><span style="flex:1">${esc(t)}</span><span style="display:flex;gap:4px;flex:none">
+   <button type="button" class="btn" data-eab="${k}" data-val="1" style="padding:4px 10px;font-size:.8rem">Sí</button><button type="button" class="btn" data-eab="${k}" data-val="0" style="padding:4px 10px;font-size:.8rem">No</button></span></div>`;
+
+ function html(id){const v=def(id),pel=peligroAplica(id);
+  return `<div id="ea-w"><p class="note-src" style="margin:0 0 8px">Arma el párrafo de <b>Enfermedad actual</b> de la historia. Toma la edad, el sexo, el pueblo y la comunidad de <b>Datos</b>; lo que falte queda como «____». En <b>Exportar la historia</b> sale aparte, junto con el <b>Motivo de consulta</b>, para copiarlo a cada campo.</p>
+  <div class="bgrid">
+   <label class="bfl"><span>Acompañante: parentesco</span>${sel("par",PAR,v.par)}</label>
+   <label class="bfl"><span>Nombre del acompañante</span><input data-ea="nom" value="${esc(v.nom||"")}" placeholder="Ej.: Alfonsina Ríos López"></label>
+   <label class="bfl" data-eaw="partxt" ${v.par==="otro"?"":"hidden"}><span>¿Quién es?</span><input data-ea="parTxt" value="${esc(v.parTxt||"")}" placeholder="Ej.: vecina"></label>
+   <label class="bfl"><span>Cómo llegó a la consulta</span>${sel("mot",MOT,v.mot)}</label>
+   ${id==="inf"?`<label class="bfl"><span>Escolaridad</span>${sel("esc",[["","Elige"],["si","Estudia"],["no","No escolarizado"]],v.esc)}</label>
+   <label class="bfl" data-eaw="grado" ${v.esc==="si"?"":"hidden"}><span>Grado</span><input data-ea="grado" value="${esc(v.grado||"")}" placeholder="Ej.: cuarto de primaria"></label>`:""}
+  </div>
+  <p class="lab" style="margin:10px 0 4px">Estado actual (últimos 15 días)</p>
+  <div class="bgrid"><label class="bfl"><span>¿Cómo está hoy?</span>${sel("est",[["","Elige"],["asin","Asintomático, sin enfermedad"],["sint","Con síntomas"]],v.est)}</label></div>
+  <div data-eaw="sint" ${v.est==="sint"?"":"hidden"} style="margin-top:6px">
+   <div style="display:flex;flex-wrap:wrap;gap:6px 14px">${SX.map(([k,t])=>`<label style="display:flex;gap:6px;align-items:center;font-size:.9rem"><input type="checkbox" data-eac="s_${k}" ${v["s_"+k]?"checked":""}> ${esc(t)}</label>`).join("")}</div>
+   <div class="bgrid" style="margin-top:6px">
+    <label class="bfl" data-eaw="sotro" ${v.s_otro?"":"hidden"}><span>¿Cuál otro?</span><input data-ea="sOtro" value="${esc(v.sOtro||"")}"></label>
+    <label class="bfl"><span>Días de evolución</span><input data-ea="dias" inputmode="numeric" value="${esc(v.dias||"")}"></label>
+    <label class="bfl"><span>Cómo ha sido el cuadro (opcional)</span><textarea data-ea="desc" style="min-height:60px" placeholder="Ej.: fiebre no cuantificada que cede con acetaminofén; recibe líquidos.">${esc(v.desc||"")}</textarea></label>
+   </div>
+   <p class="note-src" style="margin:4px 0 0">Si consulta enfermo, clasifica con AIEPI (cuadro de procedimientos) antes de seguir con la valoración integral.</p>
+  </div>
+  ${pel?`<p class="lab" style="margin:10px 0 2px">Signos generales de peligro (AIEPI, menores de 5 años)</p>
+   <div class="btns" style="margin:0 0 4px"><button type="button" class="btn" id="ea-pno" style="flex:none;padding:4px 10px;font-size:.8rem">Niega los cuatro</button></div>
+   ${PEL.map(([k,t])=>sn("p_"+k,t,v["p_"+k])).join("")}
+   <div class="risk" style="margin-top:6px"><span class="pill low" id="ea-pp">Marca los cuatro signos</span></div>`:""}
+  <p class="lab" style="margin:10px 0 4px">Alimentación, sueño y eliminación</p>
+  <div class="bgrid">
+   ${id==="pinf"?`<label class="bfl"><span>Alimentación</span>${sel("lac",LAC,v.lac)}</label>`:""}
+   <label class="bfl"><span>Apetito</span>${sel("ape",[["","Elige"],["bueno","Bueno"],["dism","Disminuido"]],v.ape)}</label>
+   <label class="bfl"><span>Sueño</span>${sel("sue",[["","Elige"],["ok","Tranquilo"],["alt","Alterado"]],v.sue)}</label>
+   <label class="bfl"><span>Orina y deposiciones</span>${sel("eli",[["","Elige"],["ok","Normales"],["alt","Alteradas"]],v.eli)}</label>
+  </div>
+  <details class="sec" open style="margin-top:10px"><summary><span>Así queda el párrafo</span></summary><p id="ea-prev" style="margin:0;padding:0 14px 12px;white-space:pre-wrap"></p></details></div>`}
+
+ function wire(id,save){const w=$("ea-w");if(!w)return;
+  const leer=()=>{const v=G(id);
+   w.querySelectorAll("[data-ea]").forEach(e=>{const k=e.dataset.ea,x=e.value.trim();if(x)v[k]=x;else delete v[k];if(k==="nom")v.nom_ed=1});
+   w.querySelectorAll("[data-eac]").forEach(e=>{if(e.checked)v[e.dataset.eac]=1;else delete v[e.dataset.eac]});
+   if(v.est!=="sint"){SX.forEach(([k])=>delete v["s_"+k]);delete v.dias;delete v.desc;delete v.sOtro}
+   SV(id,v);return v};
+  const pinta=()=>{const v=G(id),show=(n,on)=>{const e=w.querySelector(`[data-eaw="${n}"]`);if(e)e.hidden=!on};
+   show("partxt",v.par==="otro");show("grado",v.esc==="si");show("sint",v.est==="sint");show("sotro",!!v.s_otro);
+   w.querySelectorAll("[data-eab]").forEach(b=>{const on=v[b.dataset.eab]===+b.dataset.val,si=b.dataset.val==="1";
+    b.style.background=on?(si?"var(--miss)":"var(--accent)"):"";b.style.color=on?"#fff":"";b.style.borderColor=on?(si?"var(--miss)":"var(--accent)"):""});
+   const pp=$("ea-pp");if(pp){const si=PEL.filter(([k])=>v["p_"+k]===1).length,n=PEL.filter(([k])=>v["p_"+k]!=null).length;
+    pp.textContent=si?"Signo de peligro: remisión urgente a medicina":n<PEL.length?"Marca los cuatro signos":"Sin signos generales de peligro";pp.className="pill "+(si?"high":"low")}
+   const pv=$("ea-prev");if(pv)pv.textContent=txt(id)||"Elige el estado actual o el acompañante para empezar."};
+  const up=()=>{leer();pinta();save()};
+  w.querySelectorAll("[data-ea]").forEach(e=>e.addEventListener(e.tagName==="SELECT"?"change":"input",up));
+  w.querySelectorAll("[data-eac]").forEach(e=>e.addEventListener("change",up));
+  w.querySelectorAll("[data-eab]").forEach(b=>b.onclick=()=>{const v=G(id),k=b.dataset.eab,val=+b.dataset.val;if(v[k]===val)delete v[k];else v[k]=val;SV(id,v);pinta();save()});
+  const pn=$("ea-pno");if(pn)pn.onclick=()=>{const v=G(id);PEL.forEach(([k])=>v["p_"+k]=0);SV(id,v);pinta();save()};
+  pinta()}
+
+ WIDGET.enfactual={html,txt,wire,motivo:motivoTxt};
+
+ const PAUTA={t:"Cómo se redacta en el control de crecimiento y desarrollo",p:[
+  "Quién trae al niño o la niña, de dónde viene y a qué viene: valoración integral de la RPMS (Res. 3280).",
+  "Estado actual: si está sano, déjalo explícito (sin fiebre, tos, diarrea ni vómito en los últimos 15 días).",
+  "Menores de 5 años: pregunta siempre los cuatro signos generales de peligro de AIEPI. Uno solo es enfermedad muy grave: remisión urgente.",
+  "Si viene enfermo, describe el cuadro (días, síntomas, qué le han dado) y clasifícalo con AIEPI antes de la valoración integral.",
+  "Alimentación, sueño y eliminación cierran el párrafo. Los antecedentes (prematuridad, hospitalizaciones) van en su propio campo."],r:"",b:""};
+ MODS.forEach(m=>{if(!IVX[m+"::"+ETQ])IVX[m+"::"+ETQ]={widget:"enfactual",c:[],pauta:PAUTA}});
+
+ /* las respuestas guardadas antes de este cambio se corren un puesto, para que no se desordenen */
+ const mover=id=>{const fl=key(id,"eav1");if(S.get(fl))return;
+  try{let a=null;try{a=JSON.parse(S.get(key(id,"iv"))||"null")}catch(e){}
+   if(a&&Object.keys(a).length){const n={};Object.keys(a).forEach(i=>n[+i+1]=a[i]);S.set(key(id,"iv"),JSON.stringify(n));
+    const ix=Object.keys(a).map(Number).concat([60]),hi=Math.max(...ix);
+    for(let i=hi;i>=0;i--)["cv","cvo","sx"].forEach(t=>{const x=S.get(key(id,t+i));if(x!=null){S.set(key(id,t+(i+1)),x);S.del(key(id,t+i))}});
+    const vi=S.get(key(id,"ivi"));if(vi!=null&&+vi>0)S.set(key(id,"ivi"),String(+vi+1))}
+   let c=null;try{c=JSON.parse(S.get(key(id,"chk"))||"null")}catch(e){}
+   if(c&&Object.keys(c).length){const n={};Object.keys(c).forEach(k=>{const p=k.split(".");n[p[0]==="0"?"0."+(+p[1]+1):k]=c[k]});S.set(key(id,"chk"),JSON.stringify(n))}
+  }catch(e){}S.set(fl,"1")};
+
+ /* primera pregunta del bloque de valoración */
+ MODS.forEach(m=>{try{const sec=M[m]&&M[m].sections[0];if(!sec||sec.items.includes(ETQ))return;mover(m);sec.items.unshift(ETQ)}catch(e){}});
+
+ /* bloque propio en la nota y alerta si hay signo de peligro */
+ const _ivForEA=ivFor;ivFor=function(id){const q=_ivForEA(id);if(MODS.includes(id)&&q){const x=q.find(z=>z&&z.widget==="enfactual");
+   if(x&&!x._ea){x._ea=1;x.b="Motivo y enfermedad actual";x.t="ask";x.al=/signo general de peligro/i;x.am="Signo general de peligro AIEPI: enfermedad muy grave, remisión urgente a medicina."}}return q};
+
+ /* en Exportar: «Motivo de consulta» y «Enfermedad actual» como campos separados */
+ const _hcEA=hcSecciones;hcSecciones=function(id){const out=_hcEA(id);if(!MODS.includes(id))return out;
+  const q=ivFor(id),i=q.findIndex(z=>z&&z.widget==="enfactual"),a=ivAns(id),ea=i<0?"":(a[i]||"").trim();
+  const k=out.findIndex(z=>z.t==="Motivo y enfermedad actual");if(k>=0)out.splice(k,1);
+  const at=Math.max(1,out.findIndex(z=>z.t==="Datos de la consulta")+1);
+  out.splice(at,0,{t:"Motivo de consulta",x:motivoTxt(id)},{t:"Enfermedad actual",x:ea||"Falta llenar la pregunta «Enfermedad actual» en la entrevista."});
+  return out};
 })();
 
 /* ---------- arranque ---------- */
