@@ -269,6 +269,11 @@ textarea{width:100%;font:inherit;font-size:1.05rem;line-height:1.55;padding:14px
 .qt-l .btn{flex:none;padding:6px 10px;font-size:.8rem}
 .qt-c{display:block;font-family:var(--f-data);font-size:.68rem;color:var(--accent);margin-top:3px}
 .sugg .qt .btn{border:1.5px solid var(--line);background:var(--surface);color:var(--ink);border-radius:8px;font-weight:700}
+.mb-dl{margin:0;padding:10px 14px 12px;display:grid;grid-template-columns:minmax(0,1fr);gap:2px}
+.mb-dl dt{font-size:.74rem;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);margin-top:8px}
+.mb-dl dd{margin:0;font-size:.95rem}
+.mb-dl dt.mb-al{color:var(--miss)}
+#mb-q{margin:0}
 @media (prefers-reduced-motion:no-preference){.tile,.btn,.notes-pick button{transition:background .15s,border-color .15s,box-shadow .15s}}
 </style>
 
@@ -1438,6 +1443,144 @@ function calForm(v){const td=!v.hi;
     if(v.reemplaza){const h=calJ("dn2_cal_hide",{});h[v.reemplaza]=1;S.set("dn2_cal_hide",JSON.stringify(h))}
     CAL.ref=f;calRender()}}
 
+/* ======================= MORBILIDAD FRECUENTE · ZONA RURAL DEL VAUPÉS ======================= */
+const MB_ESPERA="Estabiliza primero (vía aérea, respiración, circulación, glucometría); consulta por telemedicina el mismo día y deja escrita la orden médica; registra la hora de cada gestión (referencia, telemedicina, transporte); vigila signos vitales y de alarma con la frecuencia indicada y anótalos; acta de contingencia si no hay transporte; explica a la familia qué vigilar y cómo avisarte.";
+const MB=[
+ {id:"grave",g:"Urgencias",t:"Paciente en mal estado (primer abordaje)",cu:"Llega decaído, con dificultad para respirar, frío, pálido, confundido, que no responde o con sangrado.",
+  pr:"Signos vitales completos, saturación, glucometría, llenado capilar, estado de conciencia (AVDI).",
+  en:"Abordaje ABCDE: vía aérea, respiración (oxígeno si hay), circulación (control de sangrado, acceso venoso y cristaloides si hay choque), déficit neurológico y glucemia, exposición y temperatura. Telemedicina de inmediato.",
+  es:"Reevaluar ABCDE cada 15 a 30 minutos y después de cada intervención. Anotar todo con hora.",
+  al:"Choque (frialdad, llenado capilar lento, pulso débil, hipotensión), saturación baja, alteración de la conciencia, convulsiones, sangrado que no para.",
+  no:"Según el evento que se confirme.",fu:"Surviving Sepsis Campaign: adultos 2021 y niños 2020; OMS/OPS, atención de emergencias básicas (Basic Emergency Care, BEC)."},
+ {id:"anafilaxia",g:"Urgencias",t:"Anafilaxia",cu:"Minutos u horas después de una picadura, medicamento o alimento: ronchas, hinchazón de labios o lengua, dificultad para respirar, sibilancias, desmayo o vómito.",
+  pr:"Signos vitales, saturación.",
+  en:"Adrenalina intramuscular en la cara externa del muslo: 0,01 mg/kg de la solución 1 mg/ml, máximo 0,5 mg en adultos y 0,3 mg en niños; se puede repetir a los 5 a 15 minutos. Acostar con piernas elevadas (sentado si le falta el aire), oxígeno, líquidos si hay hipotensión. Telemedicina.",
+  es:"Observar al menos 6 a 12 horas por riesgo de reacción tardía; remitir si necesitó más de una dosis.",
+  al:"Estridor, voz ronca, hipotensión, alteración de la conciencia.",
+  no:"Si fue por un medicamento o vacuna: reportar a farmacovigilancia o como evento adverso posvacunal.",fu:"World Allergy Organization, guía de anafilaxia 2020."},
+ {id:"convulsion",g:"Urgencias",t:"Convulsión",cu:"Movimientos involuntarios con pérdida de la conciencia.",
+  pr:"Glucometría, temperatura, gota gruesa si hay fiebre (malaria grave).",
+  en:"Proteger de golpes, de lado, nada en la boca, oxígeno si hay. Corregir hipoglicemia. Si dura más de 5 minutos: benzodiacepina por orden médica (telemedicina). En gestante: pensar en eclampsia.",
+  es:"Vigilancia neurológica y de signos vitales cada 15 minutos hasta que despierte; luego cada hora.",
+  al:"Convulsión de más de 5 minutos o repetida, no recupera la conciencia, fiebre con rigidez de nuca, gestante o puérpera.",
+  no:"Si es malaria grave: SIVIGILA 465.",fu:"OMS, Basic Emergency Care; OMS, guías de malaria (noviembre de 2024) para malaria grave."},
+ {id:"hpp",g:"Urgencias",t:"Hemorragia posparto",cu:"Sangrado vaginal abundante después del parto; útero blando; mareo, palidez, pulso rápido.",
+  pr:"Estimar la pérdida de sangre (paños o bolsa colectora), pulso, presión, índice de choque.",
+  en:"Pedir ayuda, masaje uterino, oxitocina 10 UI IM o IV, ácido tranexámico 1 g IV en los primeros 30 minutos a 3 horas, líquidos endovenosos, revisar desgarros y placenta, sonda vesical. Telemedicina y remisión inmediata.",
+  es:"Signos vitales cada 15 minutos, masaje uterino, mantener abrigada. Si el útero no se contrae: compresión bimanual mientras llega el transporte.",
+  al:"Pérdida mayor de 500 ml o cualquier sangrado con signos de choque.",
+  no:"Morbilidad materna extrema: SIVIGILA 549.",fu:"OMS/FIGO/ICM, guía consolidada de hemorragia posparto (2025); OMS, recomendaciones de evaluación de pérdida de sangre y paquete de tratamiento (2023)."},
+ {id:"preeclampsia",g:"Urgencias",t:"Trastorno hipertensivo del embarazo",cu:"Gestante desde la semana 20 o puérpera con presión alta, dolor de cabeza intenso, visión borrosa, dolor en la boca del estómago, hinchazón o convulsión.",
+  pr:"Presión arterial en dos tomas, proteinuria con tira si hay.",
+  en:"Si la presión es 160/110 o más o hay signos de severidad: sulfato de magnesio y antihipertensivo según protocolo y orden médica (telemedicina). Acostada del lado izquierdo, acceso venoso.",
+  es:"Es emergencia: remisión inmediata. Con sulfato de magnesio vigilar reflejos, respiración y orina cada hora.",
+  al:"Presión 160/110 o más, cefalea intensa, visión borrosa, epigastralgia, convulsión, sangrado, disminución de movimientos fetales.",
+  no:"Morbilidad materna extrema: SIVIGILA 549.",fu:"OMS, recomendaciones para prevención y tratamiento de preeclampsia y eclampsia; Minsalud, GPC de complicaciones del embarazo, parto o puerperio (2013)."},
+ {id:"malaria",g:"Fiebre",t:"Malaria",cu:"Fiebre actual o en los últimos días, escalofrío, sudoración, cefalea. En Vaupés toda fiebre se estudia para malaria; predomina P. vivax y Mitú está en brote en 2025.",
+  pr:"Gota gruesa o prueba rápida de diagnóstico antes de tratar. Hemoglobina si hay cómo.",
+  en:"Tratamiento según especie con el esquema nacional y por orden médica o protocolo de la ESE. En vivax, la primaquina evita recaídas: no se da en gestantes ni en menores de 6 meses. Tratamiento supervisado.",
+  es:"Malaria grave con remisión demorada: la OMS recomienda tratamiento previo a la referencia (artesunato intramuscular o rectal en niños) sin esperar el traslado, si la ESE lo tiene disponible y por orden médica.",
+  al:"Alteración de la conciencia, convulsiones, postración, dificultad respiratoria, ictericia, sangrado, orina oscura o muy poca, vómito que impide tomar el tratamiento, anemia grave; gestante o menor de 5 años con P. falciparum.",
+  no:"SIVIGILA 465.",fu:"OMS, Guidelines for malaria (noviembre de 2024); INS, informe de evento malaria PE VI 2025."},
+ {id:"dengue",g:"Fiebre",t:"Dengue",cu:"Fiebre de 2 a 7 días con dolor de cabeza, dolor detrás de los ojos, dolor muscular y de articulaciones, erupción.",
+  pr:"Gota gruesa para descartar malaria. Hemograma si hay acceso.",
+  en:"Hidratación oral, acetaminofén; no usar AINE ni aspirina. Con signos de alarma: cristaloides endovenosos y remisión.",
+  es:"Control diario hasta 48 horas después de que baje la fiebre: la fase crítica empieza cuando la fiebre cede.",
+  al:"Dolor abdominal intenso, vómito persistente, acumulación de líquidos, sangrado de mucosas, letargo, agrandamiento del hígado, choque.",
+  no:"SIVIGILA 210 y 220 (grave).",fu:"OPS, Directrices para el diagnóstico clínico y el tratamiento del dengue, el chikunguña y el zika (2022)."},
+ {id:"eda",g:"Niños",t:"Enfermedad diarreica aguda",cu:"Tres o más deposiciones blandas o líquidas en 24 horas.",
+  pr:"Estado de hidratación (ojos, lágrimas, sed, pliegue cutáneo, conciencia), peso.",
+  en:"Sales de rehidratación oral de baja osmolaridad según el grado de deshidratación, zinc, continuar lactancia y alimentación. No antibióticos de rutina ni antidiarreicos. Deshidratación grave: rehidratación endovenosa.",
+  es:"Rehidratación oral en el puesto con reevaluación cada hora. Si vomita todo o no mejora y no hay acceso venoso: sonda nasogástrica según protocolo, telemedicina y remisión.",
+  al:"No puede beber, vomita todo, letargo, convulsiones, deshidratación grave, sangre en heces en menor de 2 meses, desnutrición.",
+  no:"Notificación colectiva semanal de EDA; muerte en menor de 5 años: inmediata.",fu:"Minsalud/IETS, GPC de enfermedad diarreica aguda en menores de 5 años (2013); OMS/UNICEF, tratamiento de la diarrea."},
+ {id:"ira",g:"Niños",t:"Neumonía e infección respiratoria",cu:"Tos o dificultad para respirar, con o sin fiebre.",
+  pr:"Frecuencia respiratoria en un minuto completo, tiraje subcostal, saturación.",
+  en:"Neumonía no grave: antibiótico oral por orden médica (amoxicilina es la primera opción en la guía). Bronquiolitis: soporte (lavados nasales, lactancia), sin broncodilatadores de rutina.",
+  es:"Neumonía no grave: control en 48 horas. Saturación baja sin oxígeno disponible: telemedicina y remisión urgente.",
+  al:"Saturación baja, tiraje, quejido, cianosis, no puede beber, convulsiones, menor de 2 meses con respiración rápida o fiebre.",
+  no:"Notificación colectiva semanal de IRA; muerte en menor de 5 años: inmediata.",fu:"Minsalud/IETS, GPC de neumonía y bronquiolitis en menores de 5 años (2014)."},
+ {id:"dnt",g:"Niños",t:"Desnutrición aguda en menores de 5 años",cu:"Bajo peso para la talla, perímetro braquial bajo, edema en ambos pies, poco apetito.",
+  pr:"Peso, talla, puntaje Z peso para la talla, perímetro braquial (6 a 59 meses), edema, prueba de apetito.",
+  en:"Sin complicaciones y con apetito: manejo en casa con fórmula terapéutica según el lineamiento, por orden médica. Con complicaciones: hospital.",
+  es:"Mientras se remite: prevenir hipoglicemia (alimentar cada 2 a 3 horas) e hipotermia (abrigar), no dar líquidos endovenosos rápidos salvo choque.",
+  al:"Prueba de apetito negativa, edema, signos de peligro, deshidratación, hipotermia, hipoglicemia, infección.",
+  no:"SIVIGILA 113.",fu:"Minsalud, Resolución 2350 de 2020 (lineamiento de desnutrición aguda); OMS, manejo de la desnutrición aguda grave."},
+ {id:"ofidico",g:"Urgencias",t:"Accidente ofídico",cu:"Mordedura de serpiente con dolor, hinchazón o sangrado.",
+  pr:"Prueba de coagulación en tubo seco a los 20 minutos; medir el perímetro del miembro cada hora.",
+  en:"Inmovilizar, retirar anillos, sin torniquete, sin cortar, sin succionar, sin hielo. Líquidos endovenosos si hay acceso. El antiveneno es el único tratamiento específico: se aplica por orden médica (telemedicina) si está en el puesto.",
+  es:"Remisión inmediata. Mientras tanto, signos vitales, edema, sangrado y orina cada hora.",
+  al:"Sangrado, tubo seco que no coagula, edema que avanza, poca orina, hipotensión, párpados caídos o dificultad para respirar.",
+  no:"SIVIGILA 100.",fu:"OPS/PANAFTOSA, Diagnóstico y tratamiento del envenenamiento por serpientes en América Latina y el Caribe (2025); OMS, guía de manejo de mordeduras de serpiente."},
+ {id:"rabia",g:"Urgencias",t:"Agresión por animal (perro, gato, murciélago)",cu:"Mordedura, arañazo o lamedura en piel lesionada o mucosa. El murciélago hematófago es exposición grave.",
+  pr:"Clasificar la exposición (no exposición, leve, grave).",
+  en:"Lavar con agua y jabón abundantes durante 15 minutos y antiséptico. Evitar suturar. Remitir para vacuna y, si es grave, suero antirrábico.",
+  es:"La profilaxis es urgente: telemedicina el mismo día. Observar al perro o gato 10 días si es posible.",
+  al:"Exposición grave: cabeza, cara, cuello, manos, genitales, heridas múltiples o profundas, murciélago.",
+  no:"SIVIGILA 300.",fu:"Minsalud/INS, guía práctica para la atención integral de personas agredidas por animal potencialmente transmisor de rabia; OMS, documento de posición sobre vacunas antirrábicas (2018)."},
+ {id:"leish",g:"Fiebre",t:"Leishmaniasis cutánea",cu:"Úlcera indolora, redonda, de bordes elevados, de más de 2 semanas, en persona que entra al monte.",
+  pr:"Frotis directo de la lesión si hay quién lo lea.",
+  en:"Curación limpia y remisión para confirmar. El tratamiento lo indica medicina; la guía incluye opciones locales (intralesional) en casos seleccionados.",
+  es:"No es urgencia vital, pero no dejar sin confirmar.",
+  al:"Lesión en nariz o boca, lesiones múltiples o grandes, gestante, niño pequeño.",
+  no:"SIVIGILA 420.",fu:"OPS, Directrices para el tratamiento de las leishmaniasis en la Región de las Américas, 2.ª edición (2022)."},
+ {id:"tb",g:"Fiebre",t:"Tuberculosis (sintomático respiratorio)",cu:"Tos de más de 15 días, fiebre, sudoración nocturna, pérdida de peso.",
+  pr:"Baciloscopia o prueba molecular según disponibilidad; prueba de VIH con asesoría.",
+  en:"Toma de muestras, estudio de contactos, tratamiento estrictamente supervisado cuando se indique.",
+  es:"Tapabocas, ventilación, aislamiento respiratorio en casa mientras llega el resultado.",
+  al:"Tos con sangre, dificultad respiratoria, desnutrición grave, niño con contacto.",
+  no:"SIVIGILA 813.",fu:"Minsalud, Resolución 227 de 2020 (programa de tuberculosis); OMS, guías consolidadas de tuberculosis."},
+ {id:"sifilis",g:"Fiebre",t:"Sífilis en gestante",cu:"Prueba treponémica rápida reactiva en una gestante.",
+  pr:"Prueba treponémica rápida.",
+  en:"Penicilina benzatínica 2.400.000 UI intramuscular en ese momento, sin esperar la confirmación, y tratar a la pareja; completar esquema y seguimiento.",
+  es:"No esperar la remisión para la primera dosis.",
+  al:"Antecedente de alergia a la penicilina: telemedicina antes de aplicar.",
+  no:"SIVIGILA 750 (gestacional) y 740 (congénita).",fu:"Minsalud, GPC de sífilis gestacional y congénita; OMS, guías de tratamiento de sífilis (2016)."},
+ {id:"piel",g:"Comunes",t:"Piel: escabiosis, impétigo y micosis",cu:"Picazón nocturna con lesiones entre dedos y pliegues (escabiosis), costras amarillas (impétigo), placas que descaman (tiña).",
+  pr:"Revisar la piel de toda la familia.",
+  en:"Tratamiento por orden médica; en escabiosis tratar a todos los convivientes a la vez y lavar ropa y hamacas.",
+  es:"Control en 7 a 14 días.",
+  al:"Fiebre con celulitis extensa, lesiones que crecen rápido.",
+  no:"Brotes de escabiosis: notificación colectiva según la ESE.",fu:"OMS, guía de enfermedades de la piel desatendidas (Skin NTDs) y lista de medicamentos esenciales."}
+];
+function mbHomeHTML(){return `<section class="route"><div class="route-head"><h2>Morbilidad</h2><span>Lo más frecuente en la zona rural del Vaupés</span></div><div class="tiles"><button class="tile pc" type="button" id="t-mb"><b>Morbilidad frecuente</b><small>Sospecha, prueba en el puesto, qué hacer mientras llega la remisión</small></button><button class="tile pc" type="button" data-vn="morb"><b>Nota de morbilidad por voz</b><small>Consulta por enfermedad, pregunta por pregunta</small></button></div></section>`}
+function mbWire(){const b=$("t-mb");if(b)b.onclick=mbOpen}
+function mbOpen(){stopRec();st.view="mb";
+  const grupos=[...new Set(MB.map(x=>x.g))];
+  $("app").innerHTML=`<div class="top"><button class="back" type="button" id="mb-back">← Inicio</button><span class="tag pc">Morbilidad</span></div>
+  <header><h1>Morbilidad frecuente</h1><p class="sub">Zona rural del Vaupés. Para cada condición: cuándo sospecharla, qué prueba hacer en el puesto, qué hace enfermería, qué hacer si la remisión tarda días, signos de alarma y notificación.</p></header>
+  <div class="box warn"><h3>Si la remisión tarda días</h3><p style="margin:0">${esc(MB_ESPERA)}</p></div>
+  <input id="mb-q" placeholder="Buscar: fiebre, diarrea, serpiente, úlcera…" autocomplete="off">
+  <div id="mb-list"></div>
+  <div class="btns"><button class="btn primary" type="button" data-vn="morb">Hacer nota de morbilidad por voz</button></div>
+  <p class="foot">Basado en guías de práctica clínica vigentes (OMS, OPS y Ministerio de Salud), no en la Resolución 3280, que es de promoción y mantenimiento. Los medicamentos se dan por orden médica o protocolo de la ESE; solo se muestran las dosis de urgencia que fijan las guías.</p>`;
+  const pinta=()=>{const q=plano($("mb-q").value);const L=MB.filter(x=>!q||plano([x.t,x.cu,x.g].join(" ")).includes(q));
+    $("mb-list").innerHTML=grupos.map(g=>{const xs=L.filter(x=>x.g===g);return xs.length?`<p class="lab" style="margin:10px 0 6px">${esc(g)}</p>${xs.map(x=>`<details class="sec mb"><summary>${esc(x.t)}${/^SIVIGILA/.test(x.no)?`<span class="cnt">${esc(x.no.split(",")[0].split(".")[0].split(" (")[0])}</span>`:""}</summary><dl class="mb-dl">
+      <dt>Cuándo sospechar</dt><dd>${esc(x.cu)}</dd><dt>Prueba en el puesto</dt><dd>${esc(x.pr)}</dd><dt>Qué hace enfermería</dt><dd>${esc(x.en)}</dd>
+      <dt>Mientras llega la remisión</dt><dd>${esc(x.es)}</dd><dt class="mb-al">Signos de alarma: remitir urgente</dt><dd>${esc(x.al)}</dd><dt>Notificación</dt><dd>${esc(x.no)}</dd><dt>Fuente</dt><dd class="qt-c">${esc(x.fu)}</dd></dl>
+      <div class="btns" style="padding:0 14px 14px"><button class="btn" type="button" data-vnm="${x.id}">Nota de morbilidad para ${esc(x.t.toLowerCase())}</button></div></details>`).join("")}`:""}).join("")||`<p class="note-src">No encontré esa condición.</p>`;
+    document.querySelectorAll("[data-vnm]").forEach(b=>b.onclick=()=>{const d=vnDraft("morb");d.cond=MB.find(z=>z.id===b.dataset.vnm).t.toUpperCase();S.set("dn2_vn_morb",JSON.stringify(d));vnOpen("morb")})};
+  $("mb-q").oninput=pinta;pinta();
+  document.querySelectorAll("#app > .btns [data-vn]").forEach(b=>b.onclick=()=>vnOpen(b.dataset.vn));
+  $("mb-back").onclick=()=>{home();window.scrollTo(0,0)};window.scrollTo(0,0)}
+VN.morb={g:"Morbilidad",t:"Consulta de morbilidad",who:"Enfermedad general, pregunta por pregunta",qs:[
+  {k:"cond",q:"¿Qué sospechas?",o:MB.map(x=>x.t.toUpperCase()).concat(["OTRA"])},
+  {k:"motivo",q:"Motivo de consulta en palabras del paciente o el acompañante"},
+  {k:"evol",q:"Tiempo de evolución",h:"Ej.: «tres días»."},
+  {k:"sint",q:"Síntomas y cómo han evolucionado"},
+  {k:"antp",q:"Antecedentes importantes, alergias y medicamentos",def:"NIEGA",o:["NIEGA"]},
+  {k:"trad",q:"¿Recibió tratamiento tradicional o de otro lugar?",def:"NO",o:["NO","SI, CURACION CON PAYE","SI, PLANTAS MEDICINALES"]},
+  Q.sv,{k:"ef",q:"Examen físico: hallazgos positivos",def:"NORMAL",o:["NORMAL"]},
+  {k:"prueba",q:"Prueba en el puesto y resultado",def:"NO SE REALIZA",o:["GOTA GRUESA NEGATIVA","GOTA GRUESA POSITIVA P. VIVAX","GOTA GRUESA POSITIVA P. FALCIPARUM","NO SE REALIZA"]},
+  {k:"dx",q:"Impresión diagnóstica"},
+  {k:"alarma",q:"¿Hay signos de alarma?",def:"NO",o:["NO","SI"]},
+  {k:"tele",q:"Telemedicina",def:"NO REQUERIDA",o:["NO REQUERIDA","SE REALIZA, CON ORDEN MEDICA","SOLICITADA, EN ESPERA DE RESPUESTA"]},
+  {k:"conducta",q:"Conducta y tratamiento indicado",h:"Lo que se hizo o administró y por indicación de quién."},
+  {k:"remision",q:"Remisión",def:"NO REQUIERE",o:["NO REQUIERE","SE GESTIONA REMISION, EN ESPERA DE TRANSPORTE","REMISION URGENTE EFECTIVA"]},
+  {k:"notif",q:"Notificación SIVIGILA",def:"NO APLICA",o:["NO APLICA","SE NOTIFICA EVENTO","NOTIFICACION COLECTIVA SEMANAL"]},
+  {k:"control",q:"Próximo control o vigilancia",def:"24 HORAS",o:["24 HORAS","48 HORAS","DIARIO HASTA COMPLETAR TRATAMIENTO","EN 7 DIAS"]},Q.extra],
+  b:(v,P,I)=>{const m=MB.find(x=>x.t.toUpperCase()===VN_U(v.cond));return vnL([`MOTIVO DE CONSULTA: ${VN_U(v.motivo)}`,`ENFERMEDAD ACTUAL: PACIENTE DE ${I.edad} AÑOS, PROCEDENTE DE ${I.com}, ETNIA ${I.etnia}, CON CUADRO DE ${VN_U(v.evol)} DE EVOLUCION CONSISTENTE EN ${VN_U(v.sint)}.`,`ANTECEDENTES, ALERGIAS Y MEDICAMENTOS: ${VN_U(v.antp)}. TRATAMIENTO TRADICIONAL O PREVIO: ${VN_U(v.trad)}.`,vnSV(v),"","EXAMEN FISICO:",vnEF(v,vnEdadA(v,P)<12),"",`PRUEBA EN EL PUESTO: ${VN_U(v.prueba)}.`,`IMPRESION DIAGNOSTICA: ${VN_U(v.dx||v.cond)}.`,VN_U(v.alarma)==="SI"?`PRESENTA SIGNOS DE ALARMA${m?": SE VIGILA "+VN_U(m.al):""}.`:`SIN SIGNOS DE ALARMA EN EL MOMENTO.`,"","PLAN:",`TELEMEDICINA: ${VN_U(v.tele)}.`,`CONDUCTA: ${VN_U(v.conducta)}.`,`REMISION: ${VN_U(v.remision)}.`,/ESPERA/.test(VN_U(v.remision))?"MIENTRAS SE CONCRETA LA REMISION SE DEJA VIGILANCIA DE SIGNOS VITALES Y SIGNOS DE ALARMA, SE REGISTRAN HORAS DE GESTION DE REFERENCIA Y TELEMEDICINA.":"",`NOTIFICACION: ${VN_U(v.notif)}${m&&/NOTIFICA/.test(VN_U(v.notif))?" ("+VN_U(m.no)+")":""}.`,"SE EDUCA AL PACIENTE Y LA FAMILIA EN SIGNOS DE ALARMA PARA CONSULTAR DE INMEDIATO.",`CONTROL: ${VN_U(v.control)}.`,vnEsNormal(v.extra)?"":VN_U(v.extra)])}};
+
 /* ---------- MI DÍA: secretaria diaria del contrato 1785 ---------- */
 const MD_PLAN={
  1:{am:"Primera infancia e infancia (0–11)",amd:"Valoración integral C y D, agudeza visual, educación PAI y lactancia",mods:["pinf","inf"],pm:"SIVIGILA de la semana epidemiológica",pmd:"Notificación semanal y revisión de nacidos vivos y defunciones",pmr:"act. 12 · 13"},
@@ -1502,7 +1645,7 @@ function wireMiDia(){const cb=$("md-cal");if(cb)cb.onclick=calOpen;
 function mdShow(t){const s=$("md-st");s.innerHTML="";const a=document.createElement("textarea");a.value=t;a.rows=7;a.readOnly=true;s.append("No se pudo copiar solo. Mantén presionado el texto y cópialo:",a);a.focus();a.select()}
 
 /* ---------- PANEL ---------- */
-const VERSION_APP="2026-10-18 v154";
+const VERSION_APP="2026-10-18 v155";
 function home(){
   stopRec();st.view="home";
   const rm=["precon","prenatal","parto","rn","ive"],rp=["pinf","inf","adol","juv","adul","vej"];
@@ -1543,6 +1686,7 @@ function home(){
     <div class="sugg" id="sugg"><p>Escribe la edad para ver qué le corresponde.</p></div>
   </section>
   ${drafts.length?`<section><p class="lab">Borradores guardados</p><div class="drafts">${drafts.map(d=>`<button data-mod="${d}"><span>${esc(M[d].title)}</span><span>Continuar →</span></button>`).join("")}</div></section>`:""}
+  ${mbHomeHTML()}
   ${vnHomeHTML()}
   ${agendaHTML()}
   <section class="route"><div class="route-head"><h2>Pacientes</h2><span>${Object.keys(pacientes()).length} registrados</span></div><div class="tiles"><button class="tile pc" id="t-pacs"><b>Ver pacientes</b><small>Historial, próximos controles y pendientes de cada persona</small></button><button class="tile pc" id="t-vbase"><b>Ver base de datos</b><small>${registrosTodos().length} registros guardados en el celular, como la hoja de Google</small></button></div></section>
@@ -1552,7 +1696,7 @@ function home(){
   <section class="route"><div class="route-head"><h2>Base de datos</h2><span>Google Sheets</span></div><div class="tiles"><button class="tile pc" id="t-base"><b>Pendientes y conexión</b><small id="bq">${cola().length?cola().length+" pendientes":(conf().url?"al día":"sin conectar")}</small></button></div></section>
   <p class="foot" id="verlbl">Versión ${VERSION_APP}</p>
   <p class="foot">Contenido según la Resolución 3280 de 2018, con IVE actualizada a la Sentencia C-055 de 2022 y la Resolución 051 de 2023. Las semanas de vacunas se confirman con el lineamiento PAI vigente. Lo que dictas queda solo en este celular hasta que lo borres. Organizar la nota necesita internet.</p>`;
-  document.querySelectorAll("[data-mod]").forEach(b=>b.onclick=()=>openMod(b.dataset.mod));wireMiDia();vnWireHome();
+  document.querySelectorAll("[data-mod]").forEach(b=>b.onclick=()=>openMod(b.dataset.mod));wireMiDia();vnWireHome();mbWire();
   $("t-base").onclick=()=>{baseEdit=null;base({});window.scrollTo(0,0)};$("t-pacs").onclick=verPacientes;$("t-vbase").onclick=verBase;
   document.querySelectorAll("[data-ag]").forEach(b=>b.onclick=()=>{if(b.dataset.armed!=="1"){b.dataset.armed="1";b.textContent="¿Seguro? Toca otra vez";return}setAgenda(agenda().map(x=>x.id===b.dataset.ag?Object.assign(x,{ok:hoy()}):x));home()});
   ["f-edad","f-uni","f-sexo","f-est"].forEach(i=>$(i).addEventListener("input",sugerir));
