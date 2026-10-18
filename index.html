@@ -1502,7 +1502,7 @@ function wireMiDia(){const cb=$("md-cal");if(cb)cb.onclick=calOpen;
 function mdShow(t){const s=$("md-st");s.innerHTML="";const a=document.createElement("textarea");a.value=t;a.rows=7;a.readOnly=true;s.append("No se pudo copiar solo. Mantén presionado el texto y cópialo:",a);a.focus();a.select()}
 
 /* ---------- PANEL ---------- */
-const VERSION_APP="2026-10-18 v153";
+const VERSION_APP="2026-10-18 v154";
 function home(){
   stopRec();st.view="home";
   const rm=["precon","prenatal","parto","rn","ive"],rp=["pinf","inf","adol","juv","adul","vej"];
@@ -1635,11 +1635,9 @@ function qtLista(a,sx,es){const f=sx==="f",m=Math.round(a*12),y=Math.floor(a),V=
   if(f&&a>=50&&a<=69)s(R,"Mamografía","Cada 2 años de los 50 a los 69.",QC.mam);
   if(a>=50&&a<=75)s(R,"Sangre oculta en materia fecal","Cada 2 años, de los 50 a los 75 años.",QC.col);
   if(!f&&a>=50&&a<=75)s(R,"Tamizaje de cáncer de próstata","PSA y tacto rectal cada 5 años de los 50 a los 75; el tacto lo hace medicina general entrenada.",QC.pro);
-  /* Agudeza visual */
+  /* Agudeza visual: excepción territorial de la ESE (enfermería la realiza como atención propia) */
   const avc=[0,QC.av1,QC.av2,QC.av3,QC.av4,QC.av5,QC.av6][cv];
-  if(cv===1)N.push({t:"Agudeza visual",n:"Desde los 3 años, pero en primera infancia la debe hacer medicina general entrenada u optometría, no enfermería.",c:avc});
-  else if(cv<=4)N.push({t:"Agudeza visual",n:"No es una atención aparte: va dentro de la valoración integral."+(cv===4?" Si está por debajo de 20/50, derivar a optometría.":" Si hay alteración, derivar a optometría u oftalmología."),c:avc,vn:"av"});
-  else N.push({t:"Agudeza visual",n:"Va dentro de la valoración integral, que en este curso de vida hace medicina. Por debajo de 20/50 se deriva a optometría.",c:avc});
+  if(a>=3)s(S,"Tamizaje de agudeza visual (excepción territorial)","Por las condiciones del territorio, la ESE asigna este tamizaje a enfermería y se puede hacer solo."+(a>=18?" Por debajo de 20/50, derivar a optometría.":" Si hay alteración, derivar a optometría u oftalmología.")+" En la norma general va dentro de la valoración integral"+(cv===1?" y en primera infancia la asigna a medicina u optometría":"")+": conserva la directriz escrita de la ESE como soporte.",QC.ada+" · "+avc,{vn:"av"});
   if(es==="sr")N.push({t:"Sintomático respiratorio",n:"La búsqueda de tuberculosis no está en la 3280: se hace según el programa nacional de tuberculosis y los lineamientos de la ESE.",c:"Fuera de la Res. 3280",vn:"tbc"});
   return{CV,V,S,R,N}}
 function qtHTML(a,sx,es){const {CV,V,S,R,N}=qtLista(a,sx,es);
