@@ -1927,7 +1927,7 @@ function wireMiDia(){const cb=$("md-cal");if(cb)cb.onclick=calOpen;
 function mdShow(t){const s=$("md-st");s.innerHTML="";const a=document.createElement("textarea");a.value=t;a.rows=7;a.readOnly=true;s.append("No se pudo copiar solo. Mantén presionado el texto y cópialo:",a);a.focus();a.select()}
 
 /* ---------- PANEL ---------- */
-const VERSION_APP="2026-10-18 v159";
+const VERSION_APP="2026-10-18 v160";
 function home(){
   stopRec();if(S.get(AT_KEY))atReiniciar();st.view="home";
   const rm=["precon","prenatal","parto","rn","ive"],rp=["pinf","inf","adol","juv","adul","vej"];
@@ -6615,6 +6615,72 @@ function vnIdForm(){stopRec();if(VNS)VNS.voz=false;const P=pac(),tipos=(ALLF.fin
     const fnM=o["FECHA NACIMIENTO"]&&o["FECHA NACIMIENTO"]>hoy()?["La fecha de nacimiento queda en el futuro"]:[];
     setPac(o);const f=idMinFalta().concat(fnM);if(f.length){const mb=$("vi-miss");mb.hidden=false;mb.querySelector("ul").innerHTML=f.map(x=>`<li>${esc(x)}</li>`).join("");return}
     atInicio("vn",VNS.id);vnRender()}}
+
+/* ======================= INICIO POR BLOQUES =======================
+   El inicio se organiza en cajones que se despliegan al tocarlos. Solo uno abierto a la vez;
+   la app recuerda cuál dejaste abierto. Arriba quedan siempre «¿A quién vas a atender?»
+   y los borradores. Los apartados se mueven tal cual, con sus botones funcionando. */
+(function(){
+ const IC={
+  dia:'<svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 10h18M8 3v4M16 3v4M8 14h3"/></svg>',
+  pym:'<svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21s-7-4.4-7-10a4 4 0 0 1 7-2.6A4 4 0 0 1 19 11c0 5.6-7 10-7 10z"/><path d="M9 12h2l1-2 1 4 1-2h1"/></svg>',
+  morb:'<svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 4v10.5a4 4 0 1 1-4 0V4a2 2 0 0 1 4 0z"/><path d="M12 9v7"/></svg>',
+  voz:'<svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="3" width="6" height="11" rx="3"/><path d="M5 11a7 7 0 0 0 14 0M12 18v3"/></svg>',
+  proc:'<svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 2l4 4M17 7l-9 9-3 1 1-3 9-9M14 4l6 6M3 21l3-3"/></svg>',
+  datos:'<svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><ellipse cx="12" cy="5" rx="8" ry="3"/><path d="M4 5v14c0 1.7 3.6 3 8 3s8-1.3 8-3V5M4 12c0 1.7 3.6 3 8 3s8-1.3 8-3"/></svg>'};
+ const CSS=`.bloques{display:flex;flex-direction:column;gap:10px}
+ .blq{background:var(--surface);border:1.5px solid var(--line);border-radius:14px;overflow:hidden}
+ .blq>summary{list-style:none;cursor:pointer;display:flex;align-items:center;gap:12px;padding:14px 16px;min-height:72px}
+ .blq>summary::-webkit-details-marker{display:none}
+ .blq .bq-ic{flex:none;width:44px;height:44px;border-radius:12px;display:grid;place-items:center;background:var(--accent-soft);color:var(--accent)}
+ .blq.rose .bq-ic{background:var(--rose-soft);color:var(--rose)}.blq.sky .bq-ic{background:var(--sky-soft);color:var(--sky)}.blq.amber .bq-ic{background:var(--warn-bg);color:var(--warn)}
+ .blq .bq-t{flex:1;min-width:0}.blq .bq-t b{display:block;font-family:var(--f-display);font-weight:800;font-size:1.08rem;line-height:1.2}
+ .blq .bq-t small{display:block;color:var(--muted);font-size:.84rem;line-height:1.3;margin-top:2px}
+ .blq .bq-n{font-family:var(--f-data);font-size:.76rem;color:var(--muted);white-space:nowrap}
+ .blq .bq-n.alerta{color:var(--miss);font-weight:700}
+ .blq .bq-ch{flex:none;color:var(--muted);transition:transform .15s}.blq[open] .bq-ch{transform:rotate(90deg)}
+ .blq[open]>summary{border-bottom:1px solid var(--line)}
+ .blq .bq-body{padding:14px;display:flex;flex-direction:column;gap:20px}
+ .blq .bq-body>section.midia{margin:0}`;
+ const CH='<svg class="bq-ch" viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6l6 6-6 6"/></svg>';
+ const porH2=t=>[...document.querySelectorAll("#app section.route")].find(s=>{const h=s.querySelector(":scope>.route-head>h2");return h&&h.textContent.trim()===t})||null;
+ const secDe=sel=>{const e=document.querySelector(sel);return e?e.closest("section"):null};
+ const grupo=(titulo,sub,botones)=>{const s=document.createElement("section");s.className="route";s.innerHTML=`<div class="route-head"><h2>${esc(titulo)}</h2>${sub?`<span>${esc(sub)}</span>`:""}</div><div class="tiles"></div>`;botones.forEach(b=>s.querySelector(".tiles").append(b));return s};
+ const btnVN=id=>{const b=document.createElement("button");b.type="button";b.className="tile pc";b.innerHTML=`${Object.keys(vnDraft(id)).length?'<span class="dot" title="Borrador guardado"></span>':""}<b>${esc(VN[id].t)}</b><small>${esc(VN[id].who)}</small>`;b.onclick=()=>vnOpen(id);return b};
+ function organizar(){const app=$("app");if(!app||st.view!=="home"||app.querySelector(".bloques"))return;
+  if(!document.getElementById("blq-css")){const s=document.createElement("style");s.id="blq-css";s.textContent=CSS;document.head.append(s)}
+  const ag=agenda().filter(x=>!x.ok),venc=ag.filter(x=>x.prox&&x.prox<=hoy()).length,pend=cola().length;
+  const cap=$("t-cap");let capSec=null;if(cap){capSec=grupo("Búsqueda activa","Controles y pendientes por comunidad",[cap])}
+  const procVN=Object.keys(VN).filter(id=>["Procedimientos","Planificación","Consejerías"].includes(VN[id].g));
+  const B=[
+   {k:"dia",c:"amber",t:"Mi día y organización",s:"Plan del día, tareas, soportes, calendario, próximos controles y a quién buscar",n:venc?venc+" para hoy o vencidos":"",al:!!venc,
+    el:[app.querySelector("section.midia"),$("agenda"),capSec]},
+   {k:"pym",c:"rose",t:"PyM · Resolución 3280",s:"Atención materno perinatal y cursos de vida, de la primera infancia a la vejez",n:"",
+    el:[porH2("Ruta materno perinatal"),porH2("Promoción y mantenimiento")]},
+   {k:"morb",c:"sky",t:"Morbilidad",s:"Enfermedades frecuentes del Vaupés, empezar por el síntoma y nota de morbilidad",n:"",
+    el:[secDe("#t-mb")]},
+   {k:"voz",c:"",t:"Notas por voz",s:"Tus plantillas, pregunta por pregunta: citología, mama, C y D, adolescencia y más",n:"",
+    el:[$("vn-home")]},
+   {k:"proc",c:"",t:"Procedimientos y asesorías",s:"Implante, DIU, planificación, VIH y pruebas rápidas, lactancia",n:"",
+    el:[porH2("Procedimientos y consejerías"),procVN.length?grupo("Notas por voz","Planificación, procedimientos y consejerías",procVN.map(btnVN)):null]},
+   {k:"datos",c:"",t:"Pacientes, base de datos y sin internet",s:"Pacientes, registros, Excel, Google Sheets y plantillas del bloc de notas",n:pend?pend+" por enviar":"",al:!!pend,
+    el:[porH2("Pacientes"),porH2("Base de datos"),secDe("#t-plant")]}];
+  const cont=document.createElement("div");cont.className="bloques";cont.id="bloques";
+  const abierto=S.get("dn2_blq")||"";
+  B.forEach(b=>{const els=b.el.filter(Boolean);if(!els.length)return;
+   const d=document.createElement("details");d.className="blq "+b.c;d.dataset.blq=b.k;if(abierto===b.k)d.open=true;
+   d.innerHTML=`<summary><span class="bq-ic">${IC[b.k]}</span><span class="bq-t"><b>${esc(b.t)}</b><small>${esc(b.s)}</small></span>${b.n?`<span class="bq-n${b.al?" alerta":""}">${esc(b.n)}</span>`:""}${CH}</summary><div class="bq-body"></div>`;
+   const body=d.querySelector(".bq-body");els.forEach(e=>body.append(e));
+   d.addEventListener("toggle",()=>{if(d.open){S.set("dn2_blq",b.k);cont.querySelectorAll("details.blq[open]").forEach(o=>{if(o!==d)o.open=false});setTimeout(()=>d.scrollIntoView({block:"start",behavior:"smooth"}),30)}else if(S.get("dn2_blq")===b.k&&!cont.querySelector("details.blq[open]"))S.del("dn2_blq")});
+   cont.append(d)});
+  /* después de «¿A quién vas a atender?» y de los borradores */
+  const fin=app.querySelector("section.finder");let ref=fin;
+  if(fin&&fin.nextElementSibling&&fin.nextElementSibling.querySelector(".drafts"))ref=fin.nextElementSibling;
+  if(ref)ref.after(cont);else app.prepend(cont);
+}
+ const _home=home;
+ home=function(){_home.apply(this,arguments);try{organizar()}catch(e){console.warn("bloques",e)}};
+})();
 
 /* ---------- arranque ---------- */
 /* los borradores guardados con la versión anterior de los módulos se reubican una sola vez */
