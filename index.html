@@ -1074,7 +1074,7 @@ const vnPid=(P,v)=>({edad:v._edad?VN_U(v._edad):P.edad,com:v._com?VN_U(v._com):P
 const Q={
  sv:{k:"sv",q:"Signos vitales y medidas",h:"Diga: tensión 110 70, frecuencia 72, respiración 18, temperatura 36.5, peso 58, talla 155. Di «normal» para omitir.",def:"NORMAL"},
  ef:{k:"ef",q:"Examen físico: ¿normal o algún hallazgo?",h:"Di «normal» para dejar el examen de la plantilla, o dicta solo lo anormal con el sistema.",def:"NORMAL",o:["NORMAL"]},
- gpcav:{k:"gpcav",t:"gpcav",q:"Paridad: gestaciones, partos, cesáreas, abortos y vivos",h:"Diga los cinco números en orden: «dos uno cero cero dos».",def:"G0 P0 C0 A0 V0"},
+ gpcav:{k:"gpcav",t:"gpcav",q:"Paridad: gestaciones, partos, cesáreas, abortos y vivos",h:"Dílo como quieras: «dos gestas, un parto, un aborto, un vivo, cero cesáreas», «G2 P1 C0 A1 V1» o los cinco números en orden. Lo que no digas queda en cero. «Nuligesta» si nunca ha estado embarazada.",o:["NULIGESTA"]},
  fur:{k:"fur",q:"Fecha de la última menstruación",h:"Diga la fecha, o «no recuerda», «menopausia», «amenorrea por método».",o:["NO RECUERDA","MENOPAUSIA","AMENORREA POR METODO"]},
  metodo:{k:"metodo",q:"Método de planificación actual",def:"NINGUNO",o:VN_METODOS},
  citoant:{k:"citoant",q:"Citología anterior: ¿cuándo?",h:"Diga la fecha o el año. «Niega» si nunca se la ha tomado.",def:"NIEGA",o:["NIEGA"]},
@@ -1201,7 +1201,7 @@ const VN={
    if(rp)der.push("DERIVACION A LA RUTA INTEGRAL DE ATENCION DE CANCER DE MAMA POR FACTOR DE RIESGO PERSONAL O HEREDOFAMILIAR (RES. 3280, 10.5).");
    const datos=vnL([`PACIENTE FEMENINA DE ${I.edad} AÑOS, ETNIA ${I.etnia}, PROCEDENTE DE ${I.com}, QUIEN ACUDE PARA EXAMEN CLINICO DE MAMA (ECM) DE TAMIZAJE PARA DETECCION TEMPRANA DE CANCER DE MAMA. ${sx?"REFIERE: "+U("sint")+".":"ASINTOMATICA: NIEGA MASAS, DOLOR, SECRECION POR PEZON O CAMBIOS EN PIEL O FORMA DE LAS MAMAS."}`,
     `ANTECEDENTES PERSONALES DE CANCER DE MAMA, BIOPSIAS O RADIOTERAPIA EN TORAX: ${U("antper")}. FAMILIARES DE CANCER DE MAMA U OVARIO (MADRE, HERMANA, HIJA): ${U("antfam")}.`,
-    `PARIDAD: ${U("gpcav")}. FUR: ${U("fur")||"___"}. METODO DE PLANIFICACION: ${U("metodo")}.`,
+    `PARIDAD: ${U("gpcav")||"___"}. FUR: ${U("fur")||"___"}. METODO DE PLANIFICACION: ${U("metodo")}.`,
     `ULTIMO ECM: ${U("ecmant")}. ULTIMA MAMOGRAFIA: ${U("mamoant")}.`,vnSV(v)]);
    const analisis=vnL(["ANALISIS:",
     !anorm?"USUARIA ASINTOMATICA, SIN FACTORES DE RIESGO PERSONALES NI HEREDOFAMILIARES IDENTIFICADOS, CON ECM NORMAL, EN EL MARCO DE LA RUTA DE PROMOCION Y MANTENIMIENTO DE LA SALUD (RES. 3280 DE 2018, NUMERAL 10).":"",
@@ -1368,9 +1368,19 @@ function vnPaso(){if(idMinFalta().length){vnIdForm();return}const _e=vnElig(VNS.
   if(!VNS.voz)setTimeout(()=>{const t=$("vn-txt");if(t&&window.matchMedia("(pointer:fine)").matches)t.focus()},50)}
 function vnIr(n){VNS.i=Math.max(0,n);vnGuardar();vnPaso()}
 function vnAceptar(q,val){VNS.v[q.k]=val;vnGuardar();$("vn-val").textContent=val;$("vn-msg").textContent="✓ Guardado";$("vn-msg").className="gx-msg ok";setTimeout(()=>{if(st.view==="vnota"&&!VNS.fin)vnIr(VNS.i+1)},550)}
+
+/* Paridad dictada en lenguaje natural o con letras: «dos gestas, un parto, un aborto, un vivo», «G2 P1 C0 A1 V1» */
+const VN_NUMW={cero:0,ninguno:0,ninguna:0,ningun:0,no:0,un:1,uno:1,una:1,dos:2,tres:3,cuatro:4,cinco:5,seis:6,siete:7,ocho:8,nueve:9,diez:10,once:11,doce:12};
+function vnGpcav(t){const p=plano(t).replace(/,/g," ");if(/nuligesta|nunca.*embaraz/.test(p))return"G0 P0 C0 A0 V0";
+  const o={};const le=p.match(/\b([gpcavme])\s*(\d{1,2})\b/g);if(le&&le.length>=3){le.forEach(x=>{const m=x.match(/([gpcavme])\s*(\d+)/);o[m[1]]=+m[2]})}
+  else{const w=p.split(/\s+/).filter(Boolean),num=x=>/^\d{1,2}$/.test(x)?+x:(x in VN_NUMW?VN_NUMW[x]:null);
+    const K=[["g",/^(gesta|gestas|gestacion|gestaciones|embarazo|embarazos)$/],["p",/^(parto|partos|vaginal|vaginales)$/],["c",/^(cesarea|cesareas)$/],["a",/^(aborto|abortos|perdida|perdidas)$/],["v",/^(vivo|vivos|viva|vivas|hijo|hijos)$/],["m",/^(muerto|muertos|mortinato|mortinatos|obito|obitos)$/],["e",/^(ectopico|ectopicos)$/]];
+    w.forEach((x,i)=>{const k=K.find(([,re])=>re.test(x));if(!k||o[k[0]]!=null)return;let n=i>0?num(w[i-1]):null;if(n==null&&i+1<w.length)n=num(w[i+1]);if(n!=null)o[k[0]]=n})}
+  if(Object.keys(o).length<2)return null;
+  return `G${o.g||0} P${o.p||0} C${o.c||0} A${o.a||0} V${o.v||0}`+(o.m!=null?` M${o.m}`:"")+(o.e?` E${o.e}`:"")}
 function vnParse(q,t){const p=plano(t).replace(/[.,]$/,"");
   if(q.o){const hit=q.o.find(o=>plano(o)===p)||q.o.find(o=>p.length>=3&&plano(o).startsWith(p))||(p.length>=4?q.o.find(o=>plano(o).includes(p)):null);if(hit)return hit}
-  if(q.t==="gpcav"){const n=vnNums(t);if(n.length>=5)return`G${n[0]} P${n[1]} C${n[2]} A${n[3]} V${n[4]}`;if(n.length===4)return`G${n[0]} P${n[1]} C${n[2]} A${n[3]}`;return{err:"Necesito los cinco números: gestaciones, partos, cesáreas, abortos y vivos."}}
+  if(q.t==="gpcav"){const g=vnGpcav(t);if(g)return g;const n=vnNums(t);if(n.length>=5)return`G${n[0]} P${n[1]} C${n[2]} A${n[3]} V${n[4]}`;if(n.length===4)return`G${n[0]} P${n[1]} C${n[2]} A${n[3]}`;return{err:"Necesito los cinco números: gestaciones, partos, cesáreas, abortos y vivos."}}
   if(q.t==="av"){const n=vnNums(t);if(n.length>=2)return`${n[0]}/${n[1]}`;if(/\d+\/\d+/.test(t))return t.match(/\d+\/\d+/)[0];return{err:"Diga la fracción, por ejemplo «veinte veinte»."}}
   if(q.t==="num"){const n=vnNums(t);if(n.length)return String(n[0]);return{err:"No entendí el número."}}
   return VN_U(t)}
@@ -1956,7 +1966,7 @@ function wireMiDia(){const cb=$("md-cal");if(cb)cb.onclick=calOpen;
 function mdShow(t){const s=$("md-st");s.innerHTML="";const a=document.createElement("textarea");a.value=t;a.rows=7;a.readOnly=true;s.append("No se pudo copiar solo. Mantén presionado el texto y cópialo:",a);a.focus();a.select()}
 
 /* ---------- PANEL ---------- */
-const VERSION_APP="2026-10-18 v169";
+const VERSION_APP="2026-10-18 v170";
 function home(){
   stopRec();if(S.get(AT_KEY))atReiniciar();st.view="home";
   const rm=["precon","prenatal","parto","rn","ive"],rp=["pinf","inf","adol","juv","adul","vej"];
@@ -6423,7 +6433,7 @@ Object.assign(VN,{
    const prox=al.length?"SEGUN CONDUCTA DE MEDICINA":eg!=null&&eg>=36?"CADA 15 DIAS POR MEDICINA HASTA LA SEMANA 40":"EN 1 MES ("+fMas(hoy(),30)+")"+(eg!=null&&eg>=31?"; LA SEMANA 36 LA ATIENDE MEDICINA":"");
    const datos=vnSec("",[`GESTANTE DE ${I.edad} AÑOS, ETNIA ${I.etnia}, PROCEDENTE DE ${I.com}, QUIEN ASISTE A ${ing?"PRIMERA CONSULTA PRENATAL (INGRESO)":"CONTROL PRENATAL DE SEGUIMIENTO"}.`,
     ing?`ANTES DE LA INSCRIPCION SE INFORMAN LAS OPCIONES FRENTE AL EMBARAZO Y EL DERECHO A LA IVE (SENTENCIA C-055 DE 2022): ${U("opc")}.`:"",
-    `PARIDAD: ${U("gpcav")}. FUR: ${U("fur")||"___"}. ECOGRAFIA: ${U("eco")}. EDAD GESTACIONAL: ${eg!=null?vnEGtxt(eg):"___"}${/POR FUR/.test(U("eg"))?" POR FUR":""}.${fpp?" FPP: "+fpp+".":""}`,
+    `PARIDAD: ${U("gpcav")||"___"}. FUR: ${U("fur")||"___"}. ECOGRAFIA: ${U("eco")}. EDAD GESTACIONAL: ${eg!=null?vnEGtxt(eg):"___"}${/POR FUR/.test(U("eg"))?" POR FUR":""}.${fpp?" FPP: "+fpp+".":""}`,
     `MOVIMIENTOS FETALES: ${U("mov")}. ${vnEsNormal(D("sint"))?"NIEGA "+VN_ALARMA_GEST+".":"REFIERE: "+U("sint")+"."}`,
     `ANTECEDENTES DE RIESGO: ${U("antr")}.${ing?"":" ADHERENCIA A MICRONUTRIENTES: "+U("adh")+"."}`,
     `TAMIZAJE DE VIOLENCIA: ${U("viol")}. PREGUNTAS DE RIESGO DE DEPRESION: ${U("depr")}. BARRERA DE IDIOMA O ACCESO: ${U("barr")}.`]);
@@ -6584,7 +6594,7 @@ Object.assign(VN,{
    if(x.tas&&(x.tas>=140||x.tad>=90)){al.push("TA "+x.tas+"/"+x.tad);ref.push("REMISION POR TRASTORNO HIPERTENSIVO")}
    if(/NO RESPIRA|DIFICULTAD/.test(U("rn"))){al.push("RECIEN NACIDO CON DIFICULTAD RESPIRATORIA");ref.push("REANIMACION NEONATAL Y REMISION INMEDIATA")}
    if(/NO ACEPTA/.test(U("trasl")))ref.push("SE DEJA CONSTANCIA DE LA NO ACEPTACION, SE EXPLICAN RIESGOS Y SIGNOS DE ALARMA Y SE ACUERDA SEGUIMIENTO");
-   const datos=vnSec("",[`MUJER DE ${I.edad} AÑOS, ETNIA ${I.etnia}, PROCEDENTE DE ${I.com}, ${U("gpcav")}, GESTACION ${/^\d/.test(U("eg"))?"DE ":""}${U("eg")}, CON PARTO VAGINAL A LAS ${U("hora")||"___"}, ${U("lugar")}.`,
+   const datos=vnSec("",[`MUJER DE ${I.edad} AÑOS, ETNIA ${I.etnia}, PROCEDENTE DE ${I.com}, ${U("gpcav")||"___"}, GESTACION ${/^\d/.test(U("eg"))?"DE ":""}${U("eg")}, CON PARTO VAGINAL A LAS ${U("hora")||"___"}, ${U("lugar")}.`,
     `PINZAMIENTO DEL CORDON: ${U("cordon")}. PLACENTA: ${U("plac")}. UTEROTONICO: ${U("uter")}. RECIEN NACIDO: ${U("rn")}.`]);
    const efx=vnSec("EXAMEN FISICO:",[vnSV({sv:D("sv")}),`${U("sang")}. PERINE: ${U("perine")}.`]);
    const ana=vnSec("ANALISIS:",[al.length?"SE IDENTIFICA: "+al.join("; ")+".":"PUERPERIO INMEDIATO SIN SIGNOS DE HEMORRAGIA NI DE ALARMA."]);
