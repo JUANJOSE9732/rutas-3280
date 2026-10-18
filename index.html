@@ -1329,7 +1329,7 @@ function vnHomeHTML(){const grupos={};Object.entries(VN).forEach(([id,t])=>{(gru
   ${Object.entries(grupos).map(([g,ids])=>`<p class="lab" style="margin:6px 0 0">${esc(g)}</p><div class="tiles">${ids.map(id=>`<button class="tile pc" type="button" data-vn="${id}">${Object.keys(vnDraft(id)).length?'<span class="dot" title="Borrador guardado"></span>':""}<b>${esc(VN[id].t)}</b><small>${esc(VN[id].who)}</small></button>`).join("")}</div>`).join("")}
   ${n?`<button class="lnk" type="button" id="vn-hist">Ver notas guardadas (${n})</button>`:""}</section>`}
 function vnWireHome(){document.querySelectorAll("[data-vn]").forEach(b=>b.onclick=()=>vnOpen(b.dataset.vn));const h=$("vn-hist");if(h)h.onclick=vnHist}
-function vnOpen(id){stopRec();const v=vnDraft(id);VNS={id,v,i:0,voz:false,tts:S.get("dn2_vn_tts")==="1",fin:false};
+function vnOpen(id){atInicio("vn",id);stopRec();const v=vnDraft(id);VNS={id,v,i:0,voz:false,tts:S.get("dn2_vn_tts")==="1",fin:false};
   const L=vnLista2();VNS.i=Math.max(0,L.findIndex(q=>v[q.k]==null));if(VNS.i<0||L.every(q=>v[q.k]!=null))VNS.i=0;vnRender();window.scrollTo(0,0)}
 function vnLista2(){const P=vnPac();return vnPreg(VNS.id).filter(q=>!q.c||q.c(VNS.v,P))}
 function vnDefault(q){const P=vnPac();return typeof q.def==="function"?q.def(VNS.v,P):q.def}
@@ -1340,9 +1340,9 @@ function vnRender(){st.view="vnota";const T=VN[VNS.id],P=vnPac();
   ${T.aviso&&!VNS.fin&&T.aviso(VNS.v,P)?`<div class="box miss"><h3>Revisa el paciente</h3><p style="margin:0">${esc(T.aviso(VNS.v,P))}</p></div>`:""}
   <div id="vn-pane"></div>
   <p class="foot">La nota sale en mayúsculas con el texto fijo de tu plantilla. El audio se transcribe con el reconocimiento de voz del navegador (servidores de Google); si el paciente habla, pídele permiso.</p>`;
-  $("vn-back").onclick=()=>{stopRec();window.speechSynthesis&&speechSynthesis.cancel();home();window.scrollTo(0,0)};
+  atSalida($("vn-back"),"← Inicio",()=>{stopRec();window.speechSynthesis&&speechSynthesis.cancel();home();window.scrollTo(0,0)});
   VNS.fin?vnFinal():vnPaso()}
-function vnPaso(){const _e=vnElig(VNS.id,VNS.v);if(_e.b){vnBloqueo(_e);return}const L=vnLista2();if(VNS.i>=L.length){VNS.fin=true;vnRender();return}
+function vnPaso(){if(idMinFalta().length){vnIdForm();return}const _e=vnElig(VNS.id,VNS.v);if(_e.b){vnBloqueo(_e);return}const L=vnLista2();if(VNS.i>=L.length){VNS.fin=true;vnRender();return}
   const q=L[VNS.i],d=vnDefault(q),val=VNS.v[q.k];
   $("vn-pane").innerHTML=`${_e.w.length?`<div class="box warn" style="margin-bottom:10px"><h3>Atención</h3>${_e.w.map(x=>`<p style="margin:0">${esc(x)}</p>`).join("")}</div>`:""}<div class="gx" style="margin:0">
    <div class="gx-top"><span class="note-src">Pregunta ${VNS.i+1} de ${L.length}</span><span class="gx-mic" id="vn-mic"></span></div>
@@ -1390,7 +1390,7 @@ function vnEscuchar(){const m=$("vn-mic");if(!SR){if(m)m.textContent="Este naveg
 function vnHablar(txt){const ss=window.speechSynthesis;if(!ss){if(VNS.voz)vnEscuchar();return}
   stopRec();try{ss.cancel();const u=new SpeechSynthesisUtterance(txt);u.lang="es-CO";u.rate=1.05;u.onend=()=>{if(VNS&&VNS.voz&&st.view==="vnota")vnEscuchar()};u.onerror=u.onend;ss.speak(u)}catch(e){if(VNS.voz)vnEscuchar()}}
 function vnTexto(){const P=vnPac(),v=VNS.v;return VN[VNS.id].b(v,P,vnPid(P,v)).replace(/\n{3,}/g,"\n\n").trim()}
-function vnFinal(){const _e=vnElig(VNS.id,VNS.v);if(_e.b){vnBloqueo(_e);return}const _r=_e.w.concat(vnRevisar(VNS.id,VNS.v));const L=vnLista2(),falt=L.filter(q=>VNS.v[q.k]==null&&!vnDefault(q)),txt=vnTexto(),av=VN[VNS.id].aviso?VN[VNS.id].aviso(VNS.v,vnPac()):"";
+function vnFinal(){if(idMinFalta().length){vnIdForm();return}const _e=vnElig(VNS.id,VNS.v);if(_e.b){vnBloqueo(_e);return}const _r=_e.w.concat(vnRevisar(VNS.id,VNS.v));const L=vnLista2(),falt=L.filter(q=>VNS.v[q.k]==null&&!vnDefault(q)),txt=vnTexto(),av=VN[VNS.id].aviso?VN[VNS.id].aviso(VNS.v,vnPac()):"";
   $("vn-pane").innerHTML=`${av?`<div class="box miss"><h3>Revisa el paciente</h3><p style="margin:0">${esc(av)}</p></div>`:""}${falt.length?`<div class="box miss"><h3>Faltan datos</h3><ul>${falt.map(q=>`<li><button class="lnk" type="button" data-vgo="${q.k}">${esc(q.q)}</button></li>`).join("")}</ul></div>`:""}
   ${_r.length?`<div class="box miss"><h3>Revisa la coherencia antes de copiar</h3><ul>${_r.map(x=>`<li>${esc(x)}</li>`).join("")}</ul></div>`:""}
   <div class="box warn"><h3>Revisa antes de copiar</h3><p style="margin:0">Las respuestas que no dictaste quedaron con el valor normal de la plantilla. Lee la nota completa y corrige lo que no aplique.</p></div>
@@ -1402,7 +1402,7 @@ function vnFinal(){const _e=vnElig(VNS.id,VNS.v);if(_e.b){vnBloqueo(_e);return}c
   $("vn-back2").onclick=()=>{VNS.fin=false;VNS.i=Math.max(0,vnLista2().length-1);vnRender()};
   $("vn-copy").onclick=()=>{const t=$("vn-nota").value;const ok=()=>{$("vn-st").textContent="Nota copiada."};try{navigator.clipboard.writeText(t).then(ok,()=>{$("vn-nota").select();$("vn-st").textContent="Selecciona y copia el texto manualmente."})}catch(e){$("vn-nota").select()}};
   $("vn-save").onclick=()=>{const a=vnNotas(),P=vnPac();a.unshift({id:uid(),fecha:new Date().toISOString().slice(0,16).replace("T"," "),plantilla:VN[VNS.id].t,paciente:P.nombre||"",com:P.com||VN_U(VNS.v._com||""),texto:$("vn-nota").value});S.set("dn2_vnotas",JSON.stringify(a.slice(0,300)));$("vn-st").textContent="Guardada en este celular ("+Math.min(a.length,300)+" notas).";vnRegistrarBase($("vn-nota").value)};
-  $("vn-new").onclick=()=>{const b=$("vn-new");if(b.dataset.armed!=="1"){b.dataset.armed="1";b.textContent="¿Borrar respuestas? Toca otra vez";return}S.del("dn2_vn_"+VNS.id);VNS=null;home();window.scrollTo(0,0)};
+  $("vn-new").onclick=()=>{const b=$("vn-new");if(b.dataset.armed!=="1"){b.dataset.armed="1";b.textContent="¿Borrar respuestas? Toca otra vez";return}S.del("dn2_vn_"+VNS.id);VNS=null;atTerminada();home();window.scrollTo(0,0)};
   const ai=$("vn-ai");if(ai)ai.onclick=async()=>{ai.disabled=true;$("vn-st").textContent="Puliendo redacción…";
     try{const r=await sample("Eres auxiliar de historia clínica de enfermería en Colombia. Corrige ortografía y redacción de esta nota, en MAYÚSCULAS y sin tildes como el original. No agregues ni quites datos clínicos, hallazgos, valores ni conductas; no inventes nada. Devuelve solo la nota corregida.\n\nNOTA:\n"+$("vn-nota").value,{cache:false});if(r&&r.text){$("vn-nota").value=r.text.trim();$("vn-st").textContent="Listo. Revisa que no haya cambiado ningún dato."}}catch(e){$("vn-st").textContent="No se pudo pulir ahora; la nota sigue como estaba."}ai.disabled=false}}
 function vnHist(){stopRec();st.view="vnota";const a=vnNotas();
@@ -1927,9 +1927,9 @@ function wireMiDia(){const cb=$("md-cal");if(cb)cb.onclick=calOpen;
 function mdShow(t){const s=$("md-st");s.innerHTML="";const a=document.createElement("textarea");a.value=t;a.rows=7;a.readOnly=true;s.append("No se pudo copiar solo. Mantén presionado el texto y cópialo:",a);a.focus();a.select()}
 
 /* ---------- PANEL ---------- */
-const VERSION_APP="2026-10-18 v158";
+const VERSION_APP="2026-10-18 v159";
 function home(){
-  stopRec();st.view="home";
+  stopRec();if(S.get(AT_KEY))atReiniciar();st.view="home";
   const rm=["precon","prenatal","parto","rn","ive"],rp=["pinf","inf","adol","juv","adul","vej"];
   const tile=id=>{const m=M[id];return `<button class="tile ${m.route}" data-mod="${id}" id="t-${id}">${hasDraft(id)?'<span class="dot" title="Borrador guardado"></span>':""}<b>${esc(m.title)}</b><small>${esc(m.who)}</small></button>`};
   const drafts=Object.keys(M).filter(hasDraft);
@@ -1979,7 +1979,7 @@ function home(){
   <section class="route"><div class="route-head"><h2>Base de datos</h2><span>Google Sheets</span></div><div class="tiles"><button class="tile pc" id="t-base"><b>Pendientes y conexión</b><small id="bq">${cola().length?cola().length+" pendientes":(conf().url?"al día":"sin conectar")}</small></button></div></section>
   <p class="foot" id="verlbl">Versión ${VERSION_APP}</p>
   <p class="foot">Contenido según la Resolución 3280 de 2018, con IVE actualizada a la Sentencia C-055 de 2022 y la Resolución 051 de 2023. Las semanas de vacunas se confirman con el lineamiento PAI vigente. Lo que dictas queda solo en este celular hasta que lo borres. Organizar la nota necesita internet.</p>`;
-  document.querySelectorAll("[data-mod]").forEach(b=>b.onclick=()=>openMod(b.dataset.mod));wireMiDia();vnWireHome();mbWire();
+  atAviso();document.querySelectorAll("[data-mod]").forEach(b=>b.onclick=()=>openMod(b.dataset.mod));wireMiDia();vnWireHome();mbWire();
   $("t-base").onclick=()=>{baseEdit=null;base({});window.scrollTo(0,0)};$("t-pacs").onclick=verPacientes;$("t-plant").onclick=plVista;$("t-vbase").onclick=verBase;
   document.querySelectorAll("[data-ag]").forEach(b=>b.onclick=()=>{if(b.dataset.armed!=="1"){b.dataset.armed="1";b.textContent="¿Seguro? Toca otra vez";return}setAgenda(agenda().map(x=>x.id===b.dataset.ag?Object.assign(x,{ok:hoy()}):x));home()});
   ["f-edad","f-uni","f-sexo","f-est"].forEach(i=>$(i).addEventListener("input",sugerir));
@@ -2167,9 +2167,9 @@ function modBloqueo(id){const P=pac(),_fm=S.get(key(id,"fecha"))||hoy(),e=edadDe
   <div class="btns"><button class="btn primary" type="button" id="mb-fix">Corregir datos de la persona</button></div>
   ${r.length?`<p class="lab">Le corresponde</p><div class="tiles">${r.map(z=>`<button class="tile ${M[z].route}" type="button" data-mb="${z}"><b>${esc(M[z].title)}</b><small>${esc(M[z].who)}</small></button>`).join("")}</div>`:""}`;
   $("mb-fix").onclick=()=>{st.tab="id";renderMod()};document.querySelectorAll("[data-mb]").forEach(b=>b.onclick=()=>openMod(b.dataset.mb))}
-function openMod(id){st.view="mod";st.mod=id;st.tab=idFalta(id).length?"id":(S.get(key(id,"tab"))||"entr");st.note=S.get(key(id,"note"))||M[id].notes[0];if(!M[id].notes.includes(st.note))st.note=M[id].notes[0];renderMod();window.scrollTo(0,0)}
+function openMod(id){atInicio("mod",id);st.view="mod";st.mod=id;st.tab=idFalta(id).length?"id":(S.get(key(id,"tab"))||"entr");st.note=S.get(key(id,"note"))||M[id].notes[0];if(!M[id].notes.includes(st.note))st.note=M[id].notes[0];renderMod();window.scrollTo(0,0)}
 function renderMod(){
-  stopRec();const m=M[st.mod],id=st.mod;
+  stopRec();const m=M[st.mod],id=st.mod;if(idFalta(id).length&&st.tab!=="id")st.tab="id";
   const tabs=[["id","Datos"],["entr","Preguntas"],["guia","Guía"]].concat(m.tools?[["herr","Cálculos"]]:[]).concat([["nota","Nota"],["base","Base"]]);
   const hecho={id:!idFalta(id).length,entr:Object.values(ivAns(id)).some(v=>(v||"").trim()),guia:Object.keys(checks(id)).length>0,herr:!!(S.get(key(id,"eg_fum"))||S.get(key(id,"eg_ecof"))),nota:!!S.get(key(id,"nota")),base:false};
   if(!tabs.some(t=>t[0]===st.tab))st.tab="guia";
@@ -2186,7 +2186,7 @@ function renderMod(){
   ${m.facts.length?`<div class="facts">${m.facts.map(([k,v])=>`<span class="chip"><b>${esc(k)}</b>${esc(v)}</span>`).join("")}</div>`:""}
   <div class="tabs" role="tablist">${tabs.map(([k,l],i)=>`<button role="tab" data-tab="${k}" aria-selected="${st.tab===k}"><span class="stepn ${hecho[k]?"ok":""}">${hecho[k]?"✓":i+1}</span><span>${l}</span></button>`).join("")}</div>
   <div id="pane"></div>`;
-  $("back").onclick=home;$("pac-cambiar").onclick=()=>{st.tab="id";renderMod()};
+  atSalida($("back"),"← Rutas",home);$("pac-cambiar").onclick=()=>{st.tab="id";renderMod()};
   document.querySelectorAll("[data-tab]").forEach(b=>b.onclick=()=>{st.tab=b.dataset.tab;if(st.tab!=="base"&&st.tab!=="id")S.set(key(id,"tab"),st.tab);renderMod()});
   if(st._incoh&&st.tab!=="id"){modBloqueo(id);return}
   if(st.tab==="base"){st.tab=S.get(key(id,"tab"))==="base"?"nota":(S.get(key(id,"tab"))||"nota");$("pane").innerHTML=`<p class="status" id="status">Tomando los datos de esta historia…</p>`;enviarBase(id);return}
@@ -5487,7 +5487,7 @@ function base(pref,opts){
     const reg={id,comunidad,datos:Object.assign({ID_REGISTRO:id,FECHA_REGISTRO:new Date().toISOString().slice(0,16).replace("T"," "),REGISTRADO_POR:cf.who||""},datos,(()=>{const prev=cola().concat(archivo()).find(r=>r.id===id),o={};if(prev)Object.keys(prev.datos).forEach(k=>{if(/^R202 V/.test(k))o[k]=prev.datos[k]});if(R202X)Object.keys(R202X).forEach(k=>{if(/^R202 V/.test(k))o[k]=R202X[k]});const fe=datos["FECHA"]||hoy();if(R202X&&R202X.__f)Object.keys(o).forEach(k=>{if(R202X[k]===o[k]&&o[k]===R202X.__f)o[k]=fe});Object.assign(o,r202Base(datos,fe).o);delete o.__f;return o})())};R202X=null;
     const q=cola().filter(r=>r.id!==id);q.push(reg);setCola(q);archivoGuardar(reg);agendaGuardar(id,comunidad,datos);pacienteAtencion(MD||"",comunidad,datos,id);
     if(baseOpts.mod){const ident={};ID_KEYS.forEach(k=>{if(datos[k]&&datos[k]!=="N/A")ident[k]=datos[k]});ident.__com=comunidad;if(!ident["FECHA NACIMIENTO"]&&datos["EDAD"]&&datos["AA / MM"]==="AÑOS")ident.__edad=String(datos["EDAD"]);setPac(ident)}
-    S.set("dn2_ultcom",comunidad);const cs=new Set((S.get("dn2_coms")||"").split("|").filter(Boolean));cs.add(comunidad);S.set("dn2_coms",[...cs].join("|"));
+    atTerminada();S.set("dn2_ultcom",comunidad);const cs=new Set((S.get("dn2_coms")||"").split("|").filter(Boolean));cs.add(comunidad);S.set("dn2_coms",[...cs].join("|"));
     baseEdit=null;base({});$("syncTxt").textContent=conf().url?"Guardado. Enviando a la hoja…":"Guardado en el celular como pendiente. Para que llegue a la hoja falta configurar la Conexión.";sync(true)};
   syncTxt();
 }
@@ -6415,7 +6415,7 @@ function plDatos(r,tipo,id){const P={},d=r.datos,g=l=>{const k=Object.keys(d).fi
 function plAplicar(texto){const r=plLeer(texto);if(!r.tipo||!r.id)return{err:"No encontré la línea «# APP: …» del comienzo. Copia la plantilla completa, desde la primera línea."};
   if(r.tipo==="MODULO"&&!M[r.id]||r.tipo==="NOTA"&&!VN[r.id])return{err:"La plantilla es de «"+r.id+"», que no está en esta versión de la app."};
   const id=r.id,P=plDatos(r,r.tipo,id),fecha=plFecha(Object.entries(r.datos).find(([k])=>k.startsWith("fecha de esta consulta"))?.[1]);
-  if(!P["NOMBRE COMPLETO"])return{err:"Falta el nombre completo en DATOS INICIALES."};
+  {const fa=[];if(!P["NOMBRE COMPLETO"])fa.push("nombre completo");if(!P["TIPO"])fa.push("tipo de documento");if(!P["DOCUMENTO ID."])fa.push("número de documento");if(!P["GENERO"])fa.push("sexo");if(!P["FECHA NACIMIENTO"]&&!P.__edad)fa.push("edad o fecha de nacimiento");if(fa.length)return{err:"Faltan en DATOS INICIALES: "+fa.join(", ")+". Son obligatorios para pasar la plantilla."}}
   setPac(P);if(P.__com){S.set("dn2_ultcom",P.__com);addHist("__com",P.__com)}
   let n=0,sin=[];
   if(r.tipo==="MODULO"){S.keys().filter(k=>k.startsWith("dn2_"+id+"_")&&!k.endsWith("_note")).forEach(k=>S.del(k));
@@ -6574,6 +6574,47 @@ function r202Hoja(t){const por={};t.slice().sort((a,b)=>((a.datos.FECHA||"")<(b.
   const filas=Object.values(por).filter(o=>R202_COLS.some(k=>o[k]!=null&&!/V00[34] |V009 |V010 |V011 /.test(k)));if(!filas.length)return null;
   const C=["NOMBRE COMPLETO","COMUNIDAD","ULTIMA ATENCION"].concat(R202_COLS);
   return{nombre:"RES 202 POR PERSONA",filas:[C].concat(filas.map(o=>C.map(k=>o[k]==null?"":o[k])))}}
+
+/* ======================= ATENCIÓN EN CURSO: si se interrumpe, se reinicia =======================
+   Una nota o módulo que se deja sin terminar (se sale al inicio, se cierra o se recarga la app)
+   borra la persona y el borrador, para no mezclar datos de dos pacientes.
+   Terminada = registrada en la base, o «Terminar y limpiar» en una nota por voz. */
+const AT_KEY="dn2_encurso";
+function atInicio(tipo,id){const P=pac();S.set(AT_KEY,JSON.stringify({tipo,id,nom:P["NOMBRE COMPLETO"]||""}))}
+function atTerminada(){S.del(AT_KEY)}
+function atBorrarBorradores(){S.keys().filter(k=>/^dn2_[a-z0-9]+_/.test(k)&&Object.keys(M).includes(k.split("_")[1])&&!k.endsWith("_note")).forEach(k=>S.del(k));Object.keys(VN).forEach(id=>S.del("dn2_vn_"+id))}
+function atReiniciar(){let e=null;try{e=JSON.parse(S.get(AT_KEY)||"null")}catch(x){}if(!e){S.del(AT_KEY);return}
+  const t=e.tipo==="vn"?(VN[e.id]?VN[e.id].t:e.id):(M[e.id]?M[e.id].title:e.id),nom=pac()["NOMBRE COMPLETO"]||e.nom||"";
+  S.del("dn2_pac");atBorrarBorradores();S.del(AT_KEY);VNS=null;R202X=null;
+  S.set("dn2_reinicio",JSON.stringify({t,nom}))}
+function atAviso(){const rz=S.get("dn2_reinicio");if(!rz||!$("app"))return;let r={};try{r=JSON.parse(rz)}catch(e){}
+  const bx=document.createElement("div");bx.className="box warn";bx.id="rz-box";
+  bx.innerHTML=`<h3>Se reinició la atención</h3><p style="margin:0">${esc(r.t||"La atención")}${r.nom?" de "+esc(r.nom):""} quedó sin terminar: se borró junto con la persona, para no mezclar datos de dos pacientes. Para seguir, identifica de nuevo a la persona.</p><div class="btns" style="margin-top:8px"><button class="btn" type="button" id="rz-ok">Entendido</button></div>`;
+  $("app").prepend(bx);$("rz-ok").onclick=()=>{S.del("dn2_reinicio");bx.remove()}}
+/* botón de salida con doble toque cuando hay una atención en curso */
+function atSalida(btn,txt,salir){btn.onclick=()=>{if(S.get(AT_KEY)&&btn.dataset.armed!=="1"){btn.dataset.armed="1";btn.textContent="¿Salir sin terminar? Se borra la persona y lo que llevas · toca otra vez";setTimeout(()=>{if(btn.isConnected){btn.dataset.armed="";btn.textContent=txt}},5000);return}salir()}}
+/* identificación mínima obligatoria: nombre, documento, edad y sexo */
+function idMinFalta(){const P=pac(),f=[];[["NOMBRE COMPLETO","Nombre completo"],["TIPO","Tipo de documento"],["DOCUMENTO ID.","Número de documento"],["GENERO","Sexo"]].forEach(([k,l])=>{if(!P[k]||P[k]==="N/A")f.push(l)});
+  const fn=P["FECHA NACIMIENTO"];if((!fn||fn==="N/A")&&!P.__edad)f.push("Edad o fecha de nacimiento");return f}
+function vnIdForm(){stopRec();if(VNS)VNS.voz=false;const P=pac(),tipos=(ALLF.find(f=>f.k==="TIPO")||{o:["CC","TI","RC","CE","PPT","PEP","MS","AS"]}).o;
+  $("vn-pane").innerHTML=`<section class="tool"><h3>¿A quién atiendes?</h3><p class="note-src" style="margin:0">Obligatorio antes de seguir: nombre, documento, edad y sexo.</p>
+   <div class="bgrid" style="padding:0" id="vi-f">
+    <label class="bfl"><span>Nombre completo *</span><input id="vi-nom" value="${esc(P["NOMBRE COMPLETO"]||"")}" autocomplete="off"></label>
+    <label class="bfl"><span>Tipo de documento *</span><select id="vi-tip"><option value=""></option>${tipos.map(t=>`<option ${P["TIPO"]===t?"selected":""}>${t}</option>`).join("")}</select></label>
+    <label class="bfl"><span>Número de documento *</span><input id="vi-doc" inputmode="numeric" value="${esc(P["DOCUMENTO ID."]&&P["DOCUMENTO ID."]!=="N/A"?P["DOCUMENTO ID."]:"")}"></label>
+    <label class="bfl"><span>Fecha de nacimiento</span><input id="vi-fn" type="date" value="${esc(P["FECHA NACIMIENTO"]&&P["FECHA NACIMIENTO"]!=="N/A"?P["FECHA NACIMIENTO"]:"")}"></label>
+    <label class="bfl"><span>Edad (si no sabe la fecha; «8 meses» en menores de 1 año)</span><input id="vi-ed" value="${esc(P.__edad||"")}"></label>
+    <label class="bfl"><span>Sexo *</span><select id="vi-sx"><option value=""></option><option value="F" ${P["GENERO"]==="F"?"selected":""}>Mujer</option><option value="M" ${P["GENERO"]==="M"?"selected":""}>Hombre</option></select></label>
+    <label class="bfl"><span>Comunidad o vereda</span><input id="vi-com" value="${esc(P.__com||S.get("dn2_ultcom")||"")}"></label>
+   </div><div class="box miss" id="vi-miss" hidden><h3>Falta</h3><ul></ul></div>
+   <div class="btns"><button class="btn primary" type="button" id="vi-go">Guardar y seguir →</button></div></section>`;
+  $("vi-go").onclick=()=>{const o=pac(),v=i=>$(i).value.trim();
+    o["NOMBRE COMPLETO"]=v("vi-nom").toUpperCase();o["TIPO"]=v("vi-tip");o["DOCUMENTO ID."]=v("vi-doc").replace(/[^\dA-Za-z]/g,"");o["GENERO"]=v("vi-sx");
+    if(v("vi-fn")){o["FECHA NACIMIENTO"]=v("vi-fn");delete o.__edad}else{delete o["FECHA NACIMIENTO"];const t=v("vi-ed"),n=parseFloat(t.replace(",","."));if(Number.isFinite(n))o.__edad=String(/mes/i.test(t)?Math.round(n/12*10)/10:n);else delete o.__edad}
+    if(v("vi-com"))o.__com=v("vi-com").toUpperCase();Object.keys(o).forEach(k=>{if(o[k]==="")delete o[k]});
+    const fnM=o["FECHA NACIMIENTO"]&&o["FECHA NACIMIENTO"]>hoy()?["La fecha de nacimiento queda en el futuro"]:[];
+    setPac(o);const f=idMinFalta().concat(fnM);if(f.length){const mb=$("vi-miss");mb.hidden=false;mb.querySelector("ul").innerHTML=f.map(x=>`<li>${esc(x)}</li>`).join("");return}
+    atInicio("vn",VNS.id);vnRender()}}
 
 /* ---------- arranque ---------- */
 /* los borradores guardados con la versión anterior de los módulos se reubican una sola vez */

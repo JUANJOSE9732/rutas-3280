@@ -44,7 +44,7 @@ const R=await p.evaluate(()=>{
  monta('pinf',1,'M');openMod('pinf');
  return F});
 // 8. interfaz: abrir la entrevista y tocar
-await p.evaluate(()=>{localStorage.clear();const d=pD(hoy());d.setUTCFullYear(d.getUTCFullYear()-2);setPac({'NOMBRE COMPLETO':'X','FECHA NACIMIENTO':d.toISOString().slice(0,10),'GENERO':'F','__com':'MITU'});openMod('pinf');st.tab='entr';S.set(key('pinf','tab'),'entr');S.set(key('pinf','ivi'),'0');renderMod()});
+await p.evaluate(()=>{localStorage.clear();const d=pD(hoy());d.setUTCFullYear(d.getUTCFullYear()-2);setPac({'NOMBRE COMPLETO':'X','TIPO':'RC','DOCUMENTO ID.':'9','FECHA NACIMIENTO':d.toISOString().slice(0,10),'GENERO':'F','__com':'MITU'});openMod('pinf');st.tab='entr';S.set(key('pinf','tab'),'entr');S.set(key('pinf','ivi'),'0');renderMod()});
 await p.waitForTimeout(300);
 const ui=await p.evaluate(()=>!!document.getElementById('ea-w'));
 if(ui){await p.selectOption('[data-ea="est"]','asin');await p.click('#ea-pno');await p.selectOption('[data-ea="par"]','padre');}
