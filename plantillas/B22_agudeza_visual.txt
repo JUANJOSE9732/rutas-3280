@@ -1,0 +1,59 @@
+# APP: NOTA av
+==================================
+NOTA: AGUDEZA VISUAL (Tamizaje con Snellen)
+==================================
+> Cómo llenarla: escribe después de «R:». Si queda vacío, la app pone el valor normal
+>  que aparece en la ayuda. Las líneas con > son ayudas.
+
+== DATOS INICIALES ==
+Fecha de esta consulta (dd/mm/aaaa): 
+Comunidad o vereda: 
+Nombre completo: 
+Tipo de documento (CC / TI / RC / CE / PPT / PEP / MS / AS): 
+Número de documento: 
+Fecha de nacimiento (dd/mm/aaaa): 
+Sexo (F / M): 
+Teléfono: 
+Pertenencia étnica (INDIGENA / AFROCOLOMBIANO / RAIZAL / PALENQUERO / ROM / NINGUNA): 
+Pueblo indígena: 
+EAPB: 
+Régimen (SUBSIDIADO / CONTRIBUTIVO / ESPECIAL / NO AFILIADO): 
+Edad (solo si no sabe la fecha de nacimiento; años o meses): 
+
+== PREGUNTAS ==
+[acomp] ¿Quién acompaña al menor?
+    > Normal: MADRE
+    > Opciones: MADRE · PADRE · CUIDADOR
+    > Solo si aplica.
+R: 
+[sint] ¿Síntomas visuales, dolor, enrojecimiento o lagrimeo?
+    > Normal: NIEGA
+R: 
+[lentes] ¿Usa lentes?
+    > Normal: NO UTILIZA LENTES CORRECTIVOS
+    > Opciones: NO UTILIZA LENTES CORRECTIVOS · USA LENTES CORRECTIVOS
+R: 
+[od] Ojo derecho
+    > Diga «veinte veinte», «veinte cuarenta»…
+R: 
+[oi] Ojo izquierdo
+R: 
+[ao] Ambos ojos
+    > Solo si aplica.
+R: 
+[ef] Examen físico: ¿normal o algún hallazgo?
+    > Di «normal» para dejar el examen de la plantilla, o dicta solo lo anormal con el sistema.
+    > Normal: NORMAL
+R: 
+[control] ¿Cuándo es el próximo control?
+    > Normal: 1 AÑO
+R: 
+[extra] ¿Algo más para agregar a la nota?
+    > Dicta cualquier dato adicional, o di «no».
+    > Normal: NO
+R: 
+
+== OTROS DATOS U OBSERVACIONES ==
+R: 
+
+# FIN

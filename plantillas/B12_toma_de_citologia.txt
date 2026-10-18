@@ -1,0 +1,80 @@
+# APP: NOTA ccu
+==================================
+NOTA: TOMA DE CITOLOGÍA (Tamizaje de cuello uterino)
+==================================
+> Cómo llenarla: escribe después de «R:». Si queda vacío, la app pone el valor normal
+>  que aparece en la ayuda. Las líneas con > son ayudas.
+
+== DATOS INICIALES ==
+Fecha de esta consulta (dd/mm/aaaa): 
+Comunidad o vereda: 
+Nombre completo: 
+Tipo de documento (CC / TI / RC / CE / PPT / PEP / MS / AS): 
+Número de documento: 
+Fecha de nacimiento (dd/mm/aaaa): 
+Sexo (F / M): 
+Teléfono: 
+Pertenencia étnica (INDIGENA / AFROCOLOMBIANO / RAIZAL / PALENQUERO / ROM / NINGUNA): 
+Pueblo indígena: 
+EAPB: 
+Régimen (SUBSIDIADO / CONTRIBUTIVO / ESPECIAL / NO AFILIADO): 
+Edad (solo si no sabe la fecha de nacimiento; años o meses): 
+
+== PREGUNTAS ==
+[llega] ¿Cómo asiste?
+    > Normal: POR SUS PROPIOS MEDIOS
+    > Opciones: POR SUS PROPIOS MEDIOS · ACOMPAÑADA · REMITIDA POR PROMOTOR
+R: 
+[siente] ¿Cómo refiere sentirse?
+    > Normal: BIEN, ASINTOMATICA
+    > Opciones: BIEN, ASINTOMATICA · CON FLUJO VAGINAL · CON DOLOR PELVICO
+R: 
+[gpcav] Paridad: gestaciones, partos, cesáreas, abortos y vivos
+    > Diga los cinco números en orden: «dos uno cero cero dos».
+    > Normal: G0 P0 C0 A0 V0
+R: 
+[fur] Fecha de la última menstruación
+    > Diga la fecha, o «no recuerda», «menopausia», «amenorrea por método».
+    > Opciones: NO RECUERDA · MENOPAUSIA · AMENORREA POR METODO
+R: 
+[metodo] Método de planificación actual
+    > Normal: NINGUNO
+    > Opciones: NINGUNO · INYECTABLE MENSUAL · INYECTABLE TRIMESTRAL (DEPOPROVERA) · IMPLANTE SUBDERMICO · DIU T DE COBRE · ANTICONCEPTIVOS ORALES · CONDON · POMEROY
+R: 
+[citoant] Citología anterior: ¿cuándo?
+    > Diga la fecha o el año. «Niega» si nunca se la ha tomado.
+    > Normal: NIEGA
+R: 
+[citores] Resultado de la citología anterior
+    > Normal: NEGATIVA
+    > Opciones: NEGATIVA · NO CONOCE EL RESULTADO · ALTERADA
+    > Solo si aplica.
+R: 
+[sv] Signos vitales y medidas
+    > Diga: tensión 110 70, frecuencia 72, respiración 18, temperatura 36.5, peso 58, talla 155. Di «normal» para omitir.
+    > Normal: NORMAL
+R: 
+[ef] Examen físico: ¿normal o algún hallazgo?
+    > Di «normal» para dejar el examen de la plantilla, o dicta solo lo anormal con el sistema.
+    > Normal: NORMAL
+R: 
+[cuello] ¿Cómo observa el cuello uterino?
+    > Normal: DE COLOR ROSADO PALIDO Y ORIFICIO CERVICAL DE FORMA IRREGULAR ALARGADO EN FORMA HORIZONTAL
+    > Opciones: DE COLOR ROSADO PALIDO Y ORIFICIO CERVICAL DE FORMA IRREGULAR ALARGADO EN FORMA HORIZONTAL · DE COLOR ROSADO CON ORIFICIO CERVICAL PUNTIFORME · CON ECTROPION · CON LEUCORREA BLANQUECINA · FRIABLE, SANGRA AL CONTACTO
+R: 
+[muestra] ¿Qué muestra se tomó?
+    > Normal: MUESTRA ENDOCERVICAL Y EXOCERVICAL
+    > Opciones: MUESTRA ENDOCERVICAL Y EXOCERVICAL · MUESTRA PARA ADN-VPH CON CEPILLO ENDOCERVICAL · INSPECCION VISUAL VIA/VILI
+R: 
+[control] ¿Cuándo es el próximo control?
+    > Normal: 15 DIAS PARA ENTREGA DE REPORTE
+R: 
+[extra] ¿Algo más para agregar a la nota?
+    > Dicta cualquier dato adicional, o di «no».
+    > Normal: NO
+R: 
+
+== OTROS DATOS U OBSERVACIONES ==
+R: 
+
+# FIN

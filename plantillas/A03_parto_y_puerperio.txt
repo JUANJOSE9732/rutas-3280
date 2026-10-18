@@ -1,0 +1,152 @@
+# APP: MODULO parto
+==================================
+PARTO Y PUERPERIO (Parto, puerperio y control posparto)
+Res. 3280 · 4.7 Atención del parto, p. 280 y 4.8 Puerperio, p. 286
+==================================
+> Cómo llenarla: escribe después de «R:». Basta con la palabra de la opción (ej. «Normal»)
+>  y la app pone el texto completo. Si la opción tiene ____, agrega los datos después de dos
+>  puntos: «Fiebre: 38,5». Deja vacío lo que no hiciste. Las líneas con > son ayudas.
+> Le toca: Puerperio inmediato SV y sangrado c/15 min, 2 h | Alta 24 h vaginal · 48 h cesárea | Control posparto día 3 a 5
+> Alertas que obligan a remitir:
+>  - Loquios con mal olor, sangrado abundante, fiebre > 38 °C después de las primeras 24 h
+>  - Cefalea, visión borrosa, tinnitus, fosfenos, epigastralgia, convulsiones
+>  - Dolor o hinchazón en las piernas, dolor torácico, disnea
+>  - Mamas rojas, calientes y dolorosas; dolor al orinar
+>  - Sí a ambas preguntas de depresión → psicología y psiquiatría; Edimburgo > 12 → salud mental
+
+== DATOS INICIALES ==
+Fecha de esta consulta (dd/mm/aaaa): 
+Comunidad o vereda: 
+Nombre completo: 
+Tipo de documento (CC / TI / RC / CE / PPT / PEP / MS / AS): 
+Número de documento: 
+Fecha de nacimiento (dd/mm/aaaa): 
+Sexo (F / M): 
+Teléfono: 
+Pertenencia étnica (INDIGENA / AFROCOLOMBIANO / RAIZAL / PALENQUERO / ROM / NINGUNA): 
+Pueblo indígena: 
+EAPB: 
+Régimen (SUBSIDIADO / CONTRIBUTIVO / ESPECIAL / NO AFILIADO): 
+Edad (solo si no sabe la fecha de nacimiento; años o meses): 
+
+== PARTO (SI LO ATIENDES EN COMUNIDAD) ==
+[1] Pinzamiento del cordón cuando deje de latir (habitualmente 2–3 min)
+    > Opciones: Normal (2 a 3 min) · Inmediato: reanimación · Inmediato: placenta · Inmediato: cordón roto · Lo hizo la partera · No aplica
+R: 
+[2] Contacto piel a piel sin separar al RN de la madre los primeros 60 min
+    > Opciones: Realizado · Interrumpido por reanimación · Con el papá o familiar · No aplica
+R: 
+[3] Lactancia durante el contacto piel a piel
+    > Opciones: Inició · Con ayuda · No inició · Contraindicada · No aplica
+R: 
+[4] Puerperio inmediato: signos vitales y sangrado cada 15 min durante …
+    > Qué hacer: Puerperio inmediato: signos vitales y sangrado cada 15 min durante 2 horas
+    > Opciones: Estable · Sangrado que cede · Sangrado que no cede · TA alta · Pulso alto o TA baja · Fiebre
+R: 
+[5] Globo de seguridad, sangrado genital, suturas o episiotomía
+    > Opciones: Normal · Desgarro grado 1 · Desgarro grado 2 · Útero blando · Desgarro grado 3 o 4
+R: 
+[6] Escala de alerta temprana obstétrica
+    > Escribe los valores; en la app revisa el cálculo de esta pregunta.
+R: 
+[7] Remitir si hay hemorragia, tras estabilizar
+    > Opciones: Sin hemorragia · Código rojo y remisión · Remitida por otra causa
+R: 
+
+== PUERPERIO MEDIATO (2 A 48 H) ==
+[8] Involución uterina y aspecto de los loquios
+    > Opciones: Normal · Subinvolución · Loquios fétidos
+R: 
+[9] Fiebre, taquicardia, taquipnea, útero doloroso, loquios fétidos
+    > Opciones: Sin signos · Signos de infección · Fiebre primeras 24 h
+R: 
+[10] Deambulación temprana y alimentación
+    > Opciones: Realizado · No ha orinado
+R: 
+
+== CONTROL POSPARTO (DÍA 3 A 5): PREGUNTAR ==
+[11] Sangrado y olor de los loquios, fiebre, dolor
+    > Opciones: Niega · Refiere · Sin hallazgos
+R: 
+[12] Cefalea, visión, micción, mamas, piernas
+    > Opciones: Niega · Refiere · Sin hallazgos
+R: 
+[13] Lactancia y cuidado del recién nacido
+    > Opciones: Adecuada · Dificultad · Mixta
+R: 
+[14] Sexualidad en el posparto
+    > Opciones: Informada · Inquietudes
+R: 
+[15] Intención reproductiva (próximo embarazo en no menos de 18 meses)
+    > Opciones: No desea más · Desea más · No sabe
+R: 
+[16] Durante el último mes, ¿se ha preocupado porque con frecuencia se s…
+    > Pregunta: Durante el último mes, ¿se ha preocupado porque con frecuencia se sentía triste, deprimida o sin esperanza?
+    > Opciones: No · Sí
+R: 
+[17] Durante el último mes, ¿se ha preocupado porque con frecuencia sent…
+    > Pregunta: Durante el último mes, ¿se ha preocupado porque con frecuencia sentía poco interés por realizar actividades y además no sentía que le proporcionaran placer?
+    > Opciones: No · Sí
+R: 
+
+== EXAMINAR ==
+[18] Signos vitales y TA
+    > Opciones: Normal · TA alta · Fiebre · Taquicardia
+    > Escribe los valores; en la app revisa el cálculo de esta pregunta.
+R: 
+[19] Involución uterina y loquios
+    > Opciones: Normal · Subinvolución · Útero doloroso con fiebre · Sangrado aumentado
+R: 
+[20] Periné, episiotomía o herida de cesárea
+    > Opciones: Normal · Infección · Dehiscencia · Hematoma · Sin episiotomía ni cesárea
+R: 
+[21] Mamas y pezones
+    > Opciones: Normal · Grietas · Congestión · Mastitis
+R: 
+[22] Miembros inferiores
+    > Opciones: Normal · Edema de una pierna · Edema de ambas
+R: 
+
+== VERIFICAR ==
+[23] Rh: anti-D en 72 h si es Rh negativo con RN Rh positivo
+    > Opciones: Rh positivo · Anti-D aplicada · Gestionar · Desconocido
+R: 
+[24] Resultados maternos de VIH, sífilis, hepatitis B, toxoplasma, estre…
+    > Qué hacer: Resultados maternos de VIH, sífilis, hepatitis B, toxoplasma, estreptococo B
+    > Opciones: Negativos · VIH positivo · Sífilis positiva · Hepatitis B positiva · Sin resultados
+R: 
+[25] Vacunas pendientes de la gestación
+    > Opciones: Completas · Se aplica Td · Se aplica influenza · Pendiente
+    > Escribe los valores; en la app revisa el cálculo de esta pregunta.
+R: 
+[26] Riesgo tromboembólico
+    > Opciones: Bajo · Con factores
+R: 
+
+== PLAN ==
+[27] Método anticonceptivo antes del alta: DIU posparto, implante, inyec…
+    > Qué hacer: Método anticonceptivo antes del alta: DIU posparto, implante, inyectable trimestral, oral de solo progestina, ligadura, condones
+    > Opciones: Implante · DIU posparto · Inyectable trimestral · Oral solo progestina · Ligadura · Condones · No acepta
+    > Escribe los valores; en la app revisa el cálculo de esta pregunta.
+R: 
+[28] Entrega del método con cobertura de 3 meses
+    > Opciones: Píldoras: 3 meses · Inyectable: aplicada · Condones: 3 meses · Implante o DIU · No aceptó método
+R: 
+[29] Anticoncepción de emergencia: cuándo usarla
+    > Opciones: Informada
+R: 
+[30] Analgesia: ibuprofeno 600 mg o acetaminofén sin pasar de 4.000 mg/día
+    > Opciones: Ibuprofeno · Acetaminofén · No requiere
+R: 
+[31] Educación: lactancia exclusiva, alimentación, actividad física prog…
+    > Qué hacer: Educación: lactancia exclusiva, alimentación, actividad física progresiva, sueño, violencias y cómo denunciarlas
+    > Opciones: Realizada
+R: 
+[32] Registro de nacido vivo y registro civil
+    > Opciones: Realizado · Pendiente
+R: 
+
+== OTROS DATOS U OBSERVACIONES ==
+R: 
+
+# FIN

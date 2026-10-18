@@ -1,0 +1,101 @@
+# APP: NOTA cyd
+==================================
+NOTA: CONTROL PRIMERA INFANCIA (C Y D) (Valoración del menor)
+==================================
+> Cómo llenarla: escribe después de «R:». Si queda vacío, la app pone el valor normal
+>  que aparece en la ayuda. Las líneas con > son ayudas.
+
+== DATOS INICIALES ==
+Fecha de esta consulta (dd/mm/aaaa): 
+Comunidad o vereda: 
+Nombre completo: 
+Tipo de documento (CC / TI / RC / CE / PPT / PEP / MS / AS): 
+Número de documento: 
+Fecha de nacimiento (dd/mm/aaaa): 
+Sexo (F / M): 
+Teléfono: 
+Pertenencia étnica (INDIGENA / AFROCOLOMBIANO / RAIZAL / PALENQUERO / ROM / NINGUNA): 
+Pueblo indígena: 
+EAPB: 
+Régimen (SUBSIDIADO / CONTRIBUTIVO / ESPECIAL / NO AFILIADO): 
+Edad (solo si no sabe la fecha de nacimiento; años o meses): 
+Madre, padre o cuidador - relación (HIJO(A) DE / NIETO(A) DE / SOBRINO(A) DE / A CARGO DE): 
+Madre, padre o cuidador - nombre completo: 
+Madre, padre o cuidador - tipo de documento (CC / TI / CE / PPT / PEP / AS): 
+Madre, padre o cuidador - número de documento: 
+
+== PREGUNTAS ==
+[acomp] ¿Quién lo acompaña?
+    > Normal: MADRE
+    > Opciones: MADRE · PADRE · CUIDADOR
+R: 
+[hijo] Hijo número y hermanos vivos y muertos
+    > Ej.: «hijo tres, dos hermanos vivos, cero muertos».
+R: 
+[trad] ¿Recibe cuidados tradicionales?
+    > Normal: SI
+    > Opciones: SI · NO
+R: 
+[perinatal] Antecedentes perinatales
+    > Normal: NO FUE PRETERMINO, NO ESTUVO HOSPITALIZADO AL NACER, SIN COMPLICACIONES EN EMBARAZO, PARTO NI POSPARTO
+R: 
+[vive] ¿Con quién vive?
+    > Normal: PAPA, MAMA Y HERMANOS
+R: 
+[sint] ¿Síntomas de enfermedad?
+    > Normal: NIEGA, DIURESIS Y DEPOSICIONES NORMALES
+R: 
+[vac] Esquema de vacunación
+    > Normal: ADECUADO PARA LA EDAD
+    > Opciones: ADECUADO PARA LA EDAD · INCOMPLETO
+R: 
+[alim] Alimentación
+    > Opciones: LACTANCIA MATERNA EXCLUSIVA, BUENA TECNICA, BUEN AGARRE, SUCCION Y DEGLUCION ADECUADAS · LACTANCIA MATERNA MAS ALIMENTACION COMPLEMENTARIA · NO RECIBE LACTANCIA MATERNA, RECIBE BIBERON · ALIMENTACION NORMAL DE LA FAMILIA
+R: 
+[comidas] Comidas al día y alimentos que consume
+    > Normal: 3 COMIDAS AL DIA; CONSUME PESCADO, CASABE, FARIÑA, QUIÑAPIRA Y FRUTAS CON TOLERANCIA ADECUADA
+    > Solo si aplica.
+R: 
+[medidas] Peso, talla y perímetro cefálico
+    > Ej.: «peso 13.7, talla 85, perímetro 49».
+R: 
+[z] Indicadores: peso/talla, peso/edad, talla/edad, IMC/edad
+    > Dicta los valores Z y la clasificación de cada uno.
+R: 
+[ead] Escala abreviada del desarrollo (EAD-3)
+    > Normal: ADECUADA PARA LA EDAD
+    > Opciones: ADECUADA PARA LA EDAD · RIESGO DE PROBLEMAS EN EL DESARROLLO · SOSPECHA DE PROBLEMAS EN EL DESARROLLO
+R: 
+[nutri] Estado nutricional
+    > Normal: ADECUADO
+    > Opciones: ADECUADO · REGULAR · RIESGO DE DESNUTRICION · DESNUTRICION AGUDA · RIESGO DE SOBREPESO
+R: 
+[oral] Salud oral
+    > Normal: PIEZAS DENTALES COMPLETAS PARA LA EDAD, SIN ANOMALIAS; NO REFIERE VISITA AL ODONTOLOGO
+R: 
+[psico] Sueño y situaciones de violencia
+    > Normal: DUERME ADECUADAMENTE; NIEGA VIOLENCIA, MALTRATO O ABUSO
+R: 
+[ef] Examen físico: ¿normal o algún hallazgo?
+    > Normal: NORMAL
+R: 
+[meds] Medicamentos que se ordenan
+    > Lo sugerido sale de la edad; corrige si no aplica.
+    > Si lo dejas vacío, la app lo sugiere según la edad.
+R: 
+[remite] Remisiones
+    > Normal: VALORACION POR ODONTOLOGIA
+    > Opciones: VALORACION POR ODONTOLOGIA · ODONTOLOGIA Y NUTRICION · ODONTOLOGIA Y MEDICINA
+R: 
+[control] Próxima cita de C y D
+    > Fecha o tiempo.
+R: 
+[extra] ¿Algo más para agregar a la nota?
+    > Dicta cualquier dato adicional, o di «no».
+    > Normal: NO
+R: 
+
+== OTROS DATOS U OBSERVACIONES ==
+R: 
+
+# FIN

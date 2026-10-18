@@ -1,0 +1,101 @@
+# APP: MODULO vej
+==================================
+VEJEZ (60 años y más)
+Res. 3280 · RPMS 6, vejez, p. 148 (atención por medicina)
+==================================
+> Cómo llenarla: escribe después de «R:». Basta con la palabra de la opción (ej. «Normal»)
+>  y la app pone el texto completo. Si la opción tiene ____, agrega los datos después de dos
+>  puntos: «Fiebre: 38,5». Deja vacío lo que no hiciste. Las líneas con > son ayudas.
+> Le toca: Valoración cada 3 años | Odontología cada 2 años | Colon y próstata hasta 75
+> Alertas que obligan a remitir:
+>  - Caídas, dependencia funcional o deterioro cognitivo → medicina
+>  - Sospecha de maltrato o abandono → ruta de violencia
+>  - Masa mamaria o sangre oculta positiva → remisión
+
+== DATOS INICIALES ==
+Fecha de esta consulta (dd/mm/aaaa): 
+Comunidad o vereda: 
+Nombre completo: 
+Tipo de documento (CC / TI / RC / CE / PPT / PEP / MS / AS): 
+Número de documento: 
+Fecha de nacimiento (dd/mm/aaaa): 
+Sexo (F / M): 
+Teléfono: 
+Pertenencia étnica (INDIGENA / AFROCOLOMBIANO / RAIZAL / PALENQUERO / ROM / NINGUNA): 
+Pueblo indígena: 
+EAPB: 
+Régimen (SUBSIDIADO / CONTRIBUTIVO / ESPECIAL / NO AFILIADO): 
+Dirección o sector: 
+Consecutivo del hogar: 
+Rol en el hogar (JEFE DE HOGAR / CONYUGE / HIJO(A) / PADRE/MADRE / NIETO(A) / HERMANO(A) / OTRO): 
+Capitado (SI / NO): 
+Edad (solo si no sabe la fecha de nacimiento; años o meses): 
+
+== VALORACIÓN ==
+[1] Funcionalidad (actividades básicas e instrumentales)
+    > Escribe los valores; en la app revisa el cálculo de esta pregunta.
+R: 
+[2] Cognición y estado de ánimo
+    > Escribe los valores; en la app revisa el cálculo de esta pregunta.
+R: 
+[3] Riesgo de caídas
+    > Escribe los valores; en la app revisa el cálculo de esta pregunta.
+R: 
+[4] Estado nutricional, TA
+    > Opciones: Normal · Bajo peso · Sobrepeso · Obesidad
+    > Escribe los valores; en la app revisa el cálculo de esta pregunta.
+R: 
+[5] Maltrato, abandono, red de apoyo
+    > Escribe los valores; en la app revisa el cálculo de esta pregunta.
+R: 
+[6] Examen físico por sistemas, de cabeza a pies
+    > Opciones: Normal · Hallazgo
+R: 
+
+== DETECCIÓN TEMPRANA ==
+[7] Riesgo cardiovascular: glicemia, perfil lipídico, creatinina, uroan…
+    > Qué hacer: Riesgo cardiovascular: glicemia, perfil lipídico, creatinina, uroanálisis
+    > Escribe los valores; en la app revisa el cálculo de esta pregunta.
+R: 
+[8] Cuello uterino hasta los 65 (citología o ADN-VPH)
+    > Opciones: Al día, normal · Se toma hoy · VIA/VILI positiva · Resultado anormal · Nunca o vencido · No acepta · No indicado
+R: 
+[9] Mama: mamografía y examen clínico hasta los 69
+    > Opciones: Al día, normal · Mamografía ordenada · Hallazgo anormal · BI-RADS 0, 3 o más
+R: 
+[10] Colon: sangre oculta cada 2 años hasta los 75
+    > Opciones: Al día, negativa · Ordenada · Positiva · Síntomas de alarma
+    > Si no aplica por la edad: No aplica por edad: la tamización de colon es hasta los 75 años.
+R: 
+[11] Próstata (hombres): cada 5 años hasta los 75
+    > Opciones: Al día, normal · Ordenado · Alterado · Síntomas urinarios
+R: 
+
+== PROTECCIÓN ESPECÍFICA ==
+[12] Vacunación según esquema
+    > Escribe los valores; en la app revisa el cálculo de esta pregunta.
+R: 
+[13] Profilaxis oral cada 2 años
+    > Opciones: Remitido · Al día · Con hallazgos · Lesión sospechosa
+R: 
+
+== EDUCACIÓN ==
+[14] Educación individual y a cuidadores
+    > Opciones: Realizada · Cuidador · Educación individual
+R: 
+
+== PLAN ==
+[15] Medicamentos y micronutrientes formulados
+    > Opciones: Según la edad · Ninguno
+R: 
+[16] Remisiones
+    > Opciones: Ninguna · Odontología · Medicina · Vacunación · Nutrición o psicología
+R: 
+[17] Próximo control
+    > Opciones: Enfermería · Medicina · Próxima brigada · Control en 1 mes
+R: 
+
+== OTROS DATOS U OBSERVACIONES ==
+R: 
+
+# FIN

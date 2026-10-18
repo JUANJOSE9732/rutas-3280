@@ -1,0 +1,76 @@
+# APP: NOTA repcito
+==================================
+NOTA: ENTREGA DE REPORTE DE CITOLOGÍA O ADN-VPH (Lectura y explicación del resultado)
+==================================
+> Cómo llenarla: escribe después de «R:». Si queda vacío, la app pone el valor normal
+>  que aparece en la ayuda. Las líneas con > son ayudas.
+
+== DATOS INICIALES ==
+Fecha de esta consulta (dd/mm/aaaa): 
+Comunidad o vereda: 
+Nombre completo: 
+Tipo de documento (CC / TI / RC / CE / PPT / PEP / MS / AS): 
+Número de documento: 
+Fecha de nacimiento (dd/mm/aaaa): 
+Sexo (F / M): 
+Teléfono: 
+Pertenencia étnica (INDIGENA / AFROCOLOMBIANO / RAIZAL / PALENQUERO / ROM / NINGUNA): 
+Pueblo indígena: 
+EAPB: 
+Régimen (SUBSIDIADO / CONTRIBUTIVO / ESPECIAL / NO AFILIADO): 
+Edad (solo si no sabe la fecha de nacimiento; años o meses): 
+
+== PREGUNTAS ==
+[tipo] ¿Qué resultado entrega?
+    > Normal: CITOLOGIA
+    > Opciones: CITOLOGIA · ADN-VPH
+R: 
+[fecha] Fecha en que se tomó la muestra
+R: 
+[lab] Laboratorio que emite el reporte
+    > Normal: COLCAN
+R: 
+[calidad] Calidad de la muestra
+    > Normal: SATISFACTORIA
+    > Opciones: SATISFACTORIA · INSATISFACTORIA
+    > Solo si aplica.
+R: 
+[cat] Categorización general
+    > Normal: NEGATIVA PARA LESION INTRAEPITELIAL O MALIGNIDAD
+    > Opciones: NEGATIVA PARA LESION INTRAEPITELIAL O MALIGNIDAD · ANORMALIDADES DE CELULAS EPITELIALES
+    > Solo si aplica.
+R: 
+[micro] Microorganismos
+    > Normal: FLORA MIXTA NORMAL
+    > Opciones: FLORA MIXTA NORMAL · NO SE OBSERVA FLORA PATOGENA · VAGINOSIS BACTERIANA · CANDIDA · TRICHOMONAS
+    > Solo si aplica.
+R: 
+[otros] Otros hallazgos
+    > Normal: CAMBIOS ASOCIADOS A INFLAMACION
+    > Opciones: CAMBIOS ASOCIADOS A INFLAMACION · ATROFIA · NINGUNO
+    > Solo si aplica.
+R: 
+[anor] Anormalidades
+    > Normal: NO SE ENCONTRARON
+    > Opciones: NO SE ENCONTRARON · ASCUS · ASC-H · LESION INTRAEPITELIAL ESCAMOSA DE BAJO GRADO LIE BG (NIC I) · LESION INTRAEPITELIAL ESCAMOSA DE ALTO GRADO LIE AG · AGC
+    > Solo si aplica.
+R: 
+[vph] Resultado del ADN-VPH
+    > Normal: NEGATIVO PARA LOS 14 GENOTIPOS DE ALTO RIESGO
+    > Opciones: NEGATIVO PARA LOS 14 GENOTIPOS DE ALTO RIESGO · POSITIVO GENOTIPO 16 · POSITIVO GENOTIPO 18 · POSITIVO OTROS GENOTIPOS DE ALTO RIESGO
+    > Solo si aplica.
+R: 
+[control] Conducta y próximo control
+    > Lo sugerido sale del resultado; cámbialo si aplica otra conducta.
+    > Si lo dejas vacío, la app lo sugiere según la edad.
+    > Opciones: CONTROL EN 3 AÑOS · CONTROL EN 5 AÑOS · CONTROL EN 1 AÑO · SE ENVIA COLPOSCOPIA + BIOPSIA Y VALORACION POR GINECOLOGIA · NUEVA TOMA DE CITOLOGIA
+R: 
+[extra] ¿Algo más para agregar a la nota?
+    > Dicta cualquier dato adicional, o di «no».
+    > Normal: NO
+R: 
+
+== OTROS DATOS U OBSERVACIONES ==
+R: 
+
+# FIN

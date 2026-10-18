@@ -1,0 +1,52 @@
+PLANTILLAS DEL BLOC DE NOTAS - DICTADO DE NOTAS (Res. 3280 de 2018)
+Versión de la app: 2026-10-18 v158
+==================================
+
+PARA QUÉ SIRVEN
+Para tomar los datos de la consulta cuando no hay internet o no abre la
+herramienta, y pasarlos después a la app sin volver a escribir nada.
+
+ARCHIVOS
+A01 a A11 = módulos de las rutas (materno perinatal y cursos de vida).
+            Tienen las mismas preguntas, en el mismo orden, que la pestaña
+            Preguntas de la app.
+B12 en adelante = notas por voz (citología, planificación, implante, DIU,
+            mama, agudeza visual, VIH, C y D, lactancia, tuberculosis,
+            morbilidad...).
+
+CÓMO LLENARLAS
+1. Haz una copia del archivo por cada paciente (ej. "pinf_LuisPerez.txt").
+2. DATOS INICIALES: escribe después de los dos puntos.
+   Fechas así: 18/10/2026. Sexo: F o M.
+3. Cada pregunta tiene una línea "R:". Escribe la respuesta ahí.
+   - Basta con la palabra de la opción: "R: Normal". La app pone el
+     texto completo de la nota.
+   - Si la opción lleva datos, ponlos después de dos puntos, separados por
+     comas, en el orden en que aparecen:
+       R: Normales: 120, 32, 36.8      (FC, FR, temperatura)
+       R: Fiebre: 38.5
+       R: Enfermería: 18/12/2026
+   - También puedes escribir texto libre: "R: Peso 9,8 kg, talla 76 cm".
+   - Deja vacío lo que no hiciste.
+4. No borres la primera línea (# APP: ...) ni los números [1], [2]...
+   Las líneas que empiezan con > son ayudas: puedes dejarlas o borrarlas.
+5. Lo que no tenga pregunta va al final, en OTROS DATOS U OBSERVACIONES.
+
+CÓMO PASARLAS A LA APP (cuando haya señal o abra la herramienta)
+1. Copia todo el texto del archivo lleno.
+2. En la app: Inicio > Sin internet > Plantillas del bloc de notas.
+3. Pégalo en "2. Pasar una plantilla llena" y toca "Pasar a la app".
+4. Se abre el módulo con la persona identificada y las respuestas puestas.
+   Revisa las preguntas y arma la nota como siempre. Las notas por voz se
+   abren directo en la nota final.
+5. Al terminar, la atención se registra en la base: en los módulos con
+   "Siguiente: enviar a la base"; en las notas por voz con "Guardar y
+   registrar en la base".
+
+OJO
+- La app revisa que la nota corresponda a la persona por edad y sexo
+  (Res. 3280). Si no corresponde, no la arma: corrige los datos.
+- Pasar una plantilla reemplaza a la persona identificada y el borrador de
+  ese módulo. Termina o guarda la nota anterior antes de pegar otra.
+- Si la app cambia de versión, copia plantillas nuevas desde la misma
+  pantalla (1. Copiar una plantilla vacía): siempre salen al día.

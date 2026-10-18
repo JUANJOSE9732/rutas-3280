@@ -1,0 +1,270 @@
+# APP: MODULO prenatal
+==================================
+PRENATAL (Gestante: inscripción y controles)
+Res. 3280 · 4.3 Cuidado prenatal, p. 263
+==================================
+> Cómo llenarla: escribe después de «R:». Basta con la palabra de la opción (ej. «Normal»)
+>  y la app pone el texto completo. Si la opción tiene ____, agrega los datos después de dos
+>  puntos: «Fiebre: 38,5». Deja vacío lo que no hiciste. Las líneas con > son ayudas.
+> Le toca: Captación antes de la semana 10 | Controles mensual hasta 36, quincenal hasta 40 | Mínimo 10 nulípara · 7 multípara | 36, 38, 40 medicina
+> Alertas que obligan a remitir:
+>  - Cualquier factor de riesgo, enfermedad o paraclínico anormal → remisión inmediata a medicina
+>  - TA ≥ 140/90 en 2 tomas (≥ 4 h) después de la semana 20, o ≥ 160/110 en una toma → hospital
+>  - Prueba treponémica positiva → penicilina benzatínica 2.400.000 UI IM en ese momento (sin prueba de alergia si no hay antecedente)
+>  - VIH reactiva → segunda prueba diferente; si reactiva: carga viral, antirretroviral profiláctico y remitir
+>  - Ganancia de peso inadecuada en la semana 28 → equipo multidisciplinario
+>  - Adolescente → salud mental y trabajo social toda la gestación
+>  - Una respuesta positiva de violencia → ruta de víctimas de violencia
+
+== DATOS INICIALES ==
+Fecha de esta consulta (dd/mm/aaaa): 
+Comunidad o vereda: 
+Nombre completo: 
+Tipo de documento (CC / TI / RC / CE / PPT / PEP / MS / AS): 
+Número de documento: 
+Fecha de nacimiento (dd/mm/aaaa): 
+Sexo (F / M): 
+Teléfono: 
+Pertenencia étnica (INDIGENA / AFROCOLOMBIANO / RAIZAL / PALENQUERO / ROM / NINGUNA): 
+Pueblo indígena: 
+EAPB: 
+Régimen (SUBSIDIADO / CONTRIBUTIVO / ESPECIAL / NO AFILIADO): 
+Edad (solo si no sabe la fecha de nacimiento; años o meses): 
+
+== PRIMER ABORDAJE ==
+[1] Tipo de consulta
+    > Qué hacer: ¿Es la primera consulta de este embarazo o un control?
+    > Opciones: Primera consulta · Primera consulta tardía · Control de seguimiento
+R: 
+[2] Presentación
+    > Qué hacer: Salúdala, preséntate y explícale para qué es el control.
+    > Opciones: Presentación realizada · Con intérprete
+R: 
+[3] Acompañante
+    > Pregunta: ¿Viene con alguien? ¿Quiere que esté en la consulta?
+    > Opciones: Viene sola · Con su pareja · Con un familiar · Con la partera · Con intérprete
+R: 
+[4] Opciones frente al embarazo
+    > Qué hacer: Antes de inscribirla, explícale sus opciones frente al embarazo, incluido el derecho a la IVE.
+    > Opciones: Continúa el embarazo · Pide IVE · Lo va a pensar
+R: 
+[5] Embarazo deseado
+    > Pregunta: ¿Este embarazo lo buscaron? ¿Cómo se siente con él?
+    > Opciones: Deseado y planeado · Deseado, no planeado · No deseado
+R: 
+[6] Partera y medicina tradicional
+    > Pregunta: ¿La está acompañando la partera o el payé? ¿Le han hecho alguna curación o le han dado algún remedio en este embarazo?
+    > Opciones: No · Partera · Payé · Curación o rezo · Sobada o acomodada · Remedio de plantas
+R: 
+
+== GESTACIÓN ACTUAL ==
+[7] Edad gestacional
+    > Pregunta: ¿Cuándo fue su última regla? ¿Tiene ecografía?
+    > Escribe los valores; en la app revisa el cálculo de esta pregunta.
+R: 
+[8] Signos de alarma
+    > Pregunta: ¿Ha tenido sangrado, salida de líquido, dolor de cabeza fuerte, ver luces o zumbidos, hinchazón de cara o manos, dolor en la boca del estómago, fiebre, ardor al orinar o contracciones?
+    > Opciones: Niega · Sangrado · Salida de líquido · Dolor de cabeza o ve luces · Hinchazón · Dolor en la boca del estómago · Fiebre · Ardor al orinar o flujo · Contracciones
+R: 
+[9] Movimientos fetales
+    > Pregunta: ¿Siente que el bebé se mueve? ¿Igual que antes?
+    > Opciones: Sí, normales · Todavía no · Disminuidos
+R: 
+[10] Molestias del embarazo
+    > Pregunta: ¿Tiene náuseas, vómito, agrieras, estreñimiento o hemorroides? ¿Cómo duerme?
+    > Opciones: Ninguna · Náuseas y vómito · Agrieras · Estreñimiento o hemorroides · Duerme mal
+R: 
+[11] Medicamentos en este embarazo
+    > Pregunta: ¿Qué medicamentos, vitaminas o remedios ha tomado en este embarazo?
+    > Opciones: Ninguno · Micronutrientes · Antibiótico · Otro
+R: 
+
+== ANTECEDENTES ==
+[12] Fórmula obstétrica
+    > Opciones: Primigestante
+    > Escribe los valores; en la app revisa el cálculo de esta pregunta.
+R: 
+[13] Último parto
+    > Pregunta: ¿Cuándo fue su último parto? ¿Fue normal o por cesárea, a tiempo, y cuánto pesó el bebé?
+    > Opciones: No aplica · Más de 18 meses · Menos de 18 meses · Más de 10 años
+R: 
+[14] Complicaciones en embarazos anteriores
+    > Pregunta: En otros embarazos, ¿tuvo presión alta o convulsiones, sangrado, placenta previa, ruptura de fuente antes de tiempo, bebé prematuro o muy pequeño o muy grande, placenta retenida, hemorragia o infección después del parto, o algún bebé que murió o nació con malformaciones?
+    > Opciones: No aplica · Niega · Preeclampsia · Hemorragia o placenta retenida · Prematuro o bajo peso · Bebé grande · Muerte del bebé · Malformaciones · Placenta o líquido · Parto difícil · Otra
+R: 
+[15] Enfermedades crónicas
+    > Pregunta: ¿Tiene presión alta, azúcar alta, enfermedad del riñón, del corazón, de tiroides, lupus, convulsiones, asma, anemia, tuberculosis, alguna enfermedad mental o ha tenido trombosis?
+    > Opciones: Niega · Hipertensión · Diabetes · Riñón · Corazón · Lupus o autoinmune · Epilepsia · Trombosis · Enfermedad mental · Otra
+R: 
+[16] Cirugías y alergias
+    > Pregunta: ¿La han operado? ¿Es alérgica a algún medicamento?
+    > Opciones: Niega ambas · Cesárea · Cirugía del útero · Alergia a penicilina · Otra
+R: 
+
+== ANTECEDENTES GINECOLÓGICOS ==
+[17] Menarquia y ciclos
+    > Pregunta: ¿A qué edad le llegó la primera regla? ¿Le venía cada mes?
+    > Opciones: Regulares · Irregulares
+R: 
+[18] Método antes del embarazo
+    > Pregunta: ¿Qué método usaba para planificar y hasta cuándo?
+    > Opciones: Ninguno · Inyectable mensual · Inyectable trimestral · Pastillas · Implante · DIU · Condón
+R: 
+[19] Infecciones de transmisión sexual
+    > Pregunta: ¿Ha tenido sífilis, VIH, flujo con mal olor, llagas o verrugas en los genitales? ¿Recibió tratamiento?
+    > Opciones: Niega · Sífilis previa · VIH · Flujo · Úlceras o verrugas · Otra
+R: 
+[20] Infertilidad
+    > Pregunta: ¿Le costó quedar embarazada? ¿Recibió algún tratamiento para quedar en embarazo?
+    > Opciones: No · Le costó · Con tratamiento
+R: 
+[21] Tamizaje de cuello uterino
+    > Pregunta: ¿Cuándo fue su última citología o prueba de VPH? ¿Qué resultado le dieron?
+    > Opciones: Al día normal · Nunca · No recuerda · Resultado anormal
+R: 
+
+== ANTECEDENTES ==
+[22] Antecedentes familiares
+    > Pregunta: ¿En su familia hay presión alta, preeclampsia, diabetes, gemelos, malformaciones, tuberculosis u otras enfermedades?
+    > Opciones: Niega · Preeclampsia · Hipertensión o diabetes · Gemelos · Otra
+R: 
+[23] Hemoclasificación
+    > Pregunta: ¿Sabe su tipo de sangre?
+    > Opciones: No sabe · Rh positivo · Rh negativo
+R: 
+
+== HÁBITOS Y PSICOSOCIAL ==
+[24] Alimentación
+    > Pregunta: ¿Qué comió ayer desde que se levantó hasta que se acostó?
+    > Opciones: Variada · Poco variada · Casabe y fariña
+R: 
+[25] Alcohol, tabaco y sustancias
+    > Pregunta: ¿Ha tomado chicha fermentada o licor en este embarazo? ¿Fuma, usa rapé o mambe? ¿Otras sustancias?
+    > Opciones: Niega · Chicha ocasional · Chicha o licor frecuente · Tabaco o mambe · Otra sustancia
+R: 
+[26] Familia y apoyo
+    > Pregunta: ¿Con quién vive? ¿Su pareja y su familia la apoyan con el embarazo?
+    > Opciones: Buen apoyo · Poco apoyo · Madre cabeza de familia
+R: 
+[27] Acceso al servicio
+    > Pregunta: ¿Cuánto se demora en llegar al puesto o al hospital? ¿Cómo llega? ¿Entiende bien el español?
+    > Opciones: Sin barreras · Lejos · Idioma
+R: 
+
+== VIOLENCIAS Y SALUD MENTAL ==
+[28] Violencia: humillación o amenazas
+    > Pregunta: ¿Durante el último año ha sido humillada, menospreciada, insultada o amenazada por su pareja?
+    > Opciones: No · Sí
+R: 
+[29] Violencia física último año
+    > Pregunta: ¿Durante el último año fue golpeada, bofeteada, pateada o lastimada físicamente de otra manera?
+    > Opciones: No · Sí
+R: 
+[30] Violencia física en el embarazo
+    > Pregunta: ¿Desde que está en embarazo ha sido golpeada, bofeteada, pateada o lastimada físicamente de alguna manera?
+    > Opciones: No · Sí
+R: 
+[31] Violencia sexual
+    > Pregunta: ¿Durante el último año fue forzada a tener relaciones sexuales?
+    > Opciones: No · Sí
+R: 
+[32] Depresión: tristeza
+    > Pregunta: Durante el mes pasado, ¿con frecuencia se ha sentido triste, deprimida o sin esperanza?
+    > Opciones: No · Sí
+R: 
+[33] Depresión: poco interés
+    > Pregunta: Durante el mes pasado, ¿ha permanecido preocupada por tener poco interés o placer para hacer las cosas cotidianas?
+    > Opciones: No · Sí
+R: 
+[34] Depresión: necesita ayuda
+    > Pregunta: ¿Siente que necesita ayuda?
+    > Opciones: No · Sí
+R: 
+
+== VACUNACIÓN ==
+[35] Vacunas del embarazo
+    > Pregunta: Revisa el carné: ¿qué vacunas tiene en este embarazo?
+    > Escribe los valores; en la app revisa el cálculo de esta pregunta.
+R: 
+
+== EXAMEN FÍSICO ==
+[36] Signos vitales
+    > Qué hacer: Registra los signos vitales.
+    > Escribe los valores; en la app revisa el cálculo de esta pregunta.
+R: 
+[37] Antropometría y ganancia de peso
+    > Qué hacer: Registra peso y talla. Si es la primera consulta y está después de la semana 16, pregúntale cuánto pesaba antes del embarazo.
+    > Escribe los valores; en la app revisa el cálculo de esta pregunta.
+R: 
+[38] Examen por sistemas
+    > Qué hacer: Examen cefalocaudal, incluida la cavidad bucal.
+R: 
+[39] Valoración ginecológica
+    > Qué hacer: Valoración ginecológica de la primera consulta.
+    > Opciones: No: sin insumos · No: no acepta
+R: 
+[40] Valoración obstétrica
+    > Qué hacer: Mide la altura uterina y escucha la frecuencia cardiaca fetal.
+    > Opciones: Cefálica · Podálica · Transversa · Dos fetos · Aún no se define
+    > Escribe los valores; en la app revisa el cálculo de esta pregunta.
+R: 
+
+== EXÁMENES ==
+[41] Exámenes de ingreso
+    > Qué hacer: ¿Qué exámenes ordenaste o hiciste hoy?
+    > Opciones: Paquete completo · Pruebas rápidas hoy · Ecografía 11 a 14 semanas · Pendiente de toma · Treponémica reactiva · VIH reactiva
+R: 
+[42] Exámenes de seguimiento
+    > Qué hacer: ¿Qué exámenes de seguimiento le tocan y cuáles ordenaste o hiciste?
+    > Opciones: Pruebas rápidas del trimestre · IgM toxoplasma · Gota gruesa · Ecografía de detalle · PTOG · Hemograma 28 · Estreptococo B · Pendiente de toma · Treponémica reactiva · VIH reactiva
+R: 
+[43] Resultados de exámenes
+    > Qué hacer: ¿Trae resultados? ¿Cómo salieron?
+    > Opciones: Normales · Alterados · No trae
+R: 
+
+== RIESGO ==
+[44] Herrera y Hurtado
+    > Qué hacer: Escala de riesgo biopsicosocial de Herrera y Hurtado.
+    > Escribe los valores; en la app revisa el cálculo de esta pregunta.
+R: 
+[45] Riesgo de preeclampsia
+    > Qué hacer: Criterios de riesgo de preeclampsia.
+    > Escribe los valores; en la app revisa el cálculo de esta pregunta.
+R: 
+
+== PLAN ==
+[46] Micronutrientes
+    > Qué hacer: Formulación de micronutrientes.
+    > Opciones: Ácido fólico · Ácido fólico 4 mg · Calcio · Hierro · Los tres
+R: 
+[47] Desparasitación
+    > Qué hacer: Desparasitación con albendazol (una vez en el embarazo).
+    > Opciones: Se entrega · Ya la recibió · Primer trimestre
+R: 
+[48] Remisiones
+    > Qué hacer: ¿A dónde la remitiste?
+    > Opciones: Odontología · Nutrición · Curso de preparación · Medicina · Ginecobstetricia · Psicología · Trabajo social · Vacunación · Ninguna
+R: 
+[49] Anticoncepción posparto
+    > Qué hacer: Asesoría en anticoncepción para después del parto: ¿qué método eligió?
+    > Opciones: Implante · DIU · Inyectable trimestral · Ligadura · Lactancia (MELA) y condón · No ha decidido
+    > Escribe los valores; en la app revisa el cálculo de esta pregunta.
+R: 
+[50] Plan de parto
+    > Qué hacer: Plan de parto: ¿dónde va a tener el bebé y cómo va a llegar?
+    > Opciones: Hospital · Hogar materno · Partera · Hijos y casa
+R: 
+[51] Información en salud
+    > Qué hacer: Antes de cerrar, explícale estos temas. Toca los que hablaste.
+    > Opciones: Todos los temas · Signos de alarma · Alimentación y hábitos · Lactancia · Curso de preparación · Derechos · Condones
+R: 
+[52] Próximo control
+    > Qué hacer: ¿Cuándo es el próximo control?
+    > Opciones: 1 mes · 15 días · Próxima brigada · Otra fecha
+R: 
+
+== OTROS DATOS U OBSERVACIONES ==
+R: 
+
+# FIN

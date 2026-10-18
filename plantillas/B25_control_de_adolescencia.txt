@@ -1,0 +1,93 @@
+# APP: NOTA adol
+==================================
+NOTA: CONTROL DE ADOLESCENCIA (12 a 17 años)
+==================================
+> Cómo llenarla: escribe después de «R:». Si queda vacío, la app pone el valor normal
+>  que aparece en la ayuda. Las líneas con > son ayudas.
+
+== DATOS INICIALES ==
+Fecha de esta consulta (dd/mm/aaaa): 
+Comunidad o vereda: 
+Nombre completo: 
+Tipo de documento (CC / TI / RC / CE / PPT / PEP / MS / AS): 
+Número de documento: 
+Fecha de nacimiento (dd/mm/aaaa): 
+Sexo (F / M): 
+Teléfono: 
+Pertenencia étnica (INDIGENA / AFROCOLOMBIANO / RAIZAL / PALENQUERO / ROM / NINGUNA): 
+Pueblo indígena: 
+EAPB: 
+Régimen (SUBSIDIADO / CONTRIBUTIVO / ESPECIAL / NO AFILIADO): 
+Edad (solo si no sabe la fecha de nacimiento; años o meses): 
+
+== PREGUNTAS ==
+[sint] ¿Cómo se siente? ¿Algún síntoma?
+    > Normal: ASINTOMATICO
+R: 
+[animo] Tristeza, llanto fácil o ideas suicidas
+    > Normal: NIEGA
+R: 
+[antp] Antecedentes personales: ¿alguno?
+    > Cardiacos, HTA, diabetes, tiroides, renales, alergias, cirugías, hospitalizaciones. «Niega» si ninguno.
+    > Normal: NIEGA
+R: 
+[sexual] Inicio de actividad sexual
+    > Normal: NO HA INICIADO
+R: 
+[gpcav] Paridad: G P C A V
+    > Normal: G0 P0 C0 A0 V0
+    > Solo si aplica.
+R: 
+[fur] Fecha de la última menstruación
+    > Solo si aplica.
+R: 
+[pnf] Método de planificación
+    > Normal: NINGUNO
+    > Opciones: NINGUNO · INYECTABLE MENSUAL · INYECTABLE TRIMESTRAL (DEPOPROVERA) · IMPLANTE SUBDERMICO · DIU T DE COBRE · ANTICONCEPTIVOS ORALES · CONDON · POMEROY
+    > Solo si aplica.
+R: 
+[antfam] Antecedentes familiares
+    > Normal: NIEGA
+R: 
+[riesgo] Factores de riesgo comportamentales: alcohol, tabaco, sustancias
+    > Normal: NIEGA
+R: 
+[rxs] Revisión por sistemas: ¿algún síntoma?
+    > Cefalea, vértigo, cambios visuales, disnea, edemas, pérdida de peso… «Niega» si ninguno.
+    > Normal: NIEGA
+R: 
+[convive] ¿Con quién convive?
+    > Normal: MAMA, PAPA Y HERMANOS
+    > Opciones: MAMA, PAPA Y HERMANOS · MAMA Y HERMANOS · ABUELOS
+R: 
+[familia] Dinámica familiar y maltrato
+    > Normal: BUEN TRATO Y ADECUADA DINAMICA FAMILIAR, NIEGA MALTRATO
+R: 
+[libre] Escolaridad y tiempo libre
+    > Normal: ESTUDIA; EN SU TIEMPO LIBRE DESCANSA, REALIZA DEBERES ACADEMICOS Y DEL HOGAR Y EJERCICIO
+R: 
+[imagen] Percepción de su imagen corporal
+    > Normal: BUENA
+    > Opciones: BUENA · INADECUADA
+R: 
+[sv] Signos vitales y medidas
+    > Diga: tensión 110 70, frecuencia 72, respiración 18, temperatura 36.5, peso 58, talla 155. Di «normal» para omitir.
+    > Normal: NORMAL
+R: 
+[nutri] Estado nutricional
+    > Normal: ADECUADO
+    > Opciones: ADECUADO · RIESGO DE DELGADEZ · DELGADEZ · SOBREPESO · OBESIDAD
+R: 
+[ef] Examen físico: ¿normal o algún hallazgo?
+    > Di «normal» para dejar el examen de la plantilla, o dicta solo lo anormal con el sistema.
+    > Normal: NORMAL
+R: 
+[extra] ¿Algo más para agregar a la nota?
+    > Dicta cualquier dato adicional, o di «no».
+    > Normal: NO
+R: 
+
+== OTROS DATOS U OBSERVACIONES ==
+R: 
+
+# FIN

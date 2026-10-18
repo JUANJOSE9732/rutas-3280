@@ -1,0 +1,73 @@
+# APP: NOTA tbc
+==================================
+NOTA: TUBERCULOSIS (Ingreso, abandono o búsqueda)
+==================================
+> Cómo llenarla: escribe después de «R:». Si queda vacío, la app pone el valor normal
+>  que aparece en la ayuda. Las líneas con > son ayudas.
+
+== DATOS INICIALES ==
+Fecha de esta consulta (dd/mm/aaaa): 
+Comunidad o vereda: 
+Nombre completo: 
+Tipo de documento (CC / TI / RC / CE / PPT / PEP / MS / AS): 
+Número de documento: 
+Fecha de nacimiento (dd/mm/aaaa): 
+Sexo (F / M): 
+Teléfono: 
+Pertenencia étnica (INDIGENA / AFROCOLOMBIANO / RAIZAL / PALENQUERO / ROM / NINGUNA): 
+Pueblo indígena: 
+EAPB: 
+Régimen (SUBSIDIADO / CONTRIBUTIVO / ESPECIAL / NO AFILIADO): 
+Edad (solo si no sabe la fecha de nacimiento; años o meses): 
+
+== PREGUNTAS ==
+[tipo] ¿Qué nota es?
+    > Normal: INGRESO AL PROGRAMA
+    > Opciones: INGRESO AL PROGRAMA · ABANDONO DE TRATAMIENTO · BUSQUEDA: NO LOCALIZADO · BUSQUEDA: LOCALIZADO
+R: 
+[dx] Diagnóstico
+    > Normal: TUBERCULOSIS PULMONAR CONFIRMADA
+    > Opciones: TUBERCULOSIS PULMONAR CONFIRMADA · SOSPECHA DE TUBERCULOSIS PULMONAR · TUBERCULOSIS EXTRAPULMONAR
+    > Solo si aplica.
+R: 
+[sint] Síntomas principales
+    > Normal: TOS PRODUCTIVA DE MAS DE 3 SEMANAS, PERDIDA DE PESO NO CUANTIFICADA Y SUDORACION NOCTURNA
+    > Solo si aplica.
+R: 
+[asoc] Condiciones asociadas (VIH, desnutrición…)
+    > Normal: NINGUNA
+    > Solo si aplica.
+R: 
+[taes] Fecha de inicio del TAES
+    > Si lo dejas vacío, la app lo sugiere según la edad.
+    > Solo si aplica.
+R: 
+[muestras] Muestras tomadas
+    > Normal: BACILOSCOPIA SERIADA Y CULTIVO
+    > Solo si aplica.
+R: 
+[tiempo] ¿Hace cuánto no recibe tratamiento?
+    > Solo si aplica.
+R: 
+[motivo] Motivo del abandono
+    > Opciones: EFECTOS ADVERSOS · DIFICULTADES ECONOMICAS · FALTA DE APOYO FAMILIAR · CAMBIO DE DOMICILIO · DIFICULTAD DE DESPLAZAMIENTO · NEGACION DE LA ENFERMEDAD
+    > Solo si aplica.
+R: 
+[medio] ¿Cómo se hizo la búsqueda?
+    > Normal: VISITA DOMICILIARIA
+    > Opciones: VISITA DOMICILIARIA · LLAMADA TELEFONICA
+    > Solo si aplica.
+R: 
+[estado] Estado del paciente
+    > Normal: CONSCIENTE, ORIENTADO
+    > Solo si aplica.
+R: 
+[extra] ¿Algo más para agregar a la nota?
+    > Dicta cualquier dato adicional, o di «no».
+    > Normal: NO
+R: 
+
+== OTROS DATOS U OBSERVACIONES ==
+R: 
+
+# FIN

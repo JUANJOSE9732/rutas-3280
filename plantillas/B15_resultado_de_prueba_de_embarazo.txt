@@ -1,0 +1,50 @@
+# APP: NOTA pfemb
+==================================
+NOTA: RESULTADO DE PRUEBA DE EMBARAZO (Regresa con la prueba)
+==================================
+> Cómo llenarla: escribe después de «R:». Si queda vacío, la app pone el valor normal
+>  que aparece en la ayuda. Las líneas con > son ayudas.
+
+== DATOS INICIALES ==
+Fecha de esta consulta (dd/mm/aaaa): 
+Comunidad o vereda: 
+Nombre completo: 
+Tipo de documento (CC / TI / RC / CE / PPT / PEP / MS / AS): 
+Número de documento: 
+Fecha de nacimiento (dd/mm/aaaa): 
+Sexo (F / M): 
+Teléfono: 
+Pertenencia étnica (INDIGENA / AFROCOLOMBIANO / RAIZAL / PALENQUERO / ROM / NINGUNA): 
+Pueblo indígena: 
+EAPB: 
+Régimen (SUBSIDIADO / CONTRIBUTIVO / ESPECIAL / NO AFILIADO): 
+Edad (solo si no sabe la fecha de nacimiento; años o meses): 
+
+== PREGUNTAS ==
+[res] Resultado de la prueba de embarazo
+    > Normal: NEGATIVA
+    > Opciones: NEGATIVA · POSITIVA
+R: 
+[fecha] Fecha de la prueba
+    > Si lo dejas vacío, la app lo sugiere según la edad.
+R: 
+[metodo] Método escogido en la consulta anterior
+    > Opciones: INYECTABLE MENSUAL · INYECTABLE TRIMESTRAL (DEPOPROVERA) · IMPLANTE SUBDERMICO · DIU T DE COBRE · ANTICONCEPTIVOS ORALES · CONDON · POMEROY
+    > Solo si aplica.
+R: 
+[decision] ¿Qué decide frente al embarazo?
+    > Opciones: CONTINUAR EL EMBARAZO E INGRESAR A CONTROL PRENATAL · INTERRUPCION VOLUNTARIA DEL EMBARAZO · DAR EN ADOPCION · AUN NO DECIDE
+    > Solo si aplica.
+R: 
+[control] Fecha o tiempo del próximo control
+    > Si lo dejas vacío, la app lo sugiere según la edad.
+R: 
+[extra] ¿Algo más para agregar a la nota?
+    > Dicta cualquier dato adicional, o di «no».
+    > Normal: NO
+R: 
+
+== OTROS DATOS U OBSERVACIONES ==
+R: 
+
+# FIN

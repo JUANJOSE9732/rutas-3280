@@ -1,0 +1,46 @@
+# APP: NOTA lact
+==================================
+NOTA: CONSEJERÍA EN LACTANCIA MATERNA (Madre y bebé)
+==================================
+> Cómo llenarla: escribe después de «R:». Si queda vacío, la app pone el valor normal
+>  que aparece en la ayuda. Las líneas con > son ayudas.
+
+== DATOS INICIALES ==
+Fecha de esta consulta (dd/mm/aaaa): 
+Comunidad o vereda: 
+Nombre completo: 
+Tipo de documento (CC / TI / RC / CE / PPT / PEP / MS / AS): 
+Número de documento: 
+Fecha de nacimiento (dd/mm/aaaa): 
+Sexo (F / M): 
+Teléfono: 
+Pertenencia étnica (INDIGENA / AFROCOLOMBIANO / RAIZAL / PALENQUERO / ROM / NINGUNA): 
+Pueblo indígena: 
+EAPB: 
+Régimen (SUBSIDIADO / CONTRIBUTIVO / ESPECIAL / NO AFILIADO): 
+Edad (solo si no sabe la fecha de nacimiento; años o meses): 
+
+== PREGUNTAS ==
+[bebe] Edad del bebé
+R: 
+[tipo] ¿Cómo lo alimenta?
+    > Normal: LACTANCIA MATERNA EXCLUSIVA
+    > Opciones: LACTANCIA MATERNA EXCLUSIVA · LACTANCIA MIXTA · LACTANCIA Y ALIMENTACION COMPLEMENTARIA
+R: 
+[prob] ¿Problemas con la lactancia?
+    > Normal: NINGUNO
+    > Opciones: NINGUNO · DOLOR O GRIETAS EN PEZONES · MAL AGARRE · CONGESTION MAMARIA · POCA PRODUCCION
+R: 
+[obs] Observación de una toma
+    > Normal: BUENA POSICION Y BUEN AGARRE
+    > Opciones: BUENA POSICION Y BUEN AGARRE · SE CORRIGE POSICION Y AGARRE
+R: 
+[extra] ¿Algo más para agregar a la nota?
+    > Dicta cualquier dato adicional, o di «no».
+    > Normal: NO
+R: 
+
+== OTROS DATOS U OBSERVACIONES ==
+R: 
+
+# FIN

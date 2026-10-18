@@ -1,0 +1,147 @@
+# APP: MODULO rn
+==================================
+RECIÉN NACIDO (0 a 7 días: atención inmediata y control)
+Res. 3280 · 4.10 Cuidado del recién nacido, p. 299
+==================================
+> Cómo llenarla: escribe después de «R:». Basta con la palabra de la opción (ej. «Normal»)
+>  y la app pone el texto completo. Si la opción tiene ____, agrega los datos después de dos
+>  puntos: «Fiebre: 38,5». Deja vacío lo que no hiciste. Las líneas con > son ayudas.
+> Le toca: Piel a piel primeros 60 min | Vitamina K 1 mg IM | Control día 3 a 5
+> Alertas que obligan a remitir:
+>  - Temperatura fuera de 36,5–37,5 °C es señal de peligro
+>  - Apgar < 7 → remitir; < 7 a los 5 min: descartar asfixia
+>  - Pulsioximetría pre y postductal con diferencia > 3 % o < 90 % → pediatría o cardiología
+>  - No succiona, convulsiona, letárgico, dificultad para respirar, ictericia precoz, ombligo rojo o con pus → remitir
+>  - Riesgo social (maltrato, drogas, abandono) → trabajo social y restablecimiento de derechos
+
+== DATOS INICIALES ==
+Fecha de esta consulta (dd/mm/aaaa): 
+Comunidad o vereda: 
+Nombre completo: 
+Tipo de documento (CC / TI / RC / CE / PPT / PEP / MS / AS): 
+Número de documento: 
+Fecha de nacimiento (dd/mm/aaaa): 
+Sexo (F / M): 
+Teléfono: 
+Pertenencia étnica (INDIGENA / AFROCOLOMBIANO / RAIZAL / PALENQUERO / ROM / NINGUNA): 
+Pueblo indígena: 
+EAPB: 
+Régimen (SUBSIDIADO / CONTRIBUTIVO / ESPECIAL / NO AFILIADO): 
+Edad (solo si no sabe la fecha de nacimiento; años o meses): 
+Madre, padre o cuidador - relación (HIJO(A) DE / NIETO(A) DE / SOBRINO(A) DE / A CARGO DE): 
+Madre, padre o cuidador - nombre completo: 
+Madre, padre o cuidador - tipo de documento (CC / TI / CE / PPT / PEP / AS): 
+Madre, padre o cuidador - número de documento: 
+
+== ATENCIÓN INMEDIATA ==
+[1] Pinzamiento al dejar de latir el cordón (2–3 min); inmediato solo e…
+    > Qué hacer: Pinzamiento al dejar de latir el cordón (2–3 min); inmediato solo en abruptio o placenta previa sangrante
+    > Opciones: Normal (2 a 3 min) · Más tardío · Precoz (30 a 60 s) · Inmediato
+R: 
+[2] Contacto piel a piel 60 min y lactancia
+    > Opciones: Realizado · Con familiar · Interrumpido por reanimación · Sin lactancia por VIH
+R: 
+[3] Apgar al minuto y a los 5 minutos
+    > Escribe los valores; en la app revisa el cálculo de esta pregunta.
+R: 
+[4] Silverman si hay dificultad respiratoria a los 10 min
+    > Escribe los valores; en la app revisa el cálculo de esta pregunta.
+R: 
+[5] Identificación frente a la madre
+    > Opciones: Realizada
+R: 
+
+== ENTRE LOS 60 Y 90 MINUTOS ==
+[6] Profilaxis umbilical: ligadura y clorhexidina o yodopovidona
+    > Opciones: Clorhexidina · Yodopovidona
+R: 
+[7] Profilaxis ocular: povidona yodada 2,5–5 %, 1 gota en cada ojo
+    > Opciones: Povidona yodada · Eritromicina · Tetraciclina
+R: 
+[8] Vitamina K 1 mg IM en el muslo (0,5 mg si pesa < 1.500 g)
+    > Opciones: 1 mg IM · 0,5 mg IM · Oral
+R: 
+[9] Examen físico inicial: permeabilidad esofágica y anal, temperatura
+    > Opciones: Normal · Temperatura alterada · Anomalía congénita
+R: 
+[10] Antropometría
+    > Escribe los valores; en la app revisa el cálculo de esta pregunta.
+R: 
+
+== ANTES DEL EGRESO ==
+[11] Signos vitales cada 6 horas
+    > Escribe los valores; en la app revisa el cálculo de esta pregunta.
+R: 
+[12] Tamizaje de cardiopatía: pulsioximetría pre y postductal a las 24 h
+    > Escribe los valores; en la app revisa el cálculo de esta pregunta.
+R: 
+[13] TA en las 4 extremidades
+    > Opciones: Normal · Alterada
+R: 
+[14] Tamizaje visual: reflejo rojo
+    > Opciones: Normal · Alterado · Pendiente
+R: 
+[15] Tamizaje auditivo
+    > Opciones: Pasa · No pasa · Sin equipo: pendiente · Sin equipo, con riesgo: remitir
+R: 
+[16] TSH neonatal
+    > Opciones: Tomada de cordón · Tomada periférica · Pendiente
+R: 
+[17] Vacunas BCG y hepatitis B
+    > Opciones: Aplicadas · Pendiente BCG · Madre con hepatitis B
+    > Escribe los valores; en la app revisa el cálculo de esta pregunta.
+R: 
+[18] Hemoclasificación del RN; anti-D a la madre si aplica
+    > Opciones: Tomada · Madre Rh negativo · Pendiente
+R: 
+[19] Resultados maternos de VIH, sífilis, toxoplasma, hepatitis B, estre…
+    > Qué hacer: Resultados maternos de VIH, sífilis, toxoplasma, hepatitis B, estreptococo B
+    > Opciones: Negativos · VIH positivo · Sífilis positiva · Hepatitis B positiva · Sin resultados
+R: 
+
+== CONTROL DEL RECIÉN NACIDO (DÍA 3 A 5): PREGUNTAR ==
+[20] ¿Cómo y cada cuánto mama? ¿Se pega bien?
+    > Opciones: Adecuada · Mama poco · Dolor al lactar · Otros líquidos
+R: 
+[21] Orina y deposiciones
+    > Opciones: Normal · Poca orina · Sin meconio · Deposiciones con sangre
+R: 
+[22] Color amarillo de la piel, fiebre, frialdad
+    > Opciones: Niega · Ictericia · Fiebre o frialdad
+R: 
+[23] Succión, llanto, actividad
+    > Opciones: Normal · Alterado
+R: 
+[24] Vacunas y tamizajes hechos
+    > Opciones: Completos · Pendientes
+R: 
+
+== CONTROL: EXAMINAR ==
+[25] Peso y pérdida desde el nacimiento
+    > Escribe los valores; en la app revisa el cálculo de esta pregunta.
+R: 
+[26] Temperatura, FC, FR
+    > Escribe los valores; en la app revisa el cálculo de esta pregunta.
+R: 
+[27] Ictericia
+    > Opciones: Sin ictericia · Leve · Para remitir
+R: 
+[28] Ombligo
+    > Opciones: Normal · Infectado · Sangrado
+R: 
+[29] Observar una toma (posición y agarre)
+    > Opciones: Adecuada · Se corrige
+R: 
+
+== MADRE ==
+[30] Consejería en lactancia materna exclusiva
+    > Opciones: Realizada
+R: 
+[31] Con VIH confirmado: fórmula, no leche materna
+    > Opciones: No aplica · Fórmula
+R: 
+
+== OTROS DATOS U OBSERVACIONES ==
+R: 
+
+# FIN

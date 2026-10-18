@@ -285,6 +285,7 @@ const VIOL = ["¿DURANTE EL ÚLTIMO AÑO, ha sido humillada, menospreciada, insu
 const DEPR = ["Durante el mes pasado, ¿con frecuencia se ha sentido triste, deprimida o sin esperanza?","Durante el mes pasado, ¿ha permanecido preocupada por tener poco interés o placer para hacer las cosas cotidianas?","Si responde sí a alguna: ¿Siente que necesita ayuda?"];
 const CERVIX = ["Cuello uterino (Res. 3280, Directrices RPMS 9.2 y 9.5.1, p. 167–169): 25 a 29 años citología, esquema 1-3-3; 30 a 65 años ADN-VPH, esquema 1-5-5, con muestra de citología en el mismo momento para triage; 30 a 50 años en área rural dispersa, también VIA-VILI con crioterapia (esquema 1-3-3), solo por personal entrenado y certificado; menores de 25 años, citología de oportunidad por criterio","Si en la especuloscopia hay signos de carcinoma invasor: informar, alertar y gestionar colposcopia + biopsia en máximo 1 semana"];
 
+const PLAN_SEC={t:"Plan",items:["Medicamentos y micronutrientes formulados","Remisiones","Próximo control"]};
 const M = {
  precon:{route:"rm",title:"Preconcepcional",who:"Mujer que quiere embarazarse en el próximo año",
   facts:[["Consultas","1 inicial (30 min) + 1 control (20 min)"],["Quién","Medicina o enfermería"],["Ácido fólico","≥ 3 meses antes"]],
@@ -349,60 +350,67 @@ const M = {
   facts:[["Medicina","1 m, 4–5 m, 12–18 m, 24–29 m, 3 a, 5 a"],["Enfermería","2–3 m, 6–8 m, 9–11 m, 18–23 m, 30–35 m, 4 a"]],
   alerts:["Hitos de la EAD-3 no alcanzados → valoración médica","Desviación de las curvas de crecimiento o desnutrición aguda → manejo y remisión","Signos generales de peligro AIEPI → remisión urgente","Sospecha de maltrato → ruta de violencia y notificación"],
   sections:[
-   {t:"Valoración",items:["Crecimiento: peso, talla, perímetro cefálico, curvas OMS","Desarrollo con EAD-3","Alimentación: lactancia, alimentación complementaria","Esquema de vacunación","Salud bucal","Familia: familiograma, red de apoyo, cuidado"]},
+   {t:"Valoración",items:["Antecedentes perinatales: semanas y peso al nacer, hospitalización","Antecedentes personales: enfermedades, hospitalizaciones, alergias","Cuidados tradicionales: payé, rezos, plantas","Signos vitales: FC, FR, temperatura","Examen físico por sistemas, de cabeza a pies","Crecimiento: peso, talla, perímetro cefálico, curvas OMS","Desarrollo con EAD-3","Visión: reflejo rojo, fijación y seguimiento, estrabismo","Alimentación: lactancia, alimentación complementaria","Esquema de vacunación","Salud bucal","Familia: familiograma, red de apoyo, cuidado","Signos generales de peligro AIEPI"]},
    {t:"Protección específica",items:["Vacunación según esquema PAI","Micronutrientes en polvo (fortificación casera) en las edades del cuadro de la 3280","Micronutrientes dos veces al año desde los 2 años","Desparasitación desde el año, dos veces al año","Barniz de flúor y profilaxis semestral desde el año","Sellantes desde los 3 años según criterio","Consejería en lactancia"]},
    {t:"Detección temprana",items:["Hemoglobina según riesgo (una vez)","Odontología anual desde los 6 meses"]},
-   {t:"Educación",items:["Educación individual a padres o cuidadores","Al menos dos ciclos educativos"]}
+   {t:"Educación",items:["Educación individual a padres o cuidadores","Signos de alarma para consultar de inmediato","Al menos dos ciclos educativos"]},
+   PLAN_SEC
   ],
   notes:["rpms"]},
  inf:{ref:"Res. 3280 · RPMS 2, infancia, p. 115",route:"rp",title:"Infancia",who:"6 a 11 años",
   facts:[["Medicina","6, 8, 10 años"],["Enfermería","7, 9, 11 años"],["Odontología","anual"]],
   alerts:["Alteración visual o auditiva → remitir","Sospecha de maltrato o abuso → ruta de violencia"],
   sections:[
-   {t:"Valoración",items:["Crecimiento y estado nutricional","Desarrollo y desempeño escolar","Test de la figura humana de Goodenough-Harris (obligatorio si hay quejas escolares, opcional si no)","Agudeza visual y audición","Salud mental, violencias, acoso","Esquema de vacunación"]},
+   {t:"Valoración",items:["Antecedentes personales: enfermedades, hospitalizaciones, alergias","Hábitos: alimentación, actividad física, pantallas, sueño","Cuidados tradicionales: payé, rezos, plantas","Signos vitales: FC, FR, temperatura y tensión arterial","Examen físico por sistemas, de cabeza a pies","Crecimiento y estado nutricional","Desarrollo y desempeño escolar","Test de la figura humana de Goodenough-Harris (obligatorio si hay quejas escolares, opcional si no)","Agudeza visual y audición","Salud mental, violencias, acoso","Esquema de vacunación"]},
    {t:"Detección temprana",items:["Tamizaje de anemia (hemoglobina y hematocrito) una vez entre los 10 y 13 años, solo niñas"]},
    {t:"Protección específica",items:["Vacunación según PAI (VPH a los 9 años según PAI vigente)","Barniz de flúor y profilaxis dos veces al año","Sellantes según necesidad"]},
-   {t:"Educación",items:["Educación individual y familiar","Al menos dos ciclos educativos"]}
+   {t:"Educación",items:["Educación individual y familiar","Al menos dos ciclos educativos"]},
+   PLAN_SEC
   ],
   notes:["rpms"]},
  adol:{ref:"Res. 3280 · RPMS 3, adolescencia, p. 123",route:"rp",title:"Adolescencia",who:"12 a 17 años",
   facts:[["Medicina","12, 14, 16 años"],["Enfermería","13, 15, 17 años"],["Odontología","anual"]],
   alerts:["Embarazo en menor de 14 años → delito sexual presunto: ruta de violencia sexual y notificación","Ideación suicida, consumo, violencia → remisión prioritaria"],
   sections:[
-   {t:"Valoración",items:["Crecimiento y estado nutricional","Salud sexual y reproductiva: inicio de relaciones, protección","Salud mental, consumo de sustancias, violencias","Proyecto de vida","Esquema de vacunación"]},
+   {t:"Antecedentes y anamnesis",items:["Acompañante y confidencialidad","Antecedentes personales: enfermedades, hospitalizaciones, alergias","Antecedentes ginecológicos: menarquia, ciclos, última regla","Escolaridad o trabajo","Hábitos: alimentación, actividad física, pantallas, sueño"]},
+   {t:"Valoración",items:["Signos vitales: FC, FR, temperatura y tensión arterial","Examen físico por sistemas, de cabeza a pies","Crecimiento y estado nutricional","Salud sexual y reproductiva: inicio de relaciones, protección","Salud mental, consumo de sustancias, violencias","Proyecto de vida","Esquema de vacunación"]},
    {t:"Detección temprana",items:["Prueba treponémica y VIH según exposición al riesgo, con asesoría","Tamizaje de anemia una vez entre los 14 y 17 años, solo mujeres","Prueba de embarazo si hay retraso menstrual u otros signos"]},
    {t:"Protección específica",items:["Asesoría en anticoncepción y control","Suministro por demanda: DIU, implante, oral, inyectable, preservativos","Vacunación según esquema","Flúor y profilaxis dos veces al año; detartraje y sellantes según necesidad"]},
-   {t:"Educación",items:["Educación individual y familiar","Al menos dos ciclos educativos"]}
+   {t:"Educación",items:["Educación individual y familiar","Al menos dos ciclos educativos"]},
+   PLAN_SEC
   ],
   notes:["rpms"]},
  juv:{ref:"Res. 3280 · RPMS 4, juventud, p. 132",route:"rp",title:"Juventud",who:"18 a 28 años",
   facts:[["Valoración","2 en el periodo (medicina y enfermería)"],["Odontología","cada 2 años"],["Cuello uterino","desde los 25"]],
   alerts:CERVIX.slice(1).concat(["Riesgo cardiovascular alto → medicina"]),
   sections:[
-   {t:"Valoración",items:["Estado nutricional, TA, hábitos","Salud sexual y reproductiva, intención reproductiva (si quiere embarazarse: preconcepcional)","Salud mental, consumo, violencias"]},
+   {t:"Valoración",items:["Estado nutricional, TA, hábitos","Salud sexual y reproductiva, intención reproductiva (si quiere embarazarse: preconcepcional)","Salud mental, consumo, violencias","Examen físico por sistemas, de cabeza a pies"]},
    {t:"Detección temprana",items:["Riesgo cardiovascular según clasificación: glicemia, perfil lipídico, creatinina, uroanálisis","Sífilis, VIH y hepatitis B según exposición al riesgo","Hepatitis C una vez si tiene antecedente de riesgo","Prueba de embarazo si hay sospecha",CERVIX[0]]},
    {t:"Protección específica",items:["Asesoría y suministro de anticoncepción","Preservativos","Vacunación según esquema","Profilaxis oral anual"]},
-   {t:"Educación",items:["Educación individual","Ciclos educativos"]}
+   {t:"Educación",items:["Educación individual","Ciclos educativos"]},
+   PLAN_SEC
   ],
   notes:["rpms"]},
  adul:{ref:"Res. 3280 · RPMS 5, adultez (atención por medicina)",route:"rp",title:"Adultez",who:"29 a 59 años",
   facts:[["Valoración","cada 5 años"],["Riesgo CV","quinquenal"],["Mama","clínica anual ≥ 40 · mamografía c/2 a 50–69"]],
   alerts:CERVIX.slice(1).concat(["Masa mamaria o hallazgo clínico → ecografía o mamografía y remisión","Sangre oculta positiva → colonoscopia"]),
   sections:[
-   {t:"Valoración",items:["Estado nutricional, TA, perímetro abdominal","Hábitos, salud mental, violencias, consumo","Salud sexual y reproductiva, anticoncepción"]},
+   {t:"Valoración",items:["Estado nutricional, TA, perímetro abdominal","Hábitos, salud mental, violencias, consumo","Salud sexual y reproductiva, anticoncepción","Examen físico por sistemas, de cabeza a pies"]},
    {t:"Detección temprana",items:["Riesgo cardiovascular y metabólico quinquenal: glicemia, perfil lipídico, creatinina, uroanálisis",CERVIX[0],"Mama: examen clínico anual desde los 40; mamografía cada 2 años de 50 a 69","Colon: sangre oculta en heces cada 2 años desde los 50","Próstata (hombres): PSA y tacto rectal cada 5 años desde los 50","Sífilis, VIH, hepatitis B según exposición","Hepatitis C una vez desde los 50 o con antecedente de transfusión"]},
    {t:"Protección específica",items:["Anticoncepción y preservativos","Vacunación según esquema","Profilaxis oral cada 2 años"]},
-   {t:"Educación",items:["Educación individual","Ciclos educativos"]}
+   {t:"Educación",items:["Educación individual","Ciclos educativos"]},
+   PLAN_SEC
   ],
   notes:["rpms"]},
  vej:{ref:"Res. 3280 · RPMS 6, vejez, p. 148 (atención por medicina)",route:"rp",title:"Vejez",who:"60 años y más",
   facts:[["Valoración","cada 3 años"],["Odontología","cada 2 años"],["Colon y próstata","hasta 75"]],
   alerts:["Caídas, dependencia funcional o deterioro cognitivo → medicina","Sospecha de maltrato o abandono → ruta de violencia","Masa mamaria o sangre oculta positiva → remisión"],
   sections:[
-   {t:"Valoración",items:["Funcionalidad (actividades básicas e instrumentales)","Cognición y estado de ánimo","Riesgo de caídas","Estado nutricional, TA","Maltrato, abandono, red de apoyo"]},
+   {t:"Valoración",items:["Funcionalidad (actividades básicas e instrumentales)","Cognición y estado de ánimo","Riesgo de caídas","Estado nutricional, TA","Maltrato, abandono, red de apoyo","Examen físico por sistemas, de cabeza a pies"]},
    {t:"Detección temprana",items:["Riesgo cardiovascular: glicemia, perfil lipídico, creatinina, uroanálisis","Cuello uterino hasta los 65 (citología o ADN-VPH)","Mama: mamografía y examen clínico hasta los 69","Colon: sangre oculta cada 2 años hasta los 75","Próstata (hombres): cada 5 años hasta los 75"]},
    {t:"Protección específica",items:["Vacunación según esquema","Profilaxis oral cada 2 años"]},
-   {t:"Educación",items:["Educación individual y a cuidadores"]}
+   {t:"Educación",items:["Educación individual y a cuidadores"]},
+   PLAN_SEC
   ],
   notes:["rpms"]},
  proc:{ref:"Res. 3280 · RPMS 13, planificación familiar y anticoncepción, p. 180",route:"pc",title:"Procedimientos y consejerías",who:"VIH, lactancia, implante",
@@ -773,6 +781,38 @@ WIDGET.preecl={html:id=>{const o=peEfectivo(id),sg=peSugeridos();
      $("pe-p").textContent=r.ind?"Indicación de aspirina: remitir a medicina":(r.a.length||r.m.length)?"1 moderado: sin indicación":"Sin criterios";$("pe-p").className="pill "+(r.ind?"high":"low");
      $("pe-c").innerHTML=r.ind?`<p style="margin:0"><b>Qué hacer:</b> ácido acetilsalicílico 75–100 mg cada noche ${w!=null&&w<12?"desde la semana 12 ":""}hasta el parto. Lo formula medicina: remítela con la indicación. Toma la TA en cada contacto y repasa con ella los signos de alarma (dolor de cabeza, ver luces, hinchazón, dolor en la boca del estómago).${w!=null&&w>=36?" Ya está cerca del término: confírmalo con medicina.":""}</p>`:`<p style="margin:0">${r.m.length?"Con 1 criterio moderado no está indicada la aspirina; vigila la TA en cada control.":"Sin criterios: control habitual de TA en cada consulta."}</p>`;save()};
    document.querySelectorAll("[data-pe]").forEach(c=>c.onchange=up);$("pe-sug").onclick=()=>{S.set(key(id,"pe"),"{}");const sg=peSugeridos();document.querySelectorAll("[data-pe]").forEach(c=>c.checked=sg.has(c.dataset.pe));up()};up()}};
+/* ---------- Mejoras oct-2026: anamnesis, signos vitales, examen físico y plan en los cursos de vida ---------- */
+(function(){
+ const A=(ids,item,o)=>ids.forEach(id=>{IVX[id+"::"+item]=Object.assign({},o)});
+ const NNA=["pinf","inf","adol"],ADU=["juv","adul","vej"],TODOS=NNA.concat(ADU);
+ A(["pinf","inf"],"Acompañante y con quién vive",{c:["Madre|Asiste acompañado(a) de la madre.","Padre|Asiste acompañado(a) del padre.","Otro cuidador|Asiste acompañado(a) de ____ (abuela, tía u otro cuidador).","Vive con padres y hermanos|Vive con papá, mamá y hermanos.","Vive con otros|Vive con ____."]});
+ A(["pinf"],"Antecedentes perinatales: semanas y peso al nacer, hospitalización",{c:["Sin complicaciones|Nació a término, con peso adecuado, sin hospitalización al nacer ni complicaciones en el embarazo, el parto o el posparto.","Prematuro|Nació prematuro de ____ semanas; peso al nacer ____ g.","Bajo peso al nacer|Peso al nacer menor de 2.500 g (____ g).","Hospitalizado al nacer|Estuvo hospitalizado al nacer por ____ durante ____ días.","No sabe|La familia no conoce los datos del nacimiento; no trae carné."]});
+ A(TODOS,"Antecedentes personales: enfermedades, hospitalizaciones, alergias",{c:["Niega|Niega antecedentes patológicos, quirúrgicos, hospitalizaciones y alergias.","Enfermedad|Antecedente de ____, en manejo con ____.","Hospitalización|Hospitalizado en ____ por ____.","Malaria previa|Antecedente de malaria (____) tratada en ____.","Alergia|Alergia a ____."]});
+ A(["pinf","inf"],"Síntomas en los últimos 15 días: tos, fiebre, diarrea, vómito",{c:["Niega|Niega tos, fiebre, diarrea o vómito en los últimos 15 días; diuresis y deposiciones normales.","Tos o gripa|Tos o gripa de ____ días; se clasifica según AIEPI.","Diarrea|Diarrea de ____ días, ____ deposiciones al día; se valora la hidratación según AIEPI.","Fiebre|Fiebre de ____ días; en zona endémica se toma gota gruesa."]});
+ A(["pinf","inf"],"Cuidados tradicionales: payé, rezos, plantas",{c:["Sí|Recibe cuidados tradicionales según su cultura (rezos del payé); se respetan y se registran.","No|No recibe cuidados tradicionales.","Plantas o remedios|Recibe remedios de plantas: ____; se indaga por posibles riesgos."]});
+ A(["pinf"],"Sueño, juego y cuidado diario",{c:["Adecuado|Duerme adecuadamente; juega e interactúa con sus cuidadores; pasa el día al cuidado de ____.","Sueño alterado|Los cuidadores refieren alteración del sueño: ____.","Poco juego o estímulo|Poco tiempo de juego o interacción con adultos; se dan pautas de estimulación."]});
+ A(["inf","adol"],"Hábitos: alimentación, actividad física, pantallas, sueño",{c:["Saludables|Come 3 comidas y refrigerios con alimentos de la región; hace actividad física a diario; duerme bien; poco tiempo de pantallas.","Mala alimentación|Alimentación poco variada o con mucha azúcar, paquetes o gaseosa; se educa.","Sedentario|Poca actividad física; más de 2 horas al día de pantallas.","Sueño alterado|Refiere alteración del sueño: ____."]});
+ A(["adol"],"Acompañante y confidencialidad",{c:["Con acudiente|Asiste con su acudiente ____; parte de la consulta se hace a solas con el adolescente, con confidencialidad.","Solo|Asiste solo(a); se explica la confidencialidad de la consulta.","Prefiere a solas|Prefiere la consulta a solas; se respeta."]});
+ A(["adol"],"Antecedentes ginecológicos: menarquia, ciclos, última regla",{c:["Mujer|Menarquia a los ____ años, ciclos regulares cada ____ días, FUM ____.","Sin menarquia|Aún no ha tenido la primera menstruación.","Irregulares|Ciclos irregulares; FUM ____.","No aplica|No aplica (hombre)."],si:()=>pac()["GENERO"]!=="M",siTxt:"No aplica: hombre."});
+ A(["adol"],"Escolaridad o trabajo",{c:["Estudia|Estudia; cursa ____ grado; refiere buen rendimiento.","Desertó|No estudia; abandonó en ____ grado; se orienta sobre el derecho a la educación.","Trabaja|Trabaja en ____; se indaga por trabajo infantil o riesgoso."]});
+ A(["pinf"],"Signos vitales: FC, FR, temperatura",{c:["Normales|Signos vitales normales para la edad: FC ____ lpm, FR ____ rpm, T ____ °C.","Fiebre|Temperatura de ____ °C (38 o más): se busca la causa, gota gruesa en zona endémica y se remite a medicina.","Respira rápido|FR ____ rpm, rápida para la edad (60 o más en menores de 2 meses, 50 o más de 2 a 11 meses, 40 o más de 1 a 5 años): se clasifica según AIEPI y se remite."],
+  pauta:{t:"Valores de referencia",p:["Respiración rápida (AIEPI): 60 o más por minuto en menores de 2 meses; 50 o más de 2 a 11 meses; 40 o más de 1 a 5 años.","Fiebre: 38 °C o más. En zona de malaria, gota gruesa a todo niño con fiebre.","Cuenta la respiración un minuto completo, con el niño tranquilo."],r:"",b:""}});
+ A(["inf","adol"],"Signos vitales: FC, FR, temperatura y tensión arterial",{c:["Normales|Signos vitales normales para la edad: TA ____ mmHg (por debajo del percentil 90 para edad, sexo y talla), FC ____ lpm, FR ____ rpm, T ____ °C.","TA elevada|TA ____ mmHg, en percentil 90 o más para edad, sexo y talla: se repite en reposo y, si persiste, se remite a medicina.","Fiebre|Temperatura de ____ °C: se busca la causa, gota gruesa en zona endémica y se remite."],
+  pauta:{t:"Cómo tomarla",p:["Usa el manguito del tamaño del brazo del niño o adolescente.","Compara con la tabla de percentiles por edad, sexo y talla de la 3280. Desde los 13 años: elevada desde 120/80."],r:"",b:""}});
+ const EXN="Examen físico normal para la edad: cabeza normocéfala, ojos con pupilas isocóricas normorreactivas, mucosa oral húmeda, cuello sin adenopatías, tórax simétrico, ruidos respiratorios sin agregados, ruidos cardiacos rítmicos sin soplos, abdomen blando no doloroso sin masas, genitales normoconfigurados, extremidades sin edema, llenado capilar menor de 3 segundos, neurológico sin déficit, piel íntegra.";
+ A(["pinf"],"Examen físico por sistemas, de cabeza a pies",{c:["Normal|"+EXN.replace("cabeza normocéfala","cabeza normocéfala, fontanela normotensa (si aún está abierta)").replace("genitales normoconfigurados","genitales normoconfigurados, caderas sin limitación a la abducción"),"Hallazgo|Examen físico con hallazgo: ____. Resto normal.","Piel o parásitos|Lesiones en piel (____), pediculosis o escabiosis: se trata y se educa a la familia."]});
+ A(["inf","adol"],"Examen físico por sistemas, de cabeza a pies",{c:["Normal|"+EXN+" Desarrollo puberal Tanner ____.","Hallazgo|Examen físico con hallazgo: ____. Resto normal.","Piel o parásitos|Lesiones en piel (____), pediculosis o escabiosis: se trata y se educa."]});
+ A(ADU,"Examen físico por sistemas, de cabeza a pies",{c:["Normal|Buen estado general; cabeza y cuello sin adenopatías ni masas; tórax simétrico, ruidos cardiacos rítmicos sin soplos, ruidos respiratorios sin agregados; abdomen blando no doloroso; extremidades sin edema; piel íntegra; neurológico sin déficit aparente.","Hallazgo|Examen físico con hallazgo: ____. Resto normal."]});
+ A(["pinf"],"Visión: reflejo rojo, fijación y seguimiento, estrabismo",{c:["Normal|Reflejo rojo presente, simétrico y homogéneo; fija y sigue objetos; sin estrabismo ni leucocoria.","Alterado|Hallazgo visual (____): reflejo rojo ausente o asimétrico, leucocoria, estrabismo o no fija la mirada; se remite a medicina y oftalmología.","Agudeza visual|Desde los 3 años: agudeza visual con optotipos ____ en ojo derecho y ____ en ojo izquierdo."]});
+ A(["pinf"],"Audición y lenguaje (cuestionario VALE)",{c:["Normal|Responde a los sonidos y a su nombre; lenguaje acorde a la edad; cuestionario VALE sin hallazgos; oídos sin alteraciones a la inspección.","Alterado|No responde a sonidos o el lenguaje no corresponde a la edad (____); se remite a medicina y fonoaudiología.","Otitis o secreción|Secreción por el oído; se clasifica según AIEPI."]});
+ A(["pinf"],"Signos generales de peligro AIEPI",{c:["Ausentes|Sin signos generales de peligro: puede beber o tomar el pecho, no vomita todo, no ha convulsionado, no está letárgico ni inconsciente.","Presente|Presenta signo general de peligro (____): se estabiliza y se remite de urgencia."],al:/^\s*presenta/i,am:"Signo general de peligro: remisión urgente."});
+ A(["pinf"],"Signos de alarma para consultar de inmediato",{c:["Realizada|Se educa a los cuidadores en signos de alarma para consultar de inmediato: no puede beber o tomar el pecho, vomita todo, convulsiona, está muy dormido, respira rápido o con dificultad, diarrea con sangre o de muchos días, fiebre."]});
+ A(TODOS,"Medicamentos y micronutrientes formulados",{c:["Según la edad|Se formula: ____.","Ninguno|No requiere medicamentos ni micronutrientes en esta consulta."]});
+ A(TODOS,"Remisiones",{c:["Ninguna|No requiere remisiones.","Odontología|Se remite a odontología.","Medicina|Se remite a medicina por ____ (prioridad: ____).","Vacunación|Se remite a vacunación para ____.","Nutrición o psicología|Se remite a ____."]});
+ A(TODOS,"Próximo control",{c:["Enfermería|Próxima valoración por enfermería el ____, según el cronograma de la Resolución 3280.","Medicina|Próxima valoración por medicina el ____, según el cronograma.","Próxima brigada|Próximo control en la próxima brigada a la comunidad (____).","Control en 1 mes|Control en 1 mes por el hallazgo de ____."]});
+})();
+
+const OLD_LAB={"pinf": ["Enfermedad actual", "Esquema de vacunación", "Crecimiento: peso, talla, perímetro cefálico, curvas OMS", "Desarrollo con EAD-3", "Audición y comunicación (VALE)", "Alimentación: lactancia, alimentación complementaria", "Salud bucal", "Familia: familiograma, red de apoyo, cuidado", "Dinámica familiar (APGAR familiar)", "Vacunación según esquema PAI", "Micronutrientes en polvo (fortificación casera) en las edades del c…", "Micronutrientes dos veces al año desde los 2 años", "Desparasitación desde el año, dos veces al año", "Barniz de flúor y profilaxis semestral desde el año", "Sellantes desde los 3 años según criterio", "Consejería en lactancia", "Hemoglobina según riesgo (una vez)", "Odontología anual desde los 6 meses", "Educación individual a padres o cuidadores", "Al menos dos ciclos educativos"], "inf": ["Enfermedad actual", "Esquema de vacunación", "Crecimiento y estado nutricional", "Desarrollo y desempeño escolar", "Test de la figura humana de Goodenough-Harris (obligatorio si hay q…", "Agudeza visual y audición", "Audición y comunicación (VALE)", "Salud mental, violencias, acoso", "Dinámica familiar (APGAR familiar)", "Tamizaje de anemia (hemoglobina y hematocrito) una vez entre los 10…", "Vacunación según PAI (VPH a los 9 años según PAI vigente)", "Barniz de flúor y profilaxis dos veces al año", "Sellantes según necesidad", "Educación individual y familiar", "Al menos dos ciclos educativos"], "adol": ["Crecimiento y estado nutricional", "Audición y comunicación (VALE)", "Salud sexual y reproductiva: inicio de relaciones, protección", "Salud mental, consumo de sustancias, violencias", "Dinámica familiar (APGAR familiar)", "Proyecto de vida", "Esquema de vacunación", "Prueba treponémica y VIH según exposición al riesgo, con asesoría", "Tamizaje de anemia una vez entre los 14 y 17 años, solo mujeres", "Prueba de embarazo si hay retraso menstrual u otros signos", "Asesoría en anticoncepción y control", "Suministro por demanda: DIU, implante, oral, inyectable, preservativos", "Vacunación según esquema", "Flúor y profilaxis dos veces al año; detartraje y sellantes según n…", "Educación individual y familiar", "Al menos dos ciclos educativos"], "juv": ["Estado nutricional, TA, hábitos", "Salud sexual y reproductiva, intención reproductiva (si quiere emba…", "Salud mental, consumo, violencias", "Dinámica familiar (APGAR familiar)", "Riesgo cardiovascular según clasificación: glicemia, perfil lipídic…", "Sífilis, VIH y hepatitis B según exposición al riesgo", "Hepatitis C una vez si tiene antecedente de riesgo", "Prueba de embarazo si hay sospecha", "Cuello uterino (Res. 3280, Directrices RPMS 9.2 y 9.5.1, p. 167–169…", "Asesoría y suministro de anticoncepción", "Preservativos", "Vacunación según esquema", "Profilaxis oral anual", "Educación individual", "Ciclos educativos"], "adul": ["Estado nutricional, TA, perímetro abdominal", "Hábitos, salud mental, violencias, consumo", "Dinámica familiar (APGAR familiar)", "Salud sexual y reproductiva, anticoncepción", "Riesgo cardiovascular y metabólico quinquenal: glicemia, perfil lip…", "Cuello uterino (Res. 3280, Directrices RPMS 9.2 y 9.5.1, p. 167–169…", "Mama: examen clínico anual desde los 40; mamografía cada 2 años de …", "Colon: sangre oculta en heces cada 2 años desde los 50", "Próstata (hombres): PSA y tacto rectal cada 5 años desde los 50", "Sífilis, VIH, hepatitis B según exposición", "Hepatitis C una vez desde los 50 o con antecedente de transfusión", "Anticoncepción y preservativos", "Vacunación según esquema", "Profilaxis oral cada 2 años", "Educación individual", "Ciclos educativos"], "vej": ["Funcionalidad (actividades básicas e instrumentales)", "Cognición y estado de ánimo", "Riesgo de caídas", "Estado nutricional, TA", "Maltrato, abandono, red de apoyo", "Riesgo cardiovascular: glicemia, perfil lipídico, creatinina, uroan…", "Cuello uterino hasta los 65 (citología o ADN-VPH)", "Mama: mamografía y examen clínico hasta los 69", "Colon: sangre oculta cada 2 años hasta los 75", "Próstata (hombres): cada 5 años hasta los 75", "Vacunación según esquema", "Profilaxis oral cada 2 años", "Educación individual y a cuidadores"]};
 /* ---------- Bloque fijo de educación PAMI (plantilla ESE) ---------- */
 const EDU_PAMI = `EDUCACIÓN
 Se brinda educación clara, comprensible y culturalmente respetuosa, explicada de manera verbal y reforzada con material educativo:
@@ -936,7 +976,9 @@ const EX_RPMS={
 const CASO_EJ={adul:{
  resp:["Alterado. Peso 82 kg, talla 1,68 m, perímetro abdominal 98 cm. TA 150/95, FC 78, FR 18, T 36,5, SpO2 96 %.",
   "Normal. Niega tabaco; chicha ocasional. Niega violencias. Sin síntomas de depresión.",
+  "Normal. APGAR familiar 18 de 20: familia funcional.",
   "Normal. Pareja estable; no requiere anticoncepción.",
+  "Normal. Buen estado general; cuello sin masas; ruidos cardiacos rítmicos sin soplos; pulmones sin agregados; abdomen blando; sin edemas.",
   "Alterado. Hipertenso desde 2019 con losartán, no lo toma todos los días. Niega diabetes, EPOC y cáncer. Última consulta de crónicos el 10 de marzo de 2026. Se ordenan glicemia, perfil lipídico, creatinina y uroanálisis.",
   "No aplica (hombre).","No aplica (hombre).",
   "No realizado. Nunca le han hecho sangre oculta; se ordena hoy.",
@@ -1272,7 +1314,7 @@ function vnSexo(v,P){if(v._sexo)return /^(m|h|masc|hombre|niño)/i.test(plano(v.
 function vnPreg(id){const P=vnPac(),pre=[];
   const sie=VN[id].idSiempre;
   if(!P.edad||sie)pre.push({k:"_edad",q:"Edad de la persona",h:"En años, o en meses si es menor de 2 años: «18 meses».",def:sie&&P.edad?P.edad:undefined});
-  if(!P.sexo&&(id==="cyd"||id==="adol"||id==="av"||id==="vih"||id==="tbc"))pre.push({k:"_sexo",q:"Sexo",o:["MUJER","HOMBRE"]});
+  if(!P.sexo&&(id==="cyd"||id==="adol"||id==="av"||id==="vih"||id==="tbc"||(VN_ELIG[id]&&VN_ELIG[id].sx)))pre.push({k:"_sexo",q:"Sexo",o:["MUJER","HOMBRE"]});
   if(!P.com||sie)pre.push({k:"_com",q:"Procedencia: comunidad o barrio",def:sie&&P.com?P.com:undefined});
   if(!P.etnia||sie)pre.push({k:"_etnia",q:"Etnia o pueblo",def:sie&&P.etnia?P.etnia:undefined,o:["CUBEO","TUCANO","DESANO","TUYUCA","GUANANO","PIRATAPUYO","SIRIANO","NO INDIGENA"]});
   return pre.concat(VN[id].qs)}
@@ -1300,9 +1342,9 @@ function vnRender(){st.view="vnota";const T=VN[VNS.id],P=vnPac();
   <p class="foot">La nota sale en mayúsculas con el texto fijo de tu plantilla. El audio se transcribe con el reconocimiento de voz del navegador (servidores de Google); si el paciente habla, pídele permiso.</p>`;
   $("vn-back").onclick=()=>{stopRec();window.speechSynthesis&&speechSynthesis.cancel();home();window.scrollTo(0,0)};
   VNS.fin?vnFinal():vnPaso()}
-function vnPaso(){const L=vnLista2();if(VNS.i>=L.length){VNS.fin=true;vnRender();return}
+function vnPaso(){const _e=vnElig(VNS.id,VNS.v);if(_e.b){vnBloqueo(_e);return}const L=vnLista2();if(VNS.i>=L.length){VNS.fin=true;vnRender();return}
   const q=L[VNS.i],d=vnDefault(q),val=VNS.v[q.k];
-  $("vn-pane").innerHTML=`<div class="gx" style="margin:0">
+  $("vn-pane").innerHTML=`${_e.w.length?`<div class="box warn" style="margin-bottom:10px"><h3>Atención</h3>${_e.w.map(x=>`<p style="margin:0">${esc(x)}</p>`).join("")}</div>`:""}<div class="gx" style="margin:0">
    <div class="gx-top"><span class="note-src">Pregunta ${VNS.i+1} de ${L.length}</span><span class="gx-mic" id="vn-mic"></span></div>
    <div class="gx-lab">${esc(q.q)}</div>${q.h?`<div class="gx-hint">${esc(q.h)}</div>`:""}
    ${d?`<div class="gx-hint">${q.k[0]==="_"?"Registrado":"Normal"}: <b>${esc(d)}</b></div>`:""}
@@ -1348,17 +1390,18 @@ function vnEscuchar(){const m=$("vn-mic");if(!SR){if(m)m.textContent="Este naveg
 function vnHablar(txt){const ss=window.speechSynthesis;if(!ss){if(VNS.voz)vnEscuchar();return}
   stopRec();try{ss.cancel();const u=new SpeechSynthesisUtterance(txt);u.lang="es-CO";u.rate=1.05;u.onend=()=>{if(VNS&&VNS.voz&&st.view==="vnota")vnEscuchar()};u.onerror=u.onend;ss.speak(u)}catch(e){if(VNS.voz)vnEscuchar()}}
 function vnTexto(){const P=vnPac(),v=VNS.v;return VN[VNS.id].b(v,P,vnPid(P,v)).replace(/\n{3,}/g,"\n\n").trim()}
-function vnFinal(){const L=vnLista2(),falt=L.filter(q=>VNS.v[q.k]==null&&!vnDefault(q)),txt=vnTexto(),av=VN[VNS.id].aviso?VN[VNS.id].aviso(VNS.v,vnPac()):"";
+function vnFinal(){const _e=vnElig(VNS.id,VNS.v);if(_e.b){vnBloqueo(_e);return}const _r=_e.w.concat(vnRevisar(VNS.id,VNS.v));const L=vnLista2(),falt=L.filter(q=>VNS.v[q.k]==null&&!vnDefault(q)),txt=vnTexto(),av=VN[VNS.id].aviso?VN[VNS.id].aviso(VNS.v,vnPac()):"";
   $("vn-pane").innerHTML=`${av?`<div class="box miss"><h3>Revisa el paciente</h3><p style="margin:0">${esc(av)}</p></div>`:""}${falt.length?`<div class="box miss"><h3>Faltan datos</h3><ul>${falt.map(q=>`<li><button class="lnk" type="button" data-vgo="${q.k}">${esc(q.q)}</button></li>`).join("")}</ul></div>`:""}
+  ${_r.length?`<div class="box miss"><h3>Revisa la coherencia antes de copiar</h3><ul>${_r.map(x=>`<li>${esc(x)}</li>`).join("")}</ul></div>`:""}
   <div class="box warn"><h3>Revisa antes de copiar</h3><p style="margin:0">Las respuestas que no dictaste quedaron con el valor normal de la plantilla. Lee la nota completa y corrige lo que no aplique.</p></div>
   <textarea id="vn-nota" style="min-height:420px;font-size:.92rem">${esc(txt)}</textarea>
-  <div class="btns"><button class="btn primary" type="button" id="vn-copy">Copiar nota</button><button class="btn" type="button" id="vn-save">Guardar en el celular</button></div>
+  <div class="btns"><button class="btn primary" type="button" id="vn-copy">Copiar nota</button><button class="btn" type="button" id="vn-save">Guardar y registrar en la base</button></div>
   <div class="btns"><button class="btn" type="button" id="vn-back2">← Volver a las preguntas</button>${sample?`<button class="btn" type="button" id="vn-ai">Pulir redacción con Claude</button>`:""}<button class="btn" type="button" id="vn-new">Terminar y limpiar</button></div>
   <p class="status" id="vn-st" aria-live="polite"></p>`;
   document.querySelectorAll("[data-vgo]").forEach(b=>b.onclick=()=>{VNS.fin=false;VNS.i=vnLista2().findIndex(q=>q.k===b.dataset.vgo);vnRender()});
   $("vn-back2").onclick=()=>{VNS.fin=false;VNS.i=Math.max(0,vnLista2().length-1);vnRender()};
   $("vn-copy").onclick=()=>{const t=$("vn-nota").value;const ok=()=>{$("vn-st").textContent="Nota copiada."};try{navigator.clipboard.writeText(t).then(ok,()=>{$("vn-nota").select();$("vn-st").textContent="Selecciona y copia el texto manualmente."})}catch(e){$("vn-nota").select()}};
-  $("vn-save").onclick=()=>{const a=vnNotas(),P=vnPac();a.unshift({id:uid(),fecha:new Date().toISOString().slice(0,16).replace("T"," "),plantilla:VN[VNS.id].t,paciente:P.nombre||"",com:P.com||VN_U(VNS.v._com||""),texto:$("vn-nota").value});S.set("dn2_vnotas",JSON.stringify(a.slice(0,300)));$("vn-st").textContent="Guardada en este celular ("+Math.min(a.length,300)+" notas)."};
+  $("vn-save").onclick=()=>{const a=vnNotas(),P=vnPac();a.unshift({id:uid(),fecha:new Date().toISOString().slice(0,16).replace("T"," "),plantilla:VN[VNS.id].t,paciente:P.nombre||"",com:P.com||VN_U(VNS.v._com||""),texto:$("vn-nota").value});S.set("dn2_vnotas",JSON.stringify(a.slice(0,300)));$("vn-st").textContent="Guardada en este celular ("+Math.min(a.length,300)+" notas).";vnRegistrarBase($("vn-nota").value)};
   $("vn-new").onclick=()=>{const b=$("vn-new");if(b.dataset.armed!=="1"){b.dataset.armed="1";b.textContent="¿Borrar respuestas? Toca otra vez";return}S.del("dn2_vn_"+VNS.id);VNS=null;home();window.scrollTo(0,0)};
   const ai=$("vn-ai");if(ai)ai.onclick=async()=>{ai.disabled=true;$("vn-st").textContent="Puliendo redacción…";
     try{const r=await sample("Eres auxiliar de historia clínica de enfermería en Colombia. Corrige ortografía y redacción de esta nota, en MAYÚSCULAS y sin tildes como el original. No agregues ni quites datos clínicos, hallazgos, valores ni conductas; no inventes nada. Devuelve solo la nota corregida.\n\nNOTA:\n"+$("vn-nota").value,{cache:false});if(r&&r.text){$("vn-nota").value=r.text.trim();$("vn-st").textContent="Listo. Revisa que no haya cambiado ningún dato."}}catch(e){$("vn-st").textContent="No se pudo pulir ahora; la nota sigue como estaba."}ai.disabled=false}}
@@ -1884,7 +1927,7 @@ function wireMiDia(){const cb=$("md-cal");if(cb)cb.onclick=calOpen;
 function mdShow(t){const s=$("md-st");s.innerHTML="";const a=document.createElement("textarea");a.value=t;a.rows=7;a.readOnly=true;s.append("No se pudo copiar solo. Mantén presionado el texto y cópialo:",a);a.focus();a.select()}
 
 /* ---------- PANEL ---------- */
-const VERSION_APP="2026-10-18 v157";
+const VERSION_APP="2026-10-18 v158";
 function home(){
   stopRec();st.view="home";
   const rm=["precon","prenatal","parto","rn","ive"],rp=["pinf","inf","adol","juv","adul","vej"];
@@ -1927,6 +1970,7 @@ function home(){
   ${drafts.length?`<section><p class="lab">Borradores guardados</p><div class="drafts">${drafts.map(d=>`<button data-mod="${d}"><span>${esc(M[d].title)}</span><span>Continuar →</span></button>`).join("")}</div></section>`:""}
   ${mbHomeHTML()}
   ${vnHomeHTML()}
+  <section class="route"><div class="route-head"><h2>Sin internet</h2><span>Bloc de notas</span></div><div class="tiles"><button class="tile pc" type="button" id="t-plant"><b>Plantillas del bloc de notas</b><small>Copiar una plantilla vacía o pasar una ya llena</small></button></div></section>
   ${agendaHTML()}
   <section class="route"><div class="route-head"><h2>Pacientes</h2><span>${Object.keys(pacientes()).length} registrados</span></div><div class="tiles"><button class="tile pc" id="t-pacs"><b>Ver pacientes</b><small>Historial, próximos controles y pendientes de cada persona</small></button><button class="tile pc" id="t-vbase"><b>Ver base de datos</b><small>${registrosTodos().length} registros guardados en el celular, como la hoja de Google</small></button></div></section>
   <section class="route"><div class="route-head"><h2>Ruta materno perinatal</h2><span>RIAMP</span></div><div class="tiles">${rm.map(tile).join("")}</div></section>
@@ -1936,7 +1980,7 @@ function home(){
   <p class="foot" id="verlbl">Versión ${VERSION_APP}</p>
   <p class="foot">Contenido según la Resolución 3280 de 2018, con IVE actualizada a la Sentencia C-055 de 2022 y la Resolución 051 de 2023. Las semanas de vacunas se confirman con el lineamiento PAI vigente. Lo que dictas queda solo en este celular hasta que lo borres. Organizar la nota necesita internet.</p>`;
   document.querySelectorAll("[data-mod]").forEach(b=>b.onclick=()=>openMod(b.dataset.mod));wireMiDia();vnWireHome();mbWire();
-  $("t-base").onclick=()=>{baseEdit=null;base({});window.scrollTo(0,0)};$("t-pacs").onclick=verPacientes;$("t-vbase").onclick=verBase;
+  $("t-base").onclick=()=>{baseEdit=null;base({});window.scrollTo(0,0)};$("t-pacs").onclick=verPacientes;$("t-plant").onclick=plVista;$("t-vbase").onclick=verBase;
   document.querySelectorAll("[data-ag]").forEach(b=>b.onclick=()=>{if(b.dataset.armed!=="1"){b.dataset.armed="1";b.textContent="¿Seguro? Toca otra vez";return}setAgenda(agenda().map(x=>x.id===b.dataset.ag?Object.assign(x,{ok:hoy()}):x));home()});
   ["f-edad","f-uni","f-sexo","f-est"].forEach(i=>$(i).addEventListener("input",sugerir));
   const rapido=()=>{const P=pac(),v=parseFloat($("f-edad").value),u=$("f-uni").value;if(Number.isFinite(v)&&u==="a")P.__edad=String(v);else delete P.__edad;if(!P["GENERO"]||P.__sxr)Object.assign(P,{GENERO:$("f-sexo").value==="m"?"M":"F",__sxr:1});setPac(P)};
@@ -2117,6 +2161,12 @@ function paneId(){const id=st.mod,P=pac(),d=identDe(),ks=idCampos(id);if(M[id].r
     ["EAPB NOMBRE","PUEBLO"].forEach(k=>{if(o[k]&&o[k]!=="N/A")addHist(k,o[k])});setPac(o);
     const f=idFalta(id);if(f.length){const mb=$("id-miss");mb.hidden=false;mb.querySelector("ul").innerHTML=f.map(x=>`<li>${esc(x)}</li>`).join("");$("id-st").textContent="";mb.scrollIntoView({block:"nearest"});return}
     st.tab="entr";S.set(key(id,"tab"),"entr");renderMod();window.scrollTo(0,0)}}
+function modBloqueo(id){const P=pac(),_fm=S.get(key(id,"fecha"))||hoy(),e=edadDe(P["FECHA NACIMIENTO"],_fm),y=e?e.y:(P.__edad?+P.__edad:null),r=y==null?[]:rutasPara(y,P["GENERO"]).filter(z=>M[z]&&z!==id);
+  $("pane").innerHTML=`<div class="box miss"><h3>Este módulo no corresponde a esta persona</h3><p style="margin:0">${esc(st._incoh)}</p></div>
+  <p class="note-src">Las preguntas, la nota y el envío a la base quedan bloqueados para no registrar una atención que no corresponde.</p>
+  <div class="btns"><button class="btn primary" type="button" id="mb-fix">Corregir datos de la persona</button></div>
+  ${r.length?`<p class="lab">Le corresponde</p><div class="tiles">${r.map(z=>`<button class="tile ${M[z].route}" type="button" data-mb="${z}"><b>${esc(M[z].title)}</b><small>${esc(M[z].who)}</small></button>`).join("")}</div>`:""}`;
+  $("mb-fix").onclick=()=>{st.tab="id";renderMod()};document.querySelectorAll("[data-mb]").forEach(b=>b.onclick=()=>openMod(b.dataset.mb))}
 function openMod(id){st.view="mod";st.mod=id;st.tab=idFalta(id).length?"id":(S.get(key(id,"tab"))||"entr");st.note=S.get(key(id,"note"))||M[id].notes[0];if(!M[id].notes.includes(st.note))st.note=M[id].notes[0];renderMod();window.scrollTo(0,0)}
 function renderMod(){
   stopRec();const m=M[st.mod],id=st.mod;
@@ -2128,16 +2178,17 @@ function renderMod(){
   <div class="top"><button class="back" id="back">← Rutas</button><span class="tag ${m.route}">${routeName}</span></div>
   <header><h1>${esc(m.title)}</h1><p class="sub">${esc(m.who)}</p></header>
   <div class="pacbar">${pac()["NOMBRE COMPLETO"]?`<b>${esc(pac()["NOMBRE COMPLETO"])}</b>${pacResumen().map(x=>`<span>${x}</span>`).join("")}`:"<span>Persona sin identificar</span>"}<button class="lnk" id="pac-cambiar">${pac()["NOMBRE COMPLETO"]?"Corregir":"Identificar"}</button></div>
-  ${(()=>{const P=pac(),_fm=S.get(key(id,"fecha"))||hoy(),e=edadDe(P["FECHA NACIMIENTO"],_fm),y=e?e.y:(P.__edad?+P.__edad:null);if(y==null)return"";const r=rutasPara(y,P["GENERO"]);let msg="";
+  ${(()=>{const P=pac(),_fm=S.get(key(id,"fecha"))||hoy(),e=edadDe(P["FECHA NACIMIENTO"],_fm),y=e?e.y:(P.__edad?+P.__edad:null);st._incoh="";if(y==null)return"";const r=rutasPara(y,P["GENERO"]);let msg="";
     if(m.route==="rp"&&id!=="proc"&&!r.includes(id))msg="Tiene "+y+" años: no corresponde a "+m.title.toLowerCase()+" ("+m.who+"). Le corresponde: "+r.filter(z=>M[z]&&M[z].route==="rp").map(z=>M[z].title).join(", ")+". Revisa la fecha de nacimiento o cambia de módulo. Si estás registrando una consulta de otra fecha, cámbiala en Datos → «Fecha de esta consulta» (hoy dice "+fLarga(_fm)+").";
     else if(["precon","prenatal","parto","ive"].includes(id)&&(P["GENERO"]==="M"||y<10||y>55))msg=P["GENERO"]==="M"?"La persona está registrada como hombre y este módulo es materno.":"Tiene "+y+" años: revisa la fecha de nacimiento o el módulo.";
     else if(id==="rn"&&P["FECHA NACIMIENTO"]&&pD(P["FECHA NACIMIENTO"])&&(pD(_fm)-pD(P["FECHA NACIMIENTO"]))/864e5>28)msg="Tiene más de 28 días: ya no es recién nacido; usa primera infancia.";
-    return msg?`<div class="box warn" style="margin:8px 0"><h3>Revisa la persona o el módulo</h3><p style="margin:0">${esc(msg)}</p></div>`:""})()}
+    st._incoh=msg;return msg?`<div class="box warn" style="margin:8px 0"><h3>Revisa la persona o el módulo</h3><p style="margin:0">${esc(msg)}</p></div>`:""})()}
   ${m.facts.length?`<div class="facts">${m.facts.map(([k,v])=>`<span class="chip"><b>${esc(k)}</b>${esc(v)}</span>`).join("")}</div>`:""}
   <div class="tabs" role="tablist">${tabs.map(([k,l],i)=>`<button role="tab" data-tab="${k}" aria-selected="${st.tab===k}"><span class="stepn ${hecho[k]?"ok":""}">${hecho[k]?"✓":i+1}</span><span>${l}</span></button>`).join("")}</div>
   <div id="pane"></div>`;
   $("back").onclick=home;$("pac-cambiar").onclick=()=>{st.tab="id";renderMod()};
   document.querySelectorAll("[data-tab]").forEach(b=>b.onclick=()=>{st.tab=b.dataset.tab;if(st.tab!=="base"&&st.tab!=="id")S.set(key(id,"tab"),st.tab);renderMod()});
+  if(st._incoh&&st.tab!=="id"){modBloqueo(id);return}
   if(st.tab==="base"){st.tab=S.get(key(id,"tab"))==="base"?"nota":(S.get(key(id,"tab"))||"nota");$("pane").innerHTML=`<p class="status" id="status">Tomando los datos de esta historia…</p>`;enviarBase(id);return}
   if(st.tab==="id"){paneId();return}
   if(st.tab==="entr")paneEntr();else if(st.tab==="guia")paneGuia();else if(st.tab==="herr")paneHerr();else paneNota();
@@ -2324,11 +2375,11 @@ function wireMic(root,ta,onChange){
 
 /* ---------- ENTREVISTA GUIADA ---------- */
 function ivAns(id){let a={};try{a=JSON.parse(S.get(key(id,"iv"))||"{}")||{}}catch(e){a={}}
-  if(!IV[id])return a;const cur=ivFor(id).map(z=>z.l);let old=null;try{old=JSON.parse(S.get(key(id,"ivlab"))||"null")}catch(e){}
+  if(!IV[id]&&!OLD_LAB[id])return a;const cur=ivFor(id).map(z=>z.l);let old=null;try{old=JSON.parse(S.get(key(id,"ivlab"))||"null")}catch(e){}
   if(!old){let lay=null;if(id==="prenatal"&&Object.keys(a).length){const k=cur.indexOf("Menarquia y ciclos");const prev=cur.slice(0,k).concat(["Antecedentes ginecológicos"],cur.slice(k+5));const R={"Antecedentes familiares":/familiar/i,"Hemoclasificación":/grupo sangu|rh /i,"Alimentación":/recordatorio/i,"Signos vitales":/TA \d/,"Alcohol, tabaco y sustancias":/consumo/i,"Vacunas del embarazo":/td |influenza|tdap|carn/i,"Antropometría y ganancia de peso":/peso/i,"Valoración obstétrica":/altura uterina|feto/i,"Próximo control":/control/i};
       let sp=0,sc=0;Object.entries(R).forEach(([l,re])=>{if(re.test(a[prev.indexOf(l)]||""))sp++;if(re.test(a[cur.indexOf(l)]||""))sc++});if(sp>sc)lay=prev}
     old=lay||cur;S.set(key(id,"ivlab"),JSON.stringify(old))}
-  if(JSON.stringify(old)!==JSON.stringify(cur)){const n={},mv=[];old.forEach((l,oi)=>{const ni=cur.indexOf(l);if(ni<0)return;if(a[oi]!=null)n[ni]=a[oi];["cv","cvo","sx"].forEach(t=>{const v=S.get(key(id,t+oi));if(v!=null)mv.push([t,ni,v])})});
+  if(JSON.stringify(old)!==JSON.stringify(cur)){if(OLD_LAB[id]&&!IV[id])S.del(key(id,"chk"));const n={},mv=[];old.forEach((l,oi)=>{const ni=cur.indexOf(l);if(ni<0)return;if(a[oi]!=null)n[ni]=a[oi];["cv","cvo","sx"].forEach(t=>{const v=S.get(key(id,t+oi));if(v!=null)mv.push([t,ni,v])})});
     ["cv","cvo","sx"].forEach(t=>old.forEach((_,oi)=>S.del(key(id,t+oi))));mv.forEach(([t,ni,v])=>S.set(key(id,t+ni),v));
     const oi=+(S.get(key(id,"ivi"))||0),ni=oi<old.length?cur.indexOf(old[oi]):cur.length;if(ni>=0)S.set(key(id,"ivi"),String(ni));
     a=n;S.set(key(id,"iv"),JSON.stringify(a));S.set(key(id,"ivlab"),JSON.stringify(cur))}
@@ -4629,11 +4680,12 @@ function xlsxDe(hojas){const x=t=>String(t==null?"":t).replace(/&/g,"&amp;").rep
 function archivo(){try{return JSON.parse(S.get("dn2_archivo")||"[]")}catch(e){return[]}}
 function archivoGuardar(reg){const a=archivo().filter(r=>r.id!==reg.id);a.push(reg);S.set("dn2_archivo",JSON.stringify(a))}
 function registrosTodos(){const m=new Map();archivo().concat(cola()).forEach(r=>m.set(r.id,r));return[...m.values()]}
-const colsDe=()=>["ID_REGISTRO","FECHA_REGISTRO","REGISTRADO_POR"].concat(ALLF.map(f=>f.k)).concat(["SEMAFORO PROXIMO CONTROL"]);
+const colsDe=()=>["ID_REGISTRO","FECHA_REGISTRO","REGISTRADO_POR"].concat(ALLF.map(f=>f.k)).concat(["SEMAFORO PROXIMO CONTROL"]).concat(R202_COLS);
 function semTxt(d,todos){const px=d["FECHA PROXIMO CONTROL"];if(!px||px==="N/A")return"";const doc=d["DOCUMENTO ID."];if(doc&&doc!=="N/A"&&todos.some(r=>r.datos["DOCUMENTO ID."]===doc&&(r.datos["FECHA"]||"")>(d["FECHA"]||"")))return"CUMPLIDO";const sm=semaforo(px);return!sm?"":sm.c==="r"?"VENCIDO":sm.c==="a"?"PRÓXIMO":"AL DÍA"}
 async function exportarExcel(){const COLS=colsDe(),t=registrosTodos();if(!t.length)return"vacio";const por={};t.forEach(r=>{(por[r.comunidad||"SIN COMUNIDAD"]=por[r.comunidad||"SIN COMUNIDAD"]||[]).push(r)});
   const hojas=Object.keys(por).sort().map(c=>({nombre:c,filas:[COLS].concat(por[c].sort((a,b)=>(a.datos.FECHA||"")<(b.datos.FECHA||"")?-1:1).map(r=>COLS.map(k=>k==="SEMAFORO PROXIMO CONTROL"?semTxt(r.datos,t):(r.datos[k]==null?"":r.datos[k]))))}));
   const ps=Object.values(pacientes()).sort((a,b)=>a.n-b.n);if(ps.length)hojas.unshift({nombre:"PACIENTES",filas:[["CONSECUTIVO PACIENTE","NOMBRE COMPLETO","TIPO","DOCUMENTO ID.","GENERO","EDAD","COMUNIDAD","TELEFONO","N° ATENCIONES","PRIMERA ATENCION","ULTIMA ATENCION","ULTIMO MODULO","PROXIMO CONTROL","SEMAFORO","PENDIENTES"]].concat(ps.map(x=>{const I=x.ident,u=x.aten[x.aten.length-1]||{},e=estadoP(x);return[x.n,I["NOMBRE COMPLETO"]||"",I["TIPO"]||"",I["DOCUMENTO ID."]||"",I["GENERO"]||"",edadP(x)??"",I.__com||"",I["TELEFONO"]||"",x.aten.length,(x.aten[0]||{}).fecha||"",u.fecha||"",u.title||"",e?e.px:"",e?(e.c==="r"?"VENCIDO":e.c==="a"?"PRÓXIMO":"AL DÍA"):"",x.pend.filter(z=>!z.ok).map(z=>z.t).join("; ")]}))});
+  const h202=r202Hoja(t);if(h202)hojas.push(h202);
   return guardarArchivo("Rutas3280_registros_"+hoy()+".xlsx",xlsxDe(hojas))}
 async function hcWord(id){const S2=hcSecciones(id),P=pac(),m=M[id],f=S.get(key(id,"fecha"))||hoy();
   const bl=hcDocx(m.title+" — "+f.split("-").reverse().join("/"),S2);
@@ -4922,6 +4974,7 @@ const VARS=[
   {k:"OBSERVACION",l:"Observación",t:"area"},{k:"OBSERVACION DE CANALIZACION",l:"Observación de canalización",t:"area"},
   {k:"FECHA PROXIMO CONTROL",l:"Fecha del próximo control",t:"date"},{k:"MOTIVO PROXIMO CONTROL",l:"Motivo del próximo control"},{k:"TIPO DE SEGUIMIENTO",l:"Tipo de seguimiento"},{k:"FECHA DE SEGUIMIENTO",l:"Fecha de seguimiento",t:"date"},{k:"OBSERVACIONES SEGUIMIENTO",l:"Observaciones del seguimiento",t:"area"}]}
 ];
+VARS.push({g:"Atención (auditoría)",f:[{k:"TIPO DE ATENCION",l:"Tipo de atención"},{k:"CUPS",l:"CUPS sugerido (verifícalo con el manual de tu IPS)"},{k:"RESULTADO O CLASIFICACION",l:"Resultado o clasificación",t:"area"},{k:"CONDUCTA",l:"Conducta: medicamentos, remisiones, próximo control",t:"area"},{k:"EDUCACION",l:"Educación brindada"},{k:"RUTA O NOTIFICACION",l:"Ruta activada o notificación"}]});
 const ALLF=VARS.flatMap(g=>g.f);
 const REL_RM=["FECHA","NOMBRE COMPLETO","TIPO","DOCUMENTO ID.","FECHA NACIMIENTO","EDAD","AA / MM","GENERO","TELEFONO","ETNIA","PUEBLO","EAPB NOMBRE","RÉGIMEN","F.C","F. R","T. A","TEM","SPO2","PESO","TALLA","IMC","CURSO DE VIDA","HTA","HTA EN CONTROL","DIABETES","DIABETES EN CONTROL","HIPER O HIPOTIROIDISMO","TIROIDES EN CONTROL","PLANIFICACION FAMILIAR O CONTROL","PLANIFICACION FAMILIAR O CONTROL FECHA ULTIMO CONTROL","CITOLOGIA","CITOLOGIA FECHA ULTIMO CONTROL","ADN VPH","ADN VPH FECHA ULTIMO CONTROL","SE REALIZO LABORATORIOS","CANALIZADO A","CANALIZADO POR","OBSERVACION","OBSERVACION DE CANALIZACION","FECHA PROXIMO CONTROL","MOTIVO PROXIMO CONTROL"];
 function relDe(id){const m=id&&M[id];return m&&m.route==="rm"?REL_RM:null}
@@ -5296,7 +5349,7 @@ async function enviarBase(id){
   if(sample){msg("Extrayendo los datos de la historia…");
     try{const x=await sample.json(pExtraerVars(txt,f),{cache:false});if(x&&typeof x==="object")for(const [k,v] of Object.entries(x)){const fd=ALLF.find(z=>z.k===k);if(!fd||NO_EXTRAER.includes(k)||v==null||v==="")continue;let s=String(v).trim();if(fd.o&&fd.t!=="multi"){const hit=fd.o.find(o=>o.toUpperCase()===s.toUpperCase());if(!hit)continue;s=hit}d[k]=s}}
     catch(e){msg("No se pudo usar Claude; se extrajo lo básico sin conexión.")}}
-  const ident=identDe(),ej=S.get(key(id,"ejcaso"))?EJ_BASE:{};
+  const ident=identDe(),ej=S.get(key(id,"ejcaso"))?EJ_BASE:{};R202X=audModulo(id,f,Object.assign({},d,ident));AUD_COLS.forEach(k=>{if(R202X[k])d[k]=R202X[k]});
   baseEdit=null;base(Object.assign({},ej,d,ident),{review:true,mod:id,com:pacCom()||(ej===EJ_BASE?"EJEMPLO":"")});window.scrollTo(0,0)}
 
 function campo(f,d){const v=d[f.k]!=null?d[f.k]:(f.def==="hoy"?hoy():"");const id="bf_"+ALLF.indexOf(f);const attrs=`id="${id}" data-f="${esc(f.k)}"`;
@@ -5336,9 +5389,9 @@ function base(pref,opts){
   const dictBox=(lab,ph)=>`<label class="bfl" for="bd-cl"><span>${lab}</span><textarea id="bd-cl" style="min-height:80px" placeholder="${ph}"></textarea></label><div id="bd-cl-mic">${micUI(1)}</div><div class="btns"><button type="button" class="btn" id="bd-go">Llenar con lo dictado</button></div><p class="status" id="bd-st"></p>`;
   $("app").innerHTML=`
   <div class="top"><button class="back" id="back">${RV?"← Volver a la consulta":"← Rutas"}</button><span class="tag pc">${RV?"Paso final":"Base de datos"}</span></div>
-  ${RV?`<header><h1>Enviar a la base</h1><p class="sub">${esc(M[MD].title)}. Los datos salieron de la historia: completa solo lo que falte y envía.</p></header>`
+  ${RV?`<header><h1>Enviar a la base</h1><p class="sub">${esc(MD?M[MD].title:(baseOpts.titulo||"Nota por voz"))}. Los datos salieron de la historia: completa solo lo que falte y envía.</p></header>`
      :`<header><h1>Base de datos</h1><p class="sub">Envío a tu Google Sheets, una pestaña por comunidad. Los registros de una consulta se envían desde el último paso de cada módulo.</p></header>`}
-  <div class="box ${c.url?"warn":"miss"}" id="syncBox"><h3>Envío</h3><p style="margin:0" id="syncTxt"></p>
+  ${RV&&R202X?r202Box():""}<div class="box ${c.url?"warn":"miss"}" id="syncBox"><h3>Envío</h3><p style="margin:0" id="syncTxt"></p>
     <div class="btns" style="margin-top:8px"><button class="btn" id="syncNow">Enviar pendientes</button><button class="btn" id="cfgBtn">Conexión</button><button class="btn" id="xlsBtn">Exportar a Excel (${registrosTodos().length})</button></div><p class="note-src" style="margin:6px 0 0" id="xlsSt">Respaldo por si falla Google Sheets: todos los registros guardados en este celular, una pestaña por comunidad y las columnas en el mismo orden de la hoja.</p></div>
   <section class="tool" id="cfg" hidden><h3>Conexión con Google Sheets</h3>
     <label class="bfl" for="cf-url"><span>URL de la aplicación web (termina en /exec)</span><input id="cf-url" value="${esc(c.url||"")}" placeholder="https://script.google.com/macros/s/…/exec"></label>
@@ -5365,7 +5418,7 @@ function base(pref,opts){
     <div class="btns"><button class="btn primary" type="submit" id="b-save">${rec?"Guardar cambios":"Guardar y enviar"}</button>${rec?`<button class="btn" type="button" id="b-del">Quitar de pendientes</button>`:""}${RV?"":`<button class="btn" type="button" id="b-new">Formulario nuevo</button><button class="btn" type="button" id="b-ej">Cargar ejemplo (ficticio)</button>`}</div>
     <p class="status" id="b-st" role="status"></p>
   </form>${RV?"":"</div></details>"}`;
-  $("back").onclick=()=>{baseEdit=null;if(RV){openMod(MD)}else home()};
+  $("back").onclick=()=>{baseEdit=null;if(RV&&MD){openMod(MD)}else if(RV&&baseOpts.vn&&VNS){R202X=null;VNS.fin=true;vnRender()}else home()};
   $("cfgBtn").onclick=()=>{$("cfg").hidden=!$("cfg").hidden};
   $("cf-save").onclick=()=>{S.set("dn2_conf",JSON.stringify({url:$("cf-url").value.trim(),key:$("cf-key").value,who:$("cf-who").value.trim()}));$("cf-st").textContent="Conexión guardada en este celular.";syncTxt();$("syncBox").className="box warn"};
   $("cf-test").onclick=async()=>{const u=$("cf-url").value.trim();if(!/^https:\/\/script\.google\.com\//.test(u)){$("cf-st").textContent="La URL debe empezar por https://script.google.com/";return}
@@ -5429,9 +5482,9 @@ function base(pref,opts){
     if(falt.length){mostrarFaltan(falt);$("b-st").textContent="Completa los campos marcados en rojo. Si de verdad no aplica, usa N/A.";$("b-miss").scrollIntoView({behavior:"smooth",block:"start"});return}
     $("b-miss").hidden=true;
     const cf=conf();let id=baseEdit||(MD&&S.get(key(MD,"regid")))||"";
-    if(!id){const doc=datos["DOCUMENTO ID."],fe=datos["FECHA"];const same=cola().find(r=>doc&&doc!=="N/A"&&r.datos["DOCUMENTO ID."]===doc&&r.datos["FECHA"]===fe);if(same)id=same.id}
+    if(!id){const doc=datos["DOCUMENTO ID."],fe=datos["FECHA"];const same=cola().find(r=>doc&&doc!=="N/A"&&r.datos["DOCUMENTO ID."]===doc&&r.datos["FECHA"]===fe&&(r.datos["TIPO DE ATENCION"]||"")===(datos["TIPO DE ATENCION"]||""));if(same)id=same.id}
     id=id||uid();if(MD)S.set(key(MD,"regid"),id);
-    const reg={id,comunidad,datos:Object.assign({ID_REGISTRO:id,FECHA_REGISTRO:new Date().toISOString().slice(0,16).replace("T"," "),REGISTRADO_POR:cf.who||""},datos)};
+    const reg={id,comunidad,datos:Object.assign({ID_REGISTRO:id,FECHA_REGISTRO:new Date().toISOString().slice(0,16).replace("T"," "),REGISTRADO_POR:cf.who||""},datos,(()=>{const prev=cola().concat(archivo()).find(r=>r.id===id),o={};if(prev)Object.keys(prev.datos).forEach(k=>{if(/^R202 V/.test(k))o[k]=prev.datos[k]});if(R202X)Object.keys(R202X).forEach(k=>{if(/^R202 V/.test(k))o[k]=R202X[k]});const fe=datos["FECHA"]||hoy();if(R202X&&R202X.__f)Object.keys(o).forEach(k=>{if(R202X[k]===o[k]&&o[k]===R202X.__f)o[k]=fe});Object.assign(o,r202Base(datos,fe).o);delete o.__f;return o})())};R202X=null;
     const q=cola().filter(r=>r.id!==id);q.push(reg);setCola(q);archivoGuardar(reg);agendaGuardar(id,comunidad,datos);pacienteAtencion(MD||"",comunidad,datos,id);
     if(baseOpts.mod){const ident={};ID_KEYS.forEach(k=>{if(datos[k]&&datos[k]!=="N/A")ident[k]=datos[k]});ident.__com=comunidad;if(!ident["FECHA NACIMIENTO"]&&datos["EDAD"]&&datos["AA / MM"]==="AÑOS")ident.__edad=String(datos["EDAD"]);setPac(ident)}
     S.set("dn2_ultcom",comunidad);const cs=new Set((S.get("dn2_coms")||"").split("|").filter(Boolean));cs.add(comunidad);S.set("dn2_coms",[...cs].join("|"));
@@ -6230,7 +6283,302 @@ window.addEventListener("online",()=>sync(false));
   return out};
 })();
 
+/* ======================= COHERENCIA: a quién le corresponde cada nota y valores posibles ======================= */
+const VN_MENOR14="Menor de 14 años con vida sexual: en Colombia es presunto delito sexual (Código Penal, art. 208). Da la atención y además activa la ruta de atención a víctimas de violencia sexual (Res. 459 de 2012) y notifica al SIVIGILA (evento 875).";
+const VN_ELIG={
+ ccu:{sx:"F",min:25,max:65,por:"el tamizaje de cuello uterino de la Res. 3280 es de los 25 a los 65 años",fuera:"Si tiene síntomas (sangrado anormal, flujo, dolor pélvico), no es tamizaje: es consulta; remite a medicina.",
+  w:a=>a!=null&&a>=30?"De 30 a 65 años la prueba de tamización es ADN-VPH (en rural disperso, VIA/VILI de 30 a 50 años). La citología en este grupo es el triage de un ADN-VPH positivo: confirma que esta toma es eso.":""},
+ repcito:{sx:"F",min:25,max:65,soft:1,por:"el tamizaje de cuello uterino es de los 25 a los 65 años"},
+ mama:{sx:"F",min:40,max:69,por:"el examen clínico de mama de tamización es anual desde los 40 años (y la mamografía cada 2 años de 50 a 69)",fuera:"Antes de los 40 años no se hace tamizaje clínico de mama. Si consulta por una masa, secreción por el pezón, retracción o cambios en la piel, es una consulta: remite a medicina. Educa en autoconocimiento de las mamas y signos de alarma."},
+ av:{min:3,por:"la toma de agudeza visual con optotipos se hace desde los 3 años",fuera:"En menores de 3 años la visión se valora en el control de primera infancia: reflejo rojo, fijación y seguimiento."},
+ adol:{min:12,max:17,por:"el control de adolescencia es de los 12 a los 17 años",fuera:"Usa el control del momento de curso de vida que le corresponde por la edad."},
+ cyd:{maxM:71,por:"el control de primera infancia es desde los 7 días hasta los 5 años",fuera:"Desde los 6 años le corresponde la valoración de infancia (módulo Infancia)."},
+ lact:{sx:"F",min:10,max:55,por:"la consejería en lactancia se registra a nombre de la madre que lacta",fuera:"Identifica arriba a la madre (no al bebé) y vuelve a abrir la nota."},
+ precon:{sx:"F",min:10,max:55,por:"la atención preconcepcional es para mujeres en edad fértil",fuera:"",w:a=>a!=null&&a<14?VN_MENOR14:""},
+ vih:{w:a=>a!=null&&a<14?"Si la prueba es por exposición sexual en menor de 14 años: "+VN_MENOR14:""},
+ tbc:{}
+};
+["pf1","pfemb","pfc","impl","rimpl","diu","rdiu"].forEach(k=>VN_ELIG[k]={sx:"F",min:10,max:55,por:"esta nota es de anticoncepción en mujeres en edad fértil",fuera:"",w:a=>a!=null&&a<14?VN_MENOR14:""});
+function vnEdadReal(v){const P=vnPac();if(v&&v._edad){const n=vnNums(v._edad)[0];if(!Number.isFinite(n))return{a:null,m:null};return /mes/i.test(v._edad)?{a:Math.floor(n/12),m:n}:{a:n,m:n*12}}
+  return{a:P.edad!==""&&P.edad!=null?+P.edad:null,m:P.meses!=null?P.meses:null}}
+function vnSexoReal(v){const P=vnPac();if(v&&v._sexo)return /^(m|h|masc|hombre|nino)/i.test(plano(v._sexo))?"M":"F";return P.sexo||null}
+const vnEdadTxt=(a,m)=>a!=null&&a>=1?a+(a===1?" año":" años"):m!=null?m+(m===1?" mes":" meses"):"";
+function vnElig(id,v){const r=VN_ELIG[id],o={b:"",fuera:"",w:[],de:""};if(!r)return o;const {a,m}=vnEdadReal(v),s=vnSexoReal(v);
+  if(r.sx&&s&&s!==r.sx)o.b="Esta nota es solo para "+(r.sx==="F"?"mujeres":"hombres")+" y la persona está registrada como "+(s==="M"?"hombre":"mujer")+".";
+  else if(r.maxM!=null&&((m!=null&&m>r.maxM)||(m==null&&a!=null&&a>5)))o.b="Tiene "+vnEdadTxt(a,m)+": "+r.por+".";
+  else if(a!=null&&((r.min!=null&&a<r.min)||(r.max!=null&&a>r.max))){const t="Tiene "+vnEdadTxt(a,m)+": "+r.por+".";if(r.soft)o.w.push(t+" Revisa la edad o el motivo del reporte.");else o.b=t}
+  if(o.b){o.fuera=/registrada como/.test(o.b)?"":(r.fuera||"");o.de=v&&(v._edad||v._sexo)?"nota":"persona"}
+  else if(r.w){const x=r.w(a,s);if(x)o.w.push(x)}
+  return o}
+function vnBloqueo(e){stopRec();if(VNS)VNS.voz=false;
+  $("vn-pane").innerHTML=`<div class="box miss"><h3>Esta nota no corresponde a esta persona</h3><p style="margin:0 0 6px">${esc(e.b)}</p>${e.fuera?`<p style="margin:0">${esc(e.fuera)}</p>`:""}</div>
+   <p class="note-src">La nota no se arma, para no dejar en la historia una atención que no corresponde. Si la edad o el sexo están mal escritos, corrígelos y vuelve a abrir la nota.</p>
+   <div class="btns"><button class="btn primary" type="button" id="vn-fix">Corregir edad o sexo</button><button class="btn" type="button" id="vn-out">Volver al inicio</button></div>`;
+  $("vn-fix").onclick=()=>{if(e.de==="nota"){delete VNS.v._edad;delete VNS.v._sexo;vnGuardar();VNS.fin=false;VNS.i=0;vnRender()}else{VNS=null;home();const d=$("pac-det");if(d){d.open=true;d.scrollIntoView({block:"start"})}}};
+  $("vn-out").onclick=()=>{VNS=null;home();window.scrollTo(0,0)}}
+/* valores imposibles o de alarma en lo que se registró */
+function vnSignos(t){const s=String(t||""),g=re=>{const m=s.match(re);return m?parseFloat(String(m[m.length-1]).replace(",",".")):null},o={};
+  const ta=s.match(/(?:\bTA\b|T\.\s?A\.?|tensi[oó]n|presi[oó]n)\D{0,12}(\d{2,3})\s*(?:\/|sobre|-|\s)\s*(\d{2,3})/i);if(ta){o.tas=+ta[1];o.tad=+ta[2]}
+  o.fc=g(/(?:\bFC\b|frecuencia(?!\s+resp)(?:\s+card[ií]aca)?|pulso)\D{0,8}(\d{2,3})/i);o.fr=g(/(?:\bFR\b|respiraci[oó]n|frecuencia\s+respiratoria)\D{0,8}(\d{1,2})/i);
+  o.t=g(/(?:temperatura|\btemp\b|\bT\b(?!\.?\s?A))\D{0,6}(\d{2}(?:[.,]\d)?)/i);o.sp=g(/(?:spo2|saturaci[oó]n|\bsat\b)\D{0,6}(\d{2,3})/i);
+  o.peso=g(/peso\D{0,8}(\d{1,3}(?:[.,]\d{1,2})?)/i);let ta2=s.match(/talla\D{0,6}(\d)\s*con\s*(\d{2})/i);o.talla=ta2?+(ta2[1]+"."+ta2[2]):g(/talla\D{0,8}(\d{1,3}(?:[.,]\d{1,2})?)/i);if(o.talla!=null&&o.talla<3)o.talla=Math.round(o.talla*100);
+  o.pc=g(/per[ií]metro(?:\s+cef[aá]lico)?\D{0,8}(\d{2}(?:[.,]\d)?)/i);return o}
+function vnRevisar(id,v){const o=[],{a,m}=vnEdadReal(v),s=vnSexoReal(v),U=x=>VN_U(x),nino=a!=null&&a<12;
+  if(v.sv&&!vnEsNormal(v.sv)){const x=vnSignos(v.sv);
+    if(x.tas!=null){if(x.tas<60||x.tas>260||x.tad<30||x.tad>160||x.tad>=x.tas)o.push("Tensión "+x.tas+"/"+x.tad+": valor no posible; revisa cómo quedó escrita.");else if(!nino&&(x.tas>=140||x.tad>=90))o.push("Tensión "+x.tas+"/"+x.tad+" elevada (140/90 o más): repite en reposo y, si se confirma, remite a medicina.")}
+    if(x.fc!=null&&(x.fc<30||x.fc>220))o.push("Frecuencia cardiaca "+x.fc+": valor no posible.");
+    if(x.fr!=null&&(x.fr<6||x.fr>80))o.push("Frecuencia respiratoria "+x.fr+": valor no posible.");else if(x.fr!=null&&a!=null&&a>=12&&x.fr>24)o.push("Frecuencia respiratoria "+x.fr+": taquipnea; valora dificultad respiratoria.");
+    if(x.t!=null){if(x.t<33||x.t>43)o.push("Temperatura "+x.t+": valor no posible.");else if(x.t>=38)o.push("Temperatura "+x.t+" °C: fiebre; busca la causa y, en zona de malaria, toma gota gruesa.")}
+    if(x.sp!=null&&(x.sp>100||x.sp<50))o.push("Saturación "+x.sp+": valor no posible.");else if(x.sp!=null&&x.sp<92)o.push("Saturación "+x.sp+" %: baja; remite a medicina.");
+    if(x.peso!=null&&(x.peso<0.4||x.peso>250))o.push("Peso "+x.peso+": valor no posible.");
+    if(x.talla!=null&&(x.talla<30||x.talla>220))o.push("Talla "+x.talla+" cm: valor no posible.");
+    if(x.peso&&x.talla&&!nino&&a!=null&&a>=18){const imc=x.peso/Math.pow(x.talla/100,2);if(imc<12||imc>70)o.push("Peso "+x.peso+" kg con talla "+x.talla+" cm da un IMC de "+imc.toFixed(1)+": revisa los dos valores.")}}
+  if(v.gpcav){const n=(String(v.gpcav).match(/\d+/g)||[]).map(Number);if(n.length>=4){const [G,P,C,A,V]=n;
+    if(P+C+A>G)o.push("Paridad "+v.gpcav+": partos + cesáreas + abortos ("+(P+C+A)+") no puede ser mayor que las gestaciones ("+G+").");
+    if(V!=null&&V>P+C+1)o.push("Paridad "+v.gpcav+": hay más hijos vivos que partos y cesáreas; revisa (¿gemelares?).");
+    if(G>0&&a!=null&&a<14)o.push("Gestaciones previas en menor de 14 años: "+VN_MENOR14);
+    if(G>0&&a!=null&&a<10)o.push("Paridad registrada en una niña de "+vnEdadTxt(a,m)+": revisa la edad o la paridad.")}}
+  if(v.fur){const f=U(v.fur),iso=isoDeTxt(f)||plFecha(f);if(iso&&iso>hoy())o.push("La fecha de la última menstruación ("+f+") queda en el futuro.");
+    if(/MENOPAUSIA/.test(f)&&a!=null&&a<40)o.push("Menopausia registrada a los "+a+" años: es menopausia precoz; confírmalo y remite a medicina.");
+    if(a!=null&&a<9&&!/NO RECUERDA/.test(f))o.push("Fecha de última menstruación en una niña de "+vnEdadTxt(a,m)+": revisa.")}
+  if(v.citoant){const iso=isoDeTxt(U(v.citoant))||plFecha(U(v.citoant));if(iso&&iso>hoy())o.push("La fecha de la citología anterior queda en el futuro.")}
+  if(id==="mama"&&v.sint&&!vnEsNormal(v.sint))o.push("Refiere síntomas mamarios ("+U(v.sint)+"): ya no es tamizaje sino consulta; remite a medicina para valoración diagnóstica.");
+  if(id==="cyd"&&v.medidas){const x=vnSignos(v.medidas);
+    if(x.peso!=null&&(x.peso<1.5||x.peso>35))o.push("Peso "+x.peso+" kg: no es posible para un menor de 6 años; revisa.");
+    if(x.talla!=null&&(x.talla<40||x.talla>130))o.push("Talla "+x.talla+" cm: no es posible para un menor de 6 años; revisa.");
+    if(x.pc!=null&&(x.pc<28||x.pc>58))o.push("Perímetro cefálico "+x.pc+" cm: no es posible; revisa.")}
+  return o}
+
+/* ======================= PLANTILLAS DEL BLOC DE NOTAS (sin internet) ======================= */
+/* Se generan desde los mismos módulos y notas de la app, y se pegan de vuelta con «Pasar plantilla». */
+const PL_DAT=["NOMBRE COMPLETO","TIPO","DOCUMENTO ID.","FECHA NACIMIENTO","GENERO","TELEFONO","ETNIA","PUEBLO","EAPB NOMBRE","RÉGIMEN","DIRECCION","CONSECUTIVO","ROL EN EL HOGAR","CAPITADO"];
+const PL_MAD=[["Madre, padre o cuidador - relación","rel","HIJO(A) DE / NIETO(A) DE / SOBRINO(A) DE / A CARGO DE"],["Madre, padre o cuidador - nombre completo","nom",""],["Madre, padre o cuidador - tipo de documento","tip","CC / TI / CE / PPT / PEP / AS"],["Madre, padre o cuidador - número de documento","doc",""]];
+const plN=t=>plano(t).replace(/\(.*?\)/g," ").replace(/[^a-z0-9]+/g," ").trim();
+function plLista(){const o=[];Object.keys(M).filter(id=>id!=="proc").forEach(id=>o.push({tipo:"MODULO",id,t:M[id].title,who:M[id].who}));
+  Object.keys(VN).forEach(id=>o.push({tipo:"NOTA",id,t:VN[id].t,who:VN[id].who}));return o}
+function plCampos(tipo,id){const ks=tipo==="MODULO"?idCampos(id):["NOMBRE COMPLETO","TIPO","DOCUMENTO ID.","FECHA NACIMIENTO","GENERO","TELEFONO","ETNIA","PUEBLO","EAPB NOMBRE","RÉGIMEN"];return PL_DAT.filter(k=>ks.includes(k))}
+function plGenerar(tipo,id){const L=[],ln=s=>L.push(s),hr="==================================";
+  const nino=tipo==="MODULO"?["rn","pinf","inf","adol"].includes(id):id==="cyd";
+  ln("# APP: "+tipo+" "+id);ln(hr);
+  if(tipo==="MODULO"){const m=M[id];ln(m.title.toUpperCase()+" ("+m.who+")");ln(m.ref);ln(hr);
+    ln("> Cómo llenarla: escribe después de «R:». Basta con la palabra de la opción (ej. «Normal»)");ln(">  y la app pone el texto completo. Si la opción tiene ____, agrega los datos después de dos");ln(">  puntos: «Fiebre: 38,5». Deja vacío lo que no hiciste. Las líneas con > son ayudas.");
+    if(m.facts.length)ln("> Le toca: "+m.facts.map(([k,v])=>k+" "+v).join(" | "));
+    if(m.alerts.length){ln("> Alertas que obligan a remitir:");m.alerts.forEach(a=>ln(">  - "+a))}}
+  else{const T=VN[id];ln("NOTA: "+T.t.toUpperCase()+" ("+T.who+")");ln(hr);
+    ln("> Cómo llenarla: escribe después de «R:». Si queda vacío, la app pone el valor normal");ln(">  que aparece en la ayuda. Las líneas con > son ayudas.")}
+  ln("");ln("== DATOS INICIALES ==");ln("Fecha de esta consulta (dd/mm/aaaa): ");ln("Comunidad o vereda: ");
+  plCampos(tipo,id).forEach(k=>{const f=ALLF.find(z=>z.k===k);if(!f)return;const o=f.o?" ("+f.o.join(" / ")+")":f.t==="date"?" (dd/mm/aaaa)":"";ln(f.l+o+": ")});
+  ln("Edad (solo si no sabe la fecha de nacimiento; años o meses): ");
+  if(nino)PL_MAD.forEach(([l,,o])=>ln(l+(o?" ("+o+")":"")+": "));
+  if(tipo==="MODULO"){let blk="";ivFor(id).forEach((x,i)=>{if(x.b!==blk){blk=x.b;ln("");ln("== "+blk.toUpperCase()+" ==")}
+      ln("["+(i+1)+"] "+x.l);if(x.q&&plN(x.q)!==plN(x.l.replace(/…$/,"")))ln("    > "+(x.t==="ask"?"Pregunta: ":"Qué hacer: ")+x.q);
+      const op=plOpc(id,x).map(c=>String(c).split("|")[0]);if(op.length)ln("    > Opciones: "+op.join(" · "));
+      if(x.widget||x.campos)ln("    > Escribe los valores; en la app revisa el cálculo de esta pregunta.");
+      if(x.siTxt&&typeof x.siTxt==="string")ln("    > Si no aplica por la edad: "+x.siTxt);
+      ln("R: ")})}
+  else{ln("");ln("== PREGUNTAS ==");VN[id].qs.forEach(q=>{ln("["+q.k+"] "+q.q);if(q.h)ln("    > "+q.h);
+      if(q.def&&typeof q.def!=="function")ln("    > Normal: "+q.def);else if(typeof q.def==="function")ln("    > Si lo dejas vacío, la app lo sugiere según la edad.");
+      if(q.o&&q.o.length>1)ln("    > Opciones: "+q.o.join(" · "));if(q.c)ln("    > Solo si aplica.");ln("R: ")})}
+  ln("");ln("== OTROS DATOS U OBSERVACIONES ==");ln("R: ");ln("");ln("# FIN");
+  return L.join("\n")}
+function plLeer(t){const r={tipo:null,id:null,datos:{},resp:{},otros:[],fecha:""};let sec="",cur=null;
+  String(t||"").replace(/\r/g,"").split("\n").forEach(raw=>{const s=raw.trim();let m;
+    if((m=s.match(/^#\s*APP\s*:\s*(MODULO|NOTA)\s+([a-z0-9]+)/i))){r.tipo=m[1].toUpperCase();r.id=m[2];return}
+    if((m=s.match(/^==\s*(.+?)\s*==$/))){sec=plN(m[1]);cur=null;return}
+    if(!s||s.startsWith(">")||s.startsWith("#")||/^=+$/.test(s))return;
+    if((m=s.match(/^\[([^\]]+)\]\s*(.*)$/))){cur={k:m[1].trim(),l:m[2].trim(),v:[]};r.resp[cur.k]=cur;return}
+    if((m=s.match(/^R\s*:\s*(.*)$/i))){if(cur)cur.v.push(m[1]);else if(/^otros/.test(sec))r.otros.push(m[1]);return}
+    if(sec==="datos iniciales"&&(m=s.match(/^([^:]+):(.*)$/))){r.datos[plN(m[1])]=m[2].trim();return}
+    if(cur&&cur.v.length)cur.v.push(s);else if(/^otros/.test(sec))r.otros.push(s)});
+  Object.values(r.resp).forEach(x=>{x.v=x.v.join(" ").replace(/\s+/g," ").trim();if(/^_+$/.test(x.v))x.v=""});
+  r.otros=r.otros.join(" ").replace(/\s+/g," ").trim();return r}
+function plFecha(v){v=String(v||"").trim();if(/^\d{4}-\d{2}-\d{2}$/.test(v))return pD(v)?v:"";const m=v.match(/^(\d{1,2})[\/.\-](\d{1,2})[\/.\-](\d{2,4})$/);if(!m)return"";let y=m[3];if(y.length===2)y=(+y>40?"19":"20")+y;return isoDeTxt(m[1]+"/"+m[2]+"/"+y)}
+function plOpc(id,x){let c=[];try{c=x.c||[]}catch(e){}if(!c.length&&typeof IVX!=="undefined"&&IVX[id+"::"+x.q]&&Array.isArray(IVX[id+"::"+x.q].c))c=IVX[id+"::"+x.q].c;return c}
+function plOpcion(id,x,v){if(!v)return"";const op=plOpc(id,x).map(c=>String(c).split("|"));const n=plN(v);
+  for(const [lab,txt] of op){if(!txt)continue;const nl=plN(lab);if(n===nl)return txt;
+    if(n.startsWith(nl+" ")){const rest=v.trim().slice(lab.length).replace(/^[\s:.,;-]+/,"").trim();if(!rest)return txt;
+      if(txt.includes("____")){const p=rest.split(/\s*[,;]\s*/);let i=0;const out=txt.replace(/_{3,}/g,()=>i<p.length?p[i++]:"____");return i<p.length?out+" "+p.slice(i).join(", ")+".":out}
+      return txt+" "+rest}}
+  return v}
+function plDatos(r,tipo,id){const P={},d=r.datos,g=l=>{const k=Object.keys(d).find(z=>z===plN(l)||z.startsWith(plN(l)));return k?d[k].trim():""};
+  plCampos(tipo,id).forEach(k=>{const f=ALLF.find(z=>z.k===k);if(!f)return;let v=g(f.l);if(!v||/^_+$/.test(v))return;
+    if(k==="GENERO"){const p=plano(v);v=/^(f|mujer|femen|nina|niña)/.test(p)?"F":/^(m|h|hombre|mascul|nino|niño)/.test(p)?"M":""}
+    else if(f.t==="date")v=plFecha(v);
+    else if(f.t==="sel"){const p=plN(v),o=f.o.find(z=>plN(z)===p||plN(z).startsWith(p));v=o||v.toUpperCase()}
+    else if(k==="DOCUMENTO ID."||k==="TELEFONO")v=v.replace(/[^\dA-Za-z]/g,"");
+    else v=v.toUpperCase();if(v)P[k]=v});
+  const com=g("Comunidad o vereda");if(com)P.__com=com.toUpperCase();
+  const ed=g("Edad");if(ed&&!P["FECHA NACIMIENTO"]){const n=parseFloat(ed.replace(",","."));if(Number.isFinite(n))P.__edad=String(/mes/i.test(ed)?Math.round(n/12*10)/10:n)}
+  const mr=g(PL_MAD[0][0]),mn=g(PL_MAD[1][0]),mt=g(PL_MAD[2][0]),md=g(PL_MAD[3][0]);
+  if(mn){const rel=MAD_REL.find(z=>plN(z)===plN(mr))||MAD_REL.find(z=>plN(z).startsWith(plN(mr).split(" ")[0]||"hijo"))||"HIJO(A) DE";P.__mad={rel,nom:mn.toUpperCase(),tip:(mt||"CC").toUpperCase(),doc:md.replace(/\D/g,"")}}
+  return P}
+function plAplicar(texto){const r=plLeer(texto);if(!r.tipo||!r.id)return{err:"No encontré la línea «# APP: …» del comienzo. Copia la plantilla completa, desde la primera línea."};
+  if(r.tipo==="MODULO"&&!M[r.id]||r.tipo==="NOTA"&&!VN[r.id])return{err:"La plantilla es de «"+r.id+"», que no está en esta versión de la app."};
+  const id=r.id,P=plDatos(r,r.tipo,id),fecha=plFecha(Object.entries(r.datos).find(([k])=>k.startsWith("fecha de esta consulta"))?.[1]);
+  if(!P["NOMBRE COMPLETO"])return{err:"Falta el nombre completo en DATOS INICIALES."};
+  setPac(P);if(P.__com){S.set("dn2_ultcom",P.__com);addHist("__com",P.__com)}
+  let n=0,sin=[];
+  if(r.tipo==="MODULO"){S.keys().filter(k=>k.startsWith("dn2_"+id+"_")&&!k.endsWith("_note")).forEach(k=>S.del(k));
+    const q=ivFor(id),a={},ck={},usado=new Set();
+    Object.values(r.resp).forEach(x=>{if(!x.v)return;let i=q.findIndex((z,j)=>!usado.has(j)&&plN(z.l.replace(/…$/,""))===plN(x.l.replace(/…$/,"")));if(i<0&&/^\d+$/.test(x.k)&&q[+x.k-1]&&!usado.has(+x.k-1))i=+x.k-1;
+      if(i<0){sin.push(x.l+": "+x.v);return}usado.add(i);a[i]=plOpcion(id,q[i],x.v);if(q[i].ck)ck[q[i].ck]=1;n++});
+    S.set(key(id,"iv"),JSON.stringify(a));S.set(key(id,"ivlab"),JSON.stringify(q.map(z=>z.l)));S.set(key(id,"ivi"),String(q.length));S.set(key(id,"chk"),JSON.stringify(ck));
+    if(fecha)S.set(key(id,"fecha"),fecha);
+    let dict=ivCompose(id);const ot=[r.otros].concat(sin).filter(Boolean);if(ot.length)dict+="\n\nOTROS DATOS\n- "+ot.join("\n- ");
+    S.set(key(id,"dict"),dict);S.set(key(id,"note"),M[id].notes[0]);S.set(key(id,"tab"),"entr");
+    return{ok:1,n,id,tipo:"MODULO",sin:sin.length}}
+  const v={};VN[id].qs.forEach(q=>{const x=r.resp[q.k];if(!x||!x.v)return;const o=(q.o||[]).find(z=>plN(z)===plN(x.v));v[q.k]=o||x.v.toUpperCase();n++});
+  const ot=[r.otros].concat(Object.values(r.resp).filter(x=>x.v&&!VN[id].qs.some(q=>q.k===x.k)).map(x=>x.v)).filter(Boolean);
+  if(ot.length)v.extra=[v.extra&&!vnEsNormal(v.extra)?v.extra:""].concat(ot).filter(Boolean).join(". ").toUpperCase();
+  S.set("dn2_vn_"+id,JSON.stringify(v));return{ok:1,n,id,tipo:"NOTA"}}
+function plVista(){stopRec();st.view="plant";const L=plLista(),sel=S.get("dn2_pl_sel")||"MODULO:pinf";
+  $("app").innerHTML=`<div class="top"><button class="back" type="button" id="pl-back">← Inicio</button><span class="tag pc">Sin internet</span></div>
+  <header><h1>Plantillas del bloc de notas</h1><p class="sub">Para tomar los datos donde no hay señal o no abre la app, y pasarlos después.</p></header>
+  <section class="tool"><h3>1. Copiar una plantilla vacía</h3>
+   <label class="bfl"><span>Plantilla</span><select id="pl-sel">${["MODULO","NOTA"].map(t=>`<optgroup label="${t==="MODULO"?"Módulos (rutas)":"Notas por voz"}">${L.filter(x=>x.tipo===t).map(x=>`<option value="${t}:${x.id}" ${sel===t+":"+x.id?"selected":""}>${esc(x.t)} · ${esc(x.who)}</option>`).join("")}</optgroup>`).join("")}</select></label>
+   <textarea id="pl-txt" readonly style="min-height:260px;font-family:var(--f-data);font-size:.82rem"></textarea>
+   <div class="btns"><button class="btn primary" type="button" id="pl-copy">Copiar plantilla</button></div>
+   <p class="hint">Pégala en el bloc de notas del celular o del computador y guárdala con el nombre del módulo. Una copia por paciente.</p></section>
+  <section class="tool"><h3>2. Pasar una plantilla llena</h3>
+   <textarea id="pl-in" placeholder="Pega aquí la plantilla llena, completa, desde la línea # APP" style="min-height:200px;font-family:var(--f-data);font-size:.85rem"></textarea>
+   <div class="btns"><button class="btn primary" type="button" id="pl-go">Pasar a la app</button></div>
+   <p class="hint">Reemplaza a la persona identificada y el borrador de ese módulo. Luego revisa las preguntas y arma la nota como siempre.</p>
+   <p class="status" id="pl-st" role="status"></p></section>`;
+  const pinta=()=>{const [t,id]=$("pl-sel").value.split(":");$("pl-txt").value=plGenerar(t,id);S.set("dn2_pl_sel",$("pl-sel").value)};
+  $("pl-sel").onchange=pinta;pinta();$("pl-back").onclick=()=>{home();window.scrollTo(0,0)};
+  $("pl-copy").onclick=()=>{const t=$("pl-txt");t.select();let ok=false;try{navigator.clipboard.writeText(t.value).then(()=>{$("pl-copy").textContent="Copiada ✓"}).catch(()=>{document.execCommand("copy");$("pl-copy").textContent="Copiada ✓"})}catch(e){try{document.execCommand("copy");$("pl-copy").textContent="Copiada ✓"}catch(_){}}};
+  $("pl-go").onclick=()=>{const b=$("pl-go"),r=plAplicar($("pl-in").value);if(r.err){$("pl-st").textContent=r.err;return}
+    $("pl-st").textContent=`Listo: ${r.n} respuesta(s) pasadas.`;
+    if(r.tipo==="MODULO"){openMod(r.id)}else{vnOpen(r.id);VNS.fin=true;vnRender()}window.scrollTo(0,0)}}
+
+/* ======================= REGISTRO PARA AUDITORÍA Y RES. 202 DE 2021 =======================
+   Cada atención que se termina (módulo o nota por voz) llega a la base con:
+   - los campos de auditoría (tipo de atención, CUPS sugerido, resultado, conducta, educación, rutas), y
+   - solo las variables de la Res. 202 de 2021 que esa atención produce, con sus códigos.
+   Lo que la atención no produce queda vacío: no se inventa «no aplica» ni «no evaluado». */
+const R202=[[3,"TIPO DE IDENTIFICACION"],[4,"NUMERO DE IDENTIFICACION"],[9,"FECHA DE NACIMIENTO"],[10,"SEXO"],[11,"PERTENENCIA ETNICA"],
+ [14,"GESTANTE"],[18,"SINTOMATICO RESPIRATORIO"],[27,"AGUDEZA VISUAL OJO IZQUIERDO"],[28,"AGUDEZA VISUAL OJO DERECHO"],
+ [29,"FECHA DEL PESO"],[30,"PESO EN KILOGRAMOS"],[31,"FECHA DE LA TALLA"],[32,"TALLA EN CENTIMETROS"],[33,"FECHA PROBABLE DE PARTO"],[35,"CLASIFICACION DEL RIESGO GESTACIONAL"],
+ [40,"RESULTADO TAMIZAJE VALE"],[43,"EAD MOTRICIDAD GRUESA"],[44,"EAD MOTRICIDAD FINA ADAPTATIVA"],[45,"EAD PERSONAL SOCIAL"],[46,"EAD AUDICION Y LENGUAJE"],
+ [51,"FECHA ATENCION APOYO LACTANCIA MATERNA"],[52,"FECHA CONSULTA VALORACION INTEGRAL"],[53,"FECHA ASESORIA EN ANTICONCEPCION"],[54,"SUMINISTRO DE METODO ANTICONCEPTIVO"],[55,"FECHA SUMINISTRO METODO ANTICONCEPTIVO"],
+ [56,"FECHA PRIMERA CONSULTA PRENATAL"],[58,"FECHA ULTIMO CONTROL PRENATAL"],[59,"SUMINISTRO ACIDO FOLICO PRENATAL"],[60,"SUMINISTRO SULFATO FERROSO PRENATAL"],[61,"SUMINISTRO CARBONATO DE CALCIO PRENATAL"],
+ [62,"FECHA VALORACION AGUDEZA VISUAL"],[63,"FECHA TAMIZAJE VALE"],[70,"SUMINISTRO FORTIFICACION CASERA 6 A 23 MESES"],[71,"SUMINISTRO VITAMINA A 24 A 60 MESES"],[77,"SUMINISTRO HIERRO 24 A 59 MESES"],
+ [78,"FECHA ANTIGENO SUPERFICIE HEPATITIS B"],[79,"RESULTADO ANTIGENO SUPERFICIE HEPATITIS B"],[80,"FECHA PRUEBA TAMIZAJE SIFILIS"],[81,"RESULTADO PRUEBA TAMIZAJE SIFILIS"],[82,"FECHA PRUEBA VIH"],[83,"RESULTADO PRUEBA VIH"],
+ [86,"TAMIZAJE CANCER DE CUELLO UTERINO"],[87,"FECHA TAMIZAJE CANCER DE CUELLO UTERINO"],[88,"RESULTADO TAMIZAJE CANCER DE CUELLO UTERINO"],[89,"CALIDAD MUESTRA CITOLOGIA"],
+ [112,"FECHA BACILOSCOPIA DIAGNOSTICO"],[113,"RESULTADO BACILOSCOPIA DIAGNOSTICO"]];
+const R202K=n=>{const x=R202.find(z=>z[0]===n);return "R202 V"+String(n).padStart(3,"0")+" "+x[1]};
+const R202_COLS=R202.map(([n])=>R202K(n));
+const AUD_COLS=["TIPO DE ATENCION","CUPS","RESULTADO O CLASIFICACION","CONDUCTA","EDUCACION","RUTA O NOTIFICACION"];
+const ETNIA202={INDIGENA:"1",ROM:"2",RAIZAL:"3",PALENQUERO:"4",AFROCOLOMBIANO:"5",NINGUNA:"6"};
+const isoF=t=>{t=String(t||"").trim();if(/^\d{4}-\d{2}-\d{2}$/.test(t))return t;const a=isoDeTxt(t);if(a)return a;const f=typeof fechaTxt==="function"?fechaTxt(t):null;return f&&/^\d{4}-\d{2}-\d{2}$/.test(f)?f:""};
+const av202=t=>{const m=String(t||"").match(/20\s*\/\s*(\d{2,4})/);if(!m)return/cuenta dedos/i.test(t)?"6":/bultos/i.test(t)?"7":/percep|proyec.*luz/i.test(t)?"8":/no percibe/i.test(t)?"9":"";const d=+m[1];return d<=20?"3":d<=40?"4":"5"};
+const met202=t=>{const s=VN_U(t);return /IMPLANTE/.test(s)?"3":/DIU|T DE COBRE/.test(s)?"1":/ORAL|PILDORA|PASTILLA/.test(s)?"5":/TRIMESTRAL|DEPOPROVERA/.test(s)?"9":/MENSUAL/.test(s)?"7":/POMEROY|ESTERILIZ|LIGADURA|VASECTOM/.test(s)?"13":/EMERGENCIA/.test(s)?"11":/CONDON|PRESERVATIVO/.test(s)?"15":""};
+const rr=t=>/NO REACTIV|NEGATIV/.test(VN_U(t))?"5":/REACTIV|POSITIV/.test(VN_U(t))?"4":"";
+function r202Base(P,f){const o={__f:f},set=(n,v)=>{if(v!==""&&v!=null)o[R202K(n)]=String(v)};
+  set(3,P["TIPO"]||"");set(4,P["DOCUMENTO ID."]&&P["DOCUMENTO ID."]!=="N/A"?P["DOCUMENTO ID."]:"");set(9,P["FECHA NACIMIENTO"]&&P["FECHA NACIMIENTO"]!=="N/A"?P["FECHA NACIMIENTO"]:"");
+  set(10,P["GENERO"]||"");set(11,ETNIA202[P["ETNIA"]]||"");return{o,set}}
+/* ---- módulos ---- */
+function audModulo(id,f,d){const m=M[id],q=ivFor(id),a=ivAns(id),P=pac(),{o,set}=r202Base(P,f);
+  const A=re=>{const i=q.findIndex(x=>re.test(x.l));return i<0?"":String(a[i]||"").trim()},hay=re=>!!A(re)&&!/^no realizado|^no aplica|^pendiente/i.test(A(re));
+  const txt=ivCompose(id)+"\n"+(S.get(key(id,"dict"))||""),T=VN_U(txt),e=edadDe(P["FECHA NACIMIENTO"],f),mes=e?e.tm:null;
+  const peso=d&&d.PESO,talla=d&&d.TALLA;if(peso&&peso!=="N/A"){set(29,f);set(30,peso)}if(talla&&talla!=="N/A"){set(31,f);set(32,Math.round(parseFloat(String(talla).replace(",","."))*(parseFloat(talla)<3?100:1)))}
+  if(m.route==="rp"&&id!=="proc")set(52,f);
+  if(["prenatal","parto"].includes(id))set(14,"1");else if(id==="precon")set(14,"2");
+  if(id==="prenatal"){const r=egPren();if(r&&r.fpp)set(33,r.fpp.toISOString().slice(0,10));
+    if(/ALTO RIESGO/.test(T))set(35,"4");else if(/BAJO RIESGO/.test(T))set(35,"5");
+    if(/PRIMERA CONSULTA/.test(VN_U(A(/^Tipo de consulta/))))set(56,f);else set(58,f);
+    const sum=re=>new RegExp("("+re+")[^.\\n]{0,60}(FORMUL|ENTREG|SUMINISTR|SE DA|INICIA)|(FORMUL|ENTREG|SUMINISTR)[^.\\n]{0,60}("+re+")").test(T);
+    if(sum("ACIDO FOLICO"))set(59,"1");if(sum("SULFATO FERROSO|HIERRO"))set(60,"1");if(sum("CALCIO"))set(61,"1")}
+  const vale=A(/VALE/);if(vale){set(63,f);if(/falla|alterad|riesgo|remit/i.test(vale))set(40,"4");else if(/pasa|normal|sin hallazgo|adecuad/i.test(vale))set(40,"5")}
+  const ead=A(/^Desarrollo con EAD/);if(ead){if(/esperado|adecuado/i.test(ead)&&!/riesgo|sospecha/i.test(ead))[43,44,45,46].forEach(n=>set(n,"5"));
+    else{const cod=/sospecha/i.test(ead)?"3":/riesgo/i.test(ead)?"4":"";if(cod){const ar=[[43,/gruesa/i],[44,/fina/i],[45,/personal|social/i],[46,/audici|lenguaje/i]];ar.forEach(([n,re])=>{if(re.test(ead))set(n,cod)})}}}
+  if(hay(/Consejería en lactancia|lactancia/i)&&id!=="adol")set(51,f);
+  if(hay(/Asesoría en anticoncepción|Asesoría y suministro de anticoncepción|Anticoncepción y preservativos/i))set(53,f);
+  const mf=A(/Micronutrientes en polvo/);if(/entregad/i.test(mf))set(70,"1");
+  const mv=A(/Micronutrientes dos veces/);if(/entregad/i.test(mv)&&mes!=null&&mes>=24&&mes<=60){set(71,"1");if(mes<=59)set(77,"1")}
+  /* auditoría */
+  const CLAS=/Crecimiento|Estado nutricional|Desarrollo|VALE|Agudeza|APGAR|Salud mental|Riesgo cardiovascular|Funcionalidad|Riesgo de caídas|Cognición|Herrera|Clasificación|Signos generales|Esquema de vacunación/i;
+  const res=[];q.forEach((x,i)=>{const v=String(a[i]||"").trim();if(v&&CLAS.test(x.l))res.push(x.l.replace(/:.*$/,"").replace(/…$/,"")+": "+v.split(/(?<=\.)\s/)[0])});
+  const hh=id==="prenatal"&&typeof hhResumen==="function"?hhResumen(id):"";if(hh)res.unshift(hh.split(". Factores")[0]);
+  const con=[A(/^Medicamentos y micronutrientes/),A(/^Remisiones/),A(/^Próximo control/)].filter(Boolean);
+  const edu=q.map((x,i)=>/educaci|consejer/i.test(x.b+" "+x.l)&&a[i]&&!/no realizad|no aplica/i.test(a[i])?x.l.replace(/…$/,""):null).filter(Boolean);
+  const rutas=(T.match(/RUTA (?:DE|PARA) (?:ATENCI[OÓ]N (?:A|INTEGRAL)[^.;]{0,30}|[^.;]{0,15})(?:VIOLENCIA|DESNUTRICI|SALUD MENTAL|PROBLEMAS Y TRASTORNOS|CONSUMO|ALTERACIONES|C[AÁ]NCER|V[IÍ]CTIMAS)[A-ZÁÉÍÓÚÑ ]{0,40}|NOTIFIC[A-Z]* AL SIVIGILA[^.;]{0,30}|SE NOTIFICA[^.;]{0,40}/g)||[]).map(x=>x.trim()).filter((x,i,s)=>s.indexOf(x)===i);
+  const nota=N[S.get(key(id,"note"))||m.notes[0]];
+  o["TIPO DE ATENCION"]=(m.title+(nota&&m.notes.length>1?" · "+nota.label:"")).toUpperCase();
+  o["CUPS"]=id==="prenatal"?(/PRIMERA CONSULTA/.test(VN_U(A(/^Tipo de consulta/)))?"890205":"890305"):"890205";
+  o["RESULTADO O CLASIFICACION"]=res.join(" | ").slice(0,900);o["CONDUCTA"]=con.join(" | ").slice(0,600);o["EDUCACION"]=edu.join(", ").slice(0,400);o["RUTA O NOTIFICACION"]=rutas.join("; ");
+  return o}
+/* ---- notas por voz ---- */
+const EDU_KW=[["SIGNOS DE ALARMA","signos de alarma"],["LACTANCIA","lactancia materna"],["DERECHOS SEXUALES","derechos sexuales y reproductivos"],["PRESERVATIVO|DOBLE PROTECCION|PREVENCION DE ITS","prevención de ITS y doble protección"],["AUTOEXPLORACION|AUTOCONOCIMIENTO","autoconocimiento de las mamas"],["ADHERENCIA","adherencia al tratamiento"],["ACCIDENTES","prevención de accidentes"],["ESTIMULACION","estimulación del desarrollo"],["PRACTICAS ALIMENTARIAS|ALIMENTACION","alimentación saludable"],["LAVADO DE MANOS","lavado de manos"],["TAPABOCAS|BIOSEGURIDAD","medidas de bioseguridad"],["IMPORTANCIA DE[^.]{0,30}CONTROL","importancia de los controles"]];
+function audVN(id,v,f,texto){const P=pac(),{o,set}=r202Base(P,f),U=VN_U,T=U(texto||""),{m}=vnEdadReal(v);
+  const res=[],con=[];
+  if(id==="cyd"){set(52,f);const x=vnSignos(v.medidas||"");if(x.peso){set(29,f);set(30,x.peso)}if(x.talla){set(31,f);set(32,x.talla)}
+    const ead=U(v.ead||"ADECUADA PARA LA EDAD");if(/ADECUADA/.test(ead))[43,44,45,46].forEach(n=>set(n,"5"));
+    if(m!=null&&m>=24&&m<=60&&/VITAMINA A/.test(U(v.meds)))set(71,"1");if(m!=null&&m>=24&&m<=59&&/FERROSO|HIERRO/.test(U(v.meds)))set(77,"1");
+    res.push("EAD-3 "+ead,"ESTADO NUTRICIONAL "+U(v.nutri||"ADECUADO"));if(v.z)res.push("INDICADORES: "+U(v.z));if(v.meds)con.push("ORDENA: "+U(v.meds));if(v.remite)con.push("REMITE A "+U(v.remite));if(v.control)con.push("PROXIMO C Y D: "+U(v.control))}
+  if(id==="adol"){set(52,f);res.push("VALORACION DE ADOLESCENCIA")}
+  if(id==="av"){set(62,f);if(v.od)set(28,av202(v.od));if(v.oi)set(27,av202(v.oi));res.push("AV OD "+U(v.od||"")+" OI "+U(v.oi||""))}
+  if(id==="lact"){set(51,f);res.push("PROBLEMAS: "+U(v.prob||"NINGUNO")+"; TOMA: "+U(v.obs||"BUENA POSICION Y BUEN AGARRE"))}
+  if(id==="vih"){set(82,f);set(83,rr(v.vih||"NO REACTIVO"));const s=U(v.sif||"NO REACTIVO");if(!/NO SE REALIZO/.test(s)){set(80,f);set(81,rr(s))}const h=U(v.hb||"NO REACTIVO");if(!/NO SE REALIZO/.test(h)){set(78,f);set(79,rr(h))}
+    res.push("VIH "+U(v.vih||"NO REACTIVO"),"SIFILIS "+s,"HEPATITIS B "+h);if(s==="REACTIVO")con.push("SIFILIS REACTIVA: CONFIRMAR, TRATAR SEGUN PROTOCOLO, NOTIFICAR Y ESTUDIAR CONTACTOS");if(h==="REACTIVO")con.push("HEPATITIS B REACTIVA: REMITIR A MEDICINA Y NOTIFICAR");if(/REACTIVO/.test(U(v.vih||""))&&!/NO REACTIVO/.test(U(v.vih||"")))con.push("PRUEBA REACTIVA: CONFIRMAR, REMITIR Y NOTIFICAR")}
+  if(id==="ccu"){const mu=U(v.muestra||"MUESTRA ENDOCERVICAL Y EXOCERVICAL");set(86,/VPH/.test(mu)?"2":/VIA|VILI/.test(mu)?"3":"1");set(87,f);res.push("TOMA: "+mu,"CUELLO "+U(v.cuello||""));con.push("CONTROL: "+U(v.control||"15 DIAS PARA ENTREGA DE REPORTE"))}
+  if(id==="repcito"){const vph=v.tipo==="ADN-VPH";set(86,vph?"2":"1");const fm=isoF(v.fecha);if(fm)set(87,fm);
+    if(vph)set(88,/NEGATIVO/.test(U(v.vph))?"20":"19");
+    else if(v.calidad==="INSATISFACTORIA"){set(88,"18");set(89,"3")}
+    else{const an=U(v.anor||"NO SE ENCONTRARON");set(88,/ASC-H/.test(an)?"2":/ASCUS/.test(an)?"1":/BAJO GRADO/.test(an)?"3":/ALTO GRADO/.test(an)?"4":/NO SE ENCONTRARON/.test(an)&&!/ANORMALIDADES/.test(U(v.cat))?"17":"")}
+    res.push(vph?"ADN-VPH "+U(v.vph||""):"CITOLOGIA "+(v.calidad==="INSATISFACTORIA"?"INSATISFACTORIA":U(v.anor||"NEGATIVA")));con.push(U(v.control||vnRepPlan(v)))}
+  if(id==="mama"){const ok=vnEsNormal(v.mamas);res.push("EXAMEN CLINICO DE MAMA "+(ok?"NORMAL":"ANORMAL: "+U(v.mamas)));const {a:ed}=vnEdadReal(v);con.push(U(v.mamo||(ed!=null&&ed>=50&&ed<=69?"SE ORDENA MAMOGRAFIA":"")),ok?"":"REMITE A MEDICINA","CONTROL EN "+U(v.control||"1 AÑO"))}
+  if(["pf1","pfc"].includes(id)){set(53,f);const me=id==="pf1"?v.escoge:v.metodo;if(id==="pf1"&&/ORDENA/.test(U(v.prueba||""))){res.push("ESCOGE "+U(me||"")+"; INICIA CON PRUEBA DE EMBARAZO NEGATIVA")}else if(me){set(54,met202(me));set(55,f);res.push("METODO "+U(me))}}
+  if(id==="pfemb"){res.push("PRUEBA DE EMBARAZO "+U(v.res||"NEGATIVA"));if(v.res!=="POSITIVA"&&v.metodo){set(54,met202(v.metodo));set(55,f);set(53,f)}if(v.res==="POSITIVA")con.push(U(v.decision||""))}
+  if(id==="impl"){set(54,"3");set(55,f);res.push("INSERCION DE IMPLANTE "+U(v.tipo||""))}
+  if(id==="diu"){set(54,"1");set(55,f);res.push("INSERCION DE DIU "+U(v.tipo||"T DE COBRE 380A"))}
+  if(id==="rimpl"||id==="rdiu")res.push("RETIRO: "+U(v.motivo||""));
+  if(id==="precon"){set(14,"2");res.push("ATENCION PRECONCEPCIONAL")}
+  if(id==="tbc"){const t=U(v.tipo||"INGRESO AL PROGRAMA");if(/INGRESO/.test(t)){set(18,"1");if(/BACILOSCOPIA/.test(U(v.muestras||"BACILOSCOPIA")))set(112,f),set(113,"3")}res.push(t+(v.dx?": "+U(v.dx):""))}
+  if(v.sv&&!vnEsNormal(v.sv)){const x=vnSignos(v.sv);if(x.peso){set(29,f);set(30,x.peso)}if(x.talla){set(31,f);set(32,x.talla)}}
+  const edu=EDU_KW.filter(([re])=>new RegExp(re).test(T)).map(z=>z[1]);
+  const rutas=vnElig(id,v).w.filter(x=>/violencia|SIVIGILA/i.test(x)).concat((T.match(/RUTA (?:DE|PARA) (?:ATENCI[OÓ]N (?:A|INTEGRAL)[^.;]{0,30}|[^.;]{0,15})(?:VIOLENCIA|DESNUTRICI|SALUD MENTAL|PROBLEMAS Y TRASTORNOS|CONSUMO|ALTERACIONES|C[AÁ]NCER|V[IÍ]CTIMAS)[A-ZÁÉÍÓÚÑ ]{0,40}|NOTIFIC[A-Z]* AL SIVIGILA[^.;]{0,30}|SE NOTIFICA[^.;]{0,40}/g)||[]).map(x=>x.trim()));
+  o["TIPO DE ATENCION"]=VN[id].t.toUpperCase();
+  o["CUPS"]={ccu:"892901",pfc:"890305",repcito:"890305",pfemb:"890305"}[id]||"890205";
+  o["RESULTADO O CLASIFICACION"]=res.join(" | ").slice(0,900);o["CONDUCTA"]=con.filter(Boolean).join(" | ").slice(0,600);o["EDUCACION"]=edu.join(", ");o["RUTA O NOTIFICACION"]=[...new Set(rutas)].join("; ");
+  return o}
+/* datos de la base que salen de una nota por voz */
+function vnRegistrarBase(texto){const P=pac(),f=hoy(),v=VNS.v,id=VNS.id,x=vnSignos(v.sv||"");
+  const d=identDe();d["FECHA"]=f;if(x.peso)d["PESO"]=String(x.peso);if(x.talla)d["TALLA"]=String(Math.round(x.talla)/100);
+  if(x.tas)d["T. A"]=x.tas+"/"+x.tad;if(x.fc)d["F.C"]=String(x.fc);if(x.fr)d["F. R"]=String(x.fr);if(x.t)d["TEM"]=String(x.t);if(x.sp)d["SPO2"]=String(x.sp);
+  const ATN={ccu:"CITOLOGIA",mama:"EXAMEN CLINICO DE MAMA",pf1:"PLANIFICACION FAMILIAR O CONTROL",pfc:"PLANIFICACION FAMILIAR O CONTROL",pfemb:"PLANIFICACION FAMILIAR O CONTROL",impl:"PLANIFICACION FAMILIAR O CONTROL",diu:"PLANIFICACION FAMILIAR O CONTROL",rimpl:"PLANIFICACION FAMILIAR O CONTROL",rdiu:"PLANIFICACION FAMILIAR O CONTROL",cyd:"ATENCION INTEGRAL ENFERMERIA",adol:"ATENCION INTEGRAL ENFERMERIA"}[id];
+  if(ATN){d[ATN]="SI";d[ATN+" FECHA ULTIMO CONTROL"]=f}
+  if(id==="ccu"&&/VPH/.test(VN_U(v.muestra||""))){delete d["CITOLOGIA"];delete d["CITOLOGIA FECHA ULTIMO CONTROL"];d["ADN VPH"]="SI";d["ADN VPH FECHA ULTIMO CONTROL"]=f}
+  R202X=audVN(id,v,f,texto);Object.assign(d,R202X);
+  baseEdit=null;base(d,{review:true,vn:id,titulo:VN[id].t,com:P.__com||""});window.scrollTo(0,0)}
+let R202X=null;
+/* lectura de los códigos para mostrarlos en el paso final */
+const R202_RES=n=>[40,79,81,83].includes(n)?{4:n===40?"falla":"reactivo/positivo",5:n===40?"pasa":"no reactivo/negativo"}:null;
+function r202Txt(n,v){const s=String(v);
+  if([29,31,33,51,52,53,55,56,58,62,63,78,80,82,87,112].includes(n))return s.split("-").reverse().join("/");
+  if(n===30)return s+" kg";if(n===32)return s+" cm";
+  const R=R202_RES(n);if(R&&R[s])return s+" · "+R[s];
+  const T={14:{1:"sí",2:"no"},18:{1:"sí"},35:{4:"alto riesgo",5:"bajo riesgo"},43:{3:"sospecha de problema",4:"riesgo de problema",5:"desarrollo esperado"},
+   54:{1:"DIU",3:"implante",5:"oral",7:"inyectable mensual",9:"inyectable trimestral",11:"emergencia",13:"esterilización",15:"preservativo"},
+   86:{1:"citología",2:"ADN-VPH",3:"inspección visual"},88:{1:"ASC-US",2:"ASC-H",3:"LEI bajo grado",4:"LEI alto grado",17:"negativa",18:"inadecuada",19:"VPH positivo",20:"VPH negativo"},
+   89:{3:"insatisfactoria"},113:{1:"negativa",2:"positiva",3:"en proceso"},27:{3:"20/20 o mejor",4:"20/25 a 20/40",5:"20/50 o peor",6:"cuenta dedos",7:"bultos",8:"luz",9:"no percibe luz"}};
+  const k=[44,45,46].includes(n)?43:n===28?27:[59,60,61,70,71,77].includes(n)?"sum":n;
+  if(k==="sum")return s==="1"?"1 · suministrado":s;const t=T[k]&&T[k][s];return t?s+" · "+t:s}
+function r202Box(){const L=Object.keys(R202X||{}).filter(k=>/^R202 V/.test(k)).map(k=>({n:+k.slice(6,9),k})).filter(x=>![3,4,9,10,11].includes(x.n));
+  if(!L.length)return"";
+  return `<details class="sec" open style="margin-bottom:10px"><summary><span>Variables de la Res. 202 de esta atención</span><span class="cnt">${L.length}</span></summary><div style="padding:8px 14px 12px"><ul style="margin:0;padding-left:18px">${L.map(x=>`<li><b>V${x.n}</b> ${esc(x.k.slice(10).toLowerCase())}: ${esc(r202Txt(x.n,R202X[x.k]))}</li>`).join("")}</ul><p class="note-src" style="margin:6px 0 0">Salen de lo que registraste en la nota. Si algo está mal, corrígelo en la nota y vuelve a este paso. La identificación (V3, V4, V9, V10, V11) se toma de los datos de la persona.</p></div></details>`}
+/* hoja consolidada por persona: el último valor de cada variable, para cruzar con la 202 de la EAPB */
+function r202Hoja(t){const por={};t.slice().sort((a,b)=>((a.datos.FECHA||"")<(b.datos.FECHA||"")?-1:1)).forEach(r=>{const d=r.datos,id=(d["DOCUMENTO ID."]&&d["DOCUMENTO ID."]!=="N/A")?(d["TIPO"]||"")+":"+d["DOCUMENTO ID."]:"N:"+(d["NOMBRE COMPLETO"]||r.id);
+  const o=por[id]=por[id]||{"NOMBRE COMPLETO":d["NOMBRE COMPLETO"]||"",COMUNIDAD:r.comunidad||"","ULTIMA ATENCION":""};o["ULTIMA ATENCION"]=d.FECHA||o["ULTIMA ATENCION"];
+  R202_COLS.forEach(k=>{if(d[k]!=null&&d[k]!=="")o[k]=d[k]})});
+  const filas=Object.values(por).filter(o=>R202_COLS.some(k=>o[k]!=null&&!/V00[34] |V009 |V010 |V011 /.test(k)));if(!filas.length)return null;
+  const C=["NOMBRE COMPLETO","COMUNIDAD","ULTIMA ATENCION"].concat(R202_COLS);
+  return{nombre:"RES 202 POR PERSONA",filas:[C].concat(filas.map(o=>C.map(k=>o[k]==null?"":o[k])))}}
+
 /* ---------- arranque ---------- */
+/* los borradores guardados con la versión anterior de los módulos se reubican una sola vez */
+Object.keys(OLD_LAB).forEach(id=>{if(!M[id]||S.get(key(id,"ivlab")))return;let a={};try{a=JSON.parse(S.get(key(id,"iv"))||"{}")||{}}catch(e){}
+  S.set(key(id,"ivlab"),JSON.stringify(Object.keys(a).length?OLD_LAB[id]:ivFor(id).map(z=>z.l)));ivAns(id)});
 home();sync(false);
 (async()=>{try{sample=window.claude?await window.claude.use("sample"):null}catch(e){sample=null}
   if(sample&&st.view==="mod"&&st.tab==="nota"){const g=$("go"),h=$("offHint");if(g)g.textContent="Organizar nota";if(h)h.hidden=true}})();

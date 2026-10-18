@@ -1,0 +1,127 @@
+# APP: MODULO inf
+==================================
+INFANCIA (6 a 11 años)
+Res. 3280 · RPMS 2, infancia, p. 115
+==================================
+> Cómo llenarla: escribe después de «R:». Basta con la palabra de la opción (ej. «Normal»)
+>  y la app pone el texto completo. Si la opción tiene ____, agrega los datos después de dos
+>  puntos: «Fiebre: 38,5». Deja vacío lo que no hiciste. Las líneas con > son ayudas.
+> Le toca: Medicina 6, 8, 10 años | Enfermería 7, 9, 11 años | Odontología anual
+> Alertas que obligan a remitir:
+>  - Alteración visual o auditiva → remitir
+>  - Sospecha de maltrato o abuso → ruta de violencia
+
+== DATOS INICIALES ==
+Fecha de esta consulta (dd/mm/aaaa): 
+Comunidad o vereda: 
+Nombre completo: 
+Tipo de documento (CC / TI / RC / CE / PPT / PEP / MS / AS): 
+Número de documento: 
+Fecha de nacimiento (dd/mm/aaaa): 
+Sexo (F / M): 
+Teléfono: 
+Pertenencia étnica (INDIGENA / AFROCOLOMBIANO / RAIZAL / PALENQUERO / ROM / NINGUNA): 
+Pueblo indígena: 
+EAPB: 
+Régimen (SUBSIDIADO / CONTRIBUTIVO / ESPECIAL / NO AFILIADO): 
+Dirección o sector: 
+Consecutivo del hogar: 
+Rol en el hogar (JEFE DE HOGAR / CONYUGE / HIJO(A) / PADRE/MADRE / NIETO(A) / HERMANO(A) / OTRO): 
+Capitado (SI / NO): 
+Edad (solo si no sabe la fecha de nacimiento; años o meses): 
+Madre, padre o cuidador - relación (HIJO(A) DE / NIETO(A) DE / SOBRINO(A) DE / A CARGO DE): 
+Madre, padre o cuidador - nombre completo: 
+Madre, padre o cuidador - tipo de documento (CC / TI / CE / PPT / PEP / AS): 
+Madre, padre o cuidador - número de documento: 
+
+== MOTIVO Y ENFERMEDAD ACTUAL ==
+[1] Enfermedad actual
+    > Escribe los valores; en la app revisa el cálculo de esta pregunta.
+R: 
+
+== VALORACIÓN ==
+[2] Esquema de vacunación
+    > Opciones: Completo · Incompleto: se aplica · Incompleto: pendiente · Sin carné
+    > Escribe los valores; en la app revisa el cálculo de esta pregunta.
+R: 
+[3] Antecedentes personales: enfermedades, hospitalizaciones, alergias
+    > Opciones: Niega · Enfermedad · Hospitalización · Malaria previa · Alergia
+R: 
+[4] Hábitos: alimentación, actividad física, pantallas, sueño
+    > Opciones: Saludables · Mala alimentación · Sedentario · Sueño alterado
+R: 
+[5] Cuidados tradicionales: payé, rezos, plantas
+    > Opciones: Sí · No · Plantas o remedios
+R: 
+[6] Signos vitales: FC, FR, temperatura y tensión arterial
+    > Opciones: Normales · TA elevada · Fiebre
+R: 
+[7] Examen físico por sistemas, de cabeza a pies
+    > Opciones: Normal · Hallazgo · Piel o parásitos
+R: 
+[8] Crecimiento y estado nutricional
+    > Opciones: Adecuado · Riesgo · Déficit · Obesidad
+    > Escribe los valores; en la app revisa el cálculo de esta pregunta.
+R: 
+[9] Desarrollo y desempeño escolar
+    > Opciones: Adecuado · Problema escolar · Goodenough alterado · No escolarizado
+R: 
+[10] Test de la figura humana de Goodenough-Harris (obligatorio si hay q…
+    > Qué hacer: Test de la figura humana de Goodenough-Harris (obligatorio si hay quejas escolares, opcional si no)
+    > Escribe los valores; en la app revisa el cálculo de esta pregunta.
+R: 
+[11] Agudeza visual y audición
+    > Opciones: Normal · Visión alterada · Audición alterada · Sin optotipos
+R: 
+[12] Audición y comunicación (VALE)
+    > Escribe los valores; en la app revisa el cálculo de esta pregunta.
+R: 
+[13] Salud mental, violencias, acoso
+    > Escribe los valores; en la app revisa el cálculo de esta pregunta.
+R: 
+[14] Dinámica familiar (APGAR familiar)
+    > Escribe los valores; en la app revisa el cálculo de esta pregunta.
+R: 
+
+== DETECCIÓN TEMPRANA ==
+[15] Tamizaje de anemia (hemoglobina y hematocrito) una vez entre los 10…
+    > Qué hacer: Tamizaje de anemia (hemoglobina y hematocrito) una vez entre los 10 y 13 años, solo niñas
+    > Opciones: Ordenado · Ya tiene, normal · Resultado bajo
+R: 
+
+== PROTECCIÓN ESPECÍFICA ==
+[16] Vacunación según PAI (VPH a los 9 años según PAI vigente)
+    > Opciones: Aplicadas · Al día · Pendiente
+R: 
+[17] Barniz de flúor y profilaxis dos veces al año
+    > Opciones: Aplicado · Remitido · Ya recibió
+    > Escribe los valores; en la app revisa el cálculo de esta pregunta.
+    > Si no aplica por la edad: No aplica: menor de 6 meses; la primera consulta de odontología es a los 6 meses.
+R: 
+[18] Sellantes según necesidad
+    > Opciones: Remitido · Ya tiene · No requiere
+R: 
+
+== EDUCACIÓN ==
+[19] Educación individual y familiar
+    > Opciones: Realizada · Sesiones de seguimiento
+R: 
+[20] Al menos dos ciclos educativos
+    > Opciones: Derivado (lo envío hoy) · Ya asistió a 2 o más · Asistió a 1 · Sin oferta · No aplica
+R: 
+
+== PLAN ==
+[21] Medicamentos y micronutrientes formulados
+    > Opciones: Según la edad · Ninguno
+R: 
+[22] Remisiones
+    > Opciones: Ninguna · Odontología · Medicina · Vacunación · Nutrición o psicología
+R: 
+[23] Próximo control
+    > Opciones: Enfermería · Medicina · Próxima brigada · Control en 1 mes
+R: 
+
+== OTROS DATOS U OBSERVACIONES ==
+R: 
+
+# FIN

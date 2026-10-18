@@ -1,0 +1,51 @@
+# APP: NOTA vih
+==================================
+NOTA: ASESORÍA Y PRUEBAS RÁPIDAS (VIH, sífilis, hepatitis B)
+==================================
+> Cómo llenarla: escribe después de «R:». Si queda vacío, la app pone el valor normal
+>  que aparece en la ayuda. Las líneas con > son ayudas.
+
+== DATOS INICIALES ==
+Fecha de esta consulta (dd/mm/aaaa): 
+Comunidad o vereda: 
+Nombre completo: 
+Tipo de documento (CC / TI / RC / CE / PPT / PEP / MS / AS): 
+Número de documento: 
+Fecha de nacimiento (dd/mm/aaaa): 
+Sexo (F / M): 
+Teléfono: 
+Pertenencia étnica (INDIGENA / AFROCOLOMBIANO / RAIZAL / PALENQUERO / ROM / NINGUNA): 
+Pueblo indígena: 
+EAPB: 
+Régimen (SUBSIDIADO / CONTRIBUTIVO / ESPECIAL / NO AFILIADO): 
+Edad (solo si no sabe la fecha de nacimiento; años o meses): 
+
+== PREGUNTAS ==
+[motivo] Motivo de la prueba
+    > Normal: PRUEBA VOLUNTARIA
+    > Opciones: PRUEBA VOLUNTARIA · CONTROL PRENATAL · EXPOSICION DE RIESGO · PROTOCOLO PRECONCEPCIONAL
+R: 
+[vih] Resultado de VIH
+    > Normal: NO REACTIVO
+    > Opciones: NO REACTIVO · REACTIVO
+R: 
+[sif] Resultado de sífilis (prueba treponémica)
+    > Normal: NO REACTIVO
+    > Opciones: NO REACTIVO · REACTIVO · NO SE REALIZO
+R: 
+[hb] Resultado de hepatitis B
+    > Normal: NO REACTIVO
+    > Opciones: NO REACTIVO · REACTIVO · NO SE REALIZO
+R: 
+[fecha] Fecha de las pruebas
+    > Si lo dejas vacío, la app lo sugiere según la edad.
+R: 
+[extra] ¿Algo más para agregar a la nota?
+    > Dicta cualquier dato adicional, o di «no».
+    > Normal: NO
+R: 
+
+== OTROS DATOS U OBSERVACIONES ==
+R: 
+
+# FIN

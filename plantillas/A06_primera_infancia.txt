@@ -1,0 +1,156 @@
+# APP: MODULO pinf
+==================================
+PRIMERA INFANCIA (7 días a 5 años)
+Res. 3280 · RPMS 1, primera infancia, p. 105
+==================================
+> Cómo llenarla: escribe después de «R:». Basta con la palabra de la opción (ej. «Normal»)
+>  y la app pone el texto completo. Si la opción tiene ____, agrega los datos después de dos
+>  puntos: «Fiebre: 38,5». Deja vacío lo que no hiciste. Las líneas con > son ayudas.
+> Le toca: Medicina 1 m, 4–5 m, 12–18 m, 24–29 m, 3 a, 5 a | Enfermería 2–3 m, 6–8 m, 9–11 m, 18–23 m, 30–35 m, 4 a
+> Alertas que obligan a remitir:
+>  - Hitos de la EAD-3 no alcanzados → valoración médica
+>  - Desviación de las curvas de crecimiento o desnutrición aguda → manejo y remisión
+>  - Signos generales de peligro AIEPI → remisión urgente
+>  - Sospecha de maltrato → ruta de violencia y notificación
+
+== DATOS INICIALES ==
+Fecha de esta consulta (dd/mm/aaaa): 
+Comunidad o vereda: 
+Nombre completo: 
+Tipo de documento (CC / TI / RC / CE / PPT / PEP / MS / AS): 
+Número de documento: 
+Fecha de nacimiento (dd/mm/aaaa): 
+Sexo (F / M): 
+Teléfono: 
+Pertenencia étnica (INDIGENA / AFROCOLOMBIANO / RAIZAL / PALENQUERO / ROM / NINGUNA): 
+Pueblo indígena: 
+EAPB: 
+Régimen (SUBSIDIADO / CONTRIBUTIVO / ESPECIAL / NO AFILIADO): 
+Dirección o sector: 
+Consecutivo del hogar: 
+Rol en el hogar (JEFE DE HOGAR / CONYUGE / HIJO(A) / PADRE/MADRE / NIETO(A) / HERMANO(A) / OTRO): 
+Capitado (SI / NO): 
+Edad (solo si no sabe la fecha de nacimiento; años o meses): 
+Madre, padre o cuidador - relación (HIJO(A) DE / NIETO(A) DE / SOBRINO(A) DE / A CARGO DE): 
+Madre, padre o cuidador - nombre completo: 
+Madre, padre o cuidador - tipo de documento (CC / TI / CE / PPT / PEP / AS): 
+Madre, padre o cuidador - número de documento: 
+
+== MOTIVO Y ENFERMEDAD ACTUAL ==
+[1] Enfermedad actual
+    > Escribe los valores; en la app revisa el cálculo de esta pregunta.
+R: 
+
+== VALORACIÓN ==
+[2] Esquema de vacunación
+    > Opciones: Completo · Incompleto: se aplica · Incompleto: pendiente · Sin carné
+    > Escribe los valores; en la app revisa el cálculo de esta pregunta.
+R: 
+[3] Antecedentes perinatales: semanas y peso al nacer, hospitalización
+    > Opciones: Sin complicaciones · Prematuro · Bajo peso al nacer · Hospitalizado al nacer · No sabe
+R: 
+[4] Antecedentes personales: enfermedades, hospitalizaciones, alergias
+    > Opciones: Niega · Enfermedad · Hospitalización · Malaria previa · Alergia
+R: 
+[5] Cuidados tradicionales: payé, rezos, plantas
+    > Opciones: Sí · No · Plantas o remedios
+R: 
+[6] Signos vitales: FC, FR, temperatura
+    > Opciones: Normales · Fiebre · Respira rápido
+R: 
+[7] Examen físico por sistemas, de cabeza a pies
+    > Opciones: Normal · Hallazgo · Piel o parásitos
+R: 
+[8] Crecimiento: peso, talla, perímetro cefálico, curvas OMS
+    > Opciones: Adecuado · Riesgo · Desnutrición o talla baja · Desnutrición aguda
+    > Escribe los valores; en la app revisa el cálculo de esta pregunta.
+R: 
+[9] Desarrollo con EAD-3
+    > Opciones: Adecuado · Riesgo · Sospecha de problema
+    > Escribe los valores; en la app revisa el cálculo de esta pregunta.
+R: 
+[10] Audición y comunicación (VALE)
+    > Escribe los valores; en la app revisa el cálculo de esta pregunta.
+R: 
+[11] Visión: reflejo rojo, fijación y seguimiento, estrabismo
+    > Opciones: Normal · Alterado · Agudeza visual
+R: 
+[12] Alimentación: lactancia, alimentación complementaria
+    > Opciones: Adecuada · Inadecuada
+R: 
+[13] Salud bucal
+    > Opciones: Sana · Placa o caries · Pendiente odontología
+R: 
+[14] Familia: familiograma, red de apoyo, cuidado
+    > Opciones: Adecuada · Riesgo social · Sospecha de maltrato
+R: 
+[15] Dinámica familiar (APGAR familiar)
+    > Escribe los valores; en la app revisa el cálculo de esta pregunta.
+R: 
+[16] Signos generales de peligro AIEPI
+    > Opciones: Ausentes · Presente
+R: 
+
+== PROTECCIÓN ESPECÍFICA ==
+[17] Vacunación según esquema PAI
+    > Opciones: Aplicadas · Al día · Pendiente
+R: 
+[18] Micronutrientes en polvo (fortificación casera) en las edades del c…
+    > Qué hacer: Micronutrientes en polvo (fortificación casera) en las edades del cuadro de la 3280
+    > Opciones: Entregados · Ya recibió · En descanso
+    > Si no aplica por la edad: No aplica por edad: los micronutrientes en polvo son de los 6 a los 23 meses.
+R: 
+[19] Micronutrientes dos veces al año desde los 2 años
+    > Opciones: Entregados · Ya recibió
+    > Si no aplica por la edad: No aplica por edad: la suplementación con hierro y vitamina A es de los 24 a los 59 meses.
+R: 
+[20] Desparasitación desde el año, dos veces al año
+    > Opciones: Albendazol 400 mg · Ya recibió
+    > Si no aplica por la edad: No aplica por edad: la desparasitación inicia al año.
+R: 
+[21] Barniz de flúor y profilaxis semestral desde el año
+    > Opciones: Aplicado · Remitido · Ya recibió
+    > Escribe los valores; en la app revisa el cálculo de esta pregunta.
+    > Si no aplica por la edad: No aplica: menor de 6 meses; la primera consulta de odontología es a los 6 meses.
+R: 
+[22] Sellantes desde los 3 años según criterio
+    > Opciones: Remitido · Ya tiene · No requiere
+R: 
+[23] Consejería en lactancia
+    > Opciones: Realizada · No aplica
+R: 
+
+== DETECCIÓN TEMPRANA ==
+[24] Hemoglobina según riesgo (una vez)
+    > Opciones: Sin riesgo · Ordenada · Resultado normal · Resultado bajo
+R: 
+[25] Odontología anual desde los 6 meses
+    > Opciones: Al día · Remitido
+R: 
+
+== EDUCACIÓN ==
+[26] Educación individual a padres o cuidadores
+    > Opciones: Realizada
+R: 
+[27] Signos de alarma para consultar de inmediato
+    > Opciones: Realizada
+R: 
+[28] Al menos dos ciclos educativos
+    > Opciones: Derivado (lo envío hoy) · Ya asistió a 2 o más · Asistió a 1 · Sin oferta · No aplica
+R: 
+
+== PLAN ==
+[29] Medicamentos y micronutrientes formulados
+    > Opciones: Según la edad · Ninguno
+R: 
+[30] Remisiones
+    > Opciones: Ninguna · Odontología · Medicina · Vacunación · Nutrición o psicología
+R: 
+[31] Próximo control
+    > Opciones: Enfermería · Medicina · Próxima brigada · Control en 1 mes
+R: 
+
+== OTROS DATOS U OBSERVACIONES ==
+R: 
+
+# FIN

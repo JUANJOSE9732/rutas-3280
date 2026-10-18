@@ -1,0 +1,85 @@
+# APP: NOTA mama
+==================================
+NOTA: TAMIZAJE DE MAMA (Examen clínico de mama)
+==================================
+> Cómo llenarla: escribe después de «R:». Si queda vacío, la app pone el valor normal
+>  que aparece en la ayuda. Las líneas con > son ayudas.
+
+== DATOS INICIALES ==
+Fecha de esta consulta (dd/mm/aaaa): 
+Comunidad o vereda: 
+Nombre completo: 
+Tipo de documento (CC / TI / RC / CE / PPT / PEP / MS / AS): 
+Número de documento: 
+Fecha de nacimiento (dd/mm/aaaa): 
+Sexo (F / M): 
+Teléfono: 
+Pertenencia étnica (INDIGENA / AFROCOLOMBIANO / RAIZAL / PALENQUERO / ROM / NINGUNA): 
+Pueblo indígena: 
+EAPB: 
+Régimen (SUBSIDIADO / CONTRIBUTIVO / ESPECIAL / NO AFILIADO): 
+Edad (solo si no sabe la fecha de nacimiento; años o meses): 
+
+== PREGUNTAS ==
+[sint] ¿Masas, dolor, secreción por el pezón o cambios en piel o forma de las mamas?
+    > Normal: NIEGA
+R: 
+[antper] Antecedentes personales: cáncer de mama, biopsias o radioterapia en el tórax
+    > Normal: NIEGA
+R: 
+[antfam] Familiares con cáncer de mama u ovario (madre, hermana, hija)
+    > Si hay alguno, la norma pide derivar a la ruta de cáncer de mama (Res. 3280, 10.5).
+    > Normal: NIEGA
+R: 
+[gpcav] Paridad: gestaciones, partos, cesáreas, abortos y vivos
+    > Diga los cinco números en orden: «dos uno cero cero dos».
+    > Normal: G0 P0 C0 A0 V0
+R: 
+[fur] Fecha de la última menstruación
+    > Diga la fecha, o «no recuerda», «menopausia», «amenorrea por método».
+    > Opciones: NO RECUERDA · MENOPAUSIA · AMENORREA POR METODO
+R: 
+[metodo] Método de planificación actual
+    > Normal: NINGUNO
+    > Opciones: NINGUNO · INYECTABLE MENSUAL · INYECTABLE TRIMESTRAL (DEPOPROVERA) · IMPLANTE SUBDERMICO · DIU T DE COBRE · ANTICONCEPTIVOS ORALES · CONDON · POMEROY
+R: 
+[ecmant] Último examen clínico de mama: ¿cuándo?
+    > Normal: NIEGA
+    > Opciones: NIEGA · HACE 1 AÑO
+R: 
+[mamoant] Última mamografía y resultado
+    > Aplica de 50 a 69 años. Dicta fecha y BI-RADS si la tiene.
+    > Si lo dejas vacío, la app lo sugiere según la edad.
+    > Opciones: NIEGA · NO APLICA POR EDAD
+R: 
+[sv] Signos vitales y medidas
+    > Diga: tensión 110 70, frecuencia 72, respiración 18, temperatura 36.5, peso 58, talla 155. Di «normal» para omitir.
+    > Normal: NORMAL
+R: 
+[mamas] Hallazgos al examen de mama
+    > «Normal» deja inspección en tres posiciones y palpación por franjas sin masas ni ganglios. Si hay hallazgo: lado, posición en horas del reloj, tamaño, consistencia, móvil o fija.
+    > Normal: NORMAL
+R: 
+[efo] Resto del examen físico
+    > Normal: NORMAL
+R: 
+[repro] Aparato reproductor
+    > Normal: NO SE EXPLORA
+    > Opciones: NO SE EXPLORA · INTEGRO
+R: 
+[mamo] Mamografía (50 a 69 años, cada 2 años)
+    > Si lo dejas vacío, la app lo sugiere según la edad.
+    > Opciones: SE ORDENA MAMOGRAFIA · MAMOGRAFIA VIGENTE · NO APLICA POR EDAD
+R: 
+[control] ¿Cuándo es el próximo control?
+    > Normal: 1 AÑO
+R: 
+[extra] ¿Algo más para agregar a la nota?
+    > Dicta cualquier dato adicional, o di «no».
+    > Normal: NO
+R: 
+
+== OTROS DATOS U OBSERVACIONES ==
+R: 
+
+# FIN

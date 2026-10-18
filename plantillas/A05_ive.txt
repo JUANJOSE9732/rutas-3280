@@ -1,0 +1,94 @@
+# APP: MODULO ive
+==================================
+IVE (Mujer que pide interrumpir el embarazo)
+Res. 3280 · 4.2 IVE, p. 252; Sentencia C-055 de 2022 y Res. 051 de 2023
+==================================
+> Cómo llenarla: escribe después de «R:». Basta con la palabra de la opción (ej. «Normal»)
+>  y la app pone el texto completo. Si la opción tiene ____, agrega los datos después de dos
+>  puntos: «Fiebre: 38,5». Deja vacío lo que no hiciste. Las líneas con > son ayudas.
+> Le toca: Hasta semana 24 solo su voluntad | Después 1 de 3 causales | Atención inmediata (urgente)
+> Alertas que obligan a remitir:
+>  - Menor de 14 años: decide de forma autónoma; además activar ruta de violencia sexual y notificar
+>  - Remitir a medicina el mismo día por los tiempos de traslado
+
+== DATOS INICIALES ==
+Fecha de esta consulta (dd/mm/aaaa): 
+Comunidad o vereda: 
+Nombre completo: 
+Tipo de documento (CC / TI / RC / CE / PPT / PEP / MS / AS): 
+Número de documento: 
+Fecha de nacimiento (dd/mm/aaaa): 
+Sexo (F / M): 
+Teléfono: 
+Pertenencia étnica (INDIGENA / AFROCOLOMBIANO / RAIZAL / PALENQUERO / ROM / NINGUNA): 
+Pueblo indígena: 
+EAPB: 
+Régimen (SUBSIDIADO / CONTRIBUTIVO / ESPECIAL / NO AFILIADO): 
+Edad (solo si no sabe la fecha de nacimiento; años o meses): 
+
+== INFORMAR SIN INDUCIR ==
+[1] Derecho a la IVE en el primer contacto con el servicio
+    > Opciones: Informada · Ya lo conocía · Con intérprete
+R: 
+[2] Todas las opciones: continuar, IVE, adopción
+    > Opciones: Decide IVE · Decide continuar · Considera adopción · Aún no decide
+R: 
+[3] Confidencialidad
+    > Opciones: Garantizada · Acompañante de su elección · Menor de 14 años
+R: 
+
+== CONFIRMAR ==
+[4] FUM y edad gestacional
+    > Escribe los valores; en la app revisa el cálculo de esta pregunta.
+R: 
+[5] Si es mayor de 24 semanas: identificar la causal
+    > Opciones: No aplica · Causal salud · Causal malformación · Causal violencia sexual
+R: 
+
+== CAUSALES DESPUÉS DE LA SEMANA 24 ==
+[6] Riesgo para su vida o salud física, mental o social → certificado d…
+    > Pregunta: Riesgo para su vida o salud física, mental o social → certificado de medicina o psicología
+    > Opciones: No aplica · Remitida para certificado
+R: 
+[7] Malformación grave incompatible con la vida → certificado médico
+    > Opciones: No aplica · Remitida para certificado
+R: 
+[8] Violencia sexual, incesto, inseminación no consentida → no exigir d…
+    > Pregunta: Violencia sexual, incesto, inseminación no consentida → no exigir denuncia; si no se ha denunciado, informar a las autoridades
+    > Opciones: No aplica · Ruta activada
+R: 
+
+== NO EXIGIR ==
+[9] Juntas médicas, comités ni revisión por abogados
+    > Opciones: No se exigió · Hubo barrera
+R: 
+[10] Autorización de pareja, familia, capitán, cabildo ni otros
+    > Opciones: No se exigió · Hubo presión
+R: 
+[11] Orden judicial, dictamen forense ni exámenes que retrasen
+    > Opciones: No se exigió
+R: 
+
+== PLAN ==
+[12] Registrar la solicitud y la decisión en la historia clínica
+    > Opciones: Registrada · Decidió continuar
+R: 
+[13] Remisión a medicina de inmediato: es atención urgente; solo por exc…
+    > Qué hacer: Remisión a medicina de inmediato: es atención urgente; solo por excepción justificada hasta 5 días calendario desde su solicitud
+    > Opciones: Remitida hoy · Cita dentro de 5 días · Gestiona transporte · No desea IVE
+R: 
+[14] Valoración de salud mental y emocional
+    > Opciones: Sin riesgo · Con malestar · Riesgo
+R: 
+[15] Asesoría y provisión anticonceptiva post-IVE
+    > Opciones: Implante · DIU · Inyectable · Oral · Condón · No desea
+    > Escribe los valores; en la app revisa el cálculo de esta pregunta.
+R: 
+[16] Consulta de seguimiento
+    > Opciones: Opcional informada · Agendada · Seguimiento por teléfono
+R: 
+
+== OTROS DATOS U OBSERVACIONES ==
+R: 
+
+# FIN

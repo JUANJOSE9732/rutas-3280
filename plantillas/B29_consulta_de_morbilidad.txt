@@ -1,0 +1,85 @@
+# APP: NOTA morb
+==================================
+NOTA: CONSULTA DE MORBILIDAD (Enfermedad general, pregunta por pregunta)
+==================================
+> Cómo llenarla: escribe después de «R:». Si queda vacío, la app pone el valor normal
+>  que aparece en la ayuda. Las líneas con > son ayudas.
+
+== DATOS INICIALES ==
+Fecha de esta consulta (dd/mm/aaaa): 
+Comunidad o vereda: 
+Nombre completo: 
+Tipo de documento (CC / TI / RC / CE / PPT / PEP / MS / AS): 
+Número de documento: 
+Fecha de nacimiento (dd/mm/aaaa): 
+Sexo (F / M): 
+Teléfono: 
+Pertenencia étnica (INDIGENA / AFROCOLOMBIANO / RAIZAL / PALENQUERO / ROM / NINGUNA): 
+Pueblo indígena: 
+EAPB: 
+Régimen (SUBSIDIADO / CONTRIBUTIVO / ESPECIAL / NO AFILIADO): 
+Edad (solo si no sabe la fecha de nacimiento; años o meses): 
+
+== PREGUNTAS ==
+[cond] ¿Qué sospechas?
+    > Opciones: PACIENTE EN MAL ESTADO (PRIMER ABORDAJE) · ANAFILAXIA · CONVULSIÓN · HEMORRAGIA POSPARTO · TRASTORNO HIPERTENSIVO DEL EMBARAZO · MALARIA · DENGUE · ENFERMEDAD DIARREICA AGUDA · NEUMONÍA Y BRONQUIOLITIS · DESNUTRICIÓN AGUDA EN MENORES DE 5 AÑOS · ACCIDENTE OFÍDICO · AGRESIÓN POR ANIMAL (PERRO, GATO, MURCIÉLAGO) · LEISHMANIASIS CUTÁNEA · TUBERCULOSIS (SINTOMÁTICO RESPIRATORIO) · SÍFILIS EN GESTANTE · PIEL: ESCABIOSIS, IMPÉTIGO Y MICOSIS · OTRA
+R: 
+[motivo] Motivo de consulta en palabras del paciente o el acompañante
+R: 
+[evol] Tiempo de evolución
+    > Ej.: «tres días».
+R: 
+[sint] Síntomas y cómo han evolucionado
+R: 
+[antp] Antecedentes importantes, alergias y medicamentos
+    > Normal: NIEGA
+R: 
+[trad] ¿Recibió tratamiento tradicional o de otro lugar?
+    > Normal: NO
+    > Opciones: NO · SI, CURACION CON PAYE · SI, PLANTAS MEDICINALES
+R: 
+[sv] Signos vitales y medidas
+    > Diga: tensión 110 70, frecuencia 72, respiración 18, temperatura 36.5, peso 58, talla 155. Di «normal» para omitir.
+    > Normal: NORMAL
+R: 
+[ef] Examen físico: hallazgos positivos
+    > Normal: NORMAL
+R: 
+[prueba] Prueba en el puesto y resultado
+    > Normal: NO SE REALIZA
+    > Opciones: GOTA GRUESA NEGATIVA · GOTA GRUESA POSITIVA P. VIVAX · GOTA GRUESA POSITIVA P. FALCIPARUM · NO SE REALIZA
+R: 
+[dx] Impresión diagnóstica
+R: 
+[alarma] ¿Hay signos de alarma?
+    > Normal: NO
+    > Opciones: NO · SI
+R: 
+[tele] Telemedicina
+    > Normal: NO REQUERIDA
+    > Opciones: NO REQUERIDA · SE REALIZA, CON ORDEN MEDICA · SOLICITADA, EN ESPERA DE RESPUESTA
+R: 
+[conducta] Conducta y tratamiento indicado
+    > Lo que se hizo o administró y por indicación de quién.
+R: 
+[remision] Remisión
+    > Normal: NO REQUIERE
+    > Opciones: NO REQUIERE · SE GESTIONA REMISION, EN ESPERA DE TRANSPORTE · REMISION URGENTE EFECTIVA
+R: 
+[notif] Notificación SIVIGILA
+    > Normal: NO APLICA
+    > Opciones: NO APLICA · SE NOTIFICA EVENTO · NOTIFICACION COLECTIVA SEMANAL
+R: 
+[control] Próximo control o vigilancia
+    > Normal: 24 HORAS
+    > Opciones: 24 HORAS · 48 HORAS · DIARIO HASTA COMPLETAR TRATAMIENTO · EN 7 DIAS
+R: 
+[extra] ¿Algo más para agregar a la nota?
+    > Dicta cualquier dato adicional, o di «no».
+    > Normal: NO
+R: 
+
+== OTROS DATOS U OBSERVACIONES ==
+R: 
+
+# FIN

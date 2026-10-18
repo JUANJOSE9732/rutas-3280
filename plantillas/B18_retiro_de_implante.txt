@@ -1,0 +1,60 @@
+# APP: NOTA rimpl
+==================================
+NOTA: RETIRO DE IMPLANTE (Implante subdérmico)
+==================================
+> Cómo llenarla: escribe después de «R:». Si queda vacío, la app pone el valor normal
+>  que aparece en la ayuda. Las líneas con > son ayudas.
+
+== DATOS INICIALES ==
+Fecha de esta consulta (dd/mm/aaaa): 
+Comunidad o vereda: 
+Nombre completo: 
+Tipo de documento (CC / TI / RC / CE / PPT / PEP / MS / AS): 
+Número de documento: 
+Fecha de nacimiento (dd/mm/aaaa): 
+Sexo (F / M): 
+Teléfono: 
+Pertenencia étnica (INDIGENA / AFROCOLOMBIANO / RAIZAL / PALENQUERO / ROM / NINGUNA): 
+Pueblo indígena: 
+EAPB: 
+Régimen (SUBSIDIADO / CONTRIBUTIVO / ESPECIAL / NO AFILIADO): 
+Edad (solo si no sabe la fecha de nacimiento; años o meses): 
+
+== PREGUNTAS ==
+[hace] ¿Hace cuánto se lo colocaron?
+R: 
+[motivo] Motivo del retiro
+    > Opciones: CAMBIO DE METODO ANTICONCEPTIVO · DESEO DE EMBARAZO · VENCIMIENTO DEL TIEMPO DE USO · EFECTOS ADVERSOS
+R: 
+[brazo] Brazo donde está el implante
+    > Normal: IZQUIERDO
+    > Opciones: IZQUIERDO · DERECHO
+R: 
+[zona] Estado de la zona
+    > Normal: SIN SIGNOS DE INFECCION, ENROJECIMIENTO O DOLOR
+R: 
+[barras] ¿Cómo salieron las barras?
+    > Normal: SE OBTIENEN EN SU TOTALIDAD DOS BARRAS DE JADELLE, INTEGRAS, SIN ADHERENCIAS, SIN FRAGMENTACION
+    > Opciones: SE OBTIENEN EN SU TOTALIDAD DOS BARRAS DE JADELLE, INTEGRAS, SIN ADHERENCIAS, SIN FRAGMENTACION · SE OBTIENE UNA VARILLA DE IMPLANON INTEGRA
+R: 
+[sangrado] Sangrado
+    > Normal: POCO SANGRADO
+    > Opciones: POCO SANGRADO · SIN SANGRADO
+R: 
+[sig] Método que sigue
+    > Normal: NINGUNO
+    > Opciones: NINGUNO · INYECTABLE MENSUAL · INYECTABLE TRIMESTRAL (DEPOPROVERA) · IMPLANTE SUBDERMICO · DIU T DE COBRE · ANTICONCEPTIVOS ORALES · CONDON · POMEROY
+R: 
+[sv] Signos vitales y medidas
+    > Diga: tensión 110 70, frecuencia 72, respiración 18, temperatura 36.5, peso 58, talla 155. Di «normal» para omitir.
+    > Normal: NORMAL
+R: 
+[extra] ¿Algo más para agregar a la nota?
+    > Dicta cualquier dato adicional, o di «no».
+    > Normal: NO
+R: 
+
+== OTROS DATOS U OBSERVACIONES ==
+R: 
+
+# FIN

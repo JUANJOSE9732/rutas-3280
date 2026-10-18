@@ -1,0 +1,217 @@
+# APP: MODULO precon
+==================================
+PRECONCEPCIONAL (Mujer que quiere embarazarse en el próximo año)
+
+==================================
+> Cómo llenarla: escribe después de «R:». Basta con la palabra de la opción (ej. «Normal»)
+>  y la app pone el texto completo. Si la opción tiene ____, agrega los datos después de dos
+>  puntos: «Fiebre: 38,5». Deja vacío lo que no hiciste. Las líneas con > son ayudas.
+> Le toca: Consultas 1 inicial (30 min) + 1 control (20 min) | Quién Medicina o enfermería | Ácido fólico ≥ 3 meses antes
+> Alertas que obligan a remitir:
+>  - Antecedente genético o familiar (madre > 35, alteraciones genéticas, hemofilia) → ginecobstetricia
+>  - Respuesta positiva a las preguntas de depresión → ruta de salud mental
+>  - Enfermedad crónica (diabetes, tiroides, epilepsia, HTA, lupus, ERC, cardiopatía, trombofilia, asma, TB, cáncer) → especialista y anticoncepción hasta que esté controlada
+
+== DATOS INICIALES ==
+Fecha de esta consulta (dd/mm/aaaa): 
+Comunidad o vereda: 
+Nombre completo: 
+Tipo de documento (CC / TI / RC / CE / PPT / PEP / MS / AS): 
+Número de documento: 
+Fecha de nacimiento (dd/mm/aaaa): 
+Sexo (F / M): 
+Teléfono: 
+Pertenencia étnica (INDIGENA / AFROCOLOMBIANO / RAIZAL / PALENQUERO / ROM / NINGUNA): 
+Pueblo indígena: 
+EAPB: 
+Régimen (SUBSIDIADO / CONTRIBUTIVO / ESPECIAL / NO AFILIADO): 
+Edad (solo si no sabe la fecha de nacimiento; años o meses): 
+
+== PRIMER ABORDAJE ==
+[1] Presentación
+    > Qué hacer: Salúdala, preséntate con tu nombre y profesión, y explícale para qué es esta consulta.
+    > Opciones: Presentación realizada · Con intérprete
+R: 
+[2] Acompañante
+    > Pregunta: ¿Viene con alguien? ¿Quiere que esa persona esté con usted en la consulta?
+    > Opciones: Viene sola · Con su pareja · Con un familiar · Con intérprete · Prefiere estar sola
+R: 
+[3] Confidencialidad y consentimiento verbal
+    > Qué hacer: Explícale que lo que hablen es confidencial y pídele permiso para hacerle preguntas personales.
+    > Opciones: Acepta · Algunas no
+R: 
+[4] Expectativas
+    > Pregunta: ¿Qué le gustaría saber o resolver en esta consulta?
+    > Opciones: Quiere embarazarse · Dudas de fertilidad · Remitida · Sin otras
+R: 
+[5] Medicina tradicional
+    > Pregunta: ¿Ha hablado con el payé, el médico tradicional o la partera sobre su deseo de tener un bebé? ¿Le han hecho alguna curación o le han dado algún remedio?
+    > Opciones: No · Payé · Partera · Remedio de plantas
+R: 
+
+== DATOS GENERALES ==
+[6] Escolaridad y estado civil
+    > Pregunta: ¿Hasta qué año estudió? ¿Vive con su pareja?
+    > Opciones: Sin escolaridad · Primaria incompleta · Primaria completa · Bachillerato · Técnico o universitario · Unión libre · Casada · Soltera · Separada · Viuda
+R: 
+
+== INTENCIÓN REPRODUCTIVA ==
+[7] Deseo de embarazo
+    > Pregunta: ¿Usted (y su pareja) quieren tener un bebé en el próximo año?
+    > Opciones: Sí, ambos · Solo ella · No · No sabe
+R: 
+[8] Método anticonceptivo actual
+    > Pregunta: ¿Está planificando ahora? ¿Con qué método y desde cuándo?
+    > Opciones: Ninguno · Inyectable mensual · Inyectable trimestral · Implante · DIU · Pastillas · Condón
+R: 
+
+== ANTECEDENTES PERSONALES ==
+[9] Enfermedades
+    > Pregunta: ¿Algún médico le ha dicho que tiene azúcar alta, presión alta, tiroides, convulsiones, asma, problemas de riñón o de corazón, lupus, anemia o tuberculosis?
+    > Opciones: Niega · Hipertensión · Diabetes · Epilepsia · Asma · Anemia · Tiroides · Corazón o riñón · Lupus · Tuberculosis · Otra
+R: 
+[10] Medicamentos y remedios
+    > Pregunta: ¿Toma algún medicamento, remedio tradicional o producto para bajar de peso?
+    > Opciones: Niega · Hierro · Ácido fólico · Antihipertensivo · Anticonvulsivante · Plantas · Otro
+R: 
+[11] Cirugías y alergias
+    > Pregunta: ¿La han operado? ¿Es alérgica a algún medicamento?
+    > Opciones: Niega ambas · Cesárea · Cirugía en el útero · Otra cirugía · Alergia a penicilina · Alergia a otro medicamento
+R: 
+[12] Trombosis
+    > Pregunta: ¿Ha tenido trombosis o coágulos en las piernas o los pulmones?
+    > Opciones: Niega · Refiere
+R: 
+
+== ANTECEDENTES GINECOBSTÉTRICOS ==
+[13] Menarquia y ciclos
+    > Pregunta: ¿A qué edad le llegó la primera regla? ¿Le viene cada mes?
+    > Opciones: Regulares · Irregulares
+R: 
+[14] Fórmula obstétrica
+    > Pregunta: ¿Cuántos embarazos ha tenido? ¿Cuántos partos, cesáreas y abortos? ¿Cuántos hijos vivos?
+    > Opciones: Nuligesta · Fórmula
+R: 
+[15] Último parto o cesárea
+    > Pregunta: ¿Cuándo fue su último parto o cesárea?
+    > Opciones: No aplica · Más de 18 meses · Menos de 18 meses
+R: 
+[16] Complicaciones obstétricas previas
+    > Pregunta: En embarazos anteriores, ¿tuvo presión alta, convulsiones, hemorragia después del parto, placenta retenida, bebés muy pequeños o muy grandes, bebés que murieron o embarazo molar?
+    > Opciones: Niega · Preeclampsia · Hemorragia posparto · Muerte del bebé · Bebé pequeño · Parto prematuro · Abortos repetidos · Mola · Otra
+R: 
+[17] Depresión posparto previa
+    > Pregunta: Después de algún parto, ¿se sintió muy triste o sin ganas de nada por varias semanas?
+    > Opciones: No · No aplica · Sí
+R: 
+[18] Grupo sanguíneo y Rh
+    > Pregunta: ¿Sabe su tipo de sangre? ¿Y el de su pareja?
+    > Opciones: No sabe · O+ · O- · A+ · A- · B+ · B- · AB+ · AB-
+R: 
+
+== SALUD SEXUAL ==
+[19] Vida sexual
+    > Pregunta: ¿A qué edad inició relaciones? ¿Cuántas parejas ha tenido? ¿Usa condón?
+    > Opciones: Pareja estable · Usa condón
+R: 
+[20] ITS
+    > Pregunta: ¿Ha tenido flujo con mal olor, llagas en los genitales o alguna infección de transmisión sexual?
+    > Opciones: Niega · Refiere
+R: 
+[21] Tamizaje de cuello uterino
+    > Pregunta: ¿Cuándo fue su última citología o prueba de VPH? ¿Qué resultado le dieron?
+    > Opciones: Al día · Nunca · No recuerda
+R: 
+
+== ANTECEDENTES FAMILIARES ==
+[22] Antecedentes genéticos y familiares
+    > Pregunta: ¿En su familia o la de su pareja hay enfermedades que se heredan, bebés con malformaciones o hemofilia?
+    > Opciones: Niega · Hijo con defecto del tubo neural · Malformaciones o hereditarias · Hemofilia
+R: 
+
+== HÁBITOS ==
+[23] Alimentación
+    > Pregunta: ¿Qué comió ayer desde que se levantó hasta que se acostó?
+    > Opciones: Variada · Poco variada · Casabe y fariña
+R: 
+[24] Tabaco, alcohol y sustancias
+    > Pregunta: ¿Fuma? ¿Toma chicha, guarapo o licor? ¿Consume otras sustancias?
+    > Opciones: Niega · Chicha ocasional · Chicha frecuente · Tabaco o mambe · Otra sustancia
+R: 
+[25] Actividad física, sueño y estrés
+    > Pregunta: ¿Qué actividad física hace? ¿Cómo duerme? ¿Se siente preocupada o estresada?
+    > Opciones: Adecuado · Poca actividad · Duerme mal · Estrés
+R: 
+
+== PSICOSOCIAL ==
+[26] Familia y apoyo
+    > Pregunta: ¿Con quién vive? ¿Quién la apoya cuando lo necesita?
+    > Opciones: Pareja e hijos · Familia extensa · Poco apoyo
+R: 
+[27] Violencias
+    > Pregunta: ¿Alguien la ha humillado, amenazado, golpeado o forzado a tener relaciones?
+    > Opciones: Niega · Sí · Sexual en las últimas 72 h · En peligro ahora
+R: 
+[28] Tamizaje de depresión 1
+    > Pregunta: Durante el último mes, ¿se ha preocupado porque con frecuencia se sentía triste, deprimida o sin esperanza?
+    > Opciones: No · Sí
+R: 
+[29] Tamizaje de depresión 2
+    > Pregunta: Durante el último mes, ¿se ha preocupado porque con frecuencia sentía poco interés por realizar actividades y además no sentía que le proporcionaran placer?
+    > Opciones: No · Sí
+R: 
+
+== VACUNACIÓN ==
+[30] Esquema de vacunación
+    > Pregunta: ¿Tiene el carné de vacunas? Revísalo con ella.
+    > Escribe los valores; en la app revisa el cálculo de esta pregunta.
+R: 
+
+== EXAMEN FÍSICO ==
+[31] Signos vitales
+    > Qué hacer: Registra los signos vitales.
+    > Escribe los valores; en la app revisa el cálculo de esta pregunta.
+R: 
+[32] Antropometría
+    > Qué hacer: Registra peso y talla; el IMC se calcula solo.
+    > Escribe los valores; en la app revisa el cálculo de esta pregunta.
+R: 
+[33] Examen por sistemas
+    > Qué hacer: Examen cefalocaudal, incluida la cavidad bucal.
+R: 
+[34] Valoración ginecológica
+    > Qué hacer: Valoración ginecológica con especuloscopia.
+    > Opciones: No: sin insumos · No: sin privacidad · No: no acepta
+R: 
+
+== PLAN ==
+[35] Exámenes solicitados
+    > Qué hacer: ¿Qué exámenes ordenaste?
+    > Opciones: Paquete completo · Pruebas rápidas hoy · Pendiente de toma · Cuello uterino · Prueba de embarazo
+R: 
+[36] Ácido fólico
+    > Qué hacer: Formulación de ácido fólico.
+    > Opciones: 0,4 mg/día · 4 mg/día por epilepsia · 4 mg/día por defecto del tubo neural
+R: 
+[37] Anticoncepción hasta decidir
+    > Qué hacer: Método anticonceptivo mientras se prepara.
+    > Opciones: Continúa · Inicia · Busca embarazo
+    > Escribe los valores; en la app revisa el cálculo de esta pregunta.
+R: 
+[38] Remisiones
+    > Qué hacer: ¿A dónde remitiste?
+    > Opciones: Vacunación · Odontología · Nutrición · Psicología · Medicina · Ginecobstetricia · Ninguna
+R: 
+[39] Información brindada
+    > Qué hacer: Antes de cerrar, explícale estos temas (Res. 3280, 4.1.6.6). Toca los que hablaste.
+    > Opciones: Todos los temas · Planeación y espaciamiento · Nutrición · Vacunas · Control prenatal temprano · Riesgo cardiometabólico · Derechos e IVE · Riesgo por edad · Signos de alarma
+R: 
+[40] Próximo control
+    > Qué hacer: ¿Cuándo es el control para leer los exámenes?
+    > Opciones: 1 mes (estándar) · 2 semanas · Próxima brigada · Otra fecha
+R: 
+
+== OTROS DATOS U OBSERVACIONES ==
+R: 
+
+# FIN
