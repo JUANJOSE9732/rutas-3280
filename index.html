@@ -1121,8 +1121,9 @@ const VN={
   {k:"fecha",q:"Fecha de la prueba",def:()=>hoy()},
   {k:"metodo",q:"Método escogido en la consulta anterior",o:VN_METODOS.slice(1),c:v=>v.res!=="POSITIVA"},
   {k:"decision",q:"¿Qué decide frente al embarazo?",o:["CONTINUAR EL EMBARAZO E INGRESAR A CONTROL PRENATAL","INTERRUPCION VOLUNTARIA DEL EMBARAZO","DAR EN ADOPCION","AUN NO DECIDE"],c:v=>v.res==="POSITIVA"},
-  {k:"control",q:"Fecha o tiempo del próximo control",def:v=>v.res==="POSITIVA"?"CITA PRIORITARIA CON MEDICINA GENERAL":"3 MESES"},Q.extra],
-  b:(v,P,I)=>v.res==="POSITIVA"?vnL([`PACIENTE DE ${I.edad} AÑOS, PROCEDENTE DE ${I.com}, QUIEN INGRESA CON RESULTADO DE PRUEBA DE EMBARAZO DEL ${VN_U(v.fecha)} POSITIVA. SE INFORMA SOBRE EL RESULTADO Y LAS OPCIONES FRENTE A ESTE EMBARAZO: CONTINUARLO E INGRESAR A CONTROL PRENATAL, DARLO EN ADOPCION O LA INTERRUPCION VOLUNTARIA DEL EMBARAZO.`,"SE BRINDA INFORMACION SOBRE LA SENTENCIA C-055 DE 2022: IVE POR DECISION DE LA MUJER HASTA LA SEMANA 24 Y, DESPUES, EN TRES CIRCUNSTANCIAS: 1. RIESGO PARA LA SALUD FISICA O MENTAL O LA VIDA DE LA MUJER. 2. EMBARAZO RESULTADO DE VIOLACION O INCESTO. 3. MALFORMACIONES DEL FETO INCOMPATIBLES CON LA VIDA.",`PACIENTE DECIDE: ${VN_U(v.decision)}.`,`SE DA ${VN_U(v.control)}. SE BRINDA ASESORIA EN PLANIFICACION FAMILIAR Y DERECHOS SEXUALES Y REPRODUCTIVOS.`,vnEsNormal(v.extra)?"":VN_U(v.extra)]):vnL([`PACIENTE DE ${I.edad} AÑOS QUE REGRESA A CONSULTA CON REPORTE NEGATIVO DE PRUEBA DE EMBARAZO DEL ${VN_U(v.fecha)}. SE EXPLICA NUEVAMENTE EL FUNCIONAMIENTO DE LA PRUEBA Y EL RESULTADO OBTENIDO; SE ENTREGA ORDEN PARA RECLAMAR EL METODO ESCOGIDO EN LA CONSULTA ANTERIOR: ${VN_U(v.metodo)}.`,"SE REFUERZA FUNCIONAMIENTO DEL METODO, VENTAJAS, DESVENTAJAS, POSIBLES EFECTOS ADVERSOS, FORMA DE ADMINISTRACION, IMPORTANCIA DE LA ADHERENCIA Y DE LOS CONTROLES. PACIENTE MANIFIESTA ENTENDER Y ACEPTAR.",`SE CITA PARA CONTROL EN ${VN_U(v.control)}. SE RECOMIENDA EL USO DEL PRESERVATIVO LOS PRIMEROS 15 DIAS. SE ENTREGA REPORTE DE LA PRUEBA A LA USUARIA.`,vnEsNormal(v.extra)?"":VN_U(v.extra)])},
+  {k:"control",q:"Conducta y próximo control",def:v=>v.res!=="POSITIVA"?"3 MESES":/INTERRUPCION/.test(VN_U(v.decision))?"REMISION A MEDICINA EL MISMO DIA PARA ATENCION DE IVE":/AUN NO/.test(VN_U(v.decision))?"NUEVA ASESORIA EN 1 SEMANA":"INGRESO A CONTROL PRENATAL POR ENFERMERIA HOY Y VALORACION POR MEDICINA PENDIENTE (PROXIMA BRIGADA O TELEMEDICINA)",
+   o:["INGRESO A CONTROL PRENATAL POR ENFERMERIA HOY Y VALORACION POR MEDICINA PENDIENTE (PROXIMA BRIGADA O TELEMEDICINA)","CITA PRIORITARIA CON MEDICINA GENERAL","REMISION A MEDICINA EL MISMO DIA PARA ATENCION DE IVE","NUEVA ASESORIA EN 1 SEMANA","3 MESES"],h:"En comunidad sin médico, enfermería hace la primera consulta prenatal (Res. 3280, 4.3.6.1)."},Q.extra],
+  b:(v,P,I)=>v.res==="POSITIVA"?vnL([`PACIENTE DE ${I.edad} AÑOS, PROCEDENTE DE ${I.com}, QUIEN INGRESA CON RESULTADO DE PRUEBA DE EMBARAZO DEL ${VN_U(vnVal("pfemb",v,P,"fecha"))} POSITIVA. SE INFORMA SOBRE EL RESULTADO Y LAS OPCIONES FRENTE A ESTE EMBARAZO: CONTINUARLO E INGRESAR A CONTROL PRENATAL, DARLO EN ADOPCION O LA INTERRUPCION VOLUNTARIA DEL EMBARAZO.`,"SE BRINDA INFORMACION SOBRE LA SENTENCIA C-055 DE 2022: IVE POR DECISION DE LA MUJER HASTA LA SEMANA 24 Y, DESPUES, EN TRES CIRCUNSTANCIAS: 1. RIESGO PARA LA SALUD FISICA O MENTAL O LA VIDA DE LA MUJER. 2. EMBARAZO RESULTADO DE VIOLACION O INCESTO. 3. MALFORMACIONES DEL FETO INCOMPATIBLES CON LA VIDA.",`PACIENTE DECIDE: ${VN_U(v.decision)}.`,`CONDUCTA: ${VN_U(vnVal("pfemb",v,P,"control"))}.`,/CONTINUAR|ADOPCION/.test(VN_U(v.decision))?"SE INICIA ACIDO FOLICO 0,4 MG AL DIA SI ESTA ANTES DE LA SEMANA 12 Y SE ORDENAN LOS EXAMENES DE INGRESO PRENATAL (RES. 3280, 4.3.6.1.4).":"",`SE BRINDA ASESORIA EN PLANIFICACION FAMILIAR Y DERECHOS SEXUALES Y REPRODUCTIVOS.`,vnEsNormal(v.extra)?"":VN_U(v.extra)]):vnL([`PACIENTE DE ${I.edad} AÑOS QUE REGRESA A CONSULTA CON REPORTE NEGATIVO DE PRUEBA DE EMBARAZO DEL ${VN_U(v.fecha)}. SE EXPLICA NUEVAMENTE EL FUNCIONAMIENTO DE LA PRUEBA Y EL RESULTADO OBTENIDO; SE ENTREGA ORDEN PARA RECLAMAR EL METODO ESCOGIDO EN LA CONSULTA ANTERIOR: ${VN_U(v.metodo)}.`,"SE REFUERZA FUNCIONAMIENTO DEL METODO, VENTAJAS, DESVENTAJAS, POSIBLES EFECTOS ADVERSOS, FORMA DE ADMINISTRACION, IMPORTANCIA DE LA ADHERENCIA Y DE LOS CONTROLES. PACIENTE MANIFIESTA ENTENDER Y ACEPTAR.",`SE CITA PARA CONTROL EN ${VN_U(v.control)}. SE RECOMIENDA EL USO DEL PRESERVATIVO LOS PRIMEROS 15 DIAS. SE ENTREGA REPORTE DE LA PRUEBA A LA USUARIA.`,vnEsNormal(v.extra)?"":VN_U(v.extra)])},
  pfc:{g:"Planificación",t:"Control de planificación",who:"Seguimiento del método",qs:[
   {k:"metodo",q:"¿Con qué método planifica?",o:VN_METODOS.slice(1)},
   {k:"tiempo",q:"¿Hace cuánto tiempo?"},
@@ -1397,7 +1398,8 @@ function vnFinal(){if(idMinFalta().length){vnIdForm();return}const _e=vnElig(VNS
   <textarea id="vn-nota" style="min-height:420px;font-size:.92rem">${esc(txt)}</textarea>
   <div class="btns"><button class="btn primary" type="button" id="vn-copy">Copiar nota</button><button class="btn" type="button" id="vn-save">Guardar y registrar en la base</button></div>
   <div class="btns"><button class="btn" type="button" id="vn-back2">← Volver a las preguntas</button>${sample?`<button class="btn" type="button" id="vn-ai">Pulir redacción con Claude</button>`:""}<button class="btn" type="button" id="vn-new">Terminar y limpiar</button></div>
-  <p class="status" id="vn-st" aria-live="polite"></p>`;
+  <p class="status" id="vn-st" aria-live="polite"></p>${vnSigHTML()}`;
+  vnSigWire();
   document.querySelectorAll("[data-vgo]").forEach(b=>b.onclick=()=>{VNS.fin=false;VNS.i=vnLista2().findIndex(q=>q.k===b.dataset.vgo);vnRender()});
   $("vn-back2").onclick=()=>{VNS.fin=false;VNS.i=Math.max(0,vnLista2().length-1);vnRender()};
   $("vn-copy").onclick=()=>{const t=$("vn-nota").value;const ok=()=>{$("vn-st").textContent="Nota copiada."};try{navigator.clipboard.writeText(t).then(ok,()=>{$("vn-nota").select();$("vn-st").textContent="Selecciona y copia el texto manualmente."})}catch(e){$("vn-nota").select()}};
@@ -1954,7 +1956,7 @@ function wireMiDia(){const cb=$("md-cal");if(cb)cb.onclick=calOpen;
 function mdShow(t){const s=$("md-st");s.innerHTML="";const a=document.createElement("textarea");a.value=t;a.rows=7;a.readOnly=true;s.append("No se pudo copiar solo. Mantén presionado el texto y cópialo:",a);a.focus();a.select()}
 
 /* ---------- PANEL ---------- */
-const VERSION_APP="2026-10-18 v166";
+const VERSION_APP="2026-10-18 v167";
 function home(){
   stopRec();if(S.get(AT_KEY))atReiniciar();st.view="home";
   const rm=["precon","prenatal","parto","rn","ive"],rp=["pinf","inf","adol","juv","adul","vej"];
@@ -6380,6 +6382,7 @@ Object.assign(VN,{
   {k:"rap",q:"Pruebas rápidas de hoy y resultado",h:"VIH (con asesoría), sífilis treponémica, hepatitis B, gota gruesa.",o:["VIH Y SIFILIS NO REACTIVAS, GOTA GRUESA NEGATIVA","NO SE REALIZAN HOY"]},
   {k:"labs",q:"Paraclínicos revisados",def:"SIN RESULTADOS NUEVOS",o:["SIN RESULTADOS NUEVOS"]},
   {k:"riesgo",q:"Clasificación del riesgo (Herrera y Hurtado)",h:"Se aplica en cada trimestre. Dicta el puntaje si lo tienes.",o:["BAJO RIESGO","ALTO RIESGO"]},
+  {k:"med",q:"Valoración por medicina",def:"PENDIENTE: SE PROGRAMA EN LA PROXIMA BRIGADA O POR TELEMEDICINA",o:["PENDIENTE: SE PROGRAMA EN LA PROXIMA BRIGADA O POR TELEMEDICINA","REALIZADA POR TELEMEDICINA HOY","YA FUE VALORADA POR MEDICINA"],c:v=>/PRIMERA/.test(VN_U(v.tipo))},
   {k:"metpp",q:"Método anticonceptivo elegido para el posparto",def:"EN ASESORIA",o:["EN ASESORIA","DIU POSPARTO","IMPLANTE SUBDERMICO","INYECTABLE TRIMESTRAL","ORAL DE SOLO PROGESTINA","OCLUSION TUBARICA","CONDON"]},
   Q.extra],
   aviso:(v,P)=>{const sx=vnSexo(v,P),e=vnEdadA(v,P);return sx==="M"?"La persona seleccionada está registrada como hombre. Selecciona a la gestante.":e<14?VN_MENOR14:""},
@@ -6428,6 +6431,7 @@ Object.assign(VN,{
    const para=vnSec("PARACLINICOS:",[`PRUEBAS RAPIDAS HOY: ${rap||"___"}.`,`RESULTADOS REVISADOS: ${U("labs")}.`]);
    const ana=vnSec("ANALISIS:",[`GESTACION DE ${eg!=null?vnEGtxt(eg):"___"}, CLASIFICADA COMO ${U("riesgo")||"___"} SEGUN ESCALA DE HERRERA Y HURTADO.`,
     al.length?"SE IDENTIFICA: "+al.join("; ")+".":"GESTACION DE CURSO NORMAL, SIN FACTORES DE RIESGO NI SIGNOS DE ALARMA IDENTIFICADOS. CONTINUA CONTROL PRENATAL (RES. 3280, 4.3)."]);
+   if(ing)ref.push("VALORACION POR MEDICINA: "+U("med"));
    const plan=vnSec("PLAN:",[vnLis("CONDUCTA, REMISIONES Y DERIVACIONES:",ref),vnLis("MICRONUTRIENTES:",micro),"VACUNACION SEGUN ESQUEMA VIGENTE: "+vac.join(", ")+".",
     vnLis("EXAMENES QUE CORRESPONDEN O SE ACERCAN POR EDAD GESTACIONAL (VERIFICAR SI YA ESTAN):",ex),rem.length?"REMISIONES DE RUTINA: "+rem.join(", ")+".":"",
     `ASESORIA ANTICONCEPTIVA: METODO ELEGIDO PARA EL POSPARTO: ${U("metpp")}; SE REGISTRA EN EL CARNE PERINATAL.`,
@@ -6597,6 +6601,29 @@ Object.assign(VN_ELIG,{
  partoc:{sx:"F",min:10,max:55,por:"la atención del parto se registra a nombre de la madre",fuera:"Para el bebé usa «Valoración del recién nacido»."},
  rnctl:{maxM:2,por:"la valoración del recién nacido es en las primeras semanas de vida",fuera:"Después del primer mes usa el control de primera infancia.",w:()=>"La Res. 3280 (4.12.2) asigna el control del recién nacido a pediatría o medicina general. Por enfermería regístralo como valoración y asegura el control médico."}
 });
+
+/* ---------- Continuar con: siguientes atenciones, programas o rutas según lo que salió en la nota ---------- */
+function vnSigLista(id,v){const P=vnPac(),c=ctxPer(),U=k=>VN_U(vnVal(id,v,P,k)),o=[],add=(t,vn,pre,est)=>o.push({t,vn,pre:pre||{},est});
+  if(id==="pfemb"){if(U("res")==="POSITIVA"){const d=U("decision");
+     if(/CONTINUAR|ADOPCION/.test(d)){add("Ingreso a control prenatal (primera consulta)","prenat",{tipo:"PRIMERA CONSULTA (INGRESO)",opc:"SE INFORMA; DECIDE CONTINUAR LA GESTACION"},"ges");add("Pruebas rápidas de VIH, sífilis y hepatitis B","vih",{motivo:"CONTROL PRENATAL"},"ges");add("Orden de exámenes de ingreso prenatal","rem",{tipo:"LABORATORIOS DE INGRESO PRENATAL"},"ges");add("Vacunación de la gestante","vac",{},"ges")}
+     else if(/INTERRUPCION/.test(d))add("Asesoría en opciones e IVE","ivea",{},"ive");else add("Asesoría en opciones e IVE","ivea",{})}
+   else{const m=U("metodo");if(/IMPLANTE/.test(m))add("Inserción de implante","impl");else if(/DIU/.test(m))add("Inserción de DIU","diu");else add("Control de planificación","pfc")}}
+  if(id==="prenat"){if(/PRIMERA/.test(U("tipo")))add("Orden de exámenes de ingreso prenatal","rem",{tipo:"LABORATORIOS DE INGRESO PRENATAL"});add("Pruebas rápidas de VIH, sífilis y hepatitis B","vih",{motivo:"CONTROL PRENATAL"});add("Vacunación de la gestante","vac");add("Remisión a odontología","rem",{tipo:"ODONTOLOGIA (ATENCION EN SALUD BUCAL)"});add("Educación para la salud","edu")}
+  if(id==="precon"){add("Orden de exámenes preconcepcionales","rem",{tipo:"LABORATORIOS PRECONCEPCIONALES"});add("Pruebas rápidas de VIH, sífilis y hepatitis B","vih",{motivo:"PROTOCOLO PRECONCEPCIONAL"});if(c.a==null||(c.a>=25&&c.a<=65))add("Toma de citología o ADN-VPH","ccu");add("Vacunación","vac")}
+  if(id==="pospar"){add("Consejería en lactancia materna","lact");const m=U("metodo");if(/IMPLANTE/.test(m))add("Inserción de implante","impl");else if(/DIU/.test(m))add("Inserción de DIU","diu");add("Control de planificación","pfc")}
+  if(id==="partoc"){add("Control posparto (día 3 a 5)","pospar",{},"pos");add("Consejería en lactancia materna","lact",{},"pos")}
+  if(id==="rnctl")add("Consejería en lactancia materna (a nombre de la madre)","lact");
+  if(id==="ivea")add("Asesoría en anticoncepción","pf1");
+  if(id==="mama"&&c.a!=null&&c.a>=50&&c.a<=69)add("Orden de mamografía","rem",{tipo:"MAMOGRAFIA BILATERAL"});
+  if(id==="cyd"){add("Vacunación","vac");if(c.m!=null&&c.m>=6&&c.m<72)add("Micronutrientes y desparasitación","micro")}
+  if(id==="pf1"||id==="pfc"){if(c.sx==="F"&&c.a!=null&&c.a>=25&&c.a<=65)add("Toma de citología o ADN-VPH","ccu");add("Pruebas rápidas de VIH, sífilis y hepatitis B","vih")}
+  if(["vac","edu","rem","micro","av","vih","ccu"].includes(id)&&c.m!=null)add("Ver todo lo que le toca hoy","_qt");
+  return o.filter(x=>x.vn==="_qt"||VN[x.vn])}
+function vnSigHTML(){if(!VNS)return"";const L=vnSigLista(VNS.id,VNS.v);if(!L.length)return"";
+  return `<div class="box"><h3>Continuar con</h3><p class="note-src" style="margin:0 0 8px">Según lo que salió en esta nota. Antes de seguir, copia o registra esta nota.</p><div class="btns">${L.map((x,i)=>`<button class="btn" type="button" data-sig="${i}">${esc(x.t)}</button>`).join("")}</div></div>`}
+function vnSigWire(){if(!VNS)return;const L=vnSigLista(VNS.id,VNS.v);document.querySelectorAll("[data-sig]").forEach(b=>b.onclick=()=>{const x=L[+b.dataset.sig];if(!x)return;
+  if(x.est){const P=pac();P.__est=x.est;setPac(P)}if(x.vn==="_qt"){home();window.scrollTo(0,0);const d=$("pac-det");if(d)d.open=true;return}
+  const d=vnDraft(x.vn);Object.assign(d,x.pre);S.set("dn2_vn_"+x.vn,JSON.stringify(d));vnOpen(x.vn)})}
 /* ======================= ATENCIONES SEPARADAS (Res. 3280: cuadros por curso de vida; Lineamiento 7.1.1, I.d) ======================= */
 const VN_REM={
  "ODONTOLOGIA (ATENCION EN SALUD BUCAL)":{cups:"890203",fr:c=>c.a!=null&&c.a<18?"UNA VEZ AL AÑO":"UNA VEZ CADA DOS AÑOS",x:"ATENCION EN SALUD BUCAL POR ODONTOLOGIA, CON PROFILAXIS Y REMOCION DE PLACA BACTERIANA"},
@@ -6604,6 +6631,8 @@ const VN_REM={
  "MAMOGRAFIA BILATERAL":{cups:"876802",fr:()=>"CADA 2 AÑOS DE LOS 50 A LOS 69 AÑOS",x:"MAMOGRAFIA BILATERAL DE TAMIZAJE"},
  "SANGRE OCULTA EN MATERIA FECAL":{cups:"907009",fr:()=>"CADA 2 AÑOS DE LOS 50 A LOS 75 AÑOS",x:"SANGRE OCULTA EN MATERIA FECAL POR INMUNOQUIMICA"},
  "TAMIZAJE DE CANCER DE PROSTATA":{cups:"906611",fr:()=>"CADA 5 AÑOS DE LOS 50 A LOS 75 AÑOS",x:"ANTIGENO PROSTATICO ESPECIFICO (PSA) Y TACTO RECTAL POR MEDICINA GENERAL ENTRENADA"},
+ "LABORATORIOS DE INGRESO PRENATAL":{cups:"SEGUN LISTA",fr:()=>"EN LA PRIMERA CONSULTA PRENATAL",x:"UROCULTIVO Y ANTIBIOGRAMA, HEMOGRAMA, HEMOCLASIFICACION, GLICEMIA, HBSAG, IGG E IGM TOXOPLASMA, IGG RUBEOLA SI NO ESTA VACUNADA (ANTES DE LA SEMANA 16), GOTA GRUESA, PRUEBAS RAPIDAS DE VIH Y SIFILIS, ECOGRAFIA ENTRE LA SEMANA 10+6 Y 13+6 Y TAMIZAJE DE CUELLO UTERINO SI NO ESTA AL DIA (RES. 3280, 4.3.6.1)"},
+ "LABORATORIOS PRECONCEPCIONALES":{cups:"SEGUN LISTA",fr:()=>"EN LA CONSULTA PRECONCEPCIONAL",x:"HEMOGRAMA, HEMOCLASIFICACION, GLICEMIA, HBSAG, PRUEBA TREPONEMICA RAPIDA, VIH CON ASESORIA, IGG TOXOPLASMA, RUBEOLA Y VARICELA, UROCULTIVO, HEMOPARASITOS Y TAMIZAJE DE CUELLO UTERINO (RES. 3280, 4.1)"},
  "VALORACION INTEGRAL POR MEDICINA":{cups:"890201",fr:()=>"SEGUN EL ESQUEMA DEL CURSO DE VIDA",x:"VALORACION INTEGRAL DEL CURSO DE VIDA POR MEDICINA GENERAL O FAMILIAR"}};
 const VN_TEMAS=["ESTILOS DE VIDA SALUDABLE (ALIMENTACION, ACTIVIDAD FISICA, SUEÑO)","SALUD SEXUAL Y REPRODUCTIVA, DERECHOS Y ANTICONCEPCION","PREVENCION DE ITS Y VIH","LACTANCIA MATERNA Y ALIMENTACION DEL MENOR","CUIDADO Y CRIANZA DEL NIÑO","SALUD MENTAL Y PREVENCION DE VIOLENCIAS","PREVENCION DEL CONSUMO DE ALCOHOL, TABACO Y SUSTANCIAS","HIGIENE, LAVADO DE MANOS Y AGUA SEGURA","PREVENCION DE MALARIA Y DENGUE (TOLDILLO, CRIADEROS)","SALUD BUCAL"];
 const vnPie=(D,U)=>vnEsNormal(D("extra"))?"":U("extra");
