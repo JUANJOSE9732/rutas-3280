@@ -202,6 +202,20 @@ textarea{width:100%;font:inherit;font-size:1.05rem;line-height:1.55;padding:14px
 .agl{display:flex;flex-direction:column;gap:6px;margin-top:8px}.agi{display:flex;gap:8px;align-items:center;border:1px solid var(--line,#ddd);border-radius:8px;padding:8px 10px}.agi .sem{margin:0;flex:none;width:14px;height:14px}.agi small{display:block;color:var(--muted)}
 .drafts{display:flex;flex-direction:column;gap:6px}
 .drafts button{display:flex;justify-content:space-between;gap:10px;text-align:left;border:1px solid var(--warn-line);background:var(--warn-bg);color:var(--ink);border-radius:8px;padding:10px 12px}
+.midia{background:var(--surface);border:2px solid var(--accent);border-radius:12px;padding:14px;display:flex;flex-direction:column;gap:12px}
+.md-top{display:flex;justify-content:space-between;align-items:baseline;gap:8px;flex-wrap:wrap}
+.md-cd{font-family:var(--f-data);font-size:.82rem;padding:4px 10px;border-radius:999px;background:var(--warn-bg);color:var(--warn)}
+.md-cd.urg{background:var(--miss-bg);color:var(--miss)}
+.md-blk{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:8px}
+.md-b{border:1px solid var(--line);border-radius:10px;padding:10px 12px;display:flex;flex-direction:column;gap:3px;min-width:0}
+.md-b .lab{margin:0}
+.md-b small{color:var(--muted);font-size:.86rem}
+.md-b .ref{font-family:var(--f-data);font-size:.74rem;color:var(--muted)}
+.md-b.now{border-color:var(--accent);background:var(--accent-soft)}
+.md-mods{display:flex;flex-wrap:wrap;gap:6px;margin-top:4px}
+.md-mods button{border:1.5px solid var(--accent);background:var(--surface);color:var(--ink);border-radius:999px;padding:5px 12px;font-weight:700;font-size:.85rem}
+.md-stats{display:flex;flex-wrap:wrap;gap:6px}
+.md-stats .chip.alert{background:var(--miss-bg);color:var(--miss)}
 @media (prefers-reduced-motion:no-preference){.tile,.btn,.notes-pick button{transition:background .15s,border-color .15s,box-shadow .15s}}
 </style>
 
@@ -935,8 +949,387 @@ const key=(m,k)=>"dn2_"+m+"_"+k;
 function checks(m){try{return JSON.parse(S.get(key(m,"chk"))||"{}")}catch(e){return{}}}
 function hasDraft(m){return !!(S.get(key(m,"dict"))||S.get(key(m,"nota"))||Object.keys(checks(m)).length)}
 
+/* ======================= NOTAS POR VOZ (plantillas de Juan José) ======================= */
+const VN_U=s=>String(s==null?"":s).toUpperCase().trim();
+const VN_NUM={cero:0,un:1,uno:1,una:1,dos:2,tres:3,cuatro:4,cinco:5,seis:6,siete:7,ocho:8,nueve:9,diez:10,once:11,doce:12,trece:13,catorce:14,quince:15,dieciseis:16,diecisiete:17,dieciocho:18,diecinueve:19,veinte:20,veintiuno:21,veintidos:22,veintitres:23,veinticuatro:24,veinticinco:25,treinta:30,cuarenta:40,cincuenta:50,sesenta:60,setenta:70,ochenta:80,noventa:90,cien:100,ciento:100,doscientos:200};
+function vnNums(t){const w=plano(t).replace(/(\d)[,](\d)/g,"$1.$2").split(/[^a-z0-9.]+/).filter(Boolean),o=[];let acc=null;
+  w.forEach(x=>{if(/^\d+(\.\d+)?$/.test(x)){if(acc!=null){o.push(acc);acc=null}o.push(parseFloat(x));return}
+    if(x==="y"&&acc!=null)return;
+    if(x in VN_NUM){const n=VN_NUM[x];if(acc!=null&&acc>=20&&acc%10===0&&n<10){acc+=n}else if(acc!=null&&acc>=100&&n<100){acc+=n}else{if(acc!=null)o.push(acc);acc=n}return}
+    if(acc!=null){o.push(acc);acc=null}});
+  if(acc!=null)o.push(acc);return o}
+const VN_EF="APARIENCIA: BUEN ESTADO GENERAL\nCABEZA Y CUELLO: INTEGROS, NORMAL SIN ADENOPATIAS PRESENTES, SIN MASAS, MUCOSA ORAL HUMEDA, PUPILAS NORMOREACTIVAS A LA LUZ\nOIDOS: SIN ALTERACIONES\nPIEL Y FANERAS: INTEGRAS\nCARDIOPULMONAR: TORAX SIMETRICO, RUIDOS CARDIACOS RITMICOS, SIN SOPLOS, RUIDOS RESPIRATORIOS SIN AGREGADOS, SIN SIGNOS DE DIFICULTAD RESPIRATORIA\nMAMAS: NORMALES\nABDOMEN: BLANDO DEPRESIBLE, NO DOLOROSO A LA PALPACION, SIN SIGNOS DE IRRITACION PERITONEAL\nAPARATO REPRODUCTOR: INTEGRO\nLOCOMOTOR: SIN ALTERACIONES\nNEUROLOGICO: SIN DEFICIT APARENTE";
+const VN_EFNINO="CABEZA NORMOCEFALO, CABELLO BIEN IMPLANTADO, SIN MASAS NI HUNDIMIENTOS, OJOS: REFLEJO ROJO RETINIANO PRESENTE, SIMETRICO Y HOMOGENEO, PUPILAS ISOCORICAS NORMORREACTIVAS, ESCLERAS ANICTERICAS, CAVIDAD ORAL CON MUCOSAS HUMEDAS, SIN LESIONES, CUELLO MOVIL, SIN ADENOPATIAS. TORAX SIMETRICO, RUIDOS RESPIRATORIOS PRESENTES EN AMBOS CAMPOS PULMONARES, SIN AGREGADOS, RUIDOS CARDIACOS RITMICOS, SIN SOPLOS. ABDOMEN BLANDO, NO DISTENDIDO, NO DOLOROSO, SIN MASAS. GENITOURINARIO NORMOCONFIGURADO PARA LA EDAD, SIN LESIONES. EXTREMIDADES SIN EDEMA, LLENADO CAPILAR MENOR A 3 SG. SISTEMA NERVIOSO: CONSCIENTE, ACTIVO, SIN DATOS DE FOCALIZACION. PIEL INTEGRA.";
+const VN_ANTP=["INSUFICIENCIA CARDIACA","ARRITMIAS","VALVULOPATIAS","ECV","MIOCARDIOPATIAS","TRASTORNOS NEUROLOGICOS","RETINOPATIA","GLAUCOMA","NEFROPATIA","HIPERTENSION","DIABETES","LITIASIS RENAL","HIPERURICEMIA","DISLIPIDEMIA","HIPOTIROIDISMO","HIPERTIROIDISMO","DM GESTACIONAL","BEBE > 9 LIBRAS","PREECLAMPSIA","TRASTORNO HORMONAL","ALERGICOS","QUIRURGICOS","HOSPITALIZACIONES"];
+const VN_RXS=["CEFALEA","LIPOTIMIA","VERTIGO","TINITUS","CAMBIOS VISUALES","CONVULSIONES","TRASTORNOS DE CONCIENCIA","TAQUICARDIAS","PRECORDIALGIA","DISNEA","ORTOPNEA","VARICES","POLIDIPSIA","POLIFAGIA","DOLOR EN MIEMBROS INFERIORES","EDEMAS","PERDIDA DE PESO","DEBILIDAD","INSOMNIO"];
+const VN_METODOS=["NINGUNO","INYECTABLE MENSUAL","INYECTABLE TRIMESTRAL (DEPOPROVERA)","IMPLANTE SUBDERMICO","DIU T DE COBRE","ANTICONCEPTIVOS ORALES","CONDON","POMEROY"];
+const vnEsNormal=v=>!v||/^(NORMAL|NIEGA|SIN HALLAZGOS|NINGUNO|NINGUNA|NO)$/.test(VN_U(v));
+function vnEF(v,nino){const b=nino?VN_EFNINO:VN_EF;return vnEsNormal(v.ef)?b:b+"\nHALLAZGOS POSITIVOS: "+VN_U(v.ef)}
+function vnSV(v){return v.sv&&!vnEsNormal(v.sv)?"SIGNOS VITALES Y MEDIDAS: "+VN_U(v.sv)+vnIMC(v.sv):""}
+function vnIMC(t){const p=/peso\D{0,12}(\d+(?:[.,]\d+)?)/i.exec(t||""),ta=/talla\D{0,12}(\d+(?:[.,]\d+)?)/i.exec(t||"");if(!p||!ta)return"";let kg=parseFloat(p[1].replace(",",".")),m=parseFloat(ta[1].replace(",","."));if(m>3)m=m/100;if(!(kg>0&&m>0))return"";const i=kg/(m*m);return ", IMC "+i.toFixed(1)}
+function vnLista(lista,resp){if(vnEsNormal(resp))return"NIEGA: "+lista.join(", ")+".";return"REFIERE: "+VN_U(resp)+". NIEGA LOS DEMAS ("+lista.join(", ")+")."}
+const vnL=a=>a.filter(x=>x!==""&&x!=null&&x!==false).join("\n");
+const vnPid=(P,v)=>({edad:v._edad?VN_U(v._edad):P.edad,com:v._com?VN_U(v._com):P.com,etnia:v._etnia?VN_U(v._etnia):P.etnia});
+/* preguntas reutilizables */
+const Q={
+ sv:{k:"sv",q:"Signos vitales y medidas",h:"Diga: tensión 110 70, frecuencia 72, respiración 18, temperatura 36.5, peso 58, talla 155. Di «normal» para omitir.",def:"NORMAL"},
+ ef:{k:"ef",q:"Examen físico: ¿normal o algún hallazgo?",h:"Di «normal» para dejar el examen de la plantilla, o dicta solo lo anormal con el sistema.",def:"NORMAL",o:["NORMAL"]},
+ gpcav:{k:"gpcav",t:"gpcav",q:"Paridad: gestaciones, partos, cesáreas, abortos y vivos",h:"Diga los cinco números en orden: «dos uno cero cero dos».",def:"G0 P0 C0 A0 V0"},
+ fur:{k:"fur",q:"Fecha de la última menstruación",h:"Diga la fecha, o «no recuerda», «menopausia», «amenorrea por método».",o:["NO RECUERDA","MENOPAUSIA","AMENORREA POR METODO"]},
+ metodo:{k:"metodo",q:"Método de planificación actual",def:"NINGUNO",o:VN_METODOS},
+ citoant:{k:"citoant",q:"Citología anterior: ¿cuándo?",h:"Diga la fecha o el año. «Niega» si nunca se la ha tomado.",def:"NIEGA",o:["NIEGA"]},
+ citores:{k:"citores",q:"Resultado de la citología anterior",def:"NEGATIVA",o:["NEGATIVA","NO CONOCE EL RESULTADO","ALTERADA"],c:v=>!vnEsNormal(v.citoant)},
+ antfam:{k:"antfam",q:"Antecedentes familiares",def:"NIEGA",o:["NIEGA"]},
+ riesgo:{k:"riesgo",q:"Factores de riesgo comportamentales: alcohol, tabaco, sustancias",def:"NIEGA",o:["NIEGA"]},
+ antp:{k:"antp",q:"Antecedentes personales: ¿alguno?",h:"Cardiacos, HTA, diabetes, tiroides, renales, alergias, cirugías, hospitalizaciones. «Niega» si ninguno.",def:"NIEGA",o:["NIEGA"]},
+ rxs:{k:"rxs",q:"Revisión por sistemas: ¿algún síntoma?",h:"Cefalea, vértigo, cambios visuales, disnea, edemas, pérdida de peso… «Niega» si ninguno.",def:"NIEGA",o:["NIEGA"]},
+ control:(def,o)=>({k:"control",q:"¿Cuándo es el próximo control?",def,o:o||[def]}),
+ extra:{k:"extra",q:"¿Algo más para agregar a la nota?",h:"Dicta cualquier dato adicional, o di «no».",def:"NO",o:["NO"]}
+};
+const VN={
+ ccu:{g:"Mujer",t:"Toma de citología",who:"Tamizaje de cuello uterino",qs:[
+  {k:"llega",q:"¿Cómo asiste?",def:"POR SUS PROPIOS MEDIOS",o:["POR SUS PROPIOS MEDIOS","ACOMPAÑADA","REMITIDA POR PROMOTOR"]},
+  {k:"siente",q:"¿Cómo refiere sentirse?",def:"BIEN, ASINTOMATICA",o:["BIEN, ASINTOMATICA","CON FLUJO VAGINAL","CON DOLOR PELVICO"]},
+  Q.gpcav,Q.fur,Q.metodo,Q.citoant,Q.citores,Q.sv,Q.ef,
+  {k:"cuello",q:"¿Cómo observa el cuello uterino?",def:"DE COLOR ROSADO PALIDO Y ORIFICIO CERVICAL DE FORMA IRREGULAR ALARGADO EN FORMA HORIZONTAL",o:["DE COLOR ROSADO PALIDO Y ORIFICIO CERVICAL DE FORMA IRREGULAR ALARGADO EN FORMA HORIZONTAL","DE COLOR ROSADO CON ORIFICIO CERVICAL PUNTIFORME","CON ECTROPION","CON LEUCORREA BLANQUECINA","FRIABLE, SANGRA AL CONTACTO"]},
+  {k:"muestra",q:"¿Qué muestra se tomó?",def:"MUESTRA ENDOCERVICAL Y EXOCERVICAL",o:["MUESTRA ENDOCERVICAL Y EXOCERVICAL","MUESTRA PARA ADN-VPH CON CEPILLO ENDOCERVICAL","INSPECCION VISUAL VIA/VILI"]},
+  Q.control("15 DIAS PARA ENTREGA DE REPORTE"),Q.extra],
+  b:(v,P,I)=>vnL(["TOMA DE CITOLOGIA CERVICOUTERINA",`MUJER DE ${I.edad} AÑOS QUIEN ASISTE ${VN_U(v.llega)} PARA TOMA DE CITOLOGIA CERVICOUTERINA, QUIEN REFIERE SENTIRSE ${VN_U(v.siente)}.`,`PROCEDENTE DE ${I.com}. ETNIA: ${I.etnia}.`,`PARIDAD: ${VN_U(v.gpcav)}`,`FUR: ${VN_U(v.fur)}`,`METODO DE PLANIFICACION: ${VN_U(v.metodo)}`,`ANTERIOR CITOLOGIA: ${VN_U(v.citoant)}`,`RESULTADO: ${vnEsNormal(v.citoant)?"NIEGA":VN_U(v.citores)}`,vnSV(v),"","EXAMEN FISICO:",vnEF(v),"","SE BRINDA INFORMACION DEL PROCEDIMIENTO A REALIZAR, LA USUARIA REFIERE ENTENDER Y ACEPTAR. SE PASA USUARIA A CAMILLA EN POSICION GINECOLOGICA, SE REALIZA ESPECULOSCOPIA.",`SE LOCALIZA CUELLO DE UTERO OBSERVANDOSE ${VN_U(v.cuello)}.`,`SE TOMA ${VN_U(v.muestra)}.`,"PROCEDIMIENTO REALIZADO SIN COMPLICACION.","","PLAN:",`SE ASIGNA CITA DE CONTROL EN ${VN_U(v.control)} Y SE EDUCA EN LA IMPORTANCIA DE ESTE.`,"SE HACE ENTREGA DEL CARNE DE CITOLOGIA.","SE DAN RECOMENDACIONES GENERALES.",vnEsNormal(v.extra)?"":VN_U(v.extra)])},
+ repcito:{g:"Mujer",t:"Entrega de reporte de citología o ADN-VPH",who:"Lectura y explicación del resultado",qs:[
+  {k:"tipo",q:"¿Qué resultado entrega?",def:"CITOLOGIA",o:["CITOLOGIA","ADN-VPH"]},
+  {k:"fecha",q:"Fecha en que se tomó la muestra"},
+  {k:"lab",q:"Laboratorio que emite el reporte",def:"COLCAN",o:["COLCAN"]},
+  {k:"calidad",q:"Calidad de la muestra",def:"SATISFACTORIA",o:["SATISFACTORIA","INSATISFACTORIA"],c:v=>v.tipo!=="ADN-VPH"},
+  {k:"cat",q:"Categorización general",def:"NEGATIVA PARA LESION INTRAEPITELIAL O MALIGNIDAD",o:["NEGATIVA PARA LESION INTRAEPITELIAL O MALIGNIDAD","ANORMALIDADES DE CELULAS EPITELIALES"],c:v=>v.tipo!=="ADN-VPH"&&v.calidad!=="INSATISFACTORIA"},
+  {k:"micro",q:"Microorganismos",def:"FLORA MIXTA NORMAL",o:["FLORA MIXTA NORMAL","NO SE OBSERVA FLORA PATOGENA","VAGINOSIS BACTERIANA","CANDIDA","TRICHOMONAS"],c:v=>v.tipo!=="ADN-VPH"&&v.calidad!=="INSATISFACTORIA"},
+  {k:"otros",q:"Otros hallazgos",def:"CAMBIOS ASOCIADOS A INFLAMACION",o:["CAMBIOS ASOCIADOS A INFLAMACION","ATROFIA","NINGUNO"],c:v=>v.tipo!=="ADN-VPH"&&v.calidad!=="INSATISFACTORIA"},
+  {k:"anor",q:"Anormalidades",def:"NO SE ENCONTRARON",o:["NO SE ENCONTRARON","ASCUS","ASC-H","LESION INTRAEPITELIAL ESCAMOSA DE BAJO GRADO LIE BG (NIC I)","LESION INTRAEPITELIAL ESCAMOSA DE ALTO GRADO LIE AG","AGC"],c:v=>v.tipo!=="ADN-VPH"&&v.calidad!=="INSATISFACTORIA"},
+  {k:"vph",q:"Resultado del ADN-VPH",def:"NEGATIVO PARA LOS 14 GENOTIPOS DE ALTO RIESGO",o:["NEGATIVO PARA LOS 14 GENOTIPOS DE ALTO RIESGO","POSITIVO GENOTIPO 16","POSITIVO GENOTIPO 18","POSITIVO OTROS GENOTIPOS DE ALTO RIESGO"],c:v=>v.tipo==="ADN-VPH"},
+  {k:"control",q:"Conducta y próximo control",h:"Lo sugerido sale del resultado; cámbialo si aplica otra conducta.",def:v=>vnRepPlan(v),o:["CONTROL EN 3 AÑOS","CONTROL EN 5 AÑOS","CONTROL EN 1 AÑO","SE ENVIA COLPOSCOPIA + BIOPSIA Y VALORACION POR GINECOLOGIA","NUEVA TOMA DE CITOLOGIA"]},Q.extra],
+  b:(v,P,I)=>{const vph=v.tipo==="ADN-VPH",ins=!vph&&v.calidad==="INSATISFACTORIA";
+   return vnL(["ENTREGA DE REPORTE DE ESTUDIO DE TAMIZAJE DE CANCER DE CERVIX.","SE VERIFICA IDENTIDAD MEDIANTE NOMBRE COMPLETO Y NUMERO DE DOCUMENTO.",`PACIENTE DE ${I.edad} AÑOS DE EDAD, PROCEDENTE DE ${I.com}, QUIEN ACUDE EN APARENTES BUENAS CONDICIONES GENERALES POR REPORTE DE ${vph?"ADN-VPH":"CITOLOGIA"} TOMADA EL ${VN_U(v.fecha)}, EMITIDO POR EL LABORATORIO ${VN_U(v.lab)}. SE LEE REPORTE Y SE EXPLICAN CADA UNO DE LOS ITEMS:`,
+    vph?`PAPILOMAVIRUS POR PCR CON GENOTIPIFICACION DE 14 CEPAS DE ALTO RIESGO, MUESTRA CEPILLADO ENDOCERVICAL: ${VN_U(v.vph)}.`:ins?"1. CALIDAD DE LA MUESTRA: INSATISFACTORIA\n2. CATEGORIZACION GENERAL: NO SE REALIZO INTERPRETACION DEBIDO A LA CALIDAD INSATISFACTORIA DE LA MUESTRA.\nNO ES POSIBLE REALIZAR UNA INTERPRETACION VALIDA; SE REQUIERE NUEVA TOMA DE MUESTRA.":`1. CALIDAD DE LA MUESTRA: ${VN_U(v.calidad)}\n2. CATEGORIZACION GENERAL: ${VN_U(v.cat)}\n3. MICROORGANISMOS: ${VN_U(v.micro)}\n4. OTROS HALLAZGOS: ${VN_U(v.otros)}\n5. ANORMALIDADES: ${VN_U(v.anor)}`,
+    "SE ORIENTA RESPECTO A LOS HALLAZGOS DEL REPORTE, SE ACLARAN DUDAS Y SE DAN INDICACIONES Y RECOMENDACIONES. LA PACIENTE REFIERE COMPRENDER LA INFORMACION Y RECIBE EL DOCUMENTO FISICO.","","PLAN:",`1. ${VN_U(v.control)}`,"2. SE REMITE A VALORACION MEDICA.","3. SE EDUCA EN LA PREVENCION DE ITS.","4. SE DAN RECOMENDACIONES GENERALES DE AUTOCUIDADO.","5. CONSULTAR EN CASO DE SANGRADO ANORMAL, DOLOR PELVICO O SECRECION INUSUAL.","6. MANTENER CONTROLES PERIODICOS SEGUN ESQUEMA DE TAMIZAJE VIGENTE.",vnEsNormal(v.extra)?"":VN_U(v.extra)])}},
+ pf1:{g:"Planificación",t:"Planificación primera vez",who:"Asesoría y elección de método",qs:[
+  {k:"previo",q:"¿Ha planificado antes? ¿Con qué y por cuánto tiempo?",def:"NUNCA HA PLANIFICADO",o:["NUNCA HA PLANIFICADO"]},Q.fur,Q.gpcav,Q.antp,Q.antfam,Q.riesgo,Q.sv,Q.ef,
+  {k:"escoge",q:"¿Qué método escoge?",o:VN_METODOS.slice(1)},
+  {k:"prueba",q:"¿Relaciones sin protección? ¿Se ordena prueba de embarazo?",def:"SE ORDENA PRUEBA DE EMBARAZO",o:["SE ORDENA PRUEBA DE EMBARAZO","NO REQUIERE PRUEBA, INICIA EL METODO HOY"]},
+  Q.control("3 MESES",["1 MES","3 MESES"]),Q.extra],
+  b:(v,P,I)=>vnL(["MOTIVO DE CONSULTA: DESEA INICIAR A PLANIFICAR",`MUJER DE ${I.edad} AÑOS PROVENIENTE DE ${I.com}, DE ETNIA ${I.etnia}, QUIEN ASISTE A ASESORIA EN PLANIFICACION FAMILIAR.`,`PLANIFICACION PREVIA: ${VN_U(v.previo)}`,`FUR: ${VN_U(v.fur)}`,`ANTECEDENTES GINECOOBSTETRICOS: ${VN_U(v.gpcav)}`,`ANTECEDENTES PERSONALES: ${VN_U(v.antp)}`,`ANTECEDENTES FAMILIARES: ${VN_U(v.antfam)}`,`FACTORES DE RIESGO COMPORTAMENTALES: ${VN_U(v.riesgo)}`,vnSV(v),"SE DAN RECOMENDACIONES SOBRE METODOS DISPONIBLES, MECANISMOS DE ACCION, VENTAJAS, DESVENTAJAS, RIESGOS, SIGNOS DE ALARMA Y CONSECUENCIAS DEL USO DE CADA UNO. SE EVALUA DE ACUERDO A ANAMNESIS, REVISION POR SISTEMAS Y EXAMEN FISICO LA CONVENIENCIA Y EFICACIA DEL METODO.","","EXAMEN FISICO:",vnEF(v),"",`SE EXPLICAN TODOS LOS METODOS ANTICONCEPTIVOS, SU USO, VENTAJAS, POSIBLES EFECTOS Y SU MANEJO; SE EDUCA EN DERECHOS SEXUALES Y REPRODUCTIVOS Y SE EVALUAN CRITERIOS DE ELEGIBILIDAD. LA USUARIA REFIERE ENTENDER Y ESCOGE: ${VN_U(v.escoge)}.`,"SE INFORMA FUNCIONAMIENTO DEL METODO ESCOGIDO, VENTAJAS, DESVENTAJAS, POSIBLES EFECTOS ADVERSOS Y PORCENTAJE DE RIESGO DE EMBARAZO. SE INFORMA LA IMPORTANCIA DE LOS CONTROLES PARA VIGILAR PESO Y EFECTOS ADVERSOS.",/ORDENA/.test(VN_U(v.prueba))?"SE EXPLICA LA NECESIDAD DE REALIZAR UNA PRUEBA DE EMBARAZO, YA QUE LA PACIENTE MANIFIESTA HABER TENIDO RELACIONES SEXUALES SIN PROTECCION; SE EXPLICA FUNCIONAMIENTO DE LA PRUEBA Y EL REPORTE.":"","SE EXPLICA LA NECESIDAD DEL USO DEL PRESERVATIVO PARA PREVENCION DE ITS Y VIH, Y LA TECNICA DE USO CORRECTO; SE RECOMIENDA USARLO LOS 15 DIAS SIGUIENTES AL INICIO DEL METODO. PACIENTE MANIFIESTA ENTENDER Y ACEPTAR.","","PLAN:",`1. ${VN_U(v.prueba)}. SE FORMULA ${VN_U(v.escoge)}${/ORDENA/.test(VN_U(v.prueba))?", PARA INICIAR CON REPORTE NEGATIVO DE PRUEBA DE EMBARAZO":""}. CITA DE CONTROL EN ${VN_U(v.control)}.`,"2. SE EDUCA EN LA IMPORTANCIA DE LA ADHERENCIA AL METODO Y DE LOS CONTROLES.","3. SE EDUCA EN DERECHOS SEXUALES Y REPRODUCTIVOS Y DOBLE PROTECCION.","4. SE DAN RECOMENDACIONES GENERALES. SE ENTREGA FOLLETO INFORMATIVO.",vnEsNormal(v.extra)?"":VN_U(v.extra)])},
+ pfemb:{g:"Planificación",t:"Resultado de prueba de embarazo",who:"Regresa con la prueba",qs:[
+  {k:"res",q:"Resultado de la prueba de embarazo",def:"NEGATIVA",o:["NEGATIVA","POSITIVA"]},
+  {k:"fecha",q:"Fecha de la prueba",def:()=>hoy()},
+  {k:"metodo",q:"Método escogido en la consulta anterior",o:VN_METODOS.slice(1),c:v=>v.res!=="POSITIVA"},
+  {k:"decision",q:"¿Qué decide frente al embarazo?",o:["CONTINUAR EL EMBARAZO E INGRESAR A CONTROL PRENATAL","INTERRUPCION VOLUNTARIA DEL EMBARAZO","DAR EN ADOPCION","AUN NO DECIDE"],c:v=>v.res==="POSITIVA"},
+  {k:"control",q:"Fecha o tiempo del próximo control",def:v=>v.res==="POSITIVA"?"CITA PRIORITARIA CON MEDICINA GENERAL":"3 MESES"},Q.extra],
+  b:(v,P,I)=>v.res==="POSITIVA"?vnL([`PACIENTE DE ${I.edad} AÑOS, PROCEDENTE DE ${I.com}, QUIEN INGRESA CON RESULTADO DE PRUEBA DE EMBARAZO DEL ${VN_U(v.fecha)} POSITIVA. SE INFORMA SOBRE EL RESULTADO Y LAS OPCIONES FRENTE A ESTE EMBARAZO: CONTINUARLO E INGRESAR A CONTROL PRENATAL, DARLO EN ADOPCION O LA INTERRUPCION VOLUNTARIA DEL EMBARAZO.`,"SE BRINDA INFORMACION SOBRE LA SENTENCIA C-055 DE 2022: IVE POR DECISION DE LA MUJER HASTA LA SEMANA 24 Y, DESPUES, EN TRES CIRCUNSTANCIAS: 1. RIESGO PARA LA SALUD FISICA O MENTAL O LA VIDA DE LA MUJER. 2. EMBARAZO RESULTADO DE VIOLACION O INCESTO. 3. MALFORMACIONES DEL FETO INCOMPATIBLES CON LA VIDA.",`PACIENTE DECIDE: ${VN_U(v.decision)}.`,`SE DA ${VN_U(v.control)}. SE BRINDA ASESORIA EN PLANIFICACION FAMILIAR Y DERECHOS SEXUALES Y REPRODUCTIVOS.`,vnEsNormal(v.extra)?"":VN_U(v.extra)]):vnL([`PACIENTE DE ${I.edad} AÑOS QUE REGRESA A CONSULTA CON REPORTE NEGATIVO DE PRUEBA DE EMBARAZO DEL ${VN_U(v.fecha)}. SE EXPLICA NUEVAMENTE EL FUNCIONAMIENTO DE LA PRUEBA Y EL RESULTADO OBTENIDO; SE ENTREGA ORDEN PARA RECLAMAR EL METODO ESCOGIDO EN LA CONSULTA ANTERIOR: ${VN_U(v.metodo)}.`,"SE REFUERZA FUNCIONAMIENTO DEL METODO, VENTAJAS, DESVENTAJAS, POSIBLES EFECTOS ADVERSOS, FORMA DE ADMINISTRACION, IMPORTANCIA DE LA ADHERENCIA Y DE LOS CONTROLES. PACIENTE MANIFIESTA ENTENDER Y ACEPTAR.",`SE CITA PARA CONTROL EN ${VN_U(v.control)}. SE RECOMIENDA EL USO DEL PRESERVATIVO LOS PRIMEROS 15 DIAS. SE ENTREGA REPORTE DE LA PRUEBA A LA USUARIA.`,vnEsNormal(v.extra)?"":VN_U(v.extra)])},
+ pfc:{g:"Planificación",t:"Control de planificación",who:"Seguimiento del método",qs:[
+  {k:"metodo",q:"¿Con qué método planifica?",o:VN_METODOS.slice(1)},
+  {k:"tiempo",q:"¿Hace cuánto tiempo?"},
+  {k:"tolera",q:"¿Cómo se siente con el método?",def:"COMODA Y SATISFECHA, SIN ALTERACIONES NI COMPLICACIONES",o:["COMODA Y SATISFECHA, SIN ALTERACIONES NI COMPLICACIONES","REFIERE SANGRADO IRREGULAR","REFIERE CEFALEA","REFIERE AUMENTO DE PESO","DESEA CAMBIAR DE METODO"]},
+  Q.fur,Q.sv,Q.ef,
+  {k:"impl",q:"Revisión del implante",def:"EN MIEMBRO SUPERIOR IZQUIERDO, SE PALPAN LAS DOS BARRAS INTACTAS, SIN SIGNOS DE ALARMA",o:["EN MIEMBRO SUPERIOR IZQUIERDO, SE PALPAN LAS DOS BARRAS INTACTAS, SIN SIGNOS DE ALARMA","EN MIEMBRO SUPERIOR DERECHO, SE PALPAN LAS DOS BARRAS INTACTAS, SIN SIGNOS DE ALARMA"],c:v=>/IMPLANTE/.test(VN_U(v.metodo))},
+  {k:"prueba",q:"¿Relaciones sin protección que requieran prueba de embarazo?",def:"NO",o:["NO","SI, SE ORDENA PRUEBA DE EMBARAZO"]},
+  {k:"conducta",q:"Conducta",def:"SE DECIDE CONTINUAR CON EL METODO",o:["SE DECIDE CONTINUAR CON EL METODO","SE CAMBIA DE METODO A INYECTABLE TRIMESTRAL","SE CAMBIA DE METODO A IMPLANTE SUBDERMICO","SE REMITE A MEDICINA"]},
+  {k:"formula",q:"¿Qué se formula hoy?",def:v=>/TRIMESTRAL/.test(VN_U(v.metodo))?"INYECTABLE TRIMESTRAL DEPOPROVERA":/MENSUAL/.test(VN_U(v.metodo))?"INYECTABLE MENSUAL":/ORAL/.test(VN_U(v.metodo))?"ANTICONCEPTIVOS ORALES":"NO SE FORMULA"},
+  Q.control("3 MESES",["1 MES","3 MESES","6 MESES","1 AÑO"]),Q.extra],
+  b:(v,P,I)=>vnL(["MOTIVO DE CONSULTA: CONTROL DE PLANIFICACION FAMILIAR",`MUJER DE ${I.edad} AÑOS QUIEN PLANIFICA CON ${VN_U(v.metodo)} HACE ${VN_U(v.tiempo)}, PROCEDENTE DE ${I.com}, DE ETNIA ${I.etnia}. FUR: ${VN_U(v.fur)}.`,vnSV(v),"","EXAMEN FISICO:",vnEF(v),"",`MUJER QUIEN ASISTE A CONTROL DE PLANIFICACION FAMILIAR, QUIEN REFIERE SENTIRSE ${VN_U(v.tolera)}. ${VN_U(v.conducta)}. SE INFORMA LA IMPORTANCIA DE LOS CONTROLES PARA VIGILAR PESO Y EFECTOS ADVERSOS, SE EDUCA EN ESTILOS DE VIDA SALUDABLES, ALIMENTACION ADECUADA, ACTIVIDAD FISICA Y RECOMENDACIONES TRADICIONALES SEGUN SU CULTURA.`,/SI/.test(VN_U(v.prueba))?"SE EXPLICA LA NECESIDAD DE REALIZAR UNA PRUEBA DE EMBARAZO, YA QUE LA PACIENTE MANIFIESTA HABER TENIDO RELACIONES SEXUALES SIN PROTECCION; SE EXPLICA FUNCIONAMIENTO DE LA PRUEBA Y EL REPORTE. PACIENTE MANIFIESTA ENTENDER Y ACEPTAR.":"",v.impl?`SE REVISA IMPLANTE SUBDERMICO ${VN_U(v.impl)}.`:"","SE RECOMIENDA EL USO DEL PRESERVATIVO PARA PREVENCION DE ITS.","",`1. ${vnEsNormal(v.formula)||/NO SE FORMULA/.test(VN_U(v.formula))?"":"SE FORMULA "+VN_U(v.formula)+". "}SE ASIGNA CITA DE CONTROL EN ${VN_U(v.control)}.`,"2. SE EDUCA EN LA IMPORTANCIA DE LA ADHERENCIA AL METODO Y DE LOS CONTROLES.","3. SE EDUCA EN DERECHOS SEXUALES Y REPRODUCTIVOS Y DOBLE PROTECCION.","4. SE DAN RECOMENDACIONES GENERALES.",vnEsNormal(v.extra)?"":VN_U(v.extra)])},
+ impl:{g:"Procedimientos",t:"Inserción de implante",who:"Implante subdérmico",qs:[
+  {k:"post",q:"¿Viene después de un evento obstétrico?",def:"NO",o:["NO","POSPARTO","POSCESAREA","POSABORTO","POS IVE"]},
+  {k:"prueba",q:"Prueba de embarazo: fecha y resultado",def:"NEGATIVA",h:"Ej.: «del 10 de octubre negativa». Di «no aplica» si es posevento inmediato."},
+  {k:"rel",q:"¿Relaciones sexuales en los últimos 15 días?",def:"NIEGA",o:["NIEGA","SI, SE RECOMIENDA PRESERVATIVO"]},
+  {k:"tipo",q:"¿Qué implante se coloca?",def:"JADELLE (DOS VARILLAS)",o:["JADELLE (DOS VARILLAS)","IMPLANON (UNA VARILLA)"]},
+  {k:"brazo",q:"Brazo no dominante",def:"IZQUIERDO",o:["IZQUIERDO","DERECHO"]},
+  {k:"lote",q:"Número de lote",h:"Dicta letras y números del lote."},
+  {k:"retiro",q:"Fecha de retiro",def:v=>{const d=new Date();d.setFullYear(d.getFullYear()+(/IMPLANON/.test(VN_U(v.tipo))?3:5));return d.toISOString().slice(0,10)}},
+  {k:"comp",q:"¿Complicaciones?",def:"SIN COMPLICACION, NO SANGRADO",o:["SIN COMPLICACION, NO SANGRADO"]},Q.sv,Q.extra],
+  b:(v,P,I)=>{const dos=!/IMPLANON/.test(VN_U(v.tipo));return vnL(["INSERCION DE IMPLANTE SUBDERMICO",`ASISTE MUJER DE ${I.edad} AÑOS POR SUS PROPIOS MEDIOS CON ORDEN PARA INSERCION DE IMPLANTE SUBDERMICO, PROCEDENTE DE ${I.com}, ETNIA ${I.etnia}.`,vnEsNormal(v.post)?"":`${VN_U(v.post)}.`,/NO APLICA/.test(VN_U(v.prueba))?"":`PRUEBA DE EMBARAZO ${VN_U(v.prueba)}, SE ENTREGA REPORTE A LA PACIENTE.`,`RELACIONES SEXUALES EN LOS ULTIMOS 15 DIAS: ${VN_U(v.rel)}. ACTUALMENTE ASINTOMATICA.`,vnSV(v),"SE BRINDA INFORMACION Y EDUCACION SOBRE EL METODO DE PLANIFICACION FAMILIAR. SE DA A CONOCER EL FORMATO DE CONSENTIMIENTO INFORMADO; UNA VEZ FIRMADO SE PROCEDE A LA INSERCION.","","NOTA DE PROCEDIMIENTO:",`SE PASA USUARIA A CAMILLA EN POSICION SUPINA, BRAZO NO DOMINANTE (${VN_U(v.brazo)}) SOBRE CAMPO ESTERIL. SE REALIZA ASEPSIA Y ANTISEPSIA DE LA CARA INTERNA DE LA PARTE SUPERIOR DEL BRAZO, APROXIMADAMENTE 6 A 8 CM DEL PLIEGUE DEL CODO. SE APLICA ANESTESIA LOCAL BAJO LA PIEL EN LA DIRECCION DE INTRODUCCION DEL TROCAR. SE INTRODUCE TROCAR BAJO LA PIEL 5 A 5,5 CM Y SE ${dos?"COLOCAN LOS DOS IMPLANTES ("+VN_U(v.tipo)+") FORMANDO UNA FIGURA EN V":"COLOCA EL IMPLANTE ("+VN_U(v.tipo)+")"}.`,`LA HERIDA SE DEJA CUBIERTA CON MATERIAL ESTERIL MAS VENDAJE ELASTICO. PROCEDIMIENTO REALIZADO ${VN_U(v.comp)}.`,`LOTE N°: ${VN_U(v.lote)}`,`FECHA DE RETIRO: ${VN_U(v.retiro)}`,"","SE INFORMA QUE EL SITIO PUEDE CAMBIAR DE COLOR, PRESENTAR MORETON, INFLAMACION, PRURITO O DOLOR TRANSITORIO; SIGNOS DE ALARMA: CALOR, RUBOR, FIEBRE. RETIRAR VENDAJE A LOS 4 DIAS, MANTENER LA HERIDA SECA Y LIMPIA, NO MANIPULAR EL AREA, NO LEVANTAR CARGA PESADA DURANTE 8 DIAS. SE RECOMIENDA PRESERVATIVO LOS PRIMEROS 20 DIAS. SE REFUERZA FUNCIONAMIENTO DEL METODO Y SUS POSIBLES EFECTOS ADVERSOS, Y LA IMPORTANCIA DE LOS CONTROLES PARA VIGILAR PESO Y EFECTOS ADVERSOS.","SE ASIGNA CITA EN 3 DIAS PARA RETIRO DE VENDAJE Y SEGUIMIENTO. CITA DE CONTROL EN 1 MES.","SE EXPLICA A PACIENTE QUIEN MANIFIESTA ENTENDER Y ACEPTAR.",vnEsNormal(v.extra)?"":VN_U(v.extra)])}},
+ rimpl:{g:"Procedimientos",t:"Retiro de implante",who:"Implante subdérmico",qs:[
+  {k:"hace",q:"¿Hace cuánto se lo colocaron?"},
+  {k:"motivo",q:"Motivo del retiro",o:["CAMBIO DE METODO ANTICONCEPTIVO","DESEO DE EMBARAZO","VENCIMIENTO DEL TIEMPO DE USO","EFECTOS ADVERSOS"]},
+  {k:"brazo",q:"Brazo donde está el implante",def:"IZQUIERDO",o:["IZQUIERDO","DERECHO"]},
+  {k:"zona",q:"Estado de la zona",def:"SIN SIGNOS DE INFECCION, ENROJECIMIENTO O DOLOR",o:["SIN SIGNOS DE INFECCION, ENROJECIMIENTO O DOLOR"]},
+  {k:"barras",q:"¿Cómo salieron las barras?",def:"SE OBTIENEN EN SU TOTALIDAD DOS BARRAS DE JADELLE, INTEGRAS, SIN ADHERENCIAS, SIN FRAGMENTACION",o:["SE OBTIENEN EN SU TOTALIDAD DOS BARRAS DE JADELLE, INTEGRAS, SIN ADHERENCIAS, SIN FRAGMENTACION","SE OBTIENE UNA VARILLA DE IMPLANON INTEGRA"]},
+  {k:"sangrado",q:"Sangrado",def:"POCO SANGRADO",o:["POCO SANGRADO","SIN SANGRADO"]},
+  {k:"sig",q:"Método que sigue",def:"NINGUNO",o:VN_METODOS},Q.sv,Q.extra],
+  b:(v,P,I)=>vnL([`PACIENTE FEMENINA DE ${I.edad} AÑOS, PROCEDENTE DE ${I.com}, QUIEN ACUDE PARA RETIRO DE IMPLANTE SUBDERMICO COLOCADO HACE ${VN_U(v.hace)}. MOTIVO: ${VN_U(v.motivo)}. NIEGA ALERGIAS, ENFERMEDADES CRONICAS O COMPLICACIONES PREVIAS CON EL IMPLANTE.`,`PACIENTE ORIENTADA, COLABORADORA. ${vnSV(v)||"SIGNOS VITALES DENTRO DE PARAMETROS NORMALES."} IMPLANTE PALPABLE EN CARA INTERNA DEL BRAZO ${VN_U(v.brazo)}, ${VN_U(v.zona)}.`,"",`SE EXPLICA EL PROCEDIMIENTO, PACIENTE REFIERE ENTENDER Y ACEPTAR. SE PASA A CAMILLA, SE VISUALIZA ZONA DE COLOCACION Y CON TECNICA ASEPTICA SE REALIZA ASEPSIA Y ANTISEPSIA. SE INFILTRA XILOCAINA AL 2% Y SE REALIZA PEQUEÑA INCISION. ${VN_U(v.barras)}; SE ENSEÑAN A LA USUARIA Y SE DESECHAN. SE PRESENTA ${VN_U(v.sangrado)}. NO SE PRESENTARON EVENTOS ADVERSOS.`,"","INDICACIONES POST PROCEDIMIENTO: MANTENER EL APOSITO LIMPIO Y SECO 24 HORAS, NO MOJAR EL AREA POR 24 A 48 HORAS, RETIRAR EL VENDAJE A LAS 24 HORAS, VIGILAR SIGNOS DE ALARMA (ENROJECIMIENTO, DOLOR INTENSO, SECRECION PURULENTA, FIEBRE) Y ACUDIR A CONTROL SI PRESENTA MOLESTIAS.",`METODO ANTICONCEPTIVO QUE CONTINUA: ${VN_U(v.sig)}. SE ORIENTA SOBRE INICIO INMEDIATO O POSTERIOR DE OTRO METODO.`,"PACIENTE COMPRENDE Y ACEPTA LAS RECOMENDACIONES.",vnEsNormal(v.extra)?"":VN_U(v.extra)])},
+ diu:{g:"Procedimientos",t:"Inserción de DIU",who:"Dispositivo intrauterino",qs:[
+  Q.fur,{k:"rel",q:"¿Relaciones sin protección en los últimos 7 días?",def:"NIEGA",o:["NIEGA"]},Q.antp,Q.gpcav,Q.citoant,Q.antfam,Q.riesgo,Q.rxs,Q.sv,Q.ef,
+  {k:"histero",q:"Histerometría en centímetros",t:"num"},
+  {k:"tipo",q:"Tipo de DIU",def:"T DE COBRE 380A",o:["T DE COBRE 380A","DIU HORMONAL"]},
+  {k:"comp",q:"¿Complicaciones?",def:"PACIENTE TOLERA EL PROCEDIMIENTO SIN COMPLICACIONES",o:["PACIENTE TOLERA EL PROCEDIMIENTO SIN COMPLICACIONES"]},
+  Q.control("1 MES"),Q.extra],
+  b:(v,P,I)=>vnL(["MOTIVO DE CONSULTA: INSERCION DE DIU",`MUJER DE ${I.edad} AÑOS QUIEN HOY SE REALIZA PROCEDIMIENTO DE INSERCION DE DIU, PROCEDENTE DE ${I.com}, DE ETNIA ${I.etnia}.`,`REFIERE DESEO DE UTILIZAR UN METODO ANTICONCEPTIVO SEGURO Y DE LARGA DURACION. NIEGA ITS O ANTECEDENTE DE ENFERMEDAD PELVICA INFLAMATORIA. ULTIMA MENSTRUACION: ${VN_U(v.fur)}. RELACIONES SIN PROTECCION EN LOS ULTIMOS 7 DIAS: ${VN_U(v.rel)}. ACTUALMENTE ASINTOMATICA.`,"ANTECEDENTES PERSONALES: "+vnLista(VN_ANTP,v.antp),`ANTECEDENTES GINECOOBSTETRICOS: ${VN_U(v.gpcav)}. FUR: ${VN_U(v.fur)}. ULTIMA CITOLOGIA: ${VN_U(v.citoant)}.`,`ANTECEDENTES FAMILIARES: ${VN_U(v.antfam)}`,`FACTORES DE RIESGO COMPORTAMENTALES: ${VN_U(v.riesgo)}`,"REVISION POR SISTEMAS: "+vnLista(VN_RXS,v.rxs),vnSV(v),"","EXAMEN FISICO:",vnEF(v),"GENITALES EXTERNOS: NORMAL. ESPECULOSCOPIA: NORMAL.","","SE BRINDA INFORMACION DEL PROCEDIMIENTO, LA USUARIA REFIERE ENTENDER Y ACEPTAR, SE LEE Y FIRMA CONSENTIMIENTO INFORMADO. SE REALIZA LAVADO DE MANOS Y PREPARACION DEL MATERIAL ESTERIL. SE COLOCA A LA PACIENTE EN POSICION GINECOLOGICA, SE REALIZA ASEPSIA DEL AREA GENITAL, SE COLOCA ESPECULO VAGINAL ESTERIL Y SE VISUALIZA CUELLO UTERINO DE COLOR ROSADO PALIDO. SE REALIZA LIMPIEZA, SE PINZA CUELLO Y SE REALIZA HISTEROMETRIA"+(v.histero?" DE "+VN_U(v.histero)+" CM":"")+`. SE INSERTA DIU ${VN_U(v.tipo)} SEGUN TECNICA Y PROTOCOLO INSTITUCIONAL, SE RECORTAN LOS HILOS A LONGITUD ADECUADA, SE RETIRA EL ESPECULO Y SE VERIFICA HEMOSTASIA. ${VN_U(v.comp)}.`,"","PLAN:",`1. SE ASIGNA CITA DE CONTROL EN ${VN_U(v.control)}.`,"2. SE EDUCA EN SIGNOS DE ALARMA Y CUIDADOS POS PROCEDIMIENTO, SE ENTREGA VOLANTE INFORMATIVO.","3. SE EDUCA EN LA IMPORTANCIA DE LA ADHERENCIA AL METODO Y DE LOS CONTROLES.","4. SE EDUCA EN DERECHOS SEXUALES Y REPRODUCTIVOS Y DOBLE PROTECCION.","5. EVITAR RELACIONES SEXUALES, DUCHAS VAGINALES O TAMPONES POR AL MENOS 48 HORAS; CONSULTAR ANTES SI PRESENTA DOLOR INTENSO, FIEBRE O SANGRADO ABUNDANTE; VERIFICAR PERIODICAMENTE LOS HILOS DEL DIU.","PACIENTE COMPRENDE Y ACEPTA LAS INDICACIONES.",vnEsNormal(v.extra)?"":VN_U(v.extra)])},
+ rdiu:{g:"Procedimientos",t:"Retiro de DIU",who:"Dispositivo intrauterino",qs:[
+  {k:"hace",q:"¿Hace cuánto se lo colocaron?"},
+  {k:"motivo",q:"Motivo del retiro",o:["CAMBIO DE METODO ANTICONCEPTIVO","DESEO DE EMBARAZO","VENCIMIENTO DEL TIEMPO DE USO","MOLESTIAS O EFECTOS ADVERSOS"]},
+  Q.fur,{k:"sint",q:"¿Molestias, flujo anormal o dolor pélvico?",def:"NIEGA",o:["NIEGA"]},Q.antp,Q.gpcav,Q.citoant,Q.sv,Q.ef,
+  {k:"hilos",q:"Hilos y dispositivo",def:"SE VISUALIZAN HILOS DEL DIU; DISPOSITIVO SALE COMPLETO, SIN RESIDUOS NI FRAGMENTOS",o:["SE VISUALIZAN HILOS DEL DIU; DISPOSITIVO SALE COMPLETO, SIN RESIDUOS NI FRAGMENTOS","HILOS NO VISIBLES, SE REMITE A MEDICINA"]},
+  {k:"sig",q:"Método que sigue",def:"NINGUNO",o:VN_METODOS},Q.control("1 MES"),Q.extra],
+  b:(v,P,I)=>vnL(["MOTIVO DE CONSULTA: RETIRO DE DIU",`MUJER DE ${I.edad} AÑOS QUIEN HOY SE REALIZA PROCEDIMIENTO DE RETIRO DE DIU, PROCEDENTE DE ${I.com}, DE ETNIA ${I.etnia}.`,`REFIERE ACUDIR PARA RETIRO DEL DIU COLOCADO HACE ${VN_U(v.hace)}. MOTIVO: ${VN_U(v.motivo)}. MOLESTIAS, FLUJO ANORMAL O DOLOR PELVICO: ${VN_U(v.sint)}. ULTIMA MENSTRUACION: ${VN_U(v.fur)}.`,"ANTECEDENTES PERSONALES: "+vnLista(VN_ANTP,v.antp),`ANTECEDENTES GINECOOBSTETRICOS: ${VN_U(v.gpcav)}. ULTIMA CITOLOGIA: ${VN_U(v.citoant)}.`,vnSV(v),"","EXAMEN FISICO:",vnEF(v),"","SE BRINDA INFORMACION DEL PROCEDIMIENTO, LA USUARIA REFIERE ENTENDER Y ACEPTAR, SE LEE Y FIRMA CONSENTIMIENTO INFORMADO. SE REALIZA LAVADO DE MANOS Y PREPARACION DEL MATERIAL ESTERIL, POSICION GINECOLOGICA, ASEPSIA DEL AREA GENITAL, SE COLOCA ESPECULO VAGINAL ESTERIL Y SE VISUALIZA CUELLO UTERINO DE COLOR ROSADO PALIDO.",`${VN_U(v.hilos)}. SE RETIRA EL ESPECULO Y SE VERIFICA HEMOSTASIA. PACIENTE TOLERA EL PROCEDIMIENTO SIN COMPLICACIONES.`,"","PLAN:",`1. SE ASIGNA CITA DE CONTROL EN ${VN_U(v.control)}.`,`2. METODO QUE CONTINUA: ${VN_U(v.sig)}.`,"3. SE EDUCA EN SIGNOS DE ALARMA Y CUIDADOS POS PROCEDIMIENTO, SE ENTREGA VOLANTE INFORMATIVO.","4. SE EDUCA EN DERECHOS SEXUALES Y REPRODUCTIVOS Y DOBLE PROTECCION.","5. EVITAR RELACIONES SEXUALES, DUCHAS VAGINALES O TAMPONES POR 48 HORAS; CONSULTAR SI PRESENTA DOLOR INTENSO, FIEBRE O SANGRADO ABUNDANTE.","PACIENTE COMPRENDE Y ACEPTA LAS INDICACIONES.",vnEsNormal(v.extra)?"":VN_U(v.extra)])},
+ mama:{g:"Mujer",t:"Tamizaje de mama",who:"Examen clínico de mama",qs:[
+  {k:"sint",q:"¿Dolor, secreción o cambios en las mamas?",def:"NIEGA",o:["NIEGA"]},
+  {k:"antca",q:"Antecedentes personales o familiares de cáncer",def:"NIEGA",o:["NIEGA"]},
+  Q.gpcav,Q.fur,Q.metodo,Q.citoant,Q.citores,Q.sv,
+  {k:"mamas",q:"Hallazgos al examen de mama",def:"NORMAL",o:["NORMAL"],h:"«Normal» deja: simétricas, sin retracciones, sin masas ni adenomegalias. Si hay hallazgo, dicta lado, cuadrante y tamaño."},
+  {k:"efo",q:"Resto del examen físico",def:"NORMAL",o:["NORMAL"]},
+  {k:"mamo",q:"¿Mamografía? (50 a 69 años)",def:v=>"NO APLICA",o:["NO APLICA","SE ORDENA MAMOGRAFIA","MAMOGRAFIA AL DIA"]},
+  Q.control("1 AÑO"),Q.extra],
+  b:(v,P,I)=>{const ok=vnEsNormal(v.mamas);return vnL([`PACIENTE FEMENINA DE ${I.edad} AÑOS QUIEN ACUDE PARA REALIZACION DEL EXAMEN CLINICO DE MAMA (ECM) COMO PARTE DEL TAMIZAJE PARA DETECCION TEMPRANA DE CANCER DE MAMA. DOLOR, SECRECION O CAMBIOS VISIBLES EN SUS MAMAS: ${VN_U(v.sint)}. ANTECEDENTES PERSONALES O FAMILIARES DE CANCER: ${VN_U(v.antca)}.`,`PROCEDENTE DE: ${I.com}. ETNIA: ${I.etnia}.`,`PARIDAD: ${VN_U(v.gpcav)}`,`FUR: ${VN_U(v.fur)}`,`METODO DE PLANIFICACION: ${VN_U(v.metodo)}`,`ANTERIOR CITOLOGIA: ${VN_U(v.citoant)}${vnEsNormal(v.citoant)?"":" RESULTADO: "+VN_U(v.citores)}`,vnSV(v),"",vnEF({ef:v.efo}).replace("MAMAS: NORMALES",ok?"MAMAS: SIMETRICAS, SIN RETRACCIONES, SIN ALTERACIONES CUTANEAS NI SECRECION POR PEZONES. A LA PALPACION NO SE IDENTIFICAN MASAS NI ADENOMEGALIAS AXILARES.":"MAMAS: "+VN_U(v.mamas)),"","ANALISIS:",ok?"USUARIA ASINTOMATICA QUE ACUDE PARA TAMIZAJE CLINICO DE MAMA SEGUN LA RESOLUCION 3280 DE 2018. SE REALIZA INSPECCION Y PALPACION MAMARIA SIN EVIDENCIA DE ALTERACIONES SUGESTIVAS DE PATOLOGIA. SE COMUNICAN LOS HALLAZGOS DE FORMA SENCILLA, ASEGURANDO COMPRENSION.":`SE IDENTIFICA HALLAZGO EN EXAMEN CLINICO DE MAMA: ${VN_U(v.mamas)}. SE REMITE A VALORACION MEDICA PRIORITARIA PARA ESTUDIO.`,"","PLAN:",`SE ORDENA CITA DE CONTROL EN ${VN_U(v.control)} PARA TAMIZAJE DE MAMA.`,/ORDENA/.test(VN_U(v.mamo))?"SE ORDENA MAMOGRAFIA.":"SE INFORMA DE LA TOMA DE MAMOGRAFIA CADA 2 AÑOS ENTRE LOS 50 Y 69 AÑOS.","SE EXPLICA COMO REALIZAR LA AUTOEXPLORACION MAMARIA UNA VEZ AL MES Y LOS SIGNOS DE ALARMA: RETRACCION DEL PEZON, SECRECION ANORMAL, CAMBIOS EN LA PIEL O NODULOS.","SE BRINDAN RECOMENDACIONES DE ESTILO DE VIDA SALUDABLE: ALIMENTACION BALANCEADA SEGUN DIETAS TRADICIONALES, ACTIVIDAD FISICA, EVITAR ALCOHOL Y TABACO, CUIDADO DE LA SALUD MENTAL. SE EDUCA EN HIGIENE PERSONAL Y LAVADO DE MANOS.","PACIENTE TOLERA LA EXPLORACION SIN MOLESTIAS Y COMPRENDE LAS INDICACIONES.",vnEsNormal(v.extra)?"":VN_U(v.extra)])}},
+ av:{g:"Cursos de vida",t:"Agudeza visual",who:"Tamizaje con Snellen",qs:[
+  {k:"acomp",q:"¿Quién acompaña al menor?",def:"MADRE",o:["MADRE","PADRE","CUIDADOR"],c:(v,P)=>vnEdadA(v,P)<18},
+  {k:"sint",q:"¿Síntomas visuales, dolor, enrojecimiento o lagrimeo?",def:"NIEGA",o:["NIEGA"]},
+  {k:"lentes",q:"¿Usa lentes?",def:"NO UTILIZA LENTES CORRECTIVOS",o:["NO UTILIZA LENTES CORRECTIVOS","USA LENTES CORRECTIVOS"]},
+  {k:"od",q:"Ojo derecho",t:"av",h:"Diga «veinte veinte», «veinte cuarenta»…"},
+  {k:"oi",q:"Ojo izquierdo",t:"av"},
+  {k:"ao",q:"Ambos ojos",t:"av",c:(v,P)=>vnEdadA(v,P)>=18},
+  Q.ef,Q.control("1 AÑO"),Q.extra],
+  b:(v,P,I)=>{const nino=vnEdadA(v,P)<18,mal=[v.od,v.oi].some(x=>{const m=/20\/(\d+)/.exec(x||"");return m&&+m[1]>=40});return vnL(["AGUDEZA VISUAL",nino?`MENOR DE ${I.edad} AÑOS QUE ASISTE A CONSULTA DE ENFERMERIA PARA VALORACION DE LA AGUDEZA VISUAL, ACOMPAÑADO DE ${VN_U(v.acomp)}, PROCEDENTE DE ${I.com}, ETNIA ${I.etnia}. ${VN_U(v.acomp)} REFIERE QUE EL MENOR SE ENCUENTRA EN BUEN ESTADO GENERAL.`:`PACIENTE DE ${I.edad} AÑOS QUE ASISTE A CONSULTA DE ENFERMERIA PARA TAMIZAJE DE LA AGUDEZA VISUAL, PROCEDENTE DE ${I.com}, ETNIA ${I.etnia}. SE ENCUENTRA EN BUEN ESTADO GENERAL.`,`SINTOMAS VISUALES, DOLOR OCULAR, ENROJECIMIENTO O LAGRIMEO: ${VN_U(v.sint)}. ${VN_U(v.lentes)}.`,"","EXAMEN FISICO:",vnEF(v,nino),"OJOS: SIN ALTERACIONES VISIBLES EN PARPADOS, CONJUNTIVAS NI CORNEAS, PUPILAS ISOCORICAS Y REACTIVAS A LA LUZ, SIN SIGNOS INFLAMATORIOS NI SECRECION.","",`SE REALIZA VALORACION DE AGUDEZA VISUAL CON CARTA DE SNELLEN ${nino?"PEDIATRICA":"ADULTO"} A 6 M, SE EXPLICA EL PROCEDIMIENTO, REFIERE ENTENDER Y ACEPTAR.`,`OJO DERECHO (OD): ${VN_U(v.od)}`,`OJO IZQUIERDO (OI): ${VN_U(v.oi)}`,v.ao?`AMBOS OJOS: ${VN_U(v.ao)}`:"",mal?"AGUDEZA VISUAL DISMINUIDA: SE REMITE A OPTOMETRIA.":"CON ADECUADA IDENTIFICACION DE "+(nino?"FIGURAS":"LETRAS")+" Y ADECUADA CAPACIDAD DEL CAMPO VISUAL.","","PLAN:","SE BRINDA EDUCACION EN AUTOCUIDADO E HIGIENE VISUAL: BUENA ILUMINACION AL LEER, PAUSAS VISUALES, EVITAR USO PROLONGADO DE PANTALLAS.",`SE ENTREGA CARNET Y SE ASIGNA CONTROL EN ${VN_U(v.control)} O ANTES SI PRESENTA MOLESTIAS.`,"SE EDUCA EN ESTILOS DE VIDA SALUDABLE Y SIGNOS DE ALARMA PARA CONSULTAR A URGENCIAS. SE BRINDA EDUCACION EN LAVADO DE MANOS.",vnEsNormal(v.extra)?"":VN_U(v.extra)])}},
+ vih:{g:"Consejerías",t:"Asesoría y pruebas rápidas",who:"VIH, sífilis, hepatitis B",qs:[
+  {k:"motivo",q:"Motivo de la prueba",def:"PRUEBA VOLUNTARIA",o:["PRUEBA VOLUNTARIA","CONTROL PRENATAL","EXPOSICION DE RIESGO","PROTOCOLO PRECONCEPCIONAL"]},
+  {k:"vih",q:"Resultado de VIH",def:"NO REACTIVO",o:["NO REACTIVO","REACTIVO"]},
+  {k:"sif",q:"Resultado de sífilis (prueba treponémica)",def:"NO REACTIVO",o:["NO REACTIVO","REACTIVO","NO SE REALIZO"]},
+  {k:"hb",q:"Resultado de hepatitis B",def:"NO REACTIVO",o:["NO REACTIVO","REACTIVO","NO SE REALIZO"]},
+  {k:"fecha",q:"Fecha de las pruebas",def:()=>hoy()},Q.extra],
+  b:(v,P,I)=>{const pos=[v.vih,v.sif,v.hb].some(x=>VN_U(x)==="REACTIVO");return vnL(["SE BRINDA CONSEJERIA EN LA PRUEBA VOLUNTARIA PARA VIH.",`PACIENTE DE ${I.edad} AÑOS, PROCEDENTE DE ${I.com}, ETNIA ${I.etnia}, QUIEN CONSULTA PARA REALIZACION DE PRUEBAS RAPIDAS. MOTIVO: ${VN_U(v.motivo)}.`,"SE SALUDA CORDIALMENTE, SE EXPLICA EN QUE CONSISTE LA ASESORIA Y ACCEDE. SE ENTREGA INFORMACION BASICA SOBRE VIH/SIDA E ITS, VIAS DE TRANSMISION Y EXPOSICION, SE INDAGAN Y ACLARAN SUS CONCEPTOS, SE EDUCA EN PREVENCION Y EN LA CAPACIDAD DE ENFRENTAR EL POSIBLE RESULTADO. SE EXPLICA EL PROPOSITO, BENEFICIO Y CONFIDENCIALIDAD DE LA PRUEBA Y EL DERECHO A DECIDIR LIBREMENTE Y RETIRAR EL CONSENTIMIENTO. SE LEE EL CONSENTIMIENTO INFORMADO, REFIERE ENTENDER, ACEPTA Y FIRMA.",`SE REALIZAN PRUEBAS DE PERFIL INFECCIOSO EN CONSULTORIO EL ${VN_U(v.fecha)} CON LOS SIGUIENTES RESULTADOS:`,`VIH: ${VN_U(v.vih)}`,`SIFILIS: ${VN_U(v.sif)}`,`HEPATITIS B: ${VN_U(v.hb)}`,pos?"PRUEBA REACTIVA: NO CONSTITUYE DIAGNOSTICO DEFINITIVO. SE BRINDA ASESORIA POST PRUEBA, SE ACTIVA RUTA, SE SOLICITA PRUEBA CONFIRMATORIA, SE REMITE A VALORACION MEDICA PRIORITARIA Y SE NOTIFICA SEGUN PROTOCOLO.":"SE INFORMA DEL RIESGO DE ADQUIRIR LA INFECCION EN CUALQUIER MOMENTO CUANDO LA PERSONA ES SEXUALMENTE ACTIVA, AL COMPARTIR OBJETOS PERSONALES O DURANTE EL EMBARAZO Y LA LACTANCIA. SE HABLA DE LA VENTANA INMUNOLOGICA Y DEL USO DEL PRESERVATIVO.","SE INDICA SOLICITAR CITA MEDICA CON RESULTADOS. PACIENTE REFIERE ENTENDER.",vnEsNormal(v.extra)?"":VN_U(v.extra)])}},
+ precon:{g:"Mujer",t:"Atención preconcepcional",who:"Deseo de embarazo",qs:[
+  Q.antp,{k:"ciclos",q:"Menstruaciones",def:"REGULARES",o:["REGULARES","IRREGULARES"]},Q.fur,Q.riesgo,
+  {k:"metodo",q:"¿Método actual o desde cuándo lo suspendió?",def:"NO UTILIZA METODO ANTICONCEPTIVO"},
+  {k:"trad",q:"¿Recibe cuidado tradicional (payé, partera)?",def:"NO",o:["NO","SI, RECIBE ACOMPAÑAMIENTO TRADICIONAL"]},
+  {k:"vac",q:"Vacunación: Td y rubéola",def:"NO RECUERDA",h:"Ej.: «Td hace dos años, rubéola no recuerda»."},
+  Q.gpcav,{k:"labs",q:"Laboratorios recientes",def:"NO PRESENTA",o:["NO PRESENTA"]},Q.sv,Q.ef,
+  {k:"nutri",q:"Estado nutricional",def:"ADECUADO",o:["ADECUADO","BAJO PESO","SOBREPESO","OBESIDAD"]},
+  Q.control("4 SEMANAS PARA REVISION DE LABORATORIOS"),Q.extra],
+  b:(v,P,I)=>vnL([`PACIENTE FEMENINA DE ${I.edad} AÑOS, DE ETNIA ${I.etnia}, RESIDE EN ${I.com}, QUE ACUDE A CONSULTA DE ENFERMERIA POR DESEO DE EMBARAZO PLANIFICADO. ANTECEDENTES PERSONALES: ${VN_U(v.antp)}. MENSTRUACIONES ${VN_U(v.ciclos)}, ULTIMA MENSTRUACION: ${VN_U(v.fur)}. CONSUMO DE ALCOHOL, TABACO O SUSTANCIAS: ${VN_U(v.riesgo)}. ${VN_U(v.metodo)}. EXPRESA INTERES EN CONOCER MEDIDAS PARA LOGRAR UN EMBARAZO SALUDABLE.`,`CUIDADO TRADICIONAL: ${VN_U(v.trad)}.`,`VACUNACION: ${VN_U(v.vac)}.`,`ANTECEDENTES OBSTETRICOS: ${VN_U(v.gpcav)}.`,`LABORATORIOS RECIENTES: ${VN_U(v.labs)}.`,vnSV(v),"","EXAMEN FISICO:",vnEF(v),"",`SE REALIZA ATENCION EN RUTA MATERNO PERINATAL "ATENCION PRECONCEPCIONAL". ESTADO NUTRICIONAL ${VN_U(v.nutri)}. EN EL MOMENTO ASINTOMATICA, SIN SIGNOS DE ALARMA, CON APARENTE BUEN AMBITO BIOPSICOSOCIAL Y FAMILIAR, SIN SOSPECHA DE VIOLENCIA, SIN SINTOMATOLOGIA DEPRESIVA O ANSIOSA, SIN CONDUCTAS SEXUALES DE RIESGO. SE IDENTIFICA NECESIDAD DE EDUCACION EN SUPLEMENTACION, ALIMENTACION, VACUNACION Y HABITOS SALUDABLES.`,"","PLAN:","SE BRINDA EDUCACION PRECONCEPCIONAL INDIVIDUALIZADA.","SE INDICA ACIDO FOLICO DIARIO AL MENOS 3 MESES ANTES DE LA CONCEPCION.","SE ORDENAN LABORATORIOS PRECONCEPCIONALES: HEMOGRAMA, GLICEMIA, HEMOCLASIFICACION, VIH, PRUEBA TREPONEMICA, HEPATITIS B, TOXOPLASMA, RUBEOLA, VARICELA, HEMOPARASITOS, UROCULTIVO, TAMIZAJE DE CUELLO UTERINO SEGUN EDAD.","SE EDUCA EN VACUNACION SEGUN ESQUEMA VIGENTE, ALIMENTACION BALANCEADA CON ALIMENTOS TRADICIONALES, ACTIVIDAD FISICA, EVITAR TABACO, ALCOHOL Y AUTOMEDICACION, Y SIGNOS DE ALARMA.",`PROXIMA CITA EN ${VN_U(v.control)}.`,"PACIENTE MUESTRA INTERES Y COMPRENSION DE LAS RECOMENDACIONES.",vnEsNormal(v.extra)?"":VN_U(v.extra)])},
+ adol:{g:"Cursos de vida",t:"Control de adolescencia",who:"12 a 17 años",qs:[
+  {k:"sint",q:"¿Cómo se siente? ¿Algún síntoma?",def:"ASINTOMATICO",o:["ASINTOMATICO"]},
+  {k:"animo",q:"Tristeza, llanto fácil o ideas suicidas",def:"NIEGA",o:["NIEGA"]},
+  Q.antp,{k:"sexual",q:"Inicio de actividad sexual",def:"NO HA INICIADO",o:["NO HA INICIADO"]},
+  {k:"gpcav",t:"gpcav",q:"Paridad: G P C A V",def:"G0 P0 C0 A0 V0",c:(v,P)=>vnSexo(v,P)==="F"},
+  {k:"fur",q:"Fecha de la última menstruación",c:(v,P)=>vnSexo(v,P)==="F"},
+  {k:"pnf",q:"Método de planificación",def:"NINGUNO",o:VN_METODOS,c:v=>!/NO HA/.test(VN_U(v.sexual))},
+  Q.antfam,Q.riesgo,Q.rxs,
+  {k:"convive",q:"¿Con quién convive?",def:"MAMA, PAPA Y HERMANOS",o:["MAMA, PAPA Y HERMANOS","MAMA Y HERMANOS","ABUELOS"]},
+  {k:"familia",q:"Dinámica familiar y maltrato",def:"BUEN TRATO Y ADECUADA DINAMICA FAMILIAR, NIEGA MALTRATO",o:["BUEN TRATO Y ADECUADA DINAMICA FAMILIAR, NIEGA MALTRATO"]},
+  {k:"libre",q:"Escolaridad y tiempo libre",def:"ESTUDIA; EN SU TIEMPO LIBRE DESCANSA, REALIZA DEBERES ACADEMICOS Y DEL HOGAR Y EJERCICIO"},
+  {k:"imagen",q:"Percepción de su imagen corporal",def:"BUENA",o:["BUENA","INADECUADA"]},
+  Q.sv,{k:"nutri",q:"Estado nutricional",def:"ADECUADO",o:["ADECUADO","RIESGO DE DELGADEZ","DELGADEZ","SOBREPESO","OBESIDAD"]},Q.ef,Q.extra],
+  b:(v,P,I)=>{const f=vnSexo(v,P)==="F";return vnL(["MOTIVO DE CONSULTA: CONTROL DE LA ADOLESCENCIA",`JOVEN DE ${I.edad} AÑOS PROVENIENTE DE ${I.com}, DE ETNIA ${I.etnia}, QUIEN ASISTE A CONTROL DE LA ADOLESCENCIA.`,`EN EL MOMENTO REFIERE SENTIRSE ${VN_U(v.sint)}. TRISTEZA, LLANTO FACIL O IDEAS SUICIDAS: ${VN_U(v.animo)}.`,`ANTECEDENTES PERSONALES: ${VN_U(v.antp)}`,`INICIO DE ACTIVIDAD SEXUAL: ${VN_U(v.sexual)}`,f?`ANTECEDENTES GINECOOBSTETRICOS: ${VN_U(v.gpcav)}. FUR: ${VN_U(v.fur)}.`:"",v.pnf?`METODO DE PLANIFICACION: ${VN_U(v.pnf)}`:"",`ANTECEDENTES FAMILIARES: ${VN_U(v.antfam)}`,`FACTORES DE RIESGO COMPORTAMENTALES: ${VN_U(v.riesgo)}`,"REVISION POR SISTEMAS: "+vnLista(VN_RXS,v.rxs),`CONVIVE CON ${VN_U(v.convive)}. ${VN_U(v.familia)}. ${VN_U(v.libre)}. PERCEPCION DE SU IMAGEN CORPORAL: ${VN_U(v.imagen)}.`,vnSV(v),"","EXAMEN FISICO:",vnEF(v),"","ANALISIS Y EDUCACION:",`ATENCION EN RUTA DE ADOLESCENCIA. ESTADO NUTRICIONAL ${VN_U(v.nutri)}. SIN SIGNOS DE ALARMA, CON APARENTE BUEN AMBITO BIOPSICOSOCIAL Y FAMILIAR, SIN SOSPECHA DE VIOLENCIA FISICA, SEXUAL O INTRAFAMILIAR, SIN SINTOMATOLOGIA DEPRESIVA O ANSIOSA, SIN IDEACION SUICIDA, NIEGA CONSUMO DE SPA, TABACO O ALCOHOL.`,"","PLAN:","1. SE ORDENA ALBENDAZOL 400 MG VIA ORAL DOSIS UNICA. SE ORDENAN HEMOGRAMA, HEMATOCRITO, HEMOGLOBINA, VIH Y SIFILIS SEGUN RIESGO. VALORACION POR ODONTOLOGIA.","2. SE BRINDA ASESORIA EN PLANIFICACION FAMILIAR, DERECHOS SEXUALES Y REPRODUCTIVOS, PREVENCION DE ITS Y USO CORRECTO DEL PRESERVATIVO.","3. ESTILOS DE VIDA SALUDABLE: ACTIVIDAD FISICA, ALIMENTACION CON FRUTAS, VERDURAS, PROTEINAS Y DIETAS TRADICIONALES, EVITAR SPA, TABACO Y ALCOHOL. AUTOEXAMEN DE MAMA O TESTICULO.","4. SIGNOS DE ALARMA DE DEPRESION, ANSIEDAD E IDEACION SUICIDA, RUTAS DE ATENCION Y REDES DE APOYO.","5. SE INFORMA SOBRE LA SENTENCIA C-055 DE 2022 (IVE) Y EL ESQUEMA DE VACUNACION. LAVADO DE MANOS.","PACIENTE MANIFIESTA ENTENDER Y ACEPTAR.",vnEsNormal(v.extra)?"":VN_U(v.extra)])}},
+ cyd:{g:"Cursos de vida",t:"Control primera infancia (C y D)",who:"Valoración del menor",qs:[
+  {k:"acomp",q:"¿Quién lo acompaña?",def:"MADRE",o:["MADRE","PADRE","CUIDADOR"]},
+  {k:"hijo",q:"Hijo número y hermanos vivos y muertos",h:"Ej.: «hijo tres, dos hermanos vivos, cero muertos»."},
+  {k:"trad",q:"¿Recibe cuidados tradicionales?",def:"SI",o:["SI","NO"]},
+  {k:"perinatal",q:"Antecedentes perinatales",def:"NO FUE PRETERMINO, NO ESTUVO HOSPITALIZADO AL NACER, SIN COMPLICACIONES EN EMBARAZO, PARTO NI POSPARTO",o:["NO FUE PRETERMINO, NO ESTUVO HOSPITALIZADO AL NACER, SIN COMPLICACIONES EN EMBARAZO, PARTO NI POSPARTO"]},
+  {k:"vive",q:"¿Con quién vive?",def:"PAPA, MAMA Y HERMANOS"},
+  {k:"sint",q:"¿Síntomas de enfermedad?",def:"NIEGA, DIURESIS Y DEPOSICIONES NORMALES",o:["NIEGA, DIURESIS Y DEPOSICIONES NORMALES"]},
+  {k:"vac",q:"Esquema de vacunación",def:"ADECUADO PARA LA EDAD",o:["ADECUADO PARA LA EDAD","INCOMPLETO"]},
+  {k:"alim",q:"Alimentación",o:["LACTANCIA MATERNA EXCLUSIVA, BUENA TECNICA, BUEN AGARRE, SUCCION Y DEGLUCION ADECUADAS","LACTANCIA MATERNA MAS ALIMENTACION COMPLEMENTARIA","NO RECIBE LACTANCIA MATERNA, RECIBE BIBERON","ALIMENTACION NORMAL DE LA FAMILIA"]},
+  {k:"comidas",q:"Comidas al día y alimentos que consume",def:"3 COMIDAS AL DIA; CONSUME PESCADO, CASABE, FARIÑA, QUIÑAPIRA Y FRUTAS CON TOLERANCIA ADECUADA",c:v=>!/EXCLUSIVA/.test(VN_U(v.alim))},
+  {k:"medidas",q:"Peso, talla y perímetro cefálico",h:"Ej.: «peso 13.7, talla 85, perímetro 49»."},
+  {k:"z",q:"Indicadores: peso/talla, peso/edad, talla/edad, IMC/edad",h:"Dicta los valores Z y la clasificación de cada uno."},
+  {k:"ead",q:"Escala abreviada del desarrollo (EAD-3)",def:"ADECUADA PARA LA EDAD",o:["ADECUADA PARA LA EDAD","RIESGO DE PROBLEMAS EN EL DESARROLLO","SOSPECHA DE PROBLEMAS EN EL DESARROLLO"]},
+  {k:"nutri",q:"Estado nutricional",def:"ADECUADO",o:["ADECUADO","REGULAR","RIESGO DE DESNUTRICION","DESNUTRICION AGUDA","RIESGO DE SOBREPESO"]},
+  {k:"oral",q:"Salud oral",def:"PIEZAS DENTALES COMPLETAS PARA LA EDAD, SIN ANOMALIAS; NO REFIERE VISITA AL ODONTOLOGO",o:["PIEZAS DENTALES COMPLETAS PARA LA EDAD, SIN ANOMALIAS; NO REFIERE VISITA AL ODONTOLOGO"]},
+  {k:"psico",q:"Sueño y situaciones de violencia",def:"DUERME ADECUADAMENTE; NIEGA VIOLENCIA, MALTRATO O ABUSO",o:["DUERME ADECUADAMENTE; NIEGA VIOLENCIA, MALTRATO O ABUSO"]},
+  {k:"ef",q:"Examen físico: ¿normal o algún hallazgo?",def:"NORMAL",o:["NORMAL"]},
+  {k:"meds",q:"Medicamentos que se ordenan",def:(v,P)=>vnMedsCyd(vnEdadM(v,P)),h:"Lo sugerido sale de la edad; corrige si no aplica."},
+  {k:"remite",q:"Remisiones",def:"VALORACION POR ODONTOLOGIA",o:["VALORACION POR ODONTOLOGIA","ODONTOLOGIA Y NUTRICION","ODONTOLOGIA Y MEDICINA"]},
+  {k:"control",q:"Próxima cita de C y D",h:"Fecha o tiempo."},Q.extra],
+  b:(v,P,I)=>{const m=vnEdadM(v,P),txt=m<24?`${m} MESES`:`${I.edad} AÑOS`,sx=vnSexo(v,P)==="M"?"MASCULINO":"FEMENINO";return vnL(["ENFERMEDAD ACTUAL:",`PACIENTE ${sx} DE ${txt} DE EDAD, QUIEN ASISTE A CONTROL DE PRIMERA INFANCIA ACOMPAÑADO DE ${VN_U(v.acomp)}, DE LA COMUNIDAD ${I.com}, ETNIA ${I.etnia}. ${VN_U(v.hijo)}. ${VN_U(v.trad)==="SI"?"ACTUALMENTE RECIBE CUIDADOS TRADICIONALES SEGUN SU CULTURA":"NO ESTA RECIBIENDO CUIDADOS TRADICIONALES"}. ${VN_U(v.perinatal)}. SE EVALUAN RECOMENDACIONES DEL CONTROL ANTERIOR Y SE HALLA RECEPTIVIDAD. VIVE CON ${VN_U(v.vive)}. EN BUEN ESTADO GENERAL; SINTOMAS DE ENFERMEDAD: ${VN_U(v.sint)}. ESQUEMA DE VACUNACION ${VN_U(v.vac)}. ${VN_U(v.alim)}.${v.comidas?" "+VN_U(v.comidas)+".":""}`,"","EXAMEN FISICO:",vnEF(v,true),"",`MEDIDAS: ${VN_U(v.medidas)}`,`INDICADORES ANTROPOMETRICOS: ${VN_U(v.z)}`,`SALUD ORAL: ${VN_U(v.oral)}. CONDICIONES ESTRUCTURALES INTEGRAS, COMPLETAS Y SIN LESIONES.`,"","ANALISIS Y PLAN:",`MENOR DE ${txt} EN BUENAS CONDICIONES GENERALES, ESCALA ABREVIADA DEL DESARROLLO ${VN_U(v.ead)}. ESTADO NUTRICIONAL ${VN_U(v.nutri)}. ${VN_U(v.psico)}.`,"SE REFUERZAN PRACTICAS ALIMENTARIAS CON ALIMENTOS PROPIOS DE LA REGION, SIN AZUCARES, GRASAS NI SAL; SE RESPETAN REZOS Y RECOMENDACIONES TRADICIONALES SEGUN SUS CREENCIAS; LAVADO DE MANOS, CEPILLADO Y LIMPIEZA DE ENCIAS; PAUTAS DE CUIDADO EN EL HOGAR PARA PREVENIR ACCIDENTES (MEDICAMENTOS, COMBUSTIBLES, VENENOS, OBJETOS CORTOPUNZANTES, AHOGAMIENTO, CAIDAS); SIGNOS DE ALARMA DE IRA Y EDA. SE VALORAN DINAMICA FAMILIAR, REDES DE APOYO Y SALUD AUDITIVA Y COMUNICATIVA. PADRES REFIEREN ENTENDER Y ACEPTAR.","","PLAN:","- SE DILIGENCIA CARNET DE CRECIMIENTO Y DESARROLLO.",`- SE ORDENA: ${VN_U(v.meds)}.`,`- SE REMITE A ${VN_U(v.remite)}.`,"- SE BRINDA EDUCACION EN ESTIMULACION DEL DESARROLLO PARA LA EDAD Y SIGNOS DE ALARMA PARA CONSULTAR A URGENCIAS.",`- PROXIMA CITA DE C Y D: ${VN_U(v.control)}.`,vnEsNormal(v.extra)?"":VN_U(v.extra)])}},
+ lact:{g:"Consejerías",t:"Consejería en lactancia materna",who:"Madre y bebé",qs:[
+  {k:"bebe",q:"Edad del bebé"},
+  {k:"tipo",q:"¿Cómo lo alimenta?",def:"LACTANCIA MATERNA EXCLUSIVA",o:["LACTANCIA MATERNA EXCLUSIVA","LACTANCIA MIXTA","LACTANCIA Y ALIMENTACION COMPLEMENTARIA"]},
+  {k:"prob",q:"¿Problemas con la lactancia?",def:"NINGUNO",o:["NINGUNO","DOLOR O GRIETAS EN PEZONES","MAL AGARRE","CONGESTION MAMARIA","POCA PRODUCCION"]},
+  {k:"obs",q:"Observación de una toma",def:"BUENA POSICION Y BUEN AGARRE",o:["BUENA POSICION Y BUEN AGARRE","SE CORRIGE POSICION Y AGARRE"]},Q.extra],
+  b:(v,P,I)=>vnL([`MADRE DE ${I.edad} AÑOS, PROCEDENTE DE ${I.com}, ETNIA ${I.etnia}, CON BEBE DE ${VN_U(v.bebe)}, ALIMENTADO CON ${VN_U(v.tipo)}. PROBLEMAS CON LA LACTANCIA: ${VN_U(v.prob)}. SE OBSERVA UNA TOMA: ${VN_U(v.obs)}.`,"SE BRINDA CONSEJERIA EN LACTANCIA MATERNA: ES EL MEJOR ALIMENTO PARA EL RECIEN NACIDO POR SU COMPOSICION Y POR EL VINCULO AFECTIVO; LA SUCCION ESTIMULA LA PRODUCCION DE LECHE. BENEFICIOS PARA EL BEBE: DEFENSAS, PROTECCION FRENTE A ENFERMEDADES, HIDRATACION Y DESARROLLO EMOCIONAL, FISICO E INTELECTUAL. NO REQUIERE AGUA NI OTROS ALIMENTOS. LACTANCIA MATERNA EXCLUSIVA LOS PRIMEROS 6 MESES, ALIMENTACION COMPLEMENTARIA DESDE LOS 6 MESES Y LACTANCIA HASTA LOS 2 AÑOS O MAS.","BENEFICIOS PARA LA MADRE: RECUPERACION DEL PESO, MENOR RIESGO DE HIPERTENSION, DEPRESION POSPARTO, OSTEOPOROSIS Y CANCER DE MAMA Y OVARIO; ES ECONOMICA Y ECOLOGICA.","SE EDUCA EN POSICION Y POSTURA PARA EL AMAMANTAMIENTO, TECNICA DE BUEN AGARRE, AMAMANTAR AMBOS PECHOS, CUIDADO E HIGIENE DE LOS PEZONES, EXTRACCION Y CONSERVACION DE LA LECHE Y FORMA DE OFRECERLA CON VASO O CUCHARA. SE ORIENTA SOBRE LOS CUIDADOS SEGUN SU CULTURA TRADICIONAL. SE EDUCA EN HIGIENE PERSONAL Y LAVADO DE MANOS.","PACIENTE REFIERE ENTENDER LO EXPUESTO.",vnEsNormal(v.extra)?"":VN_U(v.extra)])},
+ tbc:{g:"Programas",t:"Tuberculosis",who:"Ingreso, abandono o búsqueda",qs:[
+  {k:"tipo",q:"¿Qué nota es?",def:"INGRESO AL PROGRAMA",o:["INGRESO AL PROGRAMA","ABANDONO DE TRATAMIENTO","BUSQUEDA: NO LOCALIZADO","BUSQUEDA: LOCALIZADO"]},
+  {k:"dx",q:"Diagnóstico",def:"TUBERCULOSIS PULMONAR CONFIRMADA",o:["TUBERCULOSIS PULMONAR CONFIRMADA","SOSPECHA DE TUBERCULOSIS PULMONAR","TUBERCULOSIS EXTRAPULMONAR"],c:v=>/INGRESO/.test(VN_U(v.tipo))},
+  {k:"sint",q:"Síntomas principales",def:"TOS PRODUCTIVA DE MAS DE 3 SEMANAS, PERDIDA DE PESO NO CUANTIFICADA Y SUDORACION NOCTURNA",c:v=>/INGRESO/.test(VN_U(v.tipo))},
+  {k:"asoc",q:"Condiciones asociadas (VIH, desnutrición…)",def:"NINGUNA",o:["NINGUNA"],c:v=>/INGRESO/.test(VN_U(v.tipo))},
+  {k:"taes",q:"Fecha de inicio del TAES",def:()=>hoy(),c:v=>/INGRESO/.test(VN_U(v.tipo))},
+  {k:"muestras",q:"Muestras tomadas",def:"BACILOSCOPIA SERIADA Y CULTIVO",c:v=>/INGRESO/.test(VN_U(v.tipo))},
+  {k:"tiempo",q:"¿Hace cuánto no recibe tratamiento?",c:v=>/ABANDONO/.test(VN_U(v.tipo))},
+  {k:"motivo",q:"Motivo del abandono",o:["EFECTOS ADVERSOS","DIFICULTADES ECONOMICAS","FALTA DE APOYO FAMILIAR","CAMBIO DE DOMICILIO","DIFICULTAD DE DESPLAZAMIENTO","NEGACION DE LA ENFERMEDAD"],c:v=>/ABANDONO/.test(VN_U(v.tipo))},
+  {k:"medio",q:"¿Cómo se hizo la búsqueda?",def:"VISITA DOMICILIARIA",o:["VISITA DOMICILIARIA","LLAMADA TELEFONICA"],c:v=>/BUSQUEDA|ABANDONO/.test(VN_U(v.tipo))},
+  {k:"estado",q:"Estado del paciente",def:"CONSCIENTE, ORIENTADO",c:v=>!/NO LOCALIZADO/.test(VN_U(v.tipo))},Q.extra],
+  b:(v,P,I)=>{const t=VN_U(v.tipo),cab=`FECHA: ${hoy()}. SERVICIO: PROGRAMA DE TUBERCULOSIS. PACIENTE DE ${I.edad} AÑOS, ETNIA ${I.etnia}, COMUNIDAD ${I.com}.`;
+   if(/INGRESO/.test(t))return vnL([cab,`INGRESA AL PROGRAMA DE TUBERCULOSIS POR ${VN_U(v.dx)}.`,`AL MOMENTO DE LA VALORACION SE ENCUENTRA ${VN_U(v.estado)}. SINTOMAS PRINCIPALES: ${VN_U(v.sint)}. CONDICIONES ASOCIADAS: ${VN_U(v.asoc)}.`,"SE BRINDA EDUCACION SOBRE LA ENFERMEDAD, ADHERENCIA AL TRATAMIENTO, MEDIDAS DE BIOSEGURIDAD COMO EL USO DE TAPABOCAS, TOMA Y DURACION DEL TRATAMIENTO Y POSIBLES EFECTOS ADVERSOS.",`SE INICIA TRATAMIENTO ACORTADO ESTRICTAMENTE SUPERVISADO (TAES) SEGUN INDICACION MEDICA EL ${VN_U(v.taes)}.`,`TOMA DE MUESTRAS: ${VN_U(v.muestras)}. SE NOTIFICA AL PROGRAMA.`,"PACIENTE Y FAMILIAR COMPRENDEN INDICACIONES. SE PROGRAMA SEGUIMIENTO POR ENFERMERIA Y CONTROL MEDICO.",vnEsNormal(v.extra)?"":VN_U(v.extra)]);
+   if(/ABANDONO/.test(t))return vnL([cab,"DIAGNOSTICO: TUBERCULOSIS PULMONAR EN TRATAMIENTO ABANDONADO.",`PACIENTE QUE NO ASISTE A CONTROLES NI RECIBE TRATAMIENTO ANTITUBERCULOSO DESDE HACE ${VN_U(v.tiempo)}. SE REALIZA SEGUIMIENTO POR ${VN_U(v.medio)}, EVIDENCIANDOSE ABANDONO DE TRATAMIENTO. REFIERE COMO MOTIVO: ${VN_U(v.motivo)}.`,`PACIENTE SE OBSERVA ${VN_U(v.estado)}.`,"SE BRINDA EDUCACION SOBRE IMPORTANCIA DE LA ADHERENCIA, RIESGOS DEL ABANDONO Y NECESIDAD DE REINICIAR TRATAMIENTO, COMPLICACIONES Y RESISTENCIA FARMACOLOGICA, Y MEDIDAS DE PREVENCION DEL CONTAGIO.","SE INFORMA AL EQUIPO INTERDISCIPLINARIO Y AL PROGRAMA DE CONTROL DE TUBERCULOSIS.","PLAN: CONTINUAR LOCALIZACION Y SEGUIMIENTO, REFORZAR EDUCACION, NOTIFICAR SEGUN PROTOCOLO A EPS Y LABORATORIO DE SALUD PUBLICA.",vnEsNormal(v.extra)?"":VN_U(v.extra)]);
+   if(/NO LOCALIZADO/.test(t))return vnL([cab,`SE REALIZA BUSQUEDA ACTIVA DE PACIENTE DIAGNOSTICADO CON TUBERCULOSIS PULMONAR PARA VERIFICAR ADHERENCIA Y CONTINUIDAD DEL TRATAMIENTO. SE EFECTUA ${VN_U(v.medio)} SIN LOGRAR LOCALIZARLO. SE REGISTRA EN HISTORIA CLINICA Y SE NOTIFICA A LA EPS, AL AREA DE TELEMEDICINA Y AL PROGRAMA DE TUBERCULOSIS PARA LOCALIZACION Y SEGUIMIENTO.`,vnEsNormal(v.extra)?"":VN_U(v.extra)]);
+   return vnL([cab,`SE REALIZA ${VN_U(v.medio)} PARA LOCALIZACION Y SEGUIMIENTO DE PACIENTE CON TUBERCULOSIS. PACIENTE ES LOCALIZADO, ${VN_U(v.estado)}.`,"SE BRINDA EDUCACION SOBRE ADHERENCIA TERAPEUTICA, SIGNOS DE ALARMA Y MEDIDAS DE BIOSEGURIDAD. SE ORIENTA ASISTIR A CONTROL MEDICO Y CONTINUAR TRATAMIENTO SEGUN INDICACION. SE INFORMA AL PROGRAMA PARA SEGUIMIENTO.",vnEsNormal(v.extra)?"":VN_U(v.extra)])}}
+};
+function vnRepPlan(v){if(v.tipo==="ADN-VPH")return /NEGATIVO/.test(VN_U(v.vph))?"CONTROL EN 5 AÑOS":"SE ENVIA COLPOSCOPIA + BIOPSIA Y VALORACION POR GINECOLOGIA";
+  if(v.calidad==="INSATISFACTORIA")return"NUEVA TOMA DE CITOLOGIA";
+  if(/ANORMALIDADES/.test(VN_U(v.cat))||(v.anor&&!/NO SE ENCONTRARON/.test(VN_U(v.anor))))return"SE ENVIA COLPOSCOPIA + BIOPSIA Y VALORACION POR GINECOLOGIA";return"CONTROL EN 3 AÑOS"}
+function vnMedsCyd(m){if(m==null)return"SEGUN EDAD";const o=[];if(m>=6)o.push(m<12?"VITAMINA A 100.000 UI DOSIS UNICA":"VITAMINA A 200.000 UI DOSIS UNICA");if(m>=6)o.push("SULFATO FERROSO SEGUN PESO, CEPILLAR LOS DIENTES DESPUES DE CADA TOMA");if(m>=12)o.push(m>=24?"ALBENDAZOL 400 MG DOSIS UNICA":"ALBENDAZOL 200 MG DOSIS UNICA");return o.length?o.join("; "):"NO REQUIERE MICRONUTRIENTES POR EDAD"}
+/* datos de la persona desde la app */
+function vnPac(){const P=pac(),e=edadDe(P["FECHA NACIMIENTO"]);const etn=P["ETNIA"]==="INDIGENA"&&P["PUEBLO"]?P["PUEBLO"]:(P["ETNIA"]||"");
+  return{nombre:P["NOMBRE COMPLETO"]||"",edad:e?String(e.y):(P.__edad||""),meses:e?e.tm:(P.__edad?+P.__edad*12:null),sexo:P["GENERO"]||"",com:(P.__com||"").toUpperCase(),etnia:String(etn).toUpperCase()}}
+function vnEdadA(v,P){const x=v._edad?vnNums(v._edad)[0]:+P.edad;return Number.isFinite(x)?x:30}
+function vnEdadM(v,P){if(v._edad){const n=vnNums(v._edad)[0];return /mes/i.test(v._edad)?n:n*12}return P.meses}
+function vnSexo(v,P){if(v._sexo)return /^(m|h|masc|hombre|niño)/i.test(plano(v._sexo))?"M":"F";return P.sexo||"F"}
+function vnPreg(id){const P=vnPac(),pre=[];
+  if(!P.edad)pre.push({k:"_edad",q:"Edad de la persona",h:"En años, o en meses si es menor de 2 años: «18 meses»."});
+  if(!P.sexo&&(id==="cyd"||id==="adol"||id==="av"||id==="vih"||id==="tbc"))pre.push({k:"_sexo",q:"Sexo",o:["MUJER","HOMBRE"]});
+  if(!P.com)pre.push({k:"_com",q:"Comunidad o barrio"});
+  if(!P.etnia)pre.push({k:"_etnia",q:"Etnia o pueblo",o:["CUBEO","TUCANO","DESANO","TUYUCA","GUANANO","PIRATAPUYO","SIRIANO","NO INDIGENA"]});
+  return pre.concat(VN[id].qs)}
+/* estado y vista */
+let VNS=null;
+function vnDraft(id){try{return JSON.parse(S.get("dn2_vn_"+id)||"{}")}catch(e){return{}}}
+function vnNotas(){try{return JSON.parse(S.get("dn2_vnotas")||"[]")}catch(e){return[]}}
+function vnHomeHTML(){const grupos={};Object.entries(VN).forEach(([id,t])=>{(grupos[t.g]=grupos[t.g]||[]).push(id)});
+  const n=vnNotas().length;
+  return `<section class="route" id="vn-home"><div class="route-head"><h2>Notas por voz</h2><span>Tus plantillas, pregunta por pregunta</span></div>
+  <p class="note-src" style="margin:0">Escoge la plantilla, dicta solo lo que cambia en cada paciente y sale la nota completa. Usa la persona identificada arriba.</p>
+  ${Object.entries(grupos).map(([g,ids])=>`<p class="lab" style="margin:6px 0 0">${esc(g)}</p><div class="tiles">${ids.map(id=>`<button class="tile pc" type="button" data-vn="${id}">${Object.keys(vnDraft(id)).length?'<span class="dot" title="Borrador guardado"></span>':""}<b>${esc(VN[id].t)}</b><small>${esc(VN[id].who)}</small></button>`).join("")}</div>`).join("")}
+  ${n?`<button class="lnk" type="button" id="vn-hist">Ver notas guardadas (${n})</button>`:""}</section>`}
+function vnWireHome(){document.querySelectorAll("[data-vn]").forEach(b=>b.onclick=()=>vnOpen(b.dataset.vn));const h=$("vn-hist");if(h)h.onclick=vnHist}
+function vnOpen(id){stopRec();const v=vnDraft(id);VNS={id,v,i:0,voz:false,tts:S.get("dn2_vn_tts")==="1",fin:false};
+  const L=vnLista2();VNS.i=Math.max(0,L.findIndex(q=>v[q.k]==null));if(VNS.i<0||L.every(q=>v[q.k]!=null))VNS.i=0;vnRender();window.scrollTo(0,0)}
+function vnLista2(){const P=vnPac();return vnPreg(VNS.id).filter(q=>!q.c||q.c(VNS.v,P))}
+function vnDefault(q){const P=vnPac();return typeof q.def==="function"?q.def(VNS.v,P):q.def}
+function vnGuardar(){S.set("dn2_vn_"+VNS.id,JSON.stringify(VNS.v))}
+function vnRender(){st.view="vnota";const T=VN[VNS.id],P=vnPac();
+  $("app").innerHTML=`<div class="top"><button class="back" type="button" id="vn-back">← Inicio</button><span class="tag pc">Nota por voz</span></div>
+  <header><h1>${esc(T.t)}</h1><p class="sub">${P.nombre?`<b>${esc(P.nombre)}</b> · `:""}${P.edad?esc(P.edad)+" años · ":""}${esc(P.com||"sin comunidad")}${P.etnia?" · "+esc(P.etnia):""}</p></header>
+  <div id="vn-pane"></div>
+  <p class="foot">La nota sale en mayúsculas con el texto fijo de tu plantilla. El audio se transcribe con el reconocimiento de voz del navegador (servidores de Google); si el paciente habla, pídele permiso.</p>`;
+  $("vn-back").onclick=()=>{stopRec();window.speechSynthesis&&speechSynthesis.cancel();home();window.scrollTo(0,0)};
+  VNS.fin?vnFinal():vnPaso()}
+function vnPaso(){const L=vnLista2();if(VNS.i>=L.length){VNS.fin=true;vnRender();return}
+  const q=L[VNS.i],d=vnDefault(q),val=VNS.v[q.k];
+  $("vn-pane").innerHTML=`<div class="gx" style="margin:0">
+   <div class="gx-top"><span class="note-src">Pregunta ${VNS.i+1} de ${L.length}</span><span class="gx-mic" id="vn-mic"></span></div>
+   <div class="gx-lab">${esc(q.q)}</div>${q.h?`<div class="gx-hint">${esc(q.h)}</div>`:""}
+   ${d?`<div class="gx-hint">Normal: <b>${esc(d)}</b></div>`:""}
+   <div class="gx-val" id="vn-val" aria-live="polite">${val!=null?esc(val):"—"}</div>
+   <div class="gx-heard" id="vn-heard"></div><div class="gx-msg" id="vn-msg" aria-live="polite"></div>
+   ${q.o?`<div class="popts" style="grid-column:auto">${q.o.map(o=>`<button type="button" data-vo="${esc(o)}" aria-pressed="${val===o}">${esc(o)}</button>`).join("")}</div>`:""}
+   <input id="vn-txt" placeholder="O escríbelo aquí y pulsa Enter" autocomplete="off">
+   <div class="btns"><button class="btn" type="button" id="vn-prev"${VNS.i===0?" disabled":""}>← Atrás</button>${d?`<button class="btn" type="button" id="vn-def">Normal</button>`:""}<button class="btn" type="button" id="vn-next">Siguiente →</button></div>
+   <div class="btns"><button class="btn ${VNS.voz?"mic on":"primary"}" type="button" id="vn-voz">${VNS.voz?"Detener voz":"Dictar por voz"}</button><button class="btn" type="button" id="vn-end">Ver nota</button></div>
+   <label class="check"><input type="checkbox" id="vn-tts"${VNS.tts?" checked":""}> Leer cada pregunta en voz alta</label>
+   <p class="note-src" style="margin:0">Órdenes: «siguiente», «atrás», «normal», «borrar», «listo».</p></div>`;
+  document.querySelectorAll("[data-vo]").forEach(b=>b.onclick=()=>vnAceptar(q,b.dataset.vo));
+  $("vn-txt").onkeydown=e=>{if(e.key==="Enter"){e.preventDefault();const t=$("vn-txt").value.trim();if(t)vnOir(t)}};
+  $("vn-prev").onclick=()=>vnIr(VNS.i-1);$("vn-next").onclick=()=>{if(VNS.v[q.k]==null&&d)vnAceptar(q,d);else vnIr(VNS.i+1)};
+  if($("vn-def"))$("vn-def").onclick=()=>vnAceptar(q,d);
+  $("vn-end").onclick=()=>{VNS.fin=true;stopRec();VNS.voz=false;vnRender()};
+  $("vn-voz").onclick=()=>{if(VNS.voz){VNS.voz=false;stopRec();vnPaso()}else{VNS.voz=true;vnPaso();vnEscuchar()}};
+  $("vn-tts").onchange=e=>{VNS.tts=e.target.checked;S.set("dn2_vn_tts",VNS.tts?"1":"0")};
+  if(VNS.tts)vnHablar(q.q);else if(VNS.voz)vnEscuchar();
+  if(!VNS.voz)setTimeout(()=>{const t=$("vn-txt");if(t&&window.matchMedia("(pointer:fine)").matches)t.focus()},50)}
+function vnIr(n){VNS.i=Math.max(0,n);vnGuardar();vnPaso()}
+function vnAceptar(q,val){VNS.v[q.k]=val;vnGuardar();$("vn-val").textContent=val;$("vn-msg").textContent="✓ Guardado";$("vn-msg").className="gx-msg ok";setTimeout(()=>{if(st.view==="vnota"&&!VNS.fin)vnIr(VNS.i+1)},550)}
+function vnParse(q,t){const p=plano(t).replace(/[.,]$/,"");
+  if(q.o){const hit=q.o.find(o=>plano(o)===p)||q.o.find(o=>p.length>=3&&plano(o).startsWith(p))||(p.length>=4?q.o.find(o=>plano(o).includes(p)):null);if(hit)return hit}
+  if(q.t==="gpcav"){const n=vnNums(t);if(n.length>=5)return`G${n[0]} P${n[1]} C${n[2]} A${n[3]} V${n[4]}`;if(n.length===4)return`G${n[0]} P${n[1]} C${n[2]} A${n[3]}`;return{err:"Necesito los cinco números: gestaciones, partos, cesáreas, abortos y vivos."}}
+  if(q.t==="av"){const n=vnNums(t);if(n.length>=2)return`${n[0]}/${n[1]}`;if(/\d+\/\d+/.test(t))return t.match(/\d+\/\d+/)[0];return{err:"Diga la fracción, por ejemplo «veinte veinte»."}}
+  if(q.t==="num"){const n=vnNums(t);if(n.length)return String(n[0]);return{err:"No entendí el número."}}
+  return VN_U(t)}
+function vnOir(t){if(!VNS||VNS.fin)return;const L=vnLista2(),q=L[VNS.i];if(!q)return;const x=plano(t).replace(/[.,]$/,"");const h=$("vn-heard");if(h)h.textContent="Oí: «"+t.trim()+"»";
+  if(/^(siguiente|sigue|saltar|pasa)$/.test(x)){if(VNS.v[q.k]==null&&vnDefault(q))vnAceptar(q,vnDefault(q));else vnIr(VNS.i+1);return}
+  if(/^(atras|anterior|volver)$/.test(x)){vnIr(VNS.i-1);return}
+  if(/^(borrar|corregir|repetir)$/.test(x)){delete VNS.v[q.k];vnGuardar();vnPaso();return}
+  if(/^(listo|terminar|termine|ver nota)$/.test(x)){VNS.fin=true;stopRec();VNS.voz=false;vnRender();return}
+  if(/^(normal|lo normal|igual|por defecto|sin cambios|sin hallazgos|como siempre)$/.test(x)){const d=vnDefault(q);if(d){vnAceptar(q,d)}else{const m=$("vn-msg");m.textContent="Esta pregunta no tiene valor normal: dicta el dato.";m.className="gx-msg err"}return}
+  const r=vnParse(q,t);if(r&&r.err){const m=$("vn-msg");m.textContent=r.err+" Repite, o di «siguiente».";m.className="gx-msg err";return}
+  vnAceptar(q,r)}
+function vnEscuchar(){const m=$("vn-mic");if(!SR){if(m)m.textContent="Este navegador no transcribe voz: usa el micrófono del teclado en la casilla.";VNS.voz=false;return}
+  stopRec();const r=new SR();REC=r;recOn=true;r.lang="es-CO";r.continuous=true;r.interimResults=true;
+  r.onresult=e=>{let tmp="";for(let k=e.resultIndex;k<e.results.length;k++){const t=e.results[k][0].transcript;if(e.results[k].isFinal)vnOir(t);else tmp+=t}const h=$("vn-heard");if(tmp&&h)h.textContent="… "+tmp};
+  r.onerror=e=>{const mm=$("vn-mic");if(/not-allowed|service-not-allowed/.test(e.error)){recOn=false;VNS.voz=false;if(mm)mm.textContent="Micrófono no permitido: usa el micrófono del teclado."}else if(e.error==="network"){recOn=false;VNS.voz=false;if(mm)mm.textContent="Sin internet no se transcribe: escribe o usa el teclado."}};
+  r.onend=()=>{if(recOn&&REC===r&&VNS&&VNS.voz&&st.view==="vnota"){try{r.start()}catch(e){}}};
+  try{r.start();if(m)m.textContent="● Escuchando"}catch(e){if(m)m.textContent="No se pudo iniciar el micrófono."}}
+function vnHablar(txt){const ss=window.speechSynthesis;if(!ss){if(VNS.voz)vnEscuchar();return}
+  stopRec();try{ss.cancel();const u=new SpeechSynthesisUtterance(txt);u.lang="es-CO";u.rate=1.05;u.onend=()=>{if(VNS&&VNS.voz&&st.view==="vnota")vnEscuchar()};u.onerror=u.onend;ss.speak(u)}catch(e){if(VNS.voz)vnEscuchar()}}
+function vnTexto(){const P=vnPac(),v=VNS.v;return VN[VNS.id].b(v,P,vnPid(P,v)).replace(/\n{3,}/g,"\n\n").trim()}
+function vnFinal(){const L=vnLista2(),falt=L.filter(q=>VNS.v[q.k]==null&&!vnDefault(q)),txt=vnTexto();
+  $("vn-pane").innerHTML=`${falt.length?`<div class="box miss"><h3>Faltan datos</h3><ul>${falt.map(q=>`<li><button class="lnk" type="button" data-vgo="${q.k}">${esc(q.q)}</button></li>`).join("")}</ul></div>`:""}
+  <div class="box warn"><h3>Revisa antes de copiar</h3><p style="margin:0">Las respuestas que no dictaste quedaron con el valor normal de la plantilla. Lee la nota completa y corrige lo que no aplique.</p></div>
+  <textarea id="vn-nota" style="min-height:420px;font-size:.92rem">${esc(txt)}</textarea>
+  <div class="btns"><button class="btn primary" type="button" id="vn-copy">Copiar nota</button><button class="btn" type="button" id="vn-save">Guardar en el celular</button></div>
+  <div class="btns"><button class="btn" type="button" id="vn-back2">← Volver a las preguntas</button>${sample?`<button class="btn" type="button" id="vn-ai">Pulir redacción con Claude</button>`:""}<button class="btn" type="button" id="vn-new">Terminar y limpiar</button></div>
+  <p class="status" id="vn-st" aria-live="polite"></p>`;
+  document.querySelectorAll("[data-vgo]").forEach(b=>b.onclick=()=>{VNS.fin=false;VNS.i=vnLista2().findIndex(q=>q.k===b.dataset.vgo);vnRender()});
+  $("vn-back2").onclick=()=>{VNS.fin=false;VNS.i=Math.max(0,vnLista2().length-1);vnRender()};
+  $("vn-copy").onclick=()=>{const t=$("vn-nota").value;const ok=()=>{$("vn-st").textContent="Nota copiada."};try{navigator.clipboard.writeText(t).then(ok,()=>{$("vn-nota").select();$("vn-st").textContent="Selecciona y copia el texto manualmente."})}catch(e){$("vn-nota").select()}};
+  $("vn-save").onclick=()=>{const a=vnNotas(),P=vnPac();a.unshift({id:uid(),fecha:new Date().toISOString().slice(0,16).replace("T"," "),plantilla:VN[VNS.id].t,paciente:P.nombre||"",com:P.com||VN_U(VNS.v._com||""),texto:$("vn-nota").value});S.set("dn2_vnotas",JSON.stringify(a.slice(0,300)));$("vn-st").textContent="Guardada en este celular ("+Math.min(a.length,300)+" notas)."};
+  $("vn-new").onclick=()=>{const b=$("vn-new");if(b.dataset.armed!=="1"){b.dataset.armed="1";b.textContent="¿Borrar respuestas? Toca otra vez";return}S.del("dn2_vn_"+VNS.id);VNS=null;home();window.scrollTo(0,0)};
+  const ai=$("vn-ai");if(ai)ai.onclick=async()=>{ai.disabled=true;$("vn-st").textContent="Puliendo redacción…";
+    try{const r=await sample("Eres auxiliar de historia clínica de enfermería en Colombia. Corrige ortografía y redacción de esta nota, en MAYÚSCULAS y sin tildes como el original. No agregues ni quites datos clínicos, hallazgos, valores ni conductas; no inventes nada. Devuelve solo la nota corregida.\n\nNOTA:\n"+$("vn-nota").value,{cache:false});if(r&&r.text){$("vn-nota").value=r.text.trim();$("vn-st").textContent="Listo. Revisa que no haya cambiado ningún dato."}}catch(e){$("vn-st").textContent="No se pudo pulir ahora; la nota sigue como estaba."}ai.disabled=false}}
+function vnHist(){stopRec();st.view="vnota";const a=vnNotas();
+  $("app").innerHTML=`<div class="top"><button class="back" type="button" id="vn-back">← Inicio</button><span class="tag pc">Notas guardadas</span></div><header><h1>Notas por voz guardadas</h1><p class="sub">${a.length} notas en este celular</p></header>
+  ${a.map((n,i)=>`<details class="sec"><summary><span>${esc(n.plantilla)} · ${esc(n.paciente||n.com||"")}</span><span class="cnt">${esc(n.fecha)}</span></summary><div style="padding:12px 14px;display:flex;flex-direction:column;gap:8px"><textarea readonly style="min-height:220px;font-size:.88rem" id="vh-${i}">${esc(n.texto)}</textarea><div class="btns"><button class="btn" type="button" data-vhc="${i}">Copiar</button><button class="btn" type="button" data-vhd="${i}">Borrar</button></div></div></details>`).join("")}`;
+  $("vn-back").onclick=()=>{home();window.scrollTo(0,0)};
+  document.querySelectorAll("[data-vhc]").forEach(b=>b.onclick=()=>{const t=$("vh-"+b.dataset.vhc);try{navigator.clipboard.writeText(t.value).then(()=>{b.textContent="Copiada"},()=>t.select())}catch(e){t.select()}});
+  document.querySelectorAll("[data-vhd]").forEach(b=>b.onclick=()=>{if(b.dataset.armed!=="1"){b.dataset.armed="1";b.textContent="¿Seguro? Toca otra vez";return}const x=vnNotas();x.splice(+b.dataset.vhd,1);S.set("dn2_vnotas",JSON.stringify(x));vnHist()})}
+
+/* ---------- MI DÍA: secretaria diaria del contrato 1785 ---------- */
+const MD_PLAN={
+ 1:{am:"Primera infancia e infancia (0–11)",amd:"Valoración integral C y D, agudeza visual, educación PAI y lactancia",mods:["pinf","inf"],pm:"SIVIGILA de la semana epidemiológica",pmd:"Notificación semanal y revisión de nacidos vivos y defunciones",pmr:"act. 12 · 13"},
+ 2:{am:"Adolescencia y juventud (12–28)",amd:"Valoración, planificación, asesoría VIH, preconcepcional",mods:["adol","juv","precon"],pm:"Búsqueda activa casa a casa",pmd:"Menores de 5 con esquema o control pendiente y gestantes no captadas",pmr:"act. 05 · 14"},
+ 3:{am:"Salud de la mujer y gestantes",amd:"Citología, tamizaje de mama, DIU e implante, captación y control de gestantes",mods:["prenatal","proc","adul"],pm:"Educación grupal y PIC",pmd:"Charla en escuela, maloca o casa comunal; actividades PIC programadas",pmr:"act. 11 · 16"},
+ 4:{am:"Adultez y vejez (29+)",amd:"Valoración integral, riesgo cardiovascular, sintomáticos respiratorios, agudeza visual",mods:["adul","vej"],pm:"Búsqueda activa de inasistentes",pmd:"Mujeres sin citología al día, adultos sin valoración, tos de más de 15 días",pmr:"act. 03 · 05 · 14"},
+ 5:{am:"Consulta abierta y telemedicina",amd:"No programados, interconsultas, telexperticia, referencias, controles pendientes",mods:[],pm:"Medicamentos, bases y escaneo",pmd:"Kardex e inventario, bases al día, escanear los formatos de la semana",pmr:"act. 05 · 07 · 08 · 17"},
+ 6:{am:"Jornada concertada",amd:"Solo si se acordó con el líder: salida a comunidad de influencia o recuperar citas perdidas (act. 01 · 02 · 16)",mods:[],pm:"Descanso",pmd:"",pmr:""},
+ 0:{am:"Descanso",amd:"Si tienes un rato, revisa qué soportes faltan para la entrega",mods:[],pm:"Descanso",pmd:"",pmr:""}};
+const MD_ENT=[["2026-10-30","2026-10-01","30 de octubre"],["2026-11-20","2026-10-31","20 de noviembre"],["2026-12-20","2026-11-21","20 de diciembre"]];
+const MD_SOP=["01 Acta de concertación y lista de asistencia","02 Certificado de permanencia firmado por el líder","03 Registro diario de atenciones y consentimientos","04 Listado de atenciones de Prosoft","05 Encuestas, caracterización de gestantes, búsqueda de menores de 5, bases","06 Proyección de insumos y formatos de dispensación","07 Inventario en Excel firmado","08 Registro de temperatura y novedades","09 Registro de interconsulta y telemedicina","10 Referencias o constancia de no remisiones","11 Listas de asistencia de educación PAI","12 Fichas SIVIGILA y reporte semanal","13 Nacidos vivos y defunciones, o constancia","14 Seguimiento a auxiliares y promotores","15 Acta de contingencia, o constancia","16 Listas y actas PIC","17 Informe mensual firmado","18 Actividad adicional, o constancia"];
+const MD_DIAS=["domingo","lunes","martes","miércoles","jueves","viernes","sábado"],MD_MES=["enero","febrero","marzo","abril","mayo","junio","julio","agosto","septiembre","octubre","noviembre","diciembre"];
+function mdFecha(iso){const[y,m,d]=iso.split("-").map(Number);return new Date(y,m-1,d)}
+function mdPeriodo(){const h=hoy();return MD_ENT.find(e=>e[0]>=h)||MD_ENT[MD_ENT.length-1]}
+function mdDias(){const e=mdPeriodo();return Math.round((mdFecha(e[0])-mdFecha(hoy()))/86400000)}
+function mdTareas(){const d=new Date().getDay(),r=mdDias(),t=[];
+  if(d>=1&&d<=5){t.push("Abrir el punto: insumos, nevera y temperatura anotada (act. 08)","Confirmar con el promotor los citados de hoy (act. 14)","Cada atención con su formato firmado o con huella del usuario","Todo registrado en Prosoft antes de cerrar (act. 04)","Fotos de evidencia del día guardadas (act. 17)")}
+  if(d===1)t.push("Reportar SIVIGILA de la semana, aunque sea notificación negativa (act. 12)");
+  if(d===5)t.push("Escanear a PDF todos los formatos de la semana","Reunión con auxiliares y promotores con lista firmada (act. 14)","Revisar kardex, lotes y vencimientos (act. 07 · 08)");
+  if(d===6)t.push("Si hubo jornada: lista o certificado firmado por el líder (act. 02)");
+  if(d===0)t.push("Revisar cuántos soportes van de los 18");
+  if(r>=11&&r<=13)t.push("Hacer la proyección y solicitud de medicamentos e insumos (act. 06)");
+  if(r>=4&&r<=10)t.push("Pedir al líder el certificado de permanencia (act. 02)","Hacer constancias de «no se presentaron eventos» donde no hubo","Pagar seguridad social y guardar la planilla");
+  if(r>=1&&r<=3)t.push("Escanear lo último y verificar 18 de 18","Llenar el informe de actividades y el certificado de supervisión","Imprimir, firmar y unir la cuenta de cobro con los anexos");
+  if(r===0)t.push("Radicar hoy la cuenta de cobro con todos los soportes");
+  return t}
+function mdGet(k){try{return JSON.parse(S.get(k)||"{}")}catch(e){return{}}}
+function mdStats(){const h=hoy(),e=mdPeriodo(),R=registrosTodos(),f=r=>((r.datos&&r.datos.FECHA_REGISTRO)||"").slice(0,10);
+  const venc=agenda().filter(x=>!x.ok&&x.prox&&x.prox<=h).length;
+  return{hoy:R.filter(r=>f(r)===h).length,per:R.filter(r=>f(r)>=e[1]&&f(r)<=e[0]).length,venc}}
+function miDiaHTML(){const n=new Date(),d=n.getDay(),P=MD_PLAN[d],e=mdPeriodo(),r=mdDias(),pm=n.getHours()>=12;
+  const T=mdTareas(),tk=mdGet("dn2_midia_"+hoy()),sk=mdGet("dn2_sop_"+e[0]),st=mdStats();
+  const hechas=T.filter(x=>tk[x]).length,sop=MD_SOP.filter(x=>sk[x.slice(0,2)]).length;
+  const cd=r<0?"Contrato en cierre":r===0?"Hoy se entrega la cuenta":r===1?"Mañana se entrega la cuenta":`Faltan ${r} días para entregar (${e[2]})`;
+  const mods=P.mods.length?`<div class="md-mods">${P.mods.map(m=>`<button type="button" data-mod="${m}">${esc(M[m].title)} →</button>`).join("")}</div>`:"";
+  return `<section class="midia" aria-labelledby="md-h">
+   <div class="md-top"><h2 id="md-h">Mi día · ${MD_DIAS[d]} ${n.getDate()} de ${MD_MES[n.getMonth()]}</h2><span class="md-cd${r<=3?" urg":""}">${cd}</span></div>
+   <div class="md-blk">
+    <div class="md-b${pm?"":" now"}"><p class="lab">Mañana · 7:30 a 12:00</p><b>${esc(P.am)}</b><small>${esc(P.amd)}</small>${mods}</div>
+    <div class="md-b${pm?" now":""}"><p class="lab">Tarde · 14:00 a 17:00</p><b>${esc(P.pm)}</b>${P.pmd?`<small>${esc(P.pmd)}</small>`:""}${P.pmr?`<span class="ref">${P.pmr}</span>`:""}</div>
+   </div>
+   <div class="md-stats"><span class="chip"><b>Hoy</b>${st.hoy} registros</span><span class="chip"><b>Periodo</b>${st.per} registros</span>${st.venc?`<span class="chip alert"><b>Citas</b>${st.venc} vencidas o para hoy</span>`:""}<span class="chip"><b>Soportes</b>${sop} / 18</span></div>
+   ${T.length?`<details class="sec" id="md-tdet" open><summary>Tareas de hoy <span class="cnt" id="md-tc">${hechas} / ${T.length}</span></summary><ul class="items">${T.map((x,i)=>`<li><input type="checkbox" id="md-t${i}" data-mdt="${esc(x)}"${tk[x]?" checked":""}><label for="md-t${i}"><span>${esc(x)}</span></label></li>`).join("")}</ul></details>`:""}
+   <details class="sec"><summary>Soportes para la entrega del ${esc(e[2])} <span class="cnt" id="md-sc">${sop} / 18</span></summary><ul class="items">${MD_SOP.map((x,i)=>`<li><input type="checkbox" id="md-s${i}" data-mds="${x.slice(0,2)}"${sk[x.slice(0,2)]?" checked":""}><label for="md-s${i}"><span>${esc(x)}</span></label></li>`).join("")}</ul><p class="note-src" style="padding:0 14px 12px">Marca cuando el soporte de esa actividad ya esté firmado y escaneado. Si no hubo eventos, cuenta la constancia firmada.</p></details>
+   <div class="btns"><button type="button" class="btn" id="md-copy">Copiar resumen para Claude</button></div>
+   <p class="status" id="md-st" aria-live="polite"></p>
+  </section>`}
+function mdResumen(){const n=new Date(),e=mdPeriodo(),st=mdStats(),T=mdTareas(),tk=mdGet("dn2_midia_"+hoy()),sk=mdGet("dn2_sop_"+e[0]);
+  const L=["RESUMEN DEL DÍA · "+MD_DIAS[n.getDay()]+" "+hoy(),"Entrega: "+e[2]+" (faltan "+mdDias()+" días)","Registros hoy: "+st.hoy+" · en el periodo: "+st.per+" · citas vencidas o para hoy: "+st.venc];
+  const com={};registrosTodos().filter(r=>((r.datos&&r.datos.FECHA_REGISTRO)||"").slice(0,10)===hoy()).forEach(r=>{com[r.comunidad||"SIN COMUNIDAD"]=(com[r.comunidad||"SIN COMUNIDAD"]||0)+1});
+  if(Object.keys(com).length)L.push("Por comunidad hoy: "+Object.entries(com).map(([k,v])=>k+" "+v).join(", "));
+  if(T.length){L.push("Tareas hechas: "+T.filter(x=>tk[x]).length+" / "+T.length);const p=T.filter(x=>!tk[x]);if(p.length)L.push("Tareas pendientes: "+p.join("; "))}
+  const fs=MD_SOP.filter(x=>!sk[x.slice(0,2)]);L.push("Soportes listos: "+(18-fs.length)+" / 18");if(fs.length)L.push("Soportes que faltan: "+fs.map(x=>x.slice(0,2)).join(", "));
+  return L.join("\n")}
+function wireMiDia(){
+  document.querySelectorAll("[data-mdt]").forEach(c=>c.onchange=()=>{const k="dn2_midia_"+hoy(),o=mdGet(k);if(c.checked)o[c.dataset.mdt]=1;else delete o[c.dataset.mdt];S.set(k,JSON.stringify(o));const T=mdTareas();$("md-tc").textContent=T.filter(x=>o[x]).length+" / "+T.length});
+  document.querySelectorAll("[data-mds]").forEach(c=>c.onchange=()=>{const k="dn2_sop_"+mdPeriodo()[0],o=mdGet(k);if(c.checked)o[c.dataset.mds]=1;else delete o[c.dataset.mds];S.set(k,JSON.stringify(o));const n=MD_SOP.filter(x=>o[x.slice(0,2)]).length;$("md-sc").textContent=n+" / 18";document.querySelectorAll(".md-stats .chip").forEach(ch=>{if(ch.firstChild&&ch.firstChild.textContent==="Soportes")ch.lastChild.textContent=n+" / 18"})});
+  const b=$("md-copy");if(b)b.onclick=()=>{const t=mdResumen(),ok=()=>{$("md-st").textContent="Resumen copiado. Pégalo en el chat con Claude."};
+    try{navigator.clipboard.writeText(t).then(ok,()=>mdShow(t))}catch(e){mdShow(t)}}}
+function mdShow(t){const s=$("md-st");s.innerHTML="";const a=document.createElement("textarea");a.value=t;a.rows=7;a.readOnly=true;s.append("No se pudo copiar solo. Mantén presionado el texto y cópialo:",a);a.focus();a.select()}
+
 /* ---------- PANEL ---------- */
-const VERSION_APP="2026-10-14 v149";
+const VERSION_APP="2026-10-17 v150";
 function home(){
   stopRec();st.view="home";
   const rm=["precon","prenatal","parto","rn","ive"],rp=["pinf","inf","adol","juv","adul","vej"];
@@ -944,6 +1337,7 @@ function home(){
   const drafts=Object.keys(M).filter(hasDraft);
   $("app").innerHTML=`
   <header><h1>Dictado de Notas</h1><p class="sub">Rutas de la Resolución 3280. Escoge el módulo y sigue los pasos: <b>Datos → Preguntas → Guía → Nota → Base</b>. La identificación se pide una sola vez, al empezar.</p></header>
+  ${miDiaHTML()}
   <section class="finder" aria-labelledby="fh">
     <p class="lab" id="fh">¿A quién vas a atender?</p>
     <div class="pac" id="pacsum"></div>
@@ -976,6 +1370,7 @@ function home(){
     <div class="sugg" id="sugg"><p>Escribe la edad para ver qué le corresponde.</p></div>
   </section>
   ${drafts.length?`<section><p class="lab">Borradores guardados</p><div class="drafts">${drafts.map(d=>`<button data-mod="${d}"><span>${esc(M[d].title)}</span><span>Continuar →</span></button>`).join("")}</div></section>`:""}
+  ${vnHomeHTML()}
   ${agendaHTML()}
   <section class="route"><div class="route-head"><h2>Pacientes</h2><span>${Object.keys(pacientes()).length} registrados</span></div><div class="tiles"><button class="tile pc" id="t-pacs"><b>Ver pacientes</b><small>Historial, próximos controles y pendientes de cada persona</small></button><button class="tile pc" id="t-vbase"><b>Ver base de datos</b><small>${registrosTodos().length} registros guardados en el celular, como la hoja de Google</small></button></div></section>
   <section class="route"><div class="route-head"><h2>Ruta materno perinatal</h2><span>RIAMP</span></div><div class="tiles">${rm.map(tile).join("")}</div></section>
@@ -984,7 +1379,7 @@ function home(){
   <section class="route"><div class="route-head"><h2>Base de datos</h2><span>Google Sheets</span></div><div class="tiles"><button class="tile pc" id="t-base"><b>Pendientes y conexión</b><small id="bq">${cola().length?cola().length+" pendientes":(conf().url?"al día":"sin conectar")}</small></button></div></section>
   <p class="foot" id="verlbl">Versión ${VERSION_APP}</p>
   <p class="foot">Contenido según la Resolución 3280 de 2018, con IVE actualizada a la Sentencia C-055 de 2022 y la Resolución 051 de 2023. Las semanas de vacunas se confirman con el lineamiento PAI vigente. Lo que dictas queda solo en este celular hasta que lo borres. Organizar la nota necesita internet.</p>`;
-  document.querySelectorAll("[data-mod]").forEach(b=>b.onclick=()=>openMod(b.dataset.mod));
+  document.querySelectorAll("[data-mod]").forEach(b=>b.onclick=()=>openMod(b.dataset.mod));wireMiDia();vnWireHome();
   $("t-base").onclick=()=>{baseEdit=null;base({});window.scrollTo(0,0)};$("t-pacs").onclick=verPacientes;$("t-vbase").onclick=verBase;
   document.querySelectorAll("[data-ag]").forEach(b=>b.onclick=()=>{if(b.dataset.armed!=="1"){b.dataset.armed="1";b.textContent="¿Seguro? Toca otra vez";return}setAgenda(agenda().map(x=>x.id===b.dataset.ag?Object.assign(x,{ok:hoy()}):x));home()});
   ["f-edad","f-uni","f-sexo","f-est"].forEach(i=>$(i).addEventListener("input",sugerir));
