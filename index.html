@@ -266,6 +266,8 @@ textarea{width:100%;font:inherit;font-size:1.05rem;line-height:1.55;padding:14px
 .qt-h{margin:4px 0 0;font-weight:700;font-size:.9rem}
 .qt-l{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:6px}
 .qt-l li{display:flex;gap:10px;align-items:center;border:1px solid var(--line);border-radius:8px;padding:8px 10px}
+.qt-l .btn{flex:none;padding:6px 10px;font-size:.8rem}
+.qt-c{display:block;font-family:var(--f-data);font-size:.68rem;color:var(--accent);margin-top:3px}
 .sugg .qt .btn{border:1.5px solid var(--line);background:var(--surface);color:var(--ink);border-radius:8px;font-weight:700}
 @media (prefers-reduced-motion:no-preference){.tile,.btn,.notes-pick button{transition:background .15s,border-color .15s,box-shadow .15s}}
 </style>
@@ -276,7 +278,7 @@ textarea{width:100%;font:inherit;font-size:1.05rem;line-height:1.55;padding:14px
 /* ======================= CONTENIDO NORMATIVO (Res. 3280 de 2018) ======================= */
 const VIOL = ["¿DURANTE EL ÚLTIMO AÑO, ha sido humillada, menospreciada, insultada o amenazada por su pareja?","¿DURANTE EL ÚLTIMO AÑO, fue golpeada, bofeteada, pateada o lastimada físicamente de otra manera?","¿DESDE QUE ESTÁ EN GESTACIÓN, ha sido golpeada, bofeteada, pateada o lastimada físicamente de alguna manera?","¿DURANTE EL ÚLTIMO AÑO, fue forzada a tener relaciones sexuales?"];
 const DEPR = ["Durante el mes pasado, ¿con frecuencia se ha sentido triste, deprimida o sin esperanza?","Durante el mes pasado, ¿ha permanecido preocupada por tener poco interés o placer para hacer las cosas cotidianas?","Si responde sí a alguna: ¿Siente que necesita ayuda?"];
-const CERVIX = ["Cuello uterino (rural disperso, obligatorio): 25 a 29 años citología; 30 a 50 años Ver y Tratar (VIA/VILI + crioterapia inmediata; prueba rápida ADN-VPH como alternativa junto con Ver y Tratar); 51 a 65 años citología o ADN-VPH sin triage","Si en la especuloscopia hay signos de carcinoma invasor: informar, alertar y gestionar colposcopia + biopsia en máximo 1 semana"];
+const CERVIX = ["Cuello uterino (Res. 3280, Directrices RPMS 9.2 y 9.5.1, p. 167–169): 25 a 29 años citología, esquema 1-3-3; 30 a 65 años ADN-VPH, esquema 1-5-5, con muestra de citología en el mismo momento para triage; 30 a 50 años en área rural dispersa, también VIA-VILI con crioterapia (esquema 1-3-3), solo por personal entrenado y certificado; menores de 25 años, citología de oportunidad por criterio","Si en la especuloscopia hay signos de carcinoma invasor: informar, alertar y gestionar colposcopia + biopsia en máximo 1 semana"];
 
 const M = {
  precon:{route:"rm",title:"Preconcepcional",who:"Mujer que quiere embarazarse en el próximo año",
@@ -1135,7 +1137,7 @@ const VN={
   {k:"oi",q:"Ojo izquierdo",t:"av"},
   {k:"ao",q:"Ambos ojos",t:"av",c:(v,P)=>vnEdadA(v,P)>=18},
   Q.ef,Q.control("1 AÑO"),Q.extra],
-  b:(v,P,I)=>{const nino=vnEdadA(v,P)<18,mal=[v.od,v.oi].some(x=>{const m=/20\/(\d+)/.exec(x||"");return m&&+m[1]>=40});return vnL(["AGUDEZA VISUAL",nino?`MENOR DE ${I.edad} AÑOS QUE ASISTE A CONSULTA DE ENFERMERIA PARA VALORACION DE LA AGUDEZA VISUAL, ACOMPAÑADO DE ${VN_U(v.acomp)}, PROCEDENTE DE ${I.com}, ETNIA ${I.etnia}. ${VN_U(v.acomp)} REFIERE QUE EL MENOR SE ENCUENTRA EN BUEN ESTADO GENERAL.`:`PACIENTE DE ${I.edad} AÑOS QUE ASISTE A CONSULTA DE ENFERMERIA PARA TAMIZAJE DE LA AGUDEZA VISUAL, PROCEDENTE DE ${I.com}, ETNIA ${I.etnia}. SE ENCUENTRA EN BUEN ESTADO GENERAL.`,`SINTOMAS VISUALES, DOLOR OCULAR, ENROJECIMIENTO O LAGRIMEO: ${VN_U(v.sint)}. ${VN_U(v.lentes)}.`,"","EXAMEN FISICO:",vnEF(v,nino),"OJOS: SIN ALTERACIONES VISIBLES EN PARPADOS, CONJUNTIVAS NI CORNEAS, PUPILAS ISOCORICAS Y REACTIVAS A LA LUZ, SIN SIGNOS INFLAMATORIOS NI SECRECION.","",`SE REALIZA VALORACION DE AGUDEZA VISUAL CON CARTA DE SNELLEN ${nino?"PEDIATRICA":"ADULTO"} A 6 M, SE EXPLICA EL PROCEDIMIENTO, REFIERE ENTENDER Y ACEPTAR.`,`OJO DERECHO (OD): ${VN_U(v.od)}`,`OJO IZQUIERDO (OI): ${VN_U(v.oi)}`,v.ao?`AMBOS OJOS: ${VN_U(v.ao)}`:"",mal?"AGUDEZA VISUAL DISMINUIDA: SE REMITE A OPTOMETRIA.":"CON ADECUADA IDENTIFICACION DE "+(nino?"FIGURAS":"LETRAS")+" Y ADECUADA CAPACIDAD DEL CAMPO VISUAL.","","PLAN:","SE BRINDA EDUCACION EN AUTOCUIDADO E HIGIENE VISUAL: BUENA ILUMINACION AL LEER, PAUSAS VISUALES, EVITAR USO PROLONGADO DE PANTALLAS.",`SE ENTREGA CARNET Y SE ASIGNA CONTROL EN ${VN_U(v.control)} O ANTES SI PRESENTA MOLESTIAS.`,"SE EDUCA EN ESTILOS DE VIDA SALUDABLE Y SIGNOS DE ALARMA PARA CONSULTAR A URGENCIAS. SE BRINDA EDUCACION EN LAVADO DE MANOS.",vnEsNormal(v.extra)?"":VN_U(v.extra)])}},
+  b:(v,P,I)=>{const nino=vnEdadA(v,P)<18,mal=[v.od,v.oi].some(x=>{const m=/20\/(\d+)/.exec(x||"");return m&&(nino?+m[1]>=40:+m[1]>50)});return vnL(["AGUDEZA VISUAL",nino?`MENOR DE ${I.edad} AÑOS QUE ASISTE A CONSULTA DE ENFERMERIA PARA VALORACION DE LA AGUDEZA VISUAL, ACOMPAÑADO DE ${VN_U(v.acomp)}, PROCEDENTE DE ${I.com}, ETNIA ${I.etnia}. ${VN_U(v.acomp)} REFIERE QUE EL MENOR SE ENCUENTRA EN BUEN ESTADO GENERAL.`:`PACIENTE DE ${I.edad} AÑOS QUE ASISTE A CONSULTA DE ENFERMERIA PARA TAMIZAJE DE LA AGUDEZA VISUAL, PROCEDENTE DE ${I.com}, ETNIA ${I.etnia}. SE ENCUENTRA EN BUEN ESTADO GENERAL.`,`SINTOMAS VISUALES, DOLOR OCULAR, ENROJECIMIENTO O LAGRIMEO: ${VN_U(v.sint)}. ${VN_U(v.lentes)}.`,"","EXAMEN FISICO:",vnEF(v,nino),"OJOS: SIN ALTERACIONES VISIBLES EN PARPADOS, CONJUNTIVAS NI CORNEAS, PUPILAS ISOCORICAS Y REACTIVAS A LA LUZ, SIN SIGNOS INFLAMATORIOS NI SECRECION.","",`SE REALIZA VALORACION DE AGUDEZA VISUAL CON CARTA DE SNELLEN ${nino?"PEDIATRICA":"ADULTO"} A 6 M, SE EXPLICA EL PROCEDIMIENTO, REFIERE ENTENDER Y ACEPTAR.`,`OJO DERECHO (OD): ${VN_U(v.od)}`,`OJO IZQUIERDO (OI): ${VN_U(v.oi)}`,v.ao?`AMBOS OJOS: ${VN_U(v.ao)}`:"",mal?(nino?"SE IDENTIFICA ALTERACION DE LA AGUDEZA VISUAL: SE DERIVA A OPTOMETRIA U OFTALMOLOGIA.":"AGUDEZA VISUAL POR DEBAJO DE 20/50: SE DERIVA A CONSULTA DE OPTOMETRIA PARA CONFIRMAR O DESCARTAR COMPONENTE REFRACTIVO."):"CON ADECUADA IDENTIFICACION DE "+(nino?"FIGURAS":"LETRAS")+" Y ADECUADA CAPACIDAD DEL CAMPO VISUAL.","","PLAN:","SE BRINDA EDUCACION EN AUTOCUIDADO E HIGIENE VISUAL: BUENA ILUMINACION AL LEER, PAUSAS VISUALES, EVITAR USO PROLONGADO DE PANTALLAS.",`SE ENTREGA CARNET Y SE ASIGNA CONTROL EN ${VN_U(v.control)} O ANTES SI PRESENTA MOLESTIAS.`,"SE EDUCA EN ESTILOS DE VIDA SALUDABLE Y SIGNOS DE ALARMA PARA CONSULTAR A URGENCIAS. SE BRINDA EDUCACION EN LAVADO DE MANOS.",vnEsNormal(v.extra)?"":VN_U(v.extra)])}},
  vih:{g:"Consejerías",t:"Asesoría y pruebas rápidas",who:"VIH, sífilis, hepatitis B",qs:[
   {k:"motivo",q:"Motivo de la prueba",def:"PRUEBA VOLUNTARIA",o:["PRUEBA VOLUNTARIA","CONTROL PRENATAL","EXPOSICION DE RIESGO","PROTOCOLO PRECONCEPCIONAL"]},
   {k:"vih",q:"Resultado de VIH",def:"NO REACTIVO",o:["NO REACTIVO","REACTIVO"]},
@@ -1500,7 +1502,7 @@ function wireMiDia(){const cb=$("md-cal");if(cb)cb.onclick=calOpen;
 function mdShow(t){const s=$("md-st");s.innerHTML="";const a=document.createElement("textarea");a.value=t;a.rows=7;a.readOnly=true;s.append("No se pudo copiar solo. Mantén presionado el texto y cópialo:",a);a.focus();a.select()}
 
 /* ---------- PANEL ---------- */
-const VERSION_APP="2026-10-18 v152";
+const VERSION_APP="2026-10-18 v153";
 function home(){
   stopRec();st.view="home";
   const rm=["precon","prenatal","parto","rn","ive"],rp=["pinf","inf","adol","juv","adul","vej"];
@@ -1592,39 +1594,63 @@ function home(){
   pinta();
   window.scrollTo(0,0);
 }
-/* ---------- ¿Qué le toca hoy? (clasificación por edad, sexo y situación, Res. 3280) ---------- */
-function qtLista(a,sx,es){const f=sx==="f",L=[],E=(t,n,o)=>L.push(Object.assign({t,n,q:"ENF"},o||{})),R=(t,n)=>L.push({t,n,q:"MED"});
-  let cv=a<6?"Primera infancia":a<12?"Infancia":a<18?"Adolescencia":a<29?"Juventud":a<60?"Adultez":"Vejez";
-  if(es==="ges")E("Control prenatal","Captación antes de la semana 10. Con cualquier riesgo, remitir a medicina.",{mod:"prenatal"});
-  if(es==="ges")E("Pruebas rápidas de VIH y sífilis con asesoría","Cada trimestre de la gestación.",{vn:"vih"});
-  if(es==="pos"){E("Control posparto","Día 3 a 5 después del parto.",{mod:"parto"});E("Consejería en lactancia materna","",{vn:"lact"});E("Anticoncepción posevento","Implante o DIU antes de que pasen los riesgos de un nuevo embarazo.",{vn:"impl"})}
-  if(es==="pre")E("Atención preconcepcional","Ácido fólico, laboratorios y vacunas antes del embarazo.",{vn:"precon"});
-  if(es==="ive")E("Solicitud de IVE","Informar derechos y remitir a medicina el mismo día.",{mod:"ive"});
-  if(es==="sr")E("Sintomático respiratorio","Tos de más de 15 días: baciloscopia seriada, notificación y seguimiento.",{vn:"tbc"});
-  if(a<6)E("Valoración integral de primera infancia (C y D)","Enfermería: 2–3 m, 6–8 m, 9–11 m, 18–23 m, 30–35 m y 4 años. En las otras edades la hace medicina.",{vn:"cyd"});
-  else if(a<12)E("Valoración integral de infancia","Enfermería a los 7, 9 y 11 años; medicina a los 6, 8 y 10.");
-  else if(a<18)E("Control de adolescencia","Enfermería a los 13, 15 y 17 años; medicina a los 12, 14 y 16.",{vn:"adol"});
-  else if(a<29)E("Valoración integral de juventud","Dos en el periodo: una por medicina y otra por enfermería.");
-  else if(a<60)R("Valoración integral de adultez","La hace medicina, cada 5 años. Si no la tiene, remitir.");
-  else R("Valoración integral de vejez","La hace medicina, cada 3 años. Si no la tiene, remitir.");
-  if(a<2&&es!=="pos")E("Consejería en lactancia a la madre","",{vn:"lact"});
-  if(a>=3&&a<18)E("Tamizaje de agudeza visual","En las edades que indica la 3280.",{vn:"av"});
-  if(a>=60)E("Tamizaje de agudeza visual","Si está programado por la ESE.",{vn:"av"});
-  if(a>=10&&a<50&&es!=="ges"&&es!=="pos"&&es!=="pre"){if(es==="pf")E("Control de planificación","",{vn:"pfc"});else E("Asesoría en anticoncepción",f?"Si quiere iniciar un método.":"Preservativo y anticoncepción de la pareja.",f?{vn:"pf1"}:{})}
-  if(a>=12&&es!=="ges")E("Asesoría y prueba rápida de VIH","Según exposición al riesgo.",{vn:"vih"});
-  if(f&&a>=25&&a<=65&&es!=="ges")E("Tamizaje de cuello uterino",a<30?"25 a 29 años: citología (esquema 1-3-3).":a<=50?"30 a 50 años, rural disperso: ADN-VPH o Ver y Tratar (VIA/VILI).":"51 a 65 años: citología o ADN-VPH.",{vn:"ccu"});
-  if(f&&a>=40&&a<=69)E("Examen clínico de mama","Anual desde los 40 años. Se puede hacer solo, sin la valoración integral.",{vn:"mama"});
-  if(f&&a>=50&&a<=69)R("Mamografía","Cada 2 años de los 50 a los 69: ordenar o remitir según la ESE.");
-  if(a>=29)R("Riesgo cardiovascular y metabólico","Glicemia, perfil lipídico, creatinina y uroanálisis, por medicina.");
-  if(a>=50&&a<=75)R("Sangre oculta en heces","Cada 2 años de los 50 a los 75.");
-  if(!f&&a>=50&&a<=75)R("Tamizaje de próstata","PSA y tacto rectal cada 5 años de los 50 a los 75, por medicina.");
-  return{cv,L}}
-function qtHTML(a,sx,es){const {cv,L}=qtLista(a,sx,es),en=L.filter(x=>x.q==="ENF"),me=L.filter(x=>x.q==="MED");
-  const it=x=>`<li><div style="flex:1;min-width:0"><b>${esc(x.t)}</b>${x.n?`<small style="display:block;color:var(--muted)">${esc(x.n)}</small>`:""}</div>${x.vn?`<button type="button" class="btn" data-vn="${x.vn}" style="flex:none;padding:6px 10px;font-size:.8rem">Nota por voz</button>`:x.mod?`<button type="button" class="btn" data-mod="${x.mod}" style="flex:none;padding:6px 10px;font-size:.8rem">Abrir</button>`:""}</li>`;
-  return `<div class="qt"><p class="lab" style="margin:0">¿Qué le toca hoy? · ${esc(cv)}${es==="ges"||es==="pos"||es==="pre"||es==="ive"?" · Ruta materno perinatal":" · Ruta de promoción y mantenimiento"}</p>
-   <p class="qt-h">Lo haces tú (enfermería)</p><ul class="qt-l">${en.map(it).join("")}</ul>
-   ${me.length?`<p class="qt-h">Remitir u ordenar (medicina)</p><ul class="qt-l">${me.map(it).join("")}</ul>`:""}
-   <p class="note-src" style="margin:0">Los tamizajes se pueden hacer solos, sin la valoración integral: se registran como detección temprana dentro del curso de vida. Aprovecha el contacto para ofrecer los demás pendientes. Confirma la periodicidad con lo que tenga en Prosoft.</p></div>`}
+/* ---------- ¿Qué le toca hoy? Opciones por contacto según la Res. 3280 de 2018 (citas verificadas en el texto oficial) ---------- */
+const R3={L:"Res. 3280/2018, Lineamiento RPMS",D:"Res. 3280/2018, Directrices RPMS",M:"Res. 3280/2018, Lineamiento RIAMP"};
+const QC={
+ cu1:R3.L+" 3.3.1, Cuadro 1 (p. 49–50)",cu2:R3.L+" 3.3.2, Cuadro 2 (p. 52)",cu3:R3.L+" 3.3.3, Cuadro 3 (p. 54–55)",cu4:R3.L+" 3.3.4, Cuadro 4 (p. 57–58)",cu5:R3.L+" 3.3.5, Cuadro 5 (p. 62–67)",cu6:R3.L+" 3.3.6, Cuadro 6 (p. 70–75)",
+ th1:R3.D+" 1.4 (p. 105–106)",th2:R3.D+" 2.4 (p. 116)",th3:R3.D+" 3.4 (p. 124)",th4:R3.D+" 4.4 (p. 133)",th5:R3.D+" 5.4 (p. 141)",th6:R3.D+" 6.4 (p. 148)",
+ av1:R3.D+" 1.4 (p. 106) y 1.5.2 (p. 111)",av2:R3.D+" 2.5.2 (p. 119)",av3:R3.D+" 3.5.2 (p. 128)",av4:R3.D+" 4.5.2 (p. 136)",av5:R3.D+" 5.5.2 (p. 145)",av6:R3.D+" 6.5.2 (p. 153)",
+ lac:R3.D+" 8.2 y 8.4 (p. 164–165)",ccu:R3.D+" 9.2, 9.4 y 9.5.1 (p. 167–169)",mam:R3.D+" 10.2, 10.4 y 10.6 (p. 172–173)",pro:R3.D+" 11.2 y 11.6 (p. 175–176)",col:R3.D+" 12.2 (p. 177)",ant:R3.D+" 13.2 y 13.4 (p. 180–181)",
+ ada:R3.L+" 7.1.1, I.d (p. 96–97)",pre:R3.M+" 4.1 y 4.1.2 (p. 245)",ive:R3.M+" 4.2 (p. 252)",cpn:R3.M+" 4.3 y 4.3.2 (p. 263–264)",pue:R3.M+" 4.8 (p. 286)"};
+function qtLista(a,sx,es){const f=sx==="f",m=Math.round(a*12),y=Math.floor(a),V=[],S=[],R=[],N=[];
+  const cv=a<6?1:a<12?2:a<18?3:a<29?4:a<60?5:6,CV=["","Primera infancia","Infancia","Adolescencia","Juventud","Adultez","Vejez"][cv];
+  const s=(arr,t,n,c,o)=>arr.push(Object.assign({t,n,c},o||{}));
+  /* 1. Valoración integral completa */
+  if(cv===1){const slots=[[2,3],[6,8],[9,11],[18,23],[30,35],[48,59]],enf=slots.some(([x,z])=>m>=x&&m<=z);
+    if(enf)s(V,"Valoración integral de primera infancia por enfermería",`A los ${m} meses le corresponde a enfermería (CUPS 890205). Incluye crecimiento, desarrollo, nutrición, salud bucal, auditiva, sexual, mental, familia, vacunas, micronutrientes y desparasitación.`,QC.cu1+" · "+QC.th1,{vn:"cyd"});
+    else s(R,"Valoración integral de primera infancia","A esta edad la consulta programada es de medicina (1 m, 4–5 m, 12–18 m, 24–29 m, 3 y 5 años; CUPS 890201).",QC.cu1)}
+  if(cv===2){if([7,9,11].includes(y))s(V,"Valoración integral de infancia por enfermería",`A los ${y} años le corresponde a enfermería (CUPS 890205).`,QC.cu2+" · "+QC.th2);else s(R,"Valoración integral de infancia","A los 6, 8 y 10 años la consulta programada es de medicina (CUPS 890201).",QC.cu2)}
+  if(cv===3){if([13,15,17].includes(y))s(V,"Valoración integral de adolescencia por enfermería",`A los ${y} años le corresponde a enfermería (CUPS 890205).`,QC.cu3+" · "+QC.th3,{vn:"adol"});else s(R,"Valoración integral de adolescencia","A los 12, 14 y 16 años la consulta programada es de medicina (CUPS 890201).",QC.cu3)}
+  if(cv===4)s(V,"Valoración integral de juventud","Dos en el periodo de 18 a 28 años. La norma permite que la haga medicina o enfermería según el esquema; confirma con la ESE cómo la programan.",QC.cu4+" · "+QC.th4);
+  if(cv===5)s(R,"Valoración integral de adultez","La hace medicina general o familiar (CUPS 890201). Enfermería no la realiza.",QC.cu5+" · "+QC.th5);
+  if(cv===6)s(R,"Valoración integral de vejez","La hace medicina general o familiar. Enfermería no la realiza.",QC.cu6+" · "+QC.th6);
+  /* Ruta materno perinatal: se antepone */
+  if(es==="ges")s(V,"Atención para el cuidado prenatal","Enfermería puede hacerla a gestantes sin factores de riesgo; con cualquier riesgo remite a medicina de inmediato.",QC.cpn,{mod:"prenatal"});
+  if(es==="pre")s(V,"Atención para el cuidado preconcepcional","Medicina o enfermería.",QC.pre,{vn:"precon"});
+  if(es==="pos")s(V,"Atención del puerperio","Control posparto.",QC.pue,{mod:"parto"});
+  if(es==="ive")s(R,"Interrupción voluntaria del embarazo","Informar derechos y remitir a medicina el mismo día.",QC.ive,{mod:"ive"});
+  /* 2. Atenciones que se pueden hacer solas */
+  if(f&&a>=25&&a<=65&&es!=="ges"){const t=a<30?"Citología (25 a 29 años), esquema 1-3-3.":"ADN-VPH (30 a 65 años), esquema 1-5-5, tomando en el mismo momento la muestra de citología para triage."+(a<=50?" En área rural dispersa, de 30 a 50 años, también VIA-VILI con crioterapia si estás entrenado y certificado.":"");
+    s(S,"Tamizaje de cáncer de cuello uterino",t+" La toma la puede hacer enfermería.",QC.ccu,{vn:"ccu"})}
+  if(f&&a>=18&&a<25&&es!=="ges")s(S,"Citología de oportunidad","Menores de 25 años solo por criterio: inicio de relaciones antes de los 15 años, 3 o más hijos o múltiples compañeros.",QC.ccu,{vn:"ccu"});
+  if(f&&a>=40)s(S,"Examen clínico de la mama","Anual desde los 40 años. Enfermería entrenada y certificada.",QC.mam,{vn:"mama"});
+  if(a>=10&&a<55&&es!=="ges"&&es!=="pre"){if(es==="pf")s(S,"Asesoría en anticoncepción – control","",QC.ant,{vn:"pfc"});else s(S,"Asesoría en anticoncepción","Por demanda, mujeres y hombres en edad fértil.",QC.ant,f?{vn:"pf1"}:{})}
+  if(a>=12)s(S,"Prueba rápida de VIH con asesoría pre y pos test","Según exposición al riesgo (relaciones sexuales sin protección). También hepatitis B desde la juventud.",cv===3?QC.cu3:cv===4?QC.cu4:cv===5?QC.cu5:QC.cu6,{vn:"vih"});
+  if(a<0.5||es==="pos")s(S,"Valoración, promoción y apoyo de la lactancia materna","Madre e hijo entre los 8 y 30 días de nacido; de 1 a 6 meses según criterio.",QC.lac,{vn:"lact"});
+  if(f&&a>=10&&a<14)s(S,"Tamizaje de anemia (hemoglobina y hematocrito)","Una vez entre los 10 y 13 años, solo niñas: se ordena.",QC.cu2);
+  if(f&&a>=14&&a<18)s(S,"Tamizaje de anemia (hemoglobina y hematocrito)","Una vez entre los 14 y 17 años, solo mujeres: se ordena.",QC.cu3);
+  s(S,"Vacunación","Según el esquema vigente del PAI.",cv===1?QC.cu1:cv===2?QC.cu2:cv===3?QC.cu3:cv===4?QC.cu4:cv===5?QC.cu5:QC.cu6);
+  /* 3. Remitir u ordenar */
+  if(a>=18)s(R,"Tamizaje de riesgo cardiovascular y metabólico","Glicemia, perfil lipídico, creatinina y uroanálisis, quinquenal.",cv===4?QC.cu4:cv===5?QC.cu5:QC.cu6);
+  if(f&&a>=50&&a<=69)s(R,"Mamografía","Cada 2 años de los 50 a los 69.",QC.mam);
+  if(a>=50&&a<=75)s(R,"Sangre oculta en materia fecal","Cada 2 años, de los 50 a los 75 años.",QC.col);
+  if(!f&&a>=50&&a<=75)s(R,"Tamizaje de cáncer de próstata","PSA y tacto rectal cada 5 años de los 50 a los 75; el tacto lo hace medicina general entrenada.",QC.pro);
+  /* Agudeza visual */
+  const avc=[0,QC.av1,QC.av2,QC.av3,QC.av4,QC.av5,QC.av6][cv];
+  if(cv===1)N.push({t:"Agudeza visual",n:"Desde los 3 años, pero en primera infancia la debe hacer medicina general entrenada u optometría, no enfermería.",c:avc});
+  else if(cv<=4)N.push({t:"Agudeza visual",n:"No es una atención aparte: va dentro de la valoración integral."+(cv===4?" Si está por debajo de 20/50, derivar a optometría.":" Si hay alteración, derivar a optometría u oftalmología."),c:avc,vn:"av"});
+  else N.push({t:"Agudeza visual",n:"Va dentro de la valoración integral, que en este curso de vida hace medicina. Por debajo de 20/50 se deriva a optometría.",c:avc});
+  if(es==="sr")N.push({t:"Sintomático respiratorio",n:"La búsqueda de tuberculosis no está en la 3280: se hace según el programa nacional de tuberculosis y los lineamientos de la ESE.",c:"Fuera de la Res. 3280",vn:"tbc"});
+  return{CV,V,S,R,N}}
+function qtHTML(a,sx,es){const {CV,V,S,R,N}=qtLista(a,sx,es);
+  const it=x=>`<li><div style="flex:1;min-width:0"><b>${esc(x.t)}</b>${x.n?`<small style="display:block;color:var(--muted)">${esc(x.n)}</small>`:""}<small class="qt-c">${esc(x.c)}</small></div>${x.vn?`<button type="button" class="btn" data-vn="${x.vn}">Nota por voz</button>`:x.mod?`<button type="button" class="btn" data-mod="${x.mod}">Abrir</button>`:""}</li>`;
+  const bl=(h,sub,arr)=>arr.length?`<p class="qt-h">${h}</p>${sub?`<p class="note-src" style="margin:0">${sub}</p>`:""}<ul class="qt-l">${arr.map(it).join("")}</ul>`:"";
+  return `<div class="qt"><p class="lab" style="margin:0">¿Qué le toca hoy? · ${esc(CV)}</p>
+   ${bl("Opción A · Valoración completa (si tienes el tiempo)","",V)}
+   ${bl("Opción B · Solo una atención (si el tiempo es corto)","Cada una se puede hacer y registrar sola, también fuera del puesto de salud. "+esc(QC.ada)+".",S)}
+   ${bl("Remitir u ordenar (medicina u otro servicio)","",R)}
+   ${bl("Ten en cuenta","",N)}
+   <p class="note-src" style="margin:0">Antes de hacerla, revisa en Prosoft si ya la tiene vigente.</p></div>`}
 
 function sugerir(){
   const v=parseFloat($("f-edad").value),u=$("f-uni").value,sx=$("f-sexo").value,es=$("f-est").value;
