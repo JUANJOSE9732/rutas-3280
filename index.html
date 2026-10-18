@@ -1927,7 +1927,7 @@ function wireMiDia(){const cb=$("md-cal");if(cb)cb.onclick=calOpen;
 function mdShow(t){const s=$("md-st");s.innerHTML="";const a=document.createElement("textarea");a.value=t;a.rows=7;a.readOnly=true;s.append("No se pudo copiar solo. Mantén presionado el texto y cópialo:",a);a.focus();a.select()}
 
 /* ---------- PANEL ---------- */
-const VERSION_APP="2026-10-18 v161";
+const VERSION_APP="2026-10-18 v162";
 function home(){
   stopRec();if(S.get(AT_KEY))atReiniciar();st.view="home";
   const rm=["precon","prenatal","parto","rn","ive"],rp=["pinf","inf","adol","juv","adul","vej"];
@@ -6298,6 +6298,264 @@ const VN_ELIG={
  vih:{w:a=>a!=null&&a<14?"Si la prueba es por exposición sexual en menor de 14 años: "+VN_MENOR14:""},
  tbc:{}
 };
+/* ======================= NOTAS POR VOZ · RUTA MATERNO PERINATAL (Res. 3280 de 2018, Lineamiento RIAMP) ======================= */
+const VN_MES={enero:1,febrero:2,marzo:3,abril:4,mayo:5,junio:6,julio:7,agosto:8,septiembre:9,setiembre:9,octubre:10,noviembre:11,diciembre:12};
+function vnFechaIso(t){t=String(t||"").trim();if(!t)return"";const a=isoDeTxt(t);if(a)return a;const b=plFecha(t);if(b)return b;
+  const m=plano(t).match(/(\d{1,2})\s*(?:de\s*)?([a-z]+)(?:\s*(?:de|del)?\s*(\d{4}))?/);if(!m||!VN_MES[m[2]])return"";
+  const y=m[3]?+m[3]:+hoy().slice(0,4);let iso=y+"-"+String(VN_MES[m[2]]).padStart(2,"0")+"-"+m[1].padStart(2,"0");
+  if(!m[3]&&pD(iso)>pD(hoy()))iso=(y-1)+iso.slice(4);return pD(iso)?iso:""}
+function vnEGfur(fur){const f=vnFechaIso(fur);if(!f)return null;const d=(pD(hoy())-pD(f))/864e5;return d>=0&&d<320?d/7:null}
+function vnEG(v){const t=VN_U(v.eg||"");if(t){const n=vnNums(t)[0];if(Number.isFinite(n)){const d=/(\d+)\s*(?:SEMANAS?)?\s*(?:Y\s*)?(\d)\s*D/.exec(t);return d?+d[1]+ +d[2]/7:n}}return vnEGfur(v.fur)}
+function vnEGtxt(s){if(s==null)return"";const w=Math.floor(s+1e-9),d=Math.round((s-w)*7);return w+" SEMANAS"+(d?" "+d+" DIAS":"")}
+/* resuelve el valor dictado o el sugerido por defecto */
+function vnVal(id,v,P,k){if(v[k]!=null&&v[k]!=="")return v[k];const q=vnPreg(id).find(x=>x&&x.k===k);return q?(typeof q.def==="function"?q.def(v,P):(q.def||"")):""}
+const VN_ALARMA_GEST="CEFALEA, TRASTORNOS VISUALES O AUDITIVOS, EPIGASTRALGIA, EDEMAS, DISMINUCION O AUSENCIA DE MOVIMIENTOS FETALES, ACTIVIDAD UTERINA, SANGRADO GENITAL, AMNIORREA O LEUCORREA, SINTOMAS URINARIOS Y TOS";
+const VN_ALARMA_POSP="LOQUIOS CON MAL OLOR, SANGRADO ABUNDANTE, FIEBRE, CEFALEA, VISION BORROSA, TINITUS, FOSFENOS, CONVULSIONES, EPIGASTRALGIA, DOLOR EN HIPOGASTRIO, VOMITO, DIARREA, DOLOR PERIANAL, UTERINO, TORACICO O ABDOMINAL, DISURIA, MAMAS ROJAS, CALIENTES O DOLOROSAS, DOLOR O HINCHAZON EN LAS PIERNAS Y ESTADO DE ANIMO QUE AFECTE LA RELACION CON EL BEBE";
+const VN_ALARMA_RN="NO MAMA O SUCCIONA DEBIL, VOMITA TODO, CONVULSIONES, MUY DORMIDO O DIFICIL DE DESPERTAR, RESPIRACION RAPIDA O CON TIRAJE, FIEBRE O FRIALDAD, PIEL AMARILLA, MORADA O PALIDA, OMBLIGO ROJO O CON PUS";
+const vnSec=(t,arr)=>{const x=vnL(arr);return x?(t?t+"\n":"")+x:""};
+const vnLis=(t,a)=>a.length?t+"\n"+a.map((x,i)=>(i+1)+". "+x).join("\n"):"";
+
+Object.assign(VN,{
+ prenat:{g:"Materno perinatal",t:"Control prenatal",who:"Primera consulta o control de seguimiento",idSiempre:1,qs:[
+  {k:"tipo",q:"Tipo de consulta",def:"CONTROL DE SEGUIMIENTO",o:["PRIMERA CONSULTA (INGRESO)","CONTROL DE SEGUIMIENTO"]},
+  {k:"opc",q:"Antes de inscribir: opciones frente al embarazo y derecho a la IVE. ¿Qué decide?",def:"SE INFORMA; DECIDE CONTINUAR LA GESTACION",o:["SE INFORMA; DECIDE CONTINUAR LA GESTACION","SE INFORMA; SOLICITA IVE"],c:v=>/PRIMERA/.test(VN_U(v.tipo)),h:"Res. 3280, 4.3.6.1.1: se informa antes de la inscripción."},
+  Q.fur,
+  {k:"eco",q:"Ecografía: fecha y semanas",def:"NO TIENE",o:["NO TIENE"]},
+  {k:"eg",q:"Edad gestacional",h:"La app la calcula con la FUR; corrígela si la ecografía la cambia: «24 semanas».",def:v=>{const s=vnEGfur(v.fur);return s!=null?vnEGtxt(s)+" POR FUR":""}},
+  Q.gpcav,
+  {k:"mov",q:"Movimientos fetales",def:v=>{const s=vnEG(v);return s!=null&&s<20?"AUN NO LOS PERCIBE":"PRESENTES"},o:["PRESENTES","DISMINUIDOS","AUSENTES","AUN NO LOS PERCIBE"]},
+  {k:"sint",q:"Síntomas o signos de alarma",h:"Cefalea, visión o audición, epigastralgia, edemas, actividad uterina, sangrado, salida de líquido, flujo, síntomas urinarios, tos. «Niega» si ninguno.",def:"NIEGA",o:["NIEGA"]},
+  {k:"antr",q:"Antecedentes personales y obstétricos de riesgo",h:"HTA, preeclampsia previa, diabetes, enfermedad renal o autoinmune, trombosis, cesárea, abortos, muertes perinatales, enfermedad mental, consumo. «Niega» si ninguno.",def:"NIEGA",o:["NIEGA"]},
+  {k:"adh",q:"¿Toma los micronutrientes?",def:"SI, ADHERENTE",o:["SI, ADHERENTE","NO LOS TOMA","AUN NO SE HAN FORMULADO"],c:v=>!/PRIMERA/.test(VN_U(v.tipo))},
+  {k:"viol",q:"Tamizaje de violencia (4 preguntas)",h:VIOL.join(" "),def:"NEGATIVO",o:["NEGATIVO","POSITIVO"]},
+  {k:"depr",q:"Preguntas de riesgo de depresión",h:"Obligatorias en la semana 28 (Res. 3280, 4.3.6.1.5). "+DEPR.slice(0,2).join(" "),def:"NEGATIVAS",o:["NEGATIVAS","UNA POSITIVA","AMBAS POSITIVAS"]},
+  {k:"barr",q:"¿Barrera de idioma o de acceso?",def:"NO",o:["NO","SI, REQUIERE INTERPRETE","SI, REQUIERE ALBERGUE MATERNO"]},
+  Q.sv,
+  {k:"pesoi",q:"Peso al inicio de la gestación (kg)",def:"NO CONOCIDO",o:["NO CONOCIDO"]},
+  {k:"au",q:"Altura uterina (cm)",def:v=>{const s=vnEG(v);return s!=null&&s<13?"NO APLICA POR EDAD GESTACIONAL":""}},
+  {k:"fcf",q:"Frecuencia cardiaca fetal (lpm)",def:v=>{const s=vnEG(v);return s!=null&&s<12?"NO SE AUSCULTA POR EDAD GESTACIONAL":""}},
+  {k:"pres",q:"Situación y presentación fetal",def:"LONGITUDINAL CEFALICO",o:["LONGITUDINAL CEFALICO","LONGITUDINAL PODALICO","TRANSVERSO"],c:v=>{const s=vnEG(v);return s!=null&&s>=34}},
+  Q.ef,
+  {k:"rap",q:"Pruebas rápidas de hoy y resultado",h:"VIH (con asesoría), sífilis treponémica, hepatitis B, gota gruesa.",o:["VIH Y SIFILIS NO REACTIVAS, GOTA GRUESA NEGATIVA","NO SE REALIZAN HOY"]},
+  {k:"labs",q:"Paraclínicos revisados",def:"SIN RESULTADOS NUEVOS",o:["SIN RESULTADOS NUEVOS"]},
+  {k:"riesgo",q:"Clasificación del riesgo (Herrera y Hurtado)",h:"Se aplica en cada trimestre. Dicta el puntaje si lo tienes.",o:["BAJO RIESGO","ALTO RIESGO"]},
+  {k:"metpp",q:"Método anticonceptivo elegido para el posparto",def:"EN ASESORIA",o:["EN ASESORIA","DIU POSPARTO","IMPLANTE SUBDERMICO","INYECTABLE TRIMESTRAL","ORAL DE SOLO PROGESTINA","OCLUSION TUBARICA","CONDON"]},
+  Q.extra],
+  aviso:(v,P)=>{const sx=vnSexo(v,P),e=vnEdadA(v,P);return sx==="M"?"La persona seleccionada está registrada como hombre. Selecciona a la gestante.":e<14?VN_MENOR14:""},
+  b:(v,P,I)=>{const D=k=>vnVal("prenat",v,P,k),U=k=>VN_U(D(k)),ing=/PRIMERA/.test(U("tipo")),eg=vnEG(Object.assign({},v,{eg:D("eg")})),e=vnEdadA(v,P);
+   const x=vnSignos(D("sv")),au=vnNums(U("au"))[0],fcf=vnNums(U("fcf"))[0],pi=vnNums(U("pesoi"))[0],fur=vnFechaIso(D("fur")),fpp=fur?fMas(fur,280):"";
+   const rap=U("rap"),reac=re=>new RegExp("("+re+")[^,.;]*REACTIV").test(rap)&&!new RegExp("("+re+")[^,.;]*NO REACTIV").test(rap);
+   const al=[],ref=[];
+   if(/SOLICITA IVE/.test(U("opc"))){al.push("SOLICITA IVE");ref.push("REMISION A MEDICINA EL MISMO DIA PARA ATENCION DE IVE (SENTENCIA C-055 DE 2022, RES. 051 DE 2023)")}
+   if(eg!=null&&eg>=20&&x.tas&&(x.tas>=160||x.tad>=110)){al.push("TA "+x.tas+"/"+x.tad+": CRITERIO DE PREECLAMPSIA SEVERA");ref.push("TRASLADO INMEDIATO A SERVICIO HOSPITALARIO PARA ESTUDIO DE ORGANO BLANCO (RES. 3280, 4.3.6.1.5)")}
+   else if(eg!=null&&eg>=20&&x.tas&&(x.tas>=140||x.tad>=90)){al.push("TA "+x.tas+"/"+x.tad+" DESPUES DE LA SEMANA 20");ref.push("REPETIR TA EN 4 HORAS; SI PERSISTE MAYOR O IGUAL A 140/90, SERVICIO HOSPITALARIO (RES. 3280, 4.3.6.1.5)")}
+   if((eg==null||eg<20)&&x.tas&&(x.tas>=140||x.tad>=90)){al.push("TA "+x.tas+"/"+x.tad+" ANTES DE LA SEMANA 20");ref.push("VALORACION MEDICA: POSIBLE HIPERTENSION CRONICA")}
+   if(!vnEsNormal(D("sint"))){al.push("SIGNOS O SINTOMAS DE ALARMA: "+U("sint"));ref.push("VALORACION MEDICA INMEDIATA")}
+   if(/DISMINUIDOS|AUSENTES/.test(U("mov"))&&eg!=null&&eg>=20){al.push("MOVIMIENTOS FETALES "+U("mov"));ref.push("VALORACION MEDICA INMEDIATA")}
+   if(Number.isFinite(fcf)&&(fcf<110||fcf>160)){al.push("FCF DE "+fcf+" LPM");ref.push("VALORACION MEDICA INMEDIATA")}
+   if(Number.isFinite(au)&&eg!=null&&eg>=20&&eg<=36&&Math.abs(au-eg)>3){al.push("ALTURA UTERINA DE "+au+" CM, DISCORDANTE CON "+Math.floor(eg)+" SEMANAS");ref.push("ECOGRAFIA OBSTETRICA Y VALORACION MEDICA (RES. 3280, 4.3.6.1.5)")}
+   if(!vnEsNormal(D("antr"))){al.push("FACTOR DE RIESGO: "+U("antr"));ref.push("CONTROL PRENATAL POR MEDICINA; DEFINIR NIVEL DE ATENCION");
+     if(/HTA|HIPERTENS|PREECLAMP|RENAL|LUPUS|ANTIFOSFOLIP|DIABETES/.test(U("antr")))ref.push("VALORAR CON MEDICINA ACIDO ACETILSALICILICO 75 A 100 MG DESDE LA SEMANA 12 HASTA EL PARTO (RES. 3280, 4.3.6.1.6)")}
+   if(reac("SIFILIS|TREPONEM")){al.push("PRUEBA TREPONEMICA RAPIDA REACTIVA");ref.push("SIN ANTECEDENTE DE ALERGIA A LA PENICILINA: PENICILINA BENZATINICA 2.400.000 UI IM EN ESTE MOMENTO, SIN PRUEBA DE ALERGIA; NOTIFICAR AL SIVIGILA Y DERIVAR A LA RUTA DE ITS (RES. 3280, P. 269)")}
+   if(reac("VIH")){al.push("PRUEBA RAPIDA DE VIH REACTIVA");ref.push("SEGUNDA PRUEBA DE ANTICUERPOS DIFERENTE INMEDIATA; SI ES REACTIVA, CARGA VIRAL, ANTIRRETROVIRAL PROFILACTICO Y REMISION (RES. 3280, P. 269)")}
+   if(/GOTA GRUESA POSITIVA|P\. ?VIVAX|FALCIPARUM/.test(rap)){al.push("MALARIA EN LA GESTACION");ref.push("TRATAMIENTO SEGUN LA GPC DE MALARIA PARA GESTANTES Y VALORACION MEDICA")}
+   if(/POSITIVO/.test(U("viol"))){al.push("TAMIZAJE DE VIOLENCIA POSITIVO");ref.push("ACTIVAR LA RUTA DE ATENCION A VICTIMAS DE VIOLENCIA")}
+   if(/POSITIVA/.test(U("depr"))){al.push("PREGUNTAS DE DEPRESION: "+U("depr"));ref.push("VALORACION POR SALUD MENTAL")}
+   if(e<18){ref.push("GESTANTE ADOLESCENTE: ACOMPAÑAMIENTO POR SALUD MENTAL Y TRABAJO SOCIAL DURANTE TODA LA GESTACION (RES. 3280, P. 269)")}
+   if(/ALTO/.test(U("riesgo")))ref.push("ALTO RIESGO: CONTROL PRENATAL POR MEDICINA O GINECOLOGIA");
+   if(eg!=null&&eg>=36)ref.push("DESDE LA SEMANA 36 LOS CONTROLES (36, 38 Y 40) SON POR MEDICINA");
+   if(pi&&x.peso&&eg!=null&&eg>=27&&eg<=29)ref.push("REVISAR GANANCIA DE PESO EN LA CURVA DE ATALAH: SI ES INADECUADA A LAS 28 SEMANAS, CONTROL POR EQUIPO MULTIDISCIPLINARIO (RES. 3280, 4.3.6.1.5)");
+   if(/INTERPRETE/.test(U("barr")))ref.push("FACILITADOR INTERCULTURAL O INTERPRETE");if(/ALBERGUE/.test(U("barr")))ref.push("GESTION DE ALBERGUE MATERNO O CASA DE PASO");
+   const micro=[];if(eg==null||eg<12)micro.push("ACIDO FOLICO 0,4 MG AL DIA HASTA LA SEMANA 12 (4 MG SI HAY ALTO RIESGO DE DEFECTOS DEL TUBO NEURAL)");
+   if(eg!=null&&eg>=14)micro.push("CARBONATO DE CALCIO 1.200 MG AL DIA DESDE LA SEMANA 14");micro.push("HIERRO PROFILACTICO (NO SI LA HEMOGLOBINA ES MAYOR DE 14 G/DL)");
+   if(eg!=null&&eg>=14)micro.push("ALBENDAZOL 400 MG DOSIS UNICA, UNA VEZ EN LA GESTACION, SI NO LO HA RECIBIDO");
+   const vac=["TD SEGUN ANTECEDENTE VACUNAL"];if(eg!=null&&eg>=14)vac.push("INFLUENZA ESTACIONAL");if(eg!=null&&eg>=26)vac.push("TDAP");
+   const ex=[];const w=eg==null?-1:eg,en=(a,b)=>w>=a-4&&w<=b;
+   if(ing)ex.push("UROCULTIVO, HEMOGRAMA Y HEMOCLASIFICACION, GLICEMIA, HBSAG, IGG E IGM TOXOPLASMA, IGG RUBEOLA SI NO ESTA VACUNADA (ANTES DE LA SEMANA 16), GOTA GRUESA, TAMIZAJE DE CUELLO UTERINO SI NO ESTA AL DIA");
+   if(ing&&w>=0&&w<14)ex.push("ECOGRAFIA ENTRE LA SEMANA 10+6 Y 13+6");
+   if(en(18,23.9))ex.push("ECOGRAFIA DE DETALLE ENTRE LA SEMANA 18 Y 23+6");if(en(24,28))ex.push("PTOG CON 75 G ENTRE LA SEMANA 24 Y 28");if(en(28,28.9))ex.push("HEMOGRAMA EN LA SEMANA 28");if(en(35,37))ex.push("CULTIVO DE ESTREPTOCOCO DEL GRUPO B ENTRE LA SEMANA 35 Y 37");
+   ex.push("VIH Y SIFILIS RAPIDAS UNA VEZ POR TRIMESTRE","GOTA GRUESA MENSUAL (ZONA ENDEMICA)","IGM TOXOPLASMA MENSUAL SI ES SERONEGATIVA");
+   const rem=[];if(ing)rem.push("ODONTOLOGIA","NUTRICION","CURSO DE PREPARACION PARA LA MATERNIDAD Y LA PATERNIDAD");
+   const prox=al.length?"SEGUN CONDUCTA DE MEDICINA":eg!=null&&eg>=36?"CADA 15 DIAS POR MEDICINA HASTA LA SEMANA 40":"EN 1 MES ("+fMas(hoy(),30)+")"+(eg!=null&&eg>=31?"; LA SEMANA 36 LA ATIENDE MEDICINA":"");
+   const datos=vnSec("",[`GESTANTE DE ${I.edad} AÑOS, ETNIA ${I.etnia}, PROCEDENTE DE ${I.com}, QUIEN ASISTE A ${ing?"PRIMERA CONSULTA PRENATAL (INGRESO)":"CONTROL PRENATAL DE SEGUIMIENTO"}.`,
+    ing?`ANTES DE LA INSCRIPCION SE INFORMAN LAS OPCIONES FRENTE AL EMBARAZO Y EL DERECHO A LA IVE (SENTENCIA C-055 DE 2022): ${U("opc")}.`:"",
+    `PARIDAD: ${U("gpcav")}. FUR: ${U("fur")||"___"}. ECOGRAFIA: ${U("eco")}. EDAD GESTACIONAL: ${eg!=null?vnEGtxt(eg):"___"}${/POR FUR/.test(U("eg"))?" POR FUR":""}.${fpp?" FPP: "+fpp+".":""}`,
+    `MOVIMIENTOS FETALES: ${U("mov")}. ${vnEsNormal(D("sint"))?"NIEGA "+VN_ALARMA_GEST+".":"REFIERE: "+U("sint")+"."}`,
+    `ANTECEDENTES DE RIESGO: ${U("antr")}.${ing?"":" ADHERENCIA A MICRONUTRIENTES: "+U("adh")+"."}`,
+    `TAMIZAJE DE VIOLENCIA: ${U("viol")}. PREGUNTAS DE RIESGO DE DEPRESION: ${U("depr")}. BARRERA DE IDIOMA O ACCESO: ${U("barr")}.`]);
+   const efx=vnSec("EXAMEN FISICO:",[vnSV({sv:D("sv")}),pi&&x.peso?`PESO PREGESTACIONAL ${pi} KG; GANANCIA DE ${Math.round((x.peso-pi)*10)/10} KG.`:"",`ALTURA UTERINA: ${U("au")||"___"}${Number.isFinite(au)?" CM":""}. FCF: ${U("fcf")||"___"}${Number.isFinite(fcf)?" LPM":""}.${D("pres")&&eg!=null&&eg>=34?" SITUACION Y PRESENTACION: "+U("pres")+".":""}`,vnEF({ef:D("ef")})]);
+   const para=vnSec("PARACLINICOS:",[`PRUEBAS RAPIDAS HOY: ${rap||"___"}.`,`RESULTADOS REVISADOS: ${U("labs")}.`]);
+   const ana=vnSec("ANALISIS:",[`GESTACION DE ${eg!=null?vnEGtxt(eg):"___"}, CLASIFICADA COMO ${U("riesgo")||"___"} SEGUN ESCALA DE HERRERA Y HURTADO.`,
+    al.length?"SE IDENTIFICA: "+al.join("; ")+".":"GESTACION DE CURSO NORMAL, SIN FACTORES DE RIESGO NI SIGNOS DE ALARMA IDENTIFICADOS. CONTINUA CONTROL PRENATAL (RES. 3280, 4.3)."]);
+   const plan=vnSec("PLAN:",[vnLis("CONDUCTA, REMISIONES Y DERIVACIONES:",ref),vnLis("MICRONUTRIENTES:",micro),"VACUNACION SEGUN ESQUEMA VIGENTE: "+vac.join(", ")+".",
+    vnLis("EXAMENES QUE CORRESPONDEN O SE ACERCAN POR EDAD GESTACIONAL (VERIFICAR SI YA ESTAN):",ex),rem.length?"REMISIONES DE RUTINA: "+rem.join(", ")+".":"",
+    `ASESORIA ANTICONCEPTIVA: METODO ELEGIDO PARA EL POSPARTO: ${U("metpp")}; SE REGISTRA EN EL CARNE PERINATAL.`,
+    eg!=null&&eg>=28?"PLAN DE PARTO: LUGAR Y PRESTADOR DEL PARTO, TRANSPORTE Y REFERENCIA, PARTERA SI LA PREFIERE CON ACTIVACION DEL SISTEMA DE REFERENCIA ANTE SIGNOS DE ALARMA, SIGNOS DE INICIO DEL TRABAJO DE PARTO Y CUIDADOS DEL RECIEN NACIDO.":"",
+    "SE EDUCA EN SIGNOS DE ALARMA PARA CONSULTAR DE INMEDIATO: HIPERTENSION, "+VN_ALARMA_GEST+".","SE ENTREGAN CONDONES. SE DILIGENCIA EL CARNE PERINATAL.",
+    "PROXIMO CONTROL: "+prox+".",vnEsNormal(D("extra"))?"":U("extra")]);
+   return [datos,efx,para,ana,plan].filter(Boolean).join("\n\n")}},
+
+ pospar:{g:"Materno perinatal",t:"Control posparto",who:"Puérpera entre el día 3 y 5",idSiempre:1,qs:[
+  {k:"dias",q:"Días posparto",def:"4"},
+  {k:"via",q:"Vía del parto",def:"VAGINAL",o:["VAGINAL","CESAREA"]},
+  {k:"lugar",q:"Lugar del parto y quién lo atendió",def:"INSTITUCIONAL",o:["INSTITUCIONAL","DOMICILIARIO CON PARTERA","DOMICILIARIO SIN ATENCION"]},
+  {k:"sint",q:"Signos de alarma",h:"Loquios con mal olor, sangrado abundante, fiebre, cefalea, visión borrosa, epigastralgia, dolor abdominal o torácico, disuria, mamas rojas o dolorosas, dolor o hinchazón en las piernas. «Niega» si ninguno.",def:"NIEGA",o:["NIEGA"]},
+  {k:"lact",q:"Lactancia",def:"EXCLUSIVA, BUEN AGARRE",o:["EXCLUSIVA, BUEN AGARRE","CON DIFICULTAD","NO LACTA"]},
+  {k:"micc",q:"Micción y deposición",def:"NORMALES",o:["NORMALES"]},
+  {k:"depr",q:"Preguntas de depresión posparto",h:"«Durante el último mes, ¿se ha preocupado porque con frecuencia se sentía triste, deprimida o sin esperanza?» «…¿sentía poco interés por realizar actividades y no le proporcionaban placer?»",def:"NEGATIVAS",o:["NEGATIVAS","UNA POSITIVA","AMBAS POSITIVAS"]},
+  {k:"intr",q:"Sexualidad e intención reproductiva",def:"SIN DUDAS SOBRE SEXUALIDAD; NO DESEA EMBARAZO EN LOS PROXIMOS 18 MESES",o:["SIN DUDAS SOBRE SEXUALIDAD; NO DESEA EMBARAZO EN LOS PROXIMOS 18 MESES"]},
+  {k:"viol",q:"¿Violencia de pareja o sexual?",def:"NIEGA",o:["NIEGA","REFIERE"]},
+  Q.sv,
+  {k:"utero",q:"Útero y loquios",def:"UTERO CONTRAIDO E INVOLUCIONANDO, LOQUIOS ESCASOS SIN MAL OLOR",o:["UTERO CONTRAIDO E INVOLUCIONANDO, LOQUIOS ESCASOS SIN MAL OLOR"]},
+  {k:"perine",q:"Periné, episiotomía o herida",def:"SIN SIGNOS DE INFECCION NI HEMATOMA",o:["SIN SIGNOS DE INFECCION NI HEMATOMA"]},
+  {k:"mamas",q:"Mamas y pezones",def:"SIN SIGNOS DE MASTITIS, PEZONES INDEMNES",o:["SIN SIGNOS DE MASTITIS, PEZONES INDEMNES"]},
+  {k:"mmii",q:"Miembros inferiores",def:"SIN EDEMA NI DOLOR",o:["SIN EDEMA NI DOLOR"]},
+  {k:"rh",q:"Rh materno y anti-D",def:"RH POSITIVO",o:["RH POSITIVO","RH NEGATIVO, RECIBIO ANTI-D","RH NEGATIVO, SIN ANTI-D","NO CONOCIDO"]},
+  {k:"resm",q:"Resultados maternos (VIH, sífilis, hepatitis B)",o:["NO REACTIVOS, VERIFICADOS EN EL CARNE","NO CONOCIDOS"]},
+  {k:"vac",q:"Vacunas pendientes de la gestación",def:"NINGUNA",o:["NINGUNA","TD PENDIENTE"]},
+  {k:"metodo",q:"Método anticonceptivo",h:"Si ya se lo pusieron antes del alta, dilo.",o:["DIU POSPARTO","IMPLANTE SUBDERMICO","INYECTABLE TRIMESTRAL (DEPOPROVERA)","ORAL DE SOLO PROGESTINA","OCLUSION TUBARICA","CONDON","NO DESEA METODO"]},
+  {k:"analg",q:"Analgesia",def:"NO REQUIERE",o:["NO REQUIERE","IBUPROFENO 600 MG","ACETAMINOFEN SIN PASAR DE 4.000 MG AL DIA"]},
+  Q.extra],
+  aviso:(v,P)=>vnSexo(v,P)==="M"?"La persona seleccionada está registrada como hombre. Selecciona a la puérpera.":"",
+  b:(v,P,I)=>{const D=k=>vnVal("pospar",v,P,k),U=k=>VN_U(D(k)),x=vnSignos(D("sv")),dias=vnNums(U("dias"))[0];
+   const al=[],ref=[];const anor=(k,re)=>!re.test(U(k));
+   if(!vnEsNormal(D("sint"))){al.push("SIGNOS DE ALARMA: "+U("sint"));ref.push("VALORACION MEDICA INMEDIATA")}
+   if(x.t!=null&&x.t>38){al.push("FIEBRE DE "+x.t+" °C");ref.push("PREGUNTAR POR MISOPROSTOL Y BUSCAR EL FOCO: UTERO, ORINA, HERIDA, MAMAS, PIERNAS; VALORACION MEDICA EL MISMO DIA (RES. 3280, 4.8.4)")}
+   if(x.tas&&(x.tas>=140||x.tad>=90)){al.push("TA "+x.tas+"/"+x.tad);ref.push("VALORACION MEDICA INMEDIATA POR TRASTORNO HIPERTENSIVO POSPARTO")}
+   if(anor("utero",/CONTRAIDO E INVOLUCIONANDO, LOQUIOS ESCASOS SIN MAL OLOR/)){al.push("UTERO Y LOQUIOS: "+U("utero"));ref.push("VALORACION MEDICA (SUBINVOLUCION, RESTOS O ENDOMETRITIS)")}
+   if(anor("perine",/SIN SIGNOS DE INFECCION NI HEMATOMA/)){al.push("PERINE O HERIDA: "+U("perine"));ref.push("VALORACION MEDICA")}
+   if(anor("mamas",/SIN SIGNOS DE MASTITIS/)){al.push("MAMAS: "+U("mamas"));ref.push("VALORACION MEDICA Y CONSEJERIA EN LACTANCIA")}
+   if(anor("mmii",/SIN EDEMA NI DOLOR/)){al.push("MIEMBROS INFERIORES: "+U("mmii"));ref.push("VALORACION MEDICA INMEDIATA POR RIESGO TROMBOEMBOLICO")}
+   if(/AMBAS/.test(U("depr"))){al.push("AMBAS PREGUNTAS DE DEPRESION POSITIVAS");ref.push("ACOMPAÑAMIENTO POR PSICOLOGIA Y PSIQUIATRIA PARA DIAGNOSTICO CONFIRMATORIO (RES. 3280, 4.8.4)")}
+   else if(/UNA/.test(U("depr")))ref.push("UNA PREGUNTA DE DEPRESION POSITIVA: APLICAR ESCALA DE EDIMBURGO; MAYOR DE 12 PUNTOS, SEGUIMIENTO POR SALUD MENTAL (RES. 3280, 4.8.4)");
+   if(/SIN ANTI-D/.test(U("rh"))){al.push("RH NEGATIVO SIN ANTI-D");ref.push("VERIFICAR RH DEL RECIEN NACIDO: SI ES POSITIVO, INMUNOGLOBULINA ANTI-D DENTRO DE LAS 72 HORAS POSPARTO; REMISION INMEDIATA (RES. 3280, P. 288)")}
+   if(/CON DIFICULTAD|NO LACTA/.test(U("lact")))ref.push("CONSEJERIA EN LACTANCIA MATERNA Y OBSERVACION DE UNA TOMA");
+   if(/REFIERE/.test(U("viol"))){al.push("VIOLENCIA REFERIDA");ref.push("ACTIVAR LA RUTA DE ATENCION A VICTIMAS DE VIOLENCIA")}
+   if(/NO CONOCIDO/.test(U("resm")))ref.push("VERIFICAR RESULTADOS DE VIH, SIFILIS Y HEPATITIS B; SI NO EXISTEN, PRUEBAS RAPIDAS CON ASESORIA");
+   if(/TD/.test(U("vac")))ref.push("COMPLETAR VACUNACION PENDIENTE (TD)");
+   if(Number.isFinite(dias)&&dias>5)ref.push("CONTROL POSTERIOR AL DIA 5: REGISTRAR EL MOTIVO DEL RETRASO");
+   const datos=vnSec("",[`PUERPERA DE ${I.edad} AÑOS, ETNIA ${I.etnia}, PROCEDENTE DE ${I.com}, EN ${U("dias")} DIAS POSPARTO, PARTO ${U("via")}, ${U("lugar")}, QUIEN ASISTE A CONTROL POSPARTO.`,
+    vnEsNormal(D("sint"))?"NIEGA "+VN_ALARMA_POSP+".":"REFIERE: "+U("sint")+".",
+    `LACTANCIA: ${U("lact")}. MICCION Y DEPOSICION: ${U("micc")}. PREGUNTAS DE DEPRESION POSPARTO: ${U("depr")}. SEXUALIDAD E INTENCION REPRODUCTIVA: ${U("intr")}. VIOLENCIA: ${U("viol")}.`]);
+   const efx=vnSec("EXAMEN FISICO:",[vnSV({sv:D("sv")}),`UTERO Y LOQUIOS: ${U("utero")}.`,`PERINE, EPISIOTOMIA O HERIDA: ${U("perine")}.`,`MAMAS: ${U("mamas")}.`,`MIEMBROS INFERIORES: ${U("mmii")}.`]);
+   const ver=vnSec("VERIFICACION:",[`RH Y ANTI-D: ${U("rh")}. RESULTADOS MATERNOS: ${U("resm")||"___"}. VACUNAS PENDIENTES: ${U("vac")}.`]);
+   const ana=vnSec("ANALISIS:",[al.length?"PUERPERIO CON HALLAZGOS: "+al.join("; ")+".":"PUERPERIO DE CURSO NORMAL, SIN SIGNOS DE ALARMA (RES. 3280, 4.8)."]);
+   const plan=vnSec("PLAN:",[vnLis("CONDUCTA, REMISIONES Y DERIVACIONES:",ref),
+    `ANTICONCEPCION: ${U("metodo")||"___"}. SE EXPLICA USO, EFECTOS, SIGNOS DE ALARMA DEL METODO Y DOBLE PROTECCION CON CONDON; ANTICONCEPCION DE EMERGENCIA SI SE NECESITA. SE RECOMIENDA EL PROXIMO EMBARAZO EN NO MENOS DE 18 MESES.`,
+    U("analg")!=="NO REQUIERE"?"ANALGESIA: "+U("analg")+".":"",
+    "SE EDUCA EN LACTANCIA MATERNA EXCLUSIVA, ALIMENTACION BALANCEADA, ACTIVIDAD FISICA PROGRESIVA, SUEÑO Y DESCANSO, VINCULO CON EL RECIEN NACIDO, AUTOCUIDADO, FORMAS DE VIOLENCIA DE GENERO Y SEXUAL Y MECANISMOS DE DENUNCIA.",
+    "SIGNOS DE ALARMA PARA CONSULTAR DE INMEDIATO: "+VN_ALARMA_POSP+".",
+    "SE VERIFICA REGISTRO CIVIL DEL RECIEN NACIDO Y SU CONTROL (DIA 3 A 5, POR MEDICINA O PEDIATRIA).",
+    vnLis("SUGERENCIAS:",["CONTROL DEL METODO ANTICONCEPTIVO SEGUN EL METODO ELEGIDO","VALORACION INTEGRAL Y TAMIZAJES QUE LE CORRESPONDAN POR EDAD (CUELLO UTERINO SI NO ESTA AL DIA)","CONSEJERIA EN LACTANCIA EN EL PRIMER MES"]),
+    vnEsNormal(D("extra"))?"":U("extra")]);
+   return [datos,efx,ver,ana,plan].filter(Boolean).join("\n\n")}},
+
+ rnctl:{g:"Materno perinatal",t:"Valoración del recién nacido",who:"Primeros días de vida",qs:[
+  {k:"dias",q:"Días de vida",def:(v,P)=>{const p=pac(),fn=p["FECHA NACIMIENTO"];if(!fn||!pD(fn))return"";const d=Math.round((pD(hoy())-pD(fn))/864e5);return d>=0&&d<60?String(d):""}},
+  {k:"egn",q:"Edad gestacional al nacer",def:"A TERMINO",o:["A TERMINO","PRETERMINO"]},
+  {k:"pn",q:"Peso al nacer (gramos)"},
+  {k:"lugar",q:"Lugar del parto",def:"INSTITUCIONAL",o:["INSTITUCIONAL","DOMICILIARIO CON PARTERA","DOMICILIARIO SIN ATENCION"]},
+  {k:"alim",q:"Alimentación",def:"LACTANCIA MATERNA EXCLUSIVA A LIBRE DEMANDA, 8 A 12 VECES AL DIA",o:["LACTANCIA MATERNA EXCLUSIVA A LIBRE DEMANDA, 8 A 12 VECES AL DIA","LACTANCIA MAS OTROS LIQUIDOS O FORMULA"]},
+  {k:"toma",q:"Observación de una toma",def:"BUENA POSICION Y BUEN AGARRE",o:["BUENA POSICION Y BUEN AGARRE","AGARRE INADECUADO"]},
+  {k:"elim",q:"Orina y deposiciones",def:"ORINA 6 O MAS VECES AL DIA, DEPOSICIONES AMARILLAS",o:["ORINA 6 O MAS VECES AL DIA, DEPOSICIONES AMARILLAS"]},
+  {k:"pel",q:"Signos de peligro referidos",h:"No mama, vomita todo, convulsiona, muy dormido, respira rápido, fiebre o frialdad, amarillo, ombligo rojo. «Niega» si ninguno.",def:"NIEGA",o:["NIEGA"]},
+  {k:"med",q:"Peso hoy, temperatura, frecuencia cardiaca y respiratoria",h:"Ej.: «peso 2950 gramos, temperatura 36.8, frecuencia 140, respiración 44»."},
+  {k:"ict",q:"Ictericia",def:"NO",o:["NO","CARA Y CUELLO","HASTA EL TORAX","HASTA EL ABDOMEN","MANOS Y PIES"]},
+  {k:"omb",q:"Ombligo",def:"LIMPIO Y SECO, SIN ERITEMA NI SECRECION",o:["LIMPIO Y SECO, SIN ERITEMA NI SECRECION"]},
+  {k:"sat",q:"Saturación preductal (mano derecha) y posductal (pie)",def:"NO SE TOMA",o:["NO SE TOMA"]},
+  {k:"ef",q:"Resto del examen físico",def:"NORMAL",o:["NORMAL"]},
+  {k:"vac",q:"Vacunas BCG y hepatitis B",def:"APLICADAS",o:["APLICADAS","PENDIENTES"]},
+  {k:"tam",q:"Tamizajes: TSH, auditivo, visual, cardiopatía",def:"VERIFICADOS EN EL CARNE",o:["VERIFICADOS EN EL CARNE","PENDIENTES"]},
+  {k:"madre",q:"Resultados maternos (VIH, sífilis, hepatitis B, toxoplasma)",o:["NO REACTIVOS","NO CONOCIDOS"]},
+  {k:"reg",q:"Registro civil y afiliación",def:"REGISTRADO Y AFILIADO",o:["REGISTRADO Y AFILIADO","PENDIENTE"]},
+  Q.extra],
+  b:(v,P,I)=>{const D=k=>vnVal("rnctl",v,P,k),U=k=>VN_U(D(k)),m=U("med"),g=re=>{const r=m.match(re);return r?parseFloat(r[1].replace(",",".")):null};
+   let ph=g(/PESO\D{0,8}(\d{1,4}(?:[.,]\d+)?)/);if(ph!=null&&ph<10)ph=ph*1000;let pn=vnNums(U("pn"))[0];if(Number.isFinite(pn)&&pn<10)pn=pn*1000;
+   const t=g(/TEMPERATURA\D{0,6}(\d{2}(?:[.,]\d)?)/),fc=g(/(?:FC|FRECUENCIA(?!\s+RESP)(?:\s+CARDIACA)?)\D{0,8}(\d{2,3})/),fr=g(/(?:FR|RESPIRACION|FRECUENCIA\s+RESPIRATORIA)\D{0,8}(\d{2,3})/),dias=vnNums(U("dias"))[0];
+   const perd=Number.isFinite(pn)&&ph?Math.round((pn-ph)/pn*1000)/10:null,al=[],ref=[];
+   if(!vnEsNormal(D("pel"))){al.push("SIGNOS DE PELIGRO: "+U("pel"));ref.push("REMISION INMEDIATA")}
+   if(t!=null&&(t<36.5||t>37.5)){al.push("TEMPERATURA DE "+t+" °C");ref.push("REMISION: TEMPERATURA FUERA DE 36,5 A 37,5 °C ES SIGNO DE PELIGRO")}
+   if(fr!=null&&fr>=60){al.push("FRECUENCIA RESPIRATORIA DE "+fr);ref.push("REMISION INMEDIATA")}
+   if(perd!=null&&perd>10){al.push("PERDIDA DE PESO DE "+perd+" %");ref.push("VALORACION MEDICA Y DE LA LACTANCIA EL MISMO DIA")}
+   if(/ABDOMEN|MANOS/.test(U("ict"))||(!/^NO$/.test(U("ict"))&&Number.isFinite(dias)&&dias<1)){al.push("ICTERICIA "+U("ict"));ref.push("REMISION EL MISMO DIA PARA VALORACION DE BILIRRUBINAS")}
+   if(!/LIMPIO Y SECO/.test(U("omb"))){al.push("OMBLIGO: "+U("omb"));ref.push("REMISION POR POSIBLE ONFALITIS")}
+   const sp=vnNums(U("sat"));if(sp.length>=2&&(Math.min(sp[0],sp[1])<90||Math.abs(sp[0]-sp[1])>3)){al.push("SATURACION "+sp[0]+"/"+sp[1]);ref.push("VALORACION POR PEDIATRIA O CARDIOLOGIA (TAMIZAJE DE CARDIOPATIA)")}
+   if(/AGARRE INADECUADO|OTROS LIQUIDOS|FORMULA/.test(U("alim")+" "+U("toma")))ref.push("CONSEJERIA EN LACTANCIA: POSICION, AGARRE Y LACTANCIA EXCLUSIVA");
+   if(/VIH[^,.]*REACTIV/.test(U("madre"))&&!/VIH[^,.]*NO REACTIV/.test(U("madre")))ref.push("MADRE CON VIH: REEMPLAZO DE LA LECHE MATERNA POR FORMULA Y MANEJO POR MEDICINA");
+   if(/PENDIENTE/.test(U("vac")))ref.push("APLICAR BCG Y HEPATITIS B PENDIENTES");if(/PENDIENTE/.test(U("tam")))ref.push("GESTIONAR TAMIZAJES PENDIENTES (TSH, AUDITIVO, VISUAL, CARDIOPATIA) ANTES DEL MES DE EDAD");
+   if(/PENDIENTE/.test(U("reg")))ref.push("PROMOVER REGISTRO CIVIL Y AFILIACION");if(/NO CONOCIDOS/.test(U("madre")))ref.push("VERIFICAR RESULTADOS MATERNOS DE VIH, SIFILIS, HEPATITIS B Y TOXOPLASMA");
+   const datos=vnSec("",[`RECIEN NACIDO DE ${U("dias")||"___"} DIAS DE VIDA, ${U("egn")}, PESO AL NACER ${Number.isFinite(pn)?pn+" G":"___"}, PARTO ${U("lugar")}, PROCEDENTE DE ${I.com}, ETNIA ${I.etnia}.`,
+    `ALIMENTACION: ${U("alim")}. ORINA Y DEPOSICIONES: ${U("elim")}. ${vnEsNormal(D("pel"))?"LA MADRE NIEGA SIGNOS DE PELIGRO: "+VN_ALARMA_RN+".":"LA MADRE REFIERE: "+U("pel")+"."}`]);
+   const efx=vnSec("EXAMEN FISICO:",[`PESO ${ph?ph+" G":"___"}${perd!=null?" (VARIACION DESDE EL NACIMIENTO: "+(perd>0?"-":"+")+Math.abs(perd)+" %)":""}, TEMPERATURA ${t!=null?t+" °C":"___"}, FC ${fc!=null?fc:"___"}, FR ${fr!=null?fr:"___"}.`,
+    `ICTERICIA: ${U("ict")}. OMBLIGO: ${U("omb")}. SATURACION PRE Y POSDUCTAL: ${U("sat")}. OBSERVACION DE UNA TOMA: ${U("toma")}.`,vnEsNormal(D("ef"))?"RESTO DEL EXAMEN: ACTIVO, REACTIVO, BIEN PERFUNDIDO, TONO Y FUERZA ADECUADOS, SIN CIANOSIS NI PALIDEZ, RUIDOS CARDIACOS RITMICOS SIN SOPLOS, ABDOMEN BLANDO.":"HALLAZGOS: "+U("ef")+"."]);
+   const ver=vnSec("VERIFICACION:",[`VACUNAS BCG Y HEPATITIS B: ${U("vac")}. TAMIZAJES: ${U("tam")}. RESULTADOS MATERNOS: ${U("madre")||"___"}. REGISTRO CIVIL Y AFILIACION: ${U("reg")}.`]);
+   const ana=vnSec("ANALISIS:",[al.length?"RECIEN NACIDO CON HALLAZGOS: "+al.join("; ")+".":"RECIEN NACIDO CON ADECUADA ADAPTACION A LA VIDA EXTRAUTERINA, SIN SIGNOS DE PELIGRO."]);
+   const plan=vnSec("PLAN:",[vnLis("CONDUCTA, REMISIONES Y DERIVACIONES:",ref),
+    "SE EDUCA A LOS PADRES EN LACTANCIA MATERNA EXCLUSIVA A LIBRE DEMANDA, CUIDADO DEL CORDON (LIMPIO Y SECO, SIN APLICAR NADA), SUEÑO SEGURO BOCA ARRIBA, AMBIENTE SIN HUMO Y SIGNOS DE PELIGRO PARA CONSULTAR DE INMEDIATO: "+VN_ALARMA_RN+".",
+    "SE DILIGENCIA EL CARNE DE SALUD INFANTIL Y SE INDICA LLEVARLO A CADA CONSULTA.",
+    vnLis("SUGERENCIAS:",["CONTROL DEL RECIEN NACIDO POR PEDIATRIA O MEDICINA GENERAL DENTRO DE LOS PRIMEROS 5 DIAS, SI AUN NO SE HA HECHO (RES. 3280, 4.12.2)","CONSULTA DE ENFERMERIA O NUTRICION PARA VALORACION DE LA LACTANCIA (RES. 3280, 4.12.6.1)","VALORACION INTEGRAL DE PRIMERA INFANCIA AL MES DE VIDA (MEDICINA)","HIERRO 1 MG/KG/DIA HASTA LA ALIMENTACION COMPLEMENTARIA SI LA MADRE TUVO ALIMENTACION SUBOPTIMA EN LA GESTACION Y LA LACTANCIA (RES. 3280, P. 318)","VISITA DOMICILIARIA SI HAY DIFICULTAD CON LA LACTANCIA, RIESGO O DEPRESION POSPARTO MATERNA"]),
+    vnEsNormal(D("extra"))?"":U("extra")]);
+   return [datos,efx,ver,ana,plan].filter(Boolean).join("\n\n")}},
+
+ ivea:{g:"Materno perinatal",t:"Asesoría en opciones e IVE",who:"Mujer que solicita información o IVE",idSiempre:1,qs:[
+  Q.fur,
+  {k:"eg",q:"Edad gestacional",def:v=>{const s=vnEGfur(v.fur);return s!=null?vnEGtxt(s)+" POR FUR":""}},
+  {k:"info",q:"Información brindada",def:"SE INFORMA EL DERECHO A LA IVE, LAS OPCIONES (CONTINUAR LA GESTACION, IVE O ADOPCION) Y LA CONFIDENCIALIDAD, SIN INDUCIR LA DECISION",o:["SE INFORMA EL DERECHO A LA IVE, LAS OPCIONES (CONTINUAR LA GESTACION, IVE O ADOPCION) Y LA CONFIDENCIALIDAD, SIN INDUCIR LA DECISION"]},
+  {k:"dec",q:"Decisión de la mujer, en sus palabras"},
+  {k:"causal",q:"Causal (solo después de la semana 24)",o:["RIESGO PARA SU VIDA O SALUD","MALFORMACION INCOMPATIBLE CON LA VIDA","VIOLENCIA SEXUAL, INCESTO O INSEMINACION NO CONSENTIDA"],c:v=>{const s=vnEG(v);return s!=null&&s>24}},
+  {k:"viol",q:"¿Refiere violencia sexual o de pareja?",def:"NIEGA",o:["NIEGA","REFIERE"]},
+  Q.sv,Q.extra],
+  aviso:(v,P)=>vnSexo(v,P)==="M"?"La persona seleccionada está registrada como hombre. Selecciona a la mujer que consulta.":vnEdadA(v,P)<14?VN_MENOR14:"",
+  b:(v,P,I)=>{const D=k=>vnVal("ivea",v,P,k),U=k=>VN_U(D(k)),eg=vnEG(Object.assign({},v,{eg:D("eg")})),e=vnEdadA(v,P),ive=/INTERRUMP|IVE/.test(U("dec"))&&!/CONTINUA/.test(U("dec"));
+   const ref=[];if(ive)ref.push("REMISION A MEDICINA EL MISMO DIA PARA ATENCION DE IVE, SIN BARRERAS NI REQUISITOS ADICIONALES (SENTENCIA C-055 DE 2022, RES. 051 DE 2023)");
+   else ref.push(/CONTINUA/.test(U("dec"))?"INGRESO A CONTROL PRENATAL":"SE RESPETA EL TIEMPO DE DECISION; SE OFRECE NUEVA ASESORIA");
+   if(eg!=null&&eg>24)ref.push("CAUSAL: "+(U("causal")||"___")+"; SOPORTE CORRESPONDIENTE SEGUN LA CAUSAL");
+   if(e<14)ref.push("MENOR DE 14 AÑOS: ACTIVAR LA RUTA DE ATENCION A VICTIMAS DE VIOLENCIA SEXUAL Y NOTIFICAR AL SIVIGILA, ADEMAS DE LA ATENCION");
+   if(/REFIERE/.test(U("viol")))ref.push("ACTIVAR LA RUTA DE ATENCION A VICTIMAS DE VIOLENCIA; NO SE EXIGE DENUNCIA PARA LA IVE");
+   ref.push("OFRECER VALORACION POR SALUD MENTAL","ASESORIA EN ANTICONCEPCION POS-EVENTO OBSTETRICO");
+   const datos=vnSec("",[`MUJER DE ${I.edad} AÑOS, ETNIA ${I.etnia}, PROCEDENTE DE ${I.com}, QUIEN CONSULTA POR INFORMACION SOBRE OPCIONES FRENTE AL EMBARAZO. FUR: ${U("fur")||"___"}. EDAD GESTACIONAL: ${eg!=null?vnEGtxt(eg):"___"}.`,`${U("info")}.`,`DECISION DE LA MUJER: ${U("dec")||"___"}.`,`VIOLENCIA: ${U("viol")}.`]);
+   const efx=vnSec("EXAMEN FISICO:",[vnSV({sv:D("sv")})||"SIGNOS VITALES: ___"]);
+   const ana=vnSec("ANALISIS:",["ATENCION CON ENFOQUE DE DERECHOS, CONFIDENCIAL Y SIN JUICIOS. "+(ive?"LA MUJER DECIDE LA INTERRUPCION VOLUNTARIA DEL EMBARAZO.":"SE REGISTRA LA DECISION DE LA MUJER.")]);
+   const plan=vnSec("PLAN:",[vnLis("CONDUCTA, REMISIONES Y DERIVACIONES:",ref),"SE EDUCA EN SIGNOS DE ALARMA: SANGRADO ABUNDANTE, FIEBRE, DOLOR INTENSO, FLUJO CON MAL OLOR.",vnEsNormal(D("extra"))?"":U("extra")]);
+   return [datos,efx,ana,plan].filter(Boolean).join("\n\n")}},
+
+ partoc:{g:"Materno perinatal",t:"Atención del parto en comunidad",who:"Parto y puerperio inmediato",idSiempre:1,qs:[
+  {k:"hora",q:"Hora del parto"},
+  Q.gpcav,Q.fur,
+  {k:"eg",q:"Edad gestacional",def:v=>{const s=vnEGfur(v.fur);return s!=null?vnEGtxt(s)+" POR FUR":"A TERMINO"}},
+  {k:"lugar",q:"Lugar y quién lo atendió",def:"DOMICILIARIO CON PARTERA",o:["DOMICILIARIO CON PARTERA","DOMICILIARIO SIN ATENCION","ATENDIDO POR ENFERMERIA EN EL PUESTO"]},
+  {k:"cordon",q:"Pinzamiento del cordón",def:"AL DEJAR DE LATIR",o:["AL DEJAR DE LATIR","INMEDIATO","NO CONOCIDO"]},
+  {k:"plac",q:"Placenta",def:"COMPLETA",o:["COMPLETA","INCOMPLETA","RETENIDA"]},
+  {k:"uter",q:"Uterotónico aplicado",def:"OXITOCINA 10 UI IM",o:["OXITOCINA 10 UI IM","NINGUNO"]},
+  {k:"sang",q:"Sangrado y útero",def:"SANGRADO ESCASO, GLOBO DE SEGURIDAD PRESENTE",o:["SANGRADO ESCASO, GLOBO DE SEGURIDAD PRESENTE","SANGRADO ABUNDANTE, UTERO BLANDO"]},
+  {k:"perine",q:"Periné",def:"INTEGRO",o:["INTEGRO","DESGARRO"]},
+  Q.sv,
+  {k:"rn",q:"Recién nacido",def:"LLANTO ESPONTANEO, BUEN TONO, PIEL A PIEL Y LACTANCIA EN LA PRIMERA HORA",o:["LLANTO ESPONTANEO, BUEN TONO, PIEL A PIEL Y LACTANCIA EN LA PRIMERA HORA","NO RESPIRA O RESPIRA CON DIFICULTAD"]},
+  {k:"trasl",q:"Traslado",def:"SE GESTIONA TRASLADO DE MADRE Y RECIEN NACIDO A LA INSTITUCION",o:["SE GESTIONA TRASLADO DE MADRE Y RECIEN NACIDO A LA INSTITUCION","NO ACEPTA TRASLADO"]},
+  Q.extra],
+  b:(v,P,I)=>{const D=k=>vnVal("partoc",v,P,k),U=k=>VN_U(D(k)),x=vnSignos(D("sv")),al=[],ref=[];
+   if(/ABUNDANTE|BLANDO/.test(U("sang"))){al.push("HEMORRAGIA POSPARTO");ref.push("CODIGO ROJO: PEDIR AYUDA, MASAJE UTERINO Y COMPRESION BIMANUAL, DOS ACCESOS VENOSOS, CRISTALOIDES TIBIOS, UTEROTONICOS, REMISION INMEDIATA (VER MORBILIDAD > HEMORRAGIA POSPARTO)")}
+   if(/INCOMPLETA|RETENIDA/.test(U("plac"))){al.push("PLACENTA "+U("plac"));ref.push("OXITOCINA 20 UI EN 500 ML A 60 ML POR HORA Y REMISION (GPC HEMORRAGIA POSPARTO 2013, P. 10)")}
+   if(x.tas&&(x.tas>=140||x.tad>=90)){al.push("TA "+x.tas+"/"+x.tad);ref.push("REMISION POR TRASTORNO HIPERTENSIVO")}
+   if(/NO RESPIRA|DIFICULTAD/.test(U("rn"))){al.push("RECIEN NACIDO CON DIFICULTAD RESPIRATORIA");ref.push("REANIMACION NEONATAL Y REMISION INMEDIATA")}
+   if(/NO ACEPTA/.test(U("trasl")))ref.push("SE DEJA CONSTANCIA DE LA NO ACEPTACION, SE EXPLICAN RIESGOS Y SIGNOS DE ALARMA Y SE ACUERDA SEGUIMIENTO");
+   const datos=vnSec("",[`MUJER DE ${I.edad} AÑOS, ETNIA ${I.etnia}, PROCEDENTE DE ${I.com}, ${U("gpcav")}, GESTACION ${/^\d/.test(U("eg"))?"DE ":""}${U("eg")}, CON PARTO VAGINAL A LAS ${U("hora")||"___"}, ${U("lugar")}.`,
+    `PINZAMIENTO DEL CORDON: ${U("cordon")}. PLACENTA: ${U("plac")}. UTEROTONICO: ${U("uter")}. RECIEN NACIDO: ${U("rn")}.`]);
+   const efx=vnSec("EXAMEN FISICO:",[vnSV({sv:D("sv")}),`${U("sang")}. PERINE: ${U("perine")}.`]);
+   const ana=vnSec("ANALISIS:",[al.length?"SE IDENTIFICA: "+al.join("; ")+".":"PUERPERIO INMEDIATO SIN SIGNOS DE HEMORRAGIA NI DE ALARMA."]);
+   const plan=vnSec("PLAN:",[vnLis("CONDUCTA, REMISIONES Y DERIVACIONES:",ref),"VIGILANCIA DE SIGNOS VITALES, GLOBO DE SEGURIDAD Y SANGRADO CADA 15 MINUTOS DURANTE 2 HORAS (RES. 3280, 4.8.4).",
+    `TRASLADO: ${U("trasl")}.`,"PENDIENTES EN LA INSTITUCION: VITAMINA K, PROFILAXIS OCULAR Y UMBILICAL, VACUNAS Y TAMIZAJES DEL RECIEN NACIDO, REGISTRO DE NACIDO VIVO.",
+    vnLis("SUGERENCIAS:",["CONTROL POSPARTO Y DEL RECIEN NACIDO ENTRE EL DIA 3 Y 5","ANTICONCEPCION POSPARTO SEGUN LA ELECCION DE LA MUJER","CONSEJERIA EN LACTANCIA MATERNA"]),
+    "SE EDUCA EN SIGNOS DE ALARMA DE LA MADRE Y DEL RECIEN NACIDO.",vnEsNormal(D("extra"))?"":U("extra")]);
+   return [datos,efx,ana,plan].filter(Boolean).join("\n\n")}}
+});
+Object.assign(VN_ELIG,{
+ prenat:{sx:"F",min:10,max:55,por:"el control prenatal es para la gestante",fuera:"",w:a=>a!=null&&a<14?VN_MENOR14:""},
+ pospar:{sx:"F",min:10,max:55,por:"el control posparto se registra a nombre de la madre",fuera:"Identifica arriba a la madre (no al bebé)."},
+ ivea:{sx:"F",min:10,max:55,por:"la asesoría en IVE es para la mujer gestante",fuera:"",w:a=>a!=null&&a<14?VN_MENOR14:""},
+ partoc:{sx:"F",min:10,max:55,por:"la atención del parto se registra a nombre de la madre",fuera:"Para el bebé usa «Valoración del recién nacido»."},
+ rnctl:{maxM:2,por:"la valoración del recién nacido es en las primeras semanas de vida",fuera:"Después del primer mes usa el control de primera infancia.",w:()=>"La Res. 3280 (4.12.2) asigna el control del recién nacido a pediatría o medicina general. Por enfermería regístralo como valoración y asegura el control médico."}
+});
 ["pf1","pfemb","pfc","impl","rimpl","diu","rdiu"].forEach(k=>VN_ELIG[k]={sx:"F",min:10,max:55,por:"esta nota es de anticoncepción en mujeres en edad fértil",fuera:"",w:a=>a!=null&&a<14?VN_MENOR14:""});
 function vnEdadReal(v){const P=vnPac();if(v&&v._edad){const n=vnNums(v._edad)[0];if(!Number.isFinite(n))return{a:null,m:null};return /mes/i.test(v._edad)?{a:Math.floor(n/12),m:n}:{a:n,m:n*12}}
   return{a:P.edad!==""&&P.edad!=null?+P.edad:null,m:P.meses!=null?P.meses:null}}
@@ -6534,6 +6792,14 @@ function audVN(id,v,f,texto){const P=pac(),{o,set}=r202Base(P,f),U=VN_U,T=U(text
   if(id==="diu"){set(54,"1");set(55,f);res.push("INSERCION DE DIU "+U(v.tipo||"T DE COBRE 380A"))}
   if(id==="rimpl"||id==="rdiu")res.push("RETIRO: "+U(v.motivo||""));
   if(id==="precon"){set(14,"2");res.push("ATENCION PRECONCEPCIONAL")}
+  if(id==="prenat"){set(14,"1");const P2=vnPac(),D=k=>vnVal("prenat",v,P2,k),eg=vnEG(Object.assign({},v,{eg:D("eg")})),fu=vnFechaIso(D("fur"));
+    if(/PRIMERA/.test(U(D("tipo"))))set(56,f);else set(58,f);if(fu){const fp=pD(fu);fp.setUTCDate(fp.getUTCDate()+280);set(33,fp.toISOString().slice(0,10))}
+    if(/ALTO/.test(U(D("riesgo"))))set(35,"4");else if(/BAJO/.test(U(D("riesgo"))))set(35,"5");
+    if(eg==null||eg<12)set(59,"1");set(60,"1");if(eg!=null&&eg>=14)set(61,"1");res.push("CONTROL PRENATAL "+(eg!=null?vnEGtxt(eg):""),U(D("riesgo")||""))}
+  if(id==="pospar"){const me=U(v.metodo||"");if(me&&!/NO DESEA/.test(me)){set(53,f);set(54,met202(me));set(55,f)}res.push("CONTROL POSPARTO")}
+  if(id==="rnctl")res.push("VALORACION DEL RECIEN NACIDO");
+  if(id==="ivea")res.push("ASESORIA EN OPCIONES FRENTE AL EMBARAZO");
+  if(id==="partoc")res.push("ATENCION DEL PARTO EN COMUNIDAD");
   if(id==="tbc"){const t=U(v.tipo||"INGRESO AL PROGRAMA");if(/INGRESO/.test(t)){set(18,"1");if(/BACILOSCOPIA/.test(U(v.muestras||"BACILOSCOPIA")))set(112,f),set(113,"3")}res.push(t+(v.dx?": "+U(v.dx):""))}
   if(v.sv&&!vnEsNormal(v.sv)){const x=vnSignos(v.sv);if(x.peso){set(29,f);set(30,x.peso)}if(x.talla){set(31,f);set(32,x.talla)}}
   const edu=EDU_KW.filter(([re])=>new RegExp(re).test(T)).map(z=>z[1]);
