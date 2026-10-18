@@ -1313,7 +1313,7 @@ function vnEdadA(v,P){const x=v._edad?vnNums(v._edad)[0]:+P.edad;return Number.i
 function vnEdadM(v,P){if(v._edad){const n=vnNums(v._edad)[0];return /mes/i.test(v._edad)?n:n*12}return P.meses}
 function vnSexo(v,P){if(v._sexo)return /^(m|h|masc|hombre|niño)/i.test(plano(v._sexo))?"M":"F";return P.sexo||"F"}
 function vnPreg(id){const P=vnPac(),pre=[];
-  const sie=VN[id].idSiempre;
+  const sie=false;
   if(!P.edad||sie)pre.push({k:"_edad",q:"Edad de la persona",h:"En años, o en meses si es menor de 2 años: «18 meses».",def:sie&&P.edad?P.edad:undefined});
   if(!P.sexo&&(id==="cyd"||id==="adol"||id==="av"||id==="vih"||id==="tbc"||(VN_ELIG[id]&&VN_ELIG[id].sx)))pre.push({k:"_sexo",q:"Sexo",o:["MUJER","HOMBRE"]});
   if(!P.com||sie)pre.push({k:"_com",q:"Procedencia: comunidad o barrio",def:sie&&P.com?P.com:undefined});
@@ -1330,7 +1330,7 @@ function vnHomeHTML(){const grupos={};Object.entries(VN).forEach(([id,t])=>{(gru
   ${Object.entries(grupos).map(([g,ids])=>`<p class="lab" style="margin:6px 0 0">${esc(g)}</p><div class="tiles">${ids.map(id=>`<button class="tile pc" type="button" data-vn="${id}">${Object.keys(vnDraft(id)).length?'<span class="dot" title="Borrador guardado"></span>':""}<b>${esc(VN[id].t)}</b><small>${esc(VN[id].who)}</small></button>`).join("")}</div>`).join("")}
   ${n?`<button class="lnk" type="button" id="vn-hist">Ver notas guardadas (${n})</button>`:""}</section>`}
 function vnWireHome(){document.querySelectorAll("[data-vn]").forEach(b=>b.onclick=()=>vnOpen(b.dataset.vn));const h=$("vn-hist");if(h)h.onclick=vnHist}
-function vnOpen(id){atInicio("vn",id);stopRec();const v=vnDraft(id);VNS={id,v,i:0,voz:false,tts:S.get("dn2_vn_tts")==="1",fin:false};
+function vnOpen(id){atInicio("vn",id);stopRec();const v=vnDraft(id);{const P0=vnPac();if(P0.edad)delete v._edad;if(P0.com)delete v._com;if(P0.etnia)delete v._etnia;if(P0.sexo)delete v._sexo}VNS={id,v,i:0,voz:false,tts:S.get("dn2_vn_tts")==="1",fin:false};
   const L=vnLista2();VNS.i=Math.max(0,L.findIndex(q=>v[q.k]==null));if(VNS.i<0||L.every(q=>v[q.k]!=null))VNS.i=0;vnRender();window.scrollTo(0,0)}
 function vnLista2(){const P=vnPac();return vnPreg(VNS.id).filter(q=>!q.c||q.c(VNS.v,P))}
 function vnDefault(q){const P=vnPac();return typeof q.def==="function"?q.def(VNS.v,P):q.def}
@@ -1390,7 +1390,7 @@ function vnEscuchar(){const m=$("vn-mic");if(!SR){if(m)m.textContent="Este naveg
   try{r.start();if(m)m.textContent="● Escuchando"}catch(e){if(m)m.textContent="No se pudo iniciar el micrófono."}}
 function vnHablar(txt){const ss=window.speechSynthesis;if(!ss){if(VNS.voz)vnEscuchar();return}
   stopRec();try{ss.cancel();const u=new SpeechSynthesisUtterance(txt);u.lang="es-CO";u.rate=1.05;u.onend=()=>{if(VNS&&VNS.voz&&st.view==="vnota")vnEscuchar()};u.onerror=u.onend;ss.speak(u)}catch(e){if(VNS.voz)vnEscuchar()}}
-function vnTexto(){const P=vnPac(),v=VNS.v;return VN[VNS.id].b(v,P,vnPid(P,v)).replace(/\n{3,}/g,"\n\n").trim()}
+function vnTexto(){const P=vnPac(),v=VNS.v;return VN[VNS.id].b(v,P,vnPid(P,v)).replace(/ {2,}/g," ").replace(/\n{3,}/g,"\n\n").trim()}
 function vnFinal(){if(idMinFalta().length){vnIdForm();return}const _e=vnElig(VNS.id,VNS.v);if(_e.b){vnBloqueo(_e);return}const _r=_e.w.concat(vnRevisar(VNS.id,VNS.v));const L=vnLista2(),falt=L.filter(q=>VNS.v[q.k]==null&&!vnDefault(q)),txt=vnTexto(),av=VN[VNS.id].aviso?VN[VNS.id].aviso(VNS.v,vnPac()):"";
   $("vn-pane").innerHTML=`${av?`<div class="box miss"><h3>Revisa el paciente</h3><p style="margin:0">${esc(av)}</p></div>`:""}${falt.length?`<div class="box miss"><h3>Faltan datos</h3><ul>${falt.map(q=>`<li><button class="lnk" type="button" data-vgo="${q.k}">${esc(q.q)}</button></li>`).join("")}</ul></div>`:""}
   ${_r.length?`<div class="box miss"><h3>Revisa la coherencia antes de copiar</h3><ul>${_r.map(x=>`<li>${esc(x)}</li>`).join("")}</ul></div>`:""}
@@ -1956,7 +1956,7 @@ function wireMiDia(){const cb=$("md-cal");if(cb)cb.onclick=calOpen;
 function mdShow(t){const s=$("md-st");s.innerHTML="";const a=document.createElement("textarea");a.value=t;a.rows=7;a.readOnly=true;s.append("No se pudo copiar solo. Mantén presionado el texto y cópialo:",a);a.focus();a.select()}
 
 /* ---------- PANEL ---------- */
-const VERSION_APP="2026-10-18 v167";
+const VERSION_APP="2026-10-18 v168";
 function home(){
   stopRec();if(S.get(AT_KEY))atReiniciar();st.view="home";
   const rm=["precon","prenatal","parto","rn","ive"],rp=["pinf","inf","adol","juv","adul","vej"];
@@ -6496,7 +6496,7 @@ Object.assign(VN,{
    return [datos,efx,ver,ana,plan].filter(Boolean).join("\n\n")}},
 
  rnctl:{g:"Materno perinatal",t:"Valoración del recién nacido",who:"Primeros días de vida",qs:[
-  {k:"dias",q:"Días de vida",def:(v,P)=>{const p=pac(),fn=p["FECHA NACIMIENTO"];if(!fn||!pD(fn))return"";const d=Math.round((pD(hoy())-pD(fn))/864e5);return d>=0&&d<60?String(d):""}},
+  {k:"dias",q:"Días de vida",c:()=>{const fn=pac()["FECHA NACIMIENTO"];return !(fn&&pD(fn))},def:(v,P)=>{const p=pac(),fn=p["FECHA NACIMIENTO"];if(!fn||!pD(fn))return"";const d=Math.round((pD(hoy())-pD(fn))/864e5);return d>=0&&d<60?String(d):""}},
   {k:"egn",q:"Edad gestacional al nacer",def:"A TERMINO",o:["A TERMINO","PRETERMINO"]},
   {k:"pn",q:"Peso al nacer (gramos)"},
   {k:"lugar",q:"Lugar del parto",def:"INSTITUCIONAL",o:["INSTITUCIONAL","DOMICILIARIO CON PARTERA","DOMICILIARIO SIN ATENCION"]},
@@ -6626,15 +6626,16 @@ function vnSigWire(){if(!VNS)return;const L=vnSigLista(VNS.id,VNS.v);document.qu
   const d=vnDraft(x.vn);Object.assign(d,x.pre);S.set("dn2_vn_"+x.vn,JSON.stringify(d));vnOpen(x.vn)})}
 /* ======================= ATENCIONES SEPARADAS (Res. 3280: cuadros por curso de vida; Lineamiento 7.1.1, I.d) ======================= */
 const VN_REM={
- "ODONTOLOGIA (ATENCION EN SALUD BUCAL)":{cups:"890203",fr:c=>c.a!=null&&c.a<18?"UNA VEZ AL AÑO":"UNA VEZ CADA DOS AÑOS",x:"ATENCION EN SALUD BUCAL POR ODONTOLOGIA, CON PROFILAXIS Y REMOCION DE PLACA BACTERIANA"},
- "TAMIZAJE DE RIESGO CARDIOVASCULAR Y METABOLICO":{cups:"907106, 903841, 903895, 903868, 903818, 903815, 903816",fr:c=>c.a!=null&&c.a<29?"SEGUN CLASIFICACION DEL RIESGO":"CADA 5 AÑOS",x:"GLICEMIA BASAL, PERFIL LIPIDICO, CREATININA Y UROANALISIS"},
- "MAMOGRAFIA BILATERAL":{cups:"876802",fr:()=>"CADA 2 AÑOS DE LOS 50 A LOS 69 AÑOS",x:"MAMOGRAFIA BILATERAL DE TAMIZAJE"},
- "SANGRE OCULTA EN MATERIA FECAL":{cups:"907009",fr:()=>"CADA 2 AÑOS DE LOS 50 A LOS 75 AÑOS",x:"SANGRE OCULTA EN MATERIA FECAL POR INMUNOQUIMICA"},
- "TAMIZAJE DE CANCER DE PROSTATA":{cups:"906611",fr:()=>"CADA 5 AÑOS DE LOS 50 A LOS 75 AÑOS",x:"ANTIGENO PROSTATICO ESPECIFICO (PSA) Y TACTO RECTAL POR MEDICINA GENERAL ENTRENADA"},
- "LABORATORIOS DE INGRESO PRENATAL":{cups:"SEGUN LISTA",fr:()=>"EN LA PRIMERA CONSULTA PRENATAL",x:"UROCULTIVO Y ANTIBIOGRAMA, HEMOGRAMA, HEMOCLASIFICACION, GLICEMIA, HBSAG, IGG E IGM TOXOPLASMA, IGG RUBEOLA SI NO ESTA VACUNADA (ANTES DE LA SEMANA 16), GOTA GRUESA, PRUEBAS RAPIDAS DE VIH Y SIFILIS, ECOGRAFIA ENTRE LA SEMANA 10+6 Y 13+6 Y TAMIZAJE DE CUELLO UTERINO SI NO ESTA AL DIA (RES. 3280, 4.3.6.1)"},
- "LABORATORIOS PRECONCEPCIONALES":{cups:"SEGUN LISTA",fr:()=>"EN LA CONSULTA PRECONCEPCIONAL",x:"HEMOGRAMA, HEMOCLASIFICACION, GLICEMIA, HBSAG, PRUEBA TREPONEMICA RAPIDA, VIH CON ASESORIA, IGG TOXOPLASMA, RUBEOLA Y VARICELA, UROCULTIVO, HEMOPARASITOS Y TAMIZAJE DE CUELLO UTERINO (RES. 3280, 4.1)"},
- "VALORACION INTEGRAL POR MEDICINA":{cups:"890201",fr:()=>"SEGUN EL ESQUEMA DEL CURSO DE VIDA",x:"VALORACION INTEGRAL DEL CURSO DE VIDA POR MEDICINA GENERAL O FAMILIAR"}};
+ "ODONTOLOGIA (ATENCION EN SALUD BUCAL)":{v:"SE REMITE A",s:"¿Dolor dental, sangrado de encías, caries visibles u otra molestia en la boca?",cups:"890203",fr:c=>c.a!=null&&c.a<18?"UNA VEZ AL AÑO":"UNA VEZ CADA DOS AÑOS",x:"ATENCION EN SALUD BUCAL POR ODONTOLOGIA, CON PROFILAXIS Y REMOCION DE PLACA BACTERIANA"},
+ "TAMIZAJE DE RIESGO CARDIOVASCULAR Y METABOLICO":{v:"SE ORDENA",s:"¿Enfermedad ya diagnosticada (hipertensión, diabetes, enfermedad renal) o síntomas?",cups:"907106, 903841, 903895, 903868, 903818, 903815, 903816",fr:c=>c.a!=null&&c.a<29?"SEGUN CLASIFICACION DEL RIESGO":"CADA 5 AÑOS",x:"GLICEMIA BASAL, PERFIL LIPIDICO, CREATININA Y UROANALISIS"},
+ "MAMOGRAFIA BILATERAL":{v:"SE ORDENA",s:"¿Masa, secreción por el pezón, retracción o cambios en la piel de la mama?",cups:"876802",fr:()=>"CADA 2 AÑOS DE LOS 50 A LOS 69 AÑOS",x:"MAMOGRAFIA BILATERAL DE TAMIZAJE"},
+ "SANGRE OCULTA EN MATERIA FECAL":{v:"SE ORDENA",s:"¿Sangrado por el recto, cambio en el hábito intestinal o pérdida de peso?",cups:"907009",fr:()=>"CADA 2 AÑOS DE LOS 50 A LOS 75 AÑOS",x:"SANGRE OCULTA EN MATERIA FECAL POR INMUNOQUIMICA"},
+ "TAMIZAJE DE CANCER DE PROSTATA":{v:"SE ORDENA",s:"¿Dificultad o dolor para orinar, sangre en la orina o dolor en los huesos?",cups:"906611",fr:()=>"CADA 5 AÑOS DE LOS 50 A LOS 75 AÑOS",x:"ANTIGENO PROSTATICO ESPECIFICO (PSA) Y TACTO RECTAL POR MEDICINA GENERAL ENTRENADA"},
+ "LABORATORIOS DE INGRESO PRENATAL":{v:"SE ORDENAN",s:"¿Síntomas o signos de alarma en la gestación?",pro:1,cups:"SEGUN LISTA",fr:()=>"EN LA PRIMERA CONSULTA PRENATAL",x:"UROCULTIVO Y ANTIBIOGRAMA, HEMOGRAMA, HEMOCLASIFICACION, GLICEMIA, HBSAG, IGG E IGM TOXOPLASMA, IGG RUBEOLA SI NO ESTA VACUNADA (ANTES DE LA SEMANA 16), GOTA GRUESA, PRUEBAS RAPIDAS DE VIH Y SIFILIS, ECOGRAFIA ENTRE LA SEMANA 10+6 Y 13+6 Y TAMIZAJE DE CUELLO UTERINO SI NO ESTA AL DIA (RES. 3280, 4.3.6.1)"},
+ "LABORATORIOS PRECONCEPCIONALES":{v:"SE ORDENAN",s:"¿Enfermedad o síntomas actuales?",pro:1,cups:"SEGUN LISTA",fr:()=>"EN LA CONSULTA PRECONCEPCIONAL",x:"HEMOGRAMA, HEMOCLASIFICACION, GLICEMIA, HBSAG, PRUEBA TREPONEMICA RAPIDA, VIH CON ASESORIA, IGG TOXOPLASMA, RUBEOLA Y VARICELA, UROCULTIVO, HEMOPARASITOS Y TAMIZAJE DE CUELLO UTERINO (RES. 3280, 4.1)"},
+ "VALORACION INTEGRAL POR MEDICINA":{v:"SE REMITE A",s:"¿Síntomas o enfermedad que motiven una consulta?",cups:"890201",fr:()=>"SEGUN EL ESQUEMA DEL CURSO DE VIDA",x:"VALORACION INTEGRAL DEL CURSO DE VIDA POR MEDICINA GENERAL O FAMILIAR"}};
 const VN_TEMAS=["ESTILOS DE VIDA SALUDABLE (ALIMENTACION, ACTIVIDAD FISICA, SUEÑO)","SALUD SEXUAL Y REPRODUCTIVA, DERECHOS Y ANTICONCEPCION","PREVENCION DE ITS Y VIH","LACTANCIA MATERNA Y ALIMENTACION DEL MENOR","CUIDADO Y CRIANZA DEL NIÑO","SALUD MENTAL Y PREVENCION DE VIOLENCIAS","PREVENCION DEL CONSUMO DE ALCOHOL, TABACO Y SUSTANCIAS","HIGIENE, LAVADO DE MANOS Y AGUA SEGURA","PREVENCION DE MALARIA Y DENGUE (TOLDILLO, CRIADEROS)","SALUD BUCAL"];
+const vnSexW=(m,f,o)=>{const s=ctxPer().sx;return s==="F"?f:s==="M"?m:o};
 const vnPie=(D,U)=>vnEsNormal(D("extra"))?"":U("extra");
 Object.assign(VN,{
  vac:{g:"Atenciones separadas",t:"Vacunación",who:"Solo vacunación, sin valoración integral",idSiempre:1,qs:[
@@ -6653,7 +6654,7 @@ Object.assign(VN,{
    if(/INCOMPLETO|NO TIENE/.test(U("ant")+U("carne")))sg.push("PLAN DE PUESTA AL DIA SEGUN EL ESQUEMA VIGENTE DEL PAI; EN MENORES DE 6 AÑOS USAR EL CUADRO DE VACUNAS DEL MODULO DEL CURSO DE VIDA");
    if(c.sx==="F"&&c.es==="ges")sg.push("GESTANTE: TD SEGUN ANTECEDENTE, INFLUENZA DESDE LA SEMANA 14, TDAP DESDE LA SEMANA 26 (RES. 3280, P. 269)");
    if(c.a!=null&&c.a>=60)sg.push("INFLUENZA ANUAL Y TD SEGUN ANTECEDENTE, SEGUN EL ESQUEMA VIGENTE DEL PAI");
-   const datos=vnSec("",[`PACIENTE DE ${I.edad} AÑOS, ETNIA ${I.etnia}, PROCEDENTE DE ${I.com}, QUIEN ACUDE PARA VACUNACION.${{ges:" GESTANTE.",pos:" PUERPERA."}[c.es]||""}`,`CARNE DE VACUNACION: ${U("carne")}. ANTECEDENTE VACUNAL: ${U("ant")}. CONTRAINDICACIONES O PRECAUCIONES: ${U("contra")}.`,vnSV({sv:D("sv")})]);
+   const datos=vnSec("",[`PACIENTE ${vnSexW("MASCULINO","FEMENINA","")} DE ${I.edad} AÑOS, ETNIA ${I.etnia}, PROCEDENTE DE ${I.com}, QUIEN ACUDE PARA VACUNACION.${{ges:" GESTANTE.",pos:" PUERPERA."}[c.es]||""}`,`CARNE DE VACUNACION: ${U("carne")}. ANTECEDENTE VACUNAL: ${U("ant")}. CONTRAINDICACIONES O PRECAUCIONES: ${U("contra")}.`,vnSV({sv:D("sv")})]);
    const proc=vnSec("PROCEDIMIENTO:",["PREVIA VERIFICACION DE LOS 5 CORRECTOS, CADENA DE FRIO, FECHA DE VENCIMIENTO Y ASPECTO DEL BIOLOGICO, CON CONSENTIMIENTO DEL USUARIO O SU ACUDIENTE, SE APLICA:",`${U("bio")||"___"}.`,`VIA Y SITIO: ${U("sitio")}. TECNICA ASEPTICA, JERINGA DE UN SOLO USO DESECHADA EN GUARDIAN.`,`OBSERVACION POSVACUNAL: ${U("obs")}.`]);
    const ana=vnSec("ANALISIS:",[al.length?"SE IDENTIFICA: "+al.join("; ")+".":"VACUNACION SIN COMPLICACIONES, SEGUN EL ESQUEMA VIGENTE DEL PAI (RES. 3280, CUADROS DEL CURSO DE VIDA; LINEAMIENTO 7.1.1)."]);
    const plan=vnSec("PLAN:",[vnLis("CONDUCTA Y SUGERENCIAS:",sg),"SE EDUCA SOBRE REACCIONES ESPERADAS (DOLOR, ENROJECIMIENTO, FIEBRE LEVE), MANEJO CON COMPRESAS Y ANTIPIRETICO SEGUN INDICACION, Y SIGNOS DE ALARMA PARA CONSULTAR.",
@@ -6668,23 +6669,26 @@ Object.assign(VN,{
   {k:"grupal",q:"¿Se deriva a educación grupal?",def:"SI, A DOS CICLOS DE EDUCACION GRUPAL",o:["SI, A DOS CICLOS DE EDUCACION GRUPAL","NO"]},
   Q.extra],
   b:(v,P,I)=>{const D=k=>vnVal("edu",v,P,k),U=k=>VN_U(D(k));
-   return [vnSec("",[`PACIENTE DE ${I.edad} AÑOS, ETNIA ${I.etnia}, PROCEDENTE DE ${I.com}. SE REALIZA EDUCACION ${U("mod")} PARA LA SALUD (CUPS ${/FAMILIA/.test(U("mod"))?"9901":"9902"}).`,`MOTIVO: ${U("hall")}.`]),
+   return [vnSec("",[`PACIENTE ${vnSexW("MASCULINO","FEMENINA","")} DE ${I.edad} AÑOS, ETNIA ${I.etnia}, PROCEDENTE DE ${I.com}. SE REALIZA EDUCACION ${U("mod")} PARA LA SALUD (CUPS ${/FAMILIA/.test(U("mod"))?"9901":"9902"}).`,`MOTIVO: ${U("hall")}.`]),
     vnSec("CONTENIDOS:",[`${U("temas")||"___"}.`,"METODOLOGIA PARTICIPATIVA, CON LENGUAJE SENCILLO Y RESPETO POR LOS SABERES Y PRACTICAS DE SU CULTURA."]),
     vnSec("ANALISIS:",[`${U("comp")}.`]),
     vnSec("PLAN:",[/^SI/.test(U("grupal"))?"SE DERIVA A POR LO MENOS DOS CICLOS DE EDUCACION GRUPAL (RES. 3280, CUADROS DEL CURSO DE VIDA).":"",/REFUERZO/.test(U("comp"))?"SE PROGRAMA NUEVA SESION DE REFUERZO.":"",vnPie(D,U)])].filter(Boolean).join("\n\n")}},
 
  rem:{g:"Atenciones separadas",t:"Orden o remisión de tamizaje",who:"Odontología, laboratorios, mamografía, sangre oculta, PSA, medicina",idSiempre:1,qs:[
   {k:"tipo",q:"¿Qué se ordena o remite?",o:Object.keys(VN_REM)},
-  {k:"ult",q:"¿Cuándo fue la última?",def:"NUNCA O NO RECUERDA",o:["NUNCA O NO RECUERDA"]},
-  {k:"sint",q:"¿Síntomas relacionados?",h:"Si hay síntomas no es tamizaje: es consulta y va a medicina.",def:"NIEGA",o:["NIEGA"]},
+  {k:"ult",q:"¿Cuándo se hizo esta atención o examen por última vez?",h:"Fecha o año. «No recuerda» si nunca o no sabe.",def:"NUNCA O NO RECUERDA",o:["NUNCA O NO RECUERDA"],c:v=>!(VN_REM[VN_U(v.tipo)]||{}).pro},
+  ...Object.entries(VN_REM).map(([t,R])=>({k:"sint",q:R.s,h:R.pro?"":"Si hay síntomas no es tamizaje: es consulta y va a medicina.",def:"NIEGA",o:["NIEGA"],c:v=>VN_U(v.tipo)===t})),
   Q.sv,Q.extra],
-  b:(v,P,I)=>{const D=k=>vnVal("rem",v,P,k),U=k=>VN_U(D(k)),c=ctxPer(),R=VN_REM[U("tipo")]||null;
-   return [vnSec("",[`PACIENTE DE ${I.edad} AÑOS, ETNIA ${I.etnia}, PROCEDENTE DE ${I.com}, A QUIEN SE LE GESTIONA ${U("tipo")||"___"} COMO PARTE DE LA RUTA DE PROMOCION Y MANTENIMIENTO DE LA SALUD.`,`ULTIMA: ${U("ult")}. SINTOMAS RELACIONADOS: ${U("sint")}.`,vnSV({sv:D("sv")})]),
-    vnSec("ANALISIS:",[vnEsNormal(D("sint"))?`USUARIO ASINTOMATICO; LE CORRESPONDE SEGUN LA RES. 3280 DE 2018 (${R?R.fr(c):"___"}).`:`REFIERE ${U("sint")}: NO ES TAMIZAJE, SE REMITE A CONSULTA DE MEDICINA.`]),
-    vnSec("PLAN:",[R?`SE ORDENA: ${R.x} (CUPS ${R.cups}).`:"SE ORDENA: ___.",/ODONTOLOGIA|MEDICINA/.test(U("tipo"))?"SE EXPLICA LA FINALIDAD Y LA IMPORTANCIA DE ASISTIR A LA CITA.":"SE EXPLICA LA FINALIDAD, LA PREPARACION Y LA IMPORTANCIA DE RECLAMAR Y TRAER EL RESULTADO.","SE REGISTRA LA ORDEN Y LA FECHA PARA SEGUIMIENTO.",vnPie(D,U)])].filter(Boolean).join("\n\n")}},
+  b:(v,P,I)=>{const D=k=>vnVal("rem",v,P,k),U=k=>VN_U(D(k)),c=ctxPer(),t=U("tipo"),R=VN_REM[t]||null,sn=vnEsNormal(D("sint"));
+   const obj=R?(R.v==="SE REMITE A"?"SE REMITE A "+t.replace(" (ATENCION EN SALUD BUCAL)"," PARA ATENCION EN SALUD BUCAL"):(R.v==="SE ORDENAN"?"SE ORDENAN ":"SE ORDENA ")+(R.pro?"LOS ":"")+t):"___";
+   return [vnSec("",[`PACIENTE ${vnSexW("MASCULINO","FEMENINA","")} DE ${I.edad} AÑOS, ETNIA ${I.etnia}, PROCEDENTE DE ${I.com}, A QUIEN ${obj.replace(/^SE /,"SE LE ").replace("SE LE REMITE A","SE REMITE A")}${R&&!R.pro?" COMO PARTE DE LA RUTA DE PROMOCION Y MANTENIMIENTO DE LA SALUD":""}.`,
+     R&&!R.pro?`ULTIMA ATENCION O EXAMEN DE ESTE TIPO: ${U("ult")}.`:"",`${R?R.s.replace(/[¿?]/g,"").toUpperCase().replace(/[ÁÉÍÓÚ]/g,ch=>"AEIOU"["ÁÉÍÓÚ".indexOf(ch)]):"SINTOMAS"}: ${U("sint")}.`,vnSV({sv:D("sv")})]),
+    vnSec("ANALISIS:",[R&&R.pro?(sn?"SIN SIGNOS DE ALARMA. EXAMENES QUE CORRESPONDEN A LA ATENCION SEGUN LA RES. 3280 DE 2018 ("+R.fr(c)+").":"REFIERE "+U("sint")+": VALORACION MEDICA PRIORITARIA, ADEMAS DE LOS EXAMENES."):
+     sn?`${vnSexW("USUARIO","USUARIA","USUARIO(A)")} ASINTOMATIC${vnSexW("O","A","O(A)")}; LE CORRESPONDE SEGUN LA RES. 3280 DE 2018 (${R?R.fr(c):"___"}).`:`REFIERE ${U("sint")}: NO ES TAMIZAJE, SE REMITE A CONSULTA DE MEDICINA.`]),
+    vnSec("PLAN:",[R?`${R.v==="SE REMITE A"?"REMISION":"ORDEN"}: ${R.x}${/^\d/.test(R.cups)?" (CUPS "+R.cups+")":""}.`:"ORDEN: ___.",/ODONTOLOGIA|MEDICINA/.test(t)?"SE EXPLICA LA FINALIDAD Y LA IMPORTANCIA DE ASISTIR A LA CITA.":"SE EXPLICA LA FINALIDAD, LA PREPARACION Y LA IMPORTANCIA DE RECLAMAR Y TRAER EL RESULTADO.","SE REGISTRA LA ORDEN Y LA FECHA PARA SEGUIMIENTO.",vnPie(D,U)])].filter(Boolean).join("\n\n")}},
 
  micro:{g:"Atenciones separadas",t:"Micronutrientes y desparasitación",who:"Primera infancia, sin valoración integral",idSiempre:1,qs:[
-  {k:"meses",q:"Edad en meses",def:(v,P)=>{const c=ctxPer();return c.m!=null?String(c.m):""}},
+  {k:"meses",q:"Edad en meses",def:(v,P)=>{const c=ctxPer();return c.m!=null?String(c.m):""},c:()=>ctxPer().m==null},
   {k:"sumi",q:"Qué se entrega hoy",def:v=>{const m=vnNums(VN_U(v.meses||String(ctxPer().m||"")))[0],o=[];if(!Number.isFinite(m))return"";if(m>=6&&m<24)o.push("MICRONUTRIENTES EN POLVO PARA FORTIFICACION CASERA");if(m>=24&&m<72)o.push("SUPLEMENTACION CON MICRONUTRIENTES (VITAMINA A)");if(m>=12&&m<72)o.push(m<24?"ALBENDAZOL 200 MG DOSIS UNICA":"ALBENDAZOL 400 MG DOSIS UNICA");return o.join("; ")||"NO LE CORRESPONDE POR EDAD"}},
   {k:"ultima",q:"¿Cuándo recibió la última dosis?",def:"HACE MAS DE 6 MESES O NUNCA",o:["HACE MAS DE 6 MESES O NUNCA","HACE MENOS DE 6 MESES"]},
   {k:"sint",q:"¿Está enfermo hoy (fiebre, diarrea, vómito)?",def:"NO",o:["NO","SI"]},
@@ -6692,7 +6696,7 @@ Object.assign(VN,{
   b:(v,P,I)=>{const D=k=>vnVal("micro",v,P,k),U=k=>VN_U(D(k)),al=[];
    if(/MENOS DE 6/.test(U("ultima")))al.push("RECIBIO DOSIS HACE MENOS DE 6 MESES: NO SE REPITE; SON DOS VECES AL AÑO");
    if(/^SI/.test(U("sint")))al.push("NIÑO ENFERMO HOY: VALORAR ANTES DE ENTREGAR; USAR «NO SE QUE TIENE» O REMITIR");
-   return [vnSec("",[`NIÑO(A) DE ${U("meses")||"___"} MESES, ETNIA ${I.etnia}, PROCEDENTE DE ${I.com}, QUIEN ACUDE PARA SUPLEMENTACION CON MICRONUTRIENTES Y DESPARASITACION.`,`ULTIMA DOSIS: ${U("ultima")}. ENFERMEDAD ACTUAL: ${U("sint")}.`]),
+   return [vnSec("",[`${vnSexW("NIÑO","NIÑA","NIÑO(A)")} DE ${U("meses")||"___"} MESES, ETNIA ${I.etnia}, PROCEDENTE DE ${I.com}, QUIEN ACUDE PARA SUPLEMENTACION CON MICRONUTRIENTES Y DESPARASITACION.`,`ULTIMA DOSIS: ${U("ultima")}. ENFERMEDAD ACTUAL: ${U("sint")}.`]),
     vnSec("PROCEDIMIENTO:",[`SE ENTREGA Y SE EXPLICA LA ADMINISTRACION DE: ${U("sumi")||"___"}.`]),
     vnSec("ANALISIS:",[al.length?al.join(". ")+".":"SUPLEMENTACION SEGUN LA RES. 3280 DE 2018 (CUADRO 1, P. 51): FORTIFICACION CASERA DE 6 A 23 MESES, MICRONUTRIENTES DOS VECES AL AÑO DESDE LOS 2 AÑOS Y DESPARASITACION DOS VECES AL AÑO DESDE EL AÑO, JUNTO CON LA SUPLEMENTACION."]),
     vnSec("PLAN:",["SE EDUCA EN LAVADO DE MANOS, AGUA SEGURA, USO DE CALZADO Y ALIMENTACION.","PROXIMA DOSIS EN 6 MESES ("+fMas(hoy(),182)+").","SE REGISTRA EN EL CARNE DE SALUD INFANTIL.",vnPie(D,U)])].filter(Boolean).join("\n\n")}}
