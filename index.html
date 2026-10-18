@@ -1927,7 +1927,7 @@ function wireMiDia(){const cb=$("md-cal");if(cb)cb.onclick=calOpen;
 function mdShow(t){const s=$("md-st");s.innerHTML="";const a=document.createElement("textarea");a.value=t;a.rows=7;a.readOnly=true;s.append("No se pudo copiar solo. Mantén presionado el texto y cópialo:",a);a.focus();a.select()}
 
 /* ---------- PANEL ---------- */
-const VERSION_APP="2026-10-18 v160";
+const VERSION_APP="2026-10-18 v161";
 function home(){
   stopRec();if(S.get(AT_KEY))atReiniciar();st.view="home";
   const rm=["precon","prenatal","parto","rn","ive"],rp=["pinf","inf","adol","juv","adul","vej"];
@@ -6641,7 +6641,9 @@ function vnIdForm(){stopRec();if(VNS)VNS.voz=false;const P=pac(),tipos=(ALLF.fin
  .blq .bq-ch{flex:none;color:var(--muted);transition:transform .15s}.blq[open] .bq-ch{transform:rotate(90deg)}
  .blq[open]>summary{border-bottom:1px solid var(--line)}
  .blq .bq-body{padding:14px;display:flex;flex-direction:column;gap:20px}
- .blq .bq-body>section.midia{margin:0}`;
+ .blq .bq-body>section.midia{margin:0}
+ .blq.cab{border:0;background:none}.blq.cab>summary{padding:6px 2px;min-height:0}.blq.cab>summary h1{margin:0}.blq.cab[open]>summary{border-bottom:0}.blq.cab .bq-body{padding:4px 2px 0}.blq.cab .bq-body p.sub{margin:0}
+ .blq.fdr>summary .bq-t b{font-size:1.12rem}.blq.fdr .bq-body{padding:0}.blq.fdr .bq-body>section.finder{border:0;border-radius:0;margin:0}.blq.fdr #fh{display:none}`;
  const CH='<svg class="bq-ch" viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6l6 6-6 6"/></svg>';
  const porH2=t=>[...document.querySelectorAll("#app section.route")].find(s=>{const h=s.querySelector(":scope>.route-head>h2");return h&&h.textContent.trim()===t})||null;
  const secDe=sel=>{const e=document.querySelector(sel);return e?e.closest("section"):null};
@@ -6674,7 +6676,22 @@ function vnIdForm(){stopRec();if(VNS)VNS.voz=false;const P=pac(),tipos=(ALLF.fin
    d.addEventListener("toggle",()=>{if(d.open){S.set("dn2_blq",b.k);cont.querySelectorAll("details.blq[open]").forEach(o=>{if(o!==d)o.open=false});setTimeout(()=>d.scrollIntoView({block:"start",behavior:"smooth"}),30)}else if(S.get("dn2_blq")===b.k&&!cont.querySelector("details.blq[open]"))S.del("dn2_blq")});
    cont.append(d)});
   /* después de «¿A quién vas a atender?» y de los borradores */
-  const fin=app.querySelector("section.finder");let ref=fin;
+  /* título «Dictado de Notas»: solo el título; al tocarlo, la explicación */
+  const hd=app.querySelector(":scope>header");
+  if(hd&&!app.querySelector("details.cab")){const d=document.createElement("details");d.className="blq cab";if(S.get("dn2_blq_cab")==="1")d.open=true;
+   const h1=hd.querySelector("h1");d.innerHTML=`<summary><span class="bq-t"></span>${CH}</summary><div class="bq-body"></div>`;
+   d.querySelector(".bq-t").append(h1);[...hd.children].forEach(c=>d.querySelector(".bq-body").append(c));hd.replaceWith(d);
+   d.addEventListener("toggle",()=>S.set("dn2_blq_cab",d.open?"1":"0"))}
+  /* «¿A quién vas a atender?»: solo el título y la persona; al tocarlo, todo el panel */
+  const fsec=app.querySelector(":scope>section.finder");
+  if(fsec){const d=document.createElement("details");d.className="blq fdr";d.id="blq-fdr";if(S.get("dn2_blq_fdr")==="1")d.open=true;
+   const nom=()=>{const P=pac();return P["NOMBRE COMPLETO"]?P["NOMBRE COMPLETO"]+(pacResumen?" · "+pacResumen().slice(0,3).join(" · ").replace(/<[^>]+>/g,""):""):"Toca para identificar a la persona"};
+   d.innerHTML=`<summary><span class="bq-ic">${'<svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4 3.6-7 8-7s8 3 8 7"/></svg>'}</span><span class="bq-t"><b>¿A quién vas a atender?</b><small id="fdr-sub"></small></span>${CH}</summary><div class="bq-body"></div>`;
+   fsec.before(d);d.querySelector(".bq-body").append(fsec);$("fdr-sub").textContent=nom();
+   d.addEventListener("toggle",()=>S.set("dn2_blq_fdr",d.open?"1":"0"));
+   fsec.addEventListener("input",()=>setTimeout(()=>{const x=$("fdr-sub");if(x)x.textContent=nom()},0));fsec.addEventListener("change",()=>setTimeout(()=>{const x=$("fdr-sub");if(x)x.textContent=nom()},0));
+   const pd=$("pac-det");if(pd)pd.addEventListener("toggle",()=>{if(pd.open)d.open=true})}
+  const fin=app.querySelector("#blq-fdr")||app.querySelector("section.finder");let ref=fin;
   if(fin&&fin.nextElementSibling&&fin.nextElementSibling.querySelector(".drafts"))ref=fin.nextElementSibling;
   if(ref)ref.after(cont);else app.prepend(cont);
 }
