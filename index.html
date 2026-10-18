@@ -1173,7 +1173,7 @@ const VN={
   {k:"antper",q:"Antecedentes personales: cáncer de mama, biopsias o radioterapia en el tórax",def:"NIEGA",o:["NIEGA"]},
   {k:"antfam",q:"Familiares con cáncer de mama u ovario (madre, hermana, hija)",def:"NIEGA",o:["NIEGA"],h:"Si hay alguno, la norma pide derivar a la ruta de cáncer de mama (Res. 3280, 10.5)."},
   Q.gpcav,Q.fur,Q.metodo,
-  {k:"ecmant",q:"Último examen clínico de mama: ¿cuándo?",def:"NIEGA",o:["NIEGA","HACE 1 AÑO"]},
+  {k:"ecmant",q:"¿Cuándo le examinaron las mamas un médico o enfermero por última vez?",def:"NUNCA",o:["NUNCA","HACE MENOS DE 1 AÑO","HACE 1 AÑO O MAS","NO RECUERDA"]},
   {k:"mamoant",q:"Última mamografía y resultado",def:(v,P)=>{const e=vnEdadA(v,P);return e>=50&&e<=69?"NIEGA":"NO APLICA POR EDAD"},o:["NIEGA","NO APLICA POR EDAD"],h:"Aplica de 50 a 69 años. Dicta fecha y BI-RADS si la tiene."},
   Q.sv,
   {k:"mamas",q:"Hallazgos al examen de mama",def:"NORMAL",o:["NORMAL"],h:"«Normal» deja inspección en tres posiciones y palpación por franjas sin masas ni ganglios. Si hay hallazgo: lado, posición en horas del reloj, tamaño, consistencia, móvil o fija."},
@@ -1956,7 +1956,7 @@ function wireMiDia(){const cb=$("md-cal");if(cb)cb.onclick=calOpen;
 function mdShow(t){const s=$("md-st");s.innerHTML="";const a=document.createElement("textarea");a.value=t;a.rows=7;a.readOnly=true;s.append("No se pudo copiar solo. Mantén presionado el texto y cópialo:",a);a.focus();a.select()}
 
 /* ---------- PANEL ---------- */
-const VERSION_APP="2026-10-18 v168";
+const VERSION_APP="2026-10-18 v169";
 function home(){
   stopRec();if(S.get(AT_KEY))atReiniciar();st.view="home";
   const rm=["precon","prenatal","parto","rn","ive"],rp=["pinf","inf","adol","juv","adul","vej"];
@@ -6351,7 +6351,7 @@ function vnEGfur(fur){const f=vnFechaIso(fur);if(!f)return null;const d=(pD(hoy(
 function vnEG(v){const t=VN_U(v.eg||"");if(t){const n=vnNums(t)[0];if(Number.isFinite(n)){const d=/(\d+)\s*(?:SEMANAS?)?\s*(?:Y\s*)?(\d)\s*D/.exec(t);return d?+d[1]+ +d[2]/7:n}}return vnEGfur(v.fur)}
 function vnEGtxt(s){if(s==null)return"";const w=Math.floor(s+1e-9),d=Math.round((s-w)*7);return w+" SEMANAS"+(d?" "+d+" DIAS":"")}
 /* resuelve el valor dictado o el sugerido por defecto */
-function vnVal(id,v,P,k){if(v[k]!=null&&v[k]!=="")return v[k];const q=vnPreg(id).find(x=>x&&x.k===k);return q?(typeof q.def==="function"?q.def(v,P):(q.def||"")):""}
+function vnVal(id,v,P,k){if(v[k]!=null&&v[k]!=="")return v[k];const L=vnPreg(id),q=L.find(x=>x&&x.k===k&&(!x.c||x.c(v,P)))||L.find(x=>x&&x.k===k);return q?(typeof q.def==="function"?q.def(v,P):(q.def||"")):""}
 const VN_ALARMA_GEST="CEFALEA, TRASTORNOS VISUALES O AUDITIVOS, EPIGASTRALGIA, EDEMAS, DISMINUCION O AUSENCIA DE MOVIMIENTOS FETALES, ACTIVIDAD UTERINA, SANGRADO GENITAL, AMNIORREA O LEUCORREA, SINTOMAS URINARIOS Y TOS";
 const VN_ALARMA_POSP="LOQUIOS CON MAL OLOR, SANGRADO ABUNDANTE, FIEBRE, CEFALEA, VISION BORROSA, TINITUS, FOSFENOS, CONVULSIONES, EPIGASTRALGIA, DOLOR EN HIPOGASTRIO, VOMITO, DIARREA, DOLOR PERIANAL, UTERINO, TORACICO O ABDOMINAL, DISURIA, MAMAS ROJAS, CALIENTES O DOLOROSAS, DOLOR O HINCHAZON EN LAS PIERNAS Y ESTADO DE ANIMO QUE AFECTE LA RELACION CON EL BEBE";
 const VN_ALARMA_RN="NO MAMA O SUCCIONA DEBIL, VOMITA TODO, CONVULSIONES, MUY DORMIDO O DIFICIL DE DESPERTAR, RESPIRACION RAPIDA O CON TIRAJE, FIEBRE O FRIALDAD, PIEL AMARILLA, MORADA O PALIDA, OMBLIGO ROJO O CON PUS";
@@ -6380,7 +6380,7 @@ Object.assign(VN,{
   {k:"pres",q:"Situación y presentación fetal",def:"LONGITUDINAL CEFALICO",o:["LONGITUDINAL CEFALICO","LONGITUDINAL PODALICO","TRANSVERSO"],c:v=>{const s=vnEG(v);return s!=null&&s>=34}},
   Q.ef,
   {k:"rap",q:"Pruebas rápidas de hoy y resultado",h:"VIH (con asesoría), sífilis treponémica, hepatitis B, gota gruesa.",o:["VIH Y SIFILIS NO REACTIVAS, GOTA GRUESA NEGATIVA","NO SE REALIZAN HOY"]},
-  {k:"labs",q:"Paraclínicos revisados",def:"SIN RESULTADOS NUEVOS",o:["SIN RESULTADOS NUEVOS"]},
+  {k:"labs",q:"Resultados de exámenes que trae hoy",h:"Dicta los resultados (ej.: «hemoglobina 11,5, urocultivo negativo») o «sin resultados nuevos».",def:"SIN RESULTADOS NUEVOS",o:["SIN RESULTADOS NUEVOS"]},
   {k:"riesgo",q:"Clasificación del riesgo (Herrera y Hurtado)",h:"Se aplica en cada trimestre. Dicta el puntaje si lo tienes.",o:["BAJO RIESGO","ALTO RIESGO"]},
   {k:"med",q:"Valoración por medicina",def:"PENDIENTE: SE PROGRAMA EN LA PROXIMA BRIGADA O POR TELEMEDICINA",o:["PENDIENTE: SE PROGRAMA EN LA PROXIMA BRIGADA O POR TELEMEDICINA","REALIZADA POR TELEMEDICINA HOY","YA FUE VALORADA POR MEDICINA"],c:v=>/PRIMERA/.test(VN_U(v.tipo))},
   {k:"metpp",q:"Método anticonceptivo elegido para el posparto",def:"EN ASESORIA",o:["EN ASESORIA","DIU POSPARTO","IMPLANTE SUBDERMICO","INYECTABLE TRIMESTRAL","ORAL DE SOLO PROGESTINA","OCLUSION TUBARICA","CONDON"]},
@@ -6626,15 +6626,16 @@ function vnSigWire(){if(!VNS)return;const L=vnSigLista(VNS.id,VNS.v);document.qu
   const d=vnDraft(x.vn);Object.assign(d,x.pre);S.set("dn2_vn_"+x.vn,JSON.stringify(d));vnOpen(x.vn)})}
 /* ======================= ATENCIONES SEPARADAS (Res. 3280: cuadros por curso de vida; Lineamiento 7.1.1, I.d) ======================= */
 const VN_REM={
- "ODONTOLOGIA (ATENCION EN SALUD BUCAL)":{v:"SE REMITE A",s:"¿Dolor dental, sangrado de encías, caries visibles u otra molestia en la boca?",cups:"890203",fr:c=>c.a!=null&&c.a<18?"UNA VEZ AL AÑO":"UNA VEZ CADA DOS AÑOS",x:"ATENCION EN SALUD BUCAL POR ODONTOLOGIA, CON PROFILAXIS Y REMOCION DE PLACA BACTERIANA"},
- "TAMIZAJE DE RIESGO CARDIOVASCULAR Y METABOLICO":{v:"SE ORDENA",s:"¿Enfermedad ya diagnosticada (hipertensión, diabetes, enfermedad renal) o síntomas?",cups:"907106, 903841, 903895, 903868, 903818, 903815, 903816",fr:c=>c.a!=null&&c.a<29?"SEGUN CLASIFICACION DEL RIESGO":"CADA 5 AÑOS",x:"GLICEMIA BASAL, PERFIL LIPIDICO, CREATININA Y UROANALISIS"},
- "MAMOGRAFIA BILATERAL":{v:"SE ORDENA",s:"¿Masa, secreción por el pezón, retracción o cambios en la piel de la mama?",cups:"876802",fr:()=>"CADA 2 AÑOS DE LOS 50 A LOS 69 AÑOS",x:"MAMOGRAFIA BILATERAL DE TAMIZAJE"},
- "SANGRE OCULTA EN MATERIA FECAL":{v:"SE ORDENA",s:"¿Sangrado por el recto, cambio en el hábito intestinal o pérdida de peso?",cups:"907009",fr:()=>"CADA 2 AÑOS DE LOS 50 A LOS 75 AÑOS",x:"SANGRE OCULTA EN MATERIA FECAL POR INMUNOQUIMICA"},
- "TAMIZAJE DE CANCER DE PROSTATA":{v:"SE ORDENA",s:"¿Dificultad o dolor para orinar, sangre en la orina o dolor en los huesos?",cups:"906611",fr:()=>"CADA 5 AÑOS DE LOS 50 A LOS 75 AÑOS",x:"ANTIGENO PROSTATICO ESPECIFICO (PSA) Y TACTO RECTAL POR MEDICINA GENERAL ENTRENADA"},
+ "ODONTOLOGIA (ATENCION EN SALUD BUCAL)":{l:"ULTIMA CONSULTA CON ODONTOLOGIA",u:"¿Cuándo fue su última consulta con odontología?",n:"NUNCA HA IDO",per:c=>c.a!=null&&c.a<18?12:24,v:"SE REMITE A",s:"¿Dolor dental, sangrado de encías, caries visibles u otra molestia en la boca?",cups:"890203",fr:c=>c.a!=null&&c.a<18?"UNA VEZ AL AÑO":"UNA VEZ CADA DOS AÑOS",x:"ATENCION EN SALUD BUCAL POR ODONTOLOGIA, CON PROFILAXIS Y REMOCION DE PLACA BACTERIANA"},
+ "TAMIZAJE DE RIESGO CARDIOVASCULAR Y METABOLICO":{l:"ULTIMOS EXAMENES DE RIESGO CARDIOVASCULAR",u:"¿Cuándo le hicieron por última vez los exámenes de sangre y orina (glicemia, colesterol, creatinina, parcial de orina)?",n:"NUNCA SE LOS HA HECHO",per:()=>60,v:"SE ORDENA",s:"¿Enfermedad ya diagnosticada (hipertensión, diabetes, enfermedad renal) o síntomas?",cups:"907106, 903841, 903895, 903868, 903818, 903815, 903816",fr:c=>c.a!=null&&c.a<29?"SEGUN CLASIFICACION DEL RIESGO":"CADA 5 AÑOS",x:"GLICEMIA BASAL, PERFIL LIPIDICO, CREATININA Y UROANALISIS"},
+ "MAMOGRAFIA BILATERAL":{l:"ULTIMA MAMOGRAFIA",u:"¿Cuándo fue su última mamografía?",n:"NUNCA SE LA HA HECHO",per:()=>24,v:"SE ORDENA",s:"¿Masa, secreción por el pezón, retracción o cambios en la piel de la mama?",cups:"876802",fr:()=>"CADA 2 AÑOS DE LOS 50 A LOS 69 AÑOS",x:"MAMOGRAFIA BILATERAL DE TAMIZAJE"},
+ "SANGRE OCULTA EN MATERIA FECAL":{l:"ULTIMA PRUEBA DE SANGRE OCULTA EN MATERIA FECAL",u:"¿Cuándo fue su última prueba de sangre oculta en materia fecal (examen de heces para detectar sangre)?",n:"NUNCA SE LA HA HECHO",per:()=>24,v:"SE ORDENA",s:"¿Sangrado por el recto, cambio en el hábito intestinal o pérdida de peso?",cups:"907009",fr:()=>"CADA 2 AÑOS DE LOS 50 A LOS 75 AÑOS",x:"SANGRE OCULTA EN MATERIA FECAL POR INMUNOQUIMICA"},
+ "TAMIZAJE DE CANCER DE PROSTATA":{l:"ULTIMO TAMIZAJE DE PROSTATA",u:"¿Cuándo fue su último examen de próstata (PSA o tacto rectal)?",n:"NUNCA SE LO HA HECHO",per:()=>60,v:"SE ORDENA",s:"¿Dificultad o dolor para orinar, sangre en la orina o dolor en los huesos?",cups:"906611",fr:()=>"CADA 5 AÑOS DE LOS 50 A LOS 75 AÑOS",x:"ANTIGENO PROSTATICO ESPECIFICO (PSA) Y TACTO RECTAL POR MEDICINA GENERAL ENTRENADA"},
  "LABORATORIOS DE INGRESO PRENATAL":{v:"SE ORDENAN",s:"¿Síntomas o signos de alarma en la gestación?",pro:1,cups:"SEGUN LISTA",fr:()=>"EN LA PRIMERA CONSULTA PRENATAL",x:"UROCULTIVO Y ANTIBIOGRAMA, HEMOGRAMA, HEMOCLASIFICACION, GLICEMIA, HBSAG, IGG E IGM TOXOPLASMA, IGG RUBEOLA SI NO ESTA VACUNADA (ANTES DE LA SEMANA 16), GOTA GRUESA, PRUEBAS RAPIDAS DE VIH Y SIFILIS, ECOGRAFIA ENTRE LA SEMANA 10+6 Y 13+6 Y TAMIZAJE DE CUELLO UTERINO SI NO ESTA AL DIA (RES. 3280, 4.3.6.1)"},
  "LABORATORIOS PRECONCEPCIONALES":{v:"SE ORDENAN",s:"¿Enfermedad o síntomas actuales?",pro:1,cups:"SEGUN LISTA",fr:()=>"EN LA CONSULTA PRECONCEPCIONAL",x:"HEMOGRAMA, HEMOCLASIFICACION, GLICEMIA, HBSAG, PRUEBA TREPONEMICA RAPIDA, VIH CON ASESORIA, IGG TOXOPLASMA, RUBEOLA Y VARICELA, UROCULTIVO, HEMOPARASITOS Y TAMIZAJE DE CUELLO UTERINO (RES. 3280, 4.1)"},
- "VALORACION INTEGRAL POR MEDICINA":{v:"SE REMITE A",s:"¿Síntomas o enfermedad que motiven una consulta?",cups:"890201",fr:()=>"SEGUN EL ESQUEMA DEL CURSO DE VIDA",x:"VALORACION INTEGRAL DEL CURSO DE VIDA POR MEDICINA GENERAL O FAMILIAR"}};
+ "VALORACION INTEGRAL POR MEDICINA":{l:"ULTIMA VALORACION POR MEDICINA",u:"¿Cuándo fue su última valoración de control por medicina (sin estar enfermo)?",n:"NUNCA O NO RECUERDA",per:c=>c.a!=null&&c.a>=60?36:60,v:"SE REMITE A",s:"¿Síntomas o enfermedad que motiven una consulta?",cups:"890201",fr:()=>"SEGUN EL ESQUEMA DEL CURSO DE VIDA",x:"VALORACION INTEGRAL DEL CURSO DE VIDA POR MEDICINA GENERAL O FAMILIAR"}};
 const VN_TEMAS=["ESTILOS DE VIDA SALUDABLE (ALIMENTACION, ACTIVIDAD FISICA, SUEÑO)","SALUD SEXUAL Y REPRODUCTIVA, DERECHOS Y ANTICONCEPCION","PREVENCION DE ITS Y VIH","LACTANCIA MATERNA Y ALIMENTACION DEL MENOR","CUIDADO Y CRIANZA DEL NIÑO","SALUD MENTAL Y PREVENCION DE VIOLENCIAS","PREVENCION DEL CONSUMO DE ALCOHOL, TABACO Y SUSTANCIAS","HIGIENE, LAVADO DE MANOS Y AGUA SEGURA","PREVENCION DE MALARIA Y DENGUE (TOLDILLO, CRIADEROS)","SALUD BUCAL"];
+const vnPerTxt=m=>m%12?m+" MESES":(m/12)+(m===12?" AÑO":" AÑOS");
 const vnSexW=(m,f,o)=>{const s=ctxPer().sx;return s==="F"?f:s==="M"?m:o};
 const vnPie=(D,U)=>vnEsNormal(D("extra"))?"":U("extra");
 Object.assign(VN,{
@@ -6676,21 +6677,23 @@ Object.assign(VN,{
 
  rem:{g:"Atenciones separadas",t:"Orden o remisión de tamizaje",who:"Odontología, laboratorios, mamografía, sangre oculta, PSA, medicina",idSiempre:1,qs:[
   {k:"tipo",q:"¿Qué se ordena o remite?",o:Object.keys(VN_REM)},
-  {k:"ult",q:"¿Cuándo se hizo esta atención o examen por última vez?",h:"Fecha o año. «No recuerda» si nunca o no sabe.",def:"NUNCA O NO RECUERDA",o:["NUNCA O NO RECUERDA"],c:v=>!(VN_REM[VN_U(v.tipo)]||{}).pro},
+  ...Object.entries(VN_REM).filter(([t,R])=>R.u).map(([t,R])=>({k:"ult",q:R.u,h:"Si sabe la fecha o el año, díctalo.",def:R.n,get o(){const x=vnPerTxt(R.per(ctxPer()));return[R.n,"HACE MENOS DE "+x,"HACE "+x+" O MAS","NO RECUERDA"]},c:v=>VN_U(v.tipo)===t})),
   ...Object.entries(VN_REM).map(([t,R])=>({k:"sint",q:R.s,h:R.pro?"":"Si hay síntomas no es tamizaje: es consulta y va a medicina.",def:"NIEGA",o:["NIEGA"],c:v=>VN_U(v.tipo)===t})),
   Q.sv,Q.extra],
   b:(v,P,I)=>{const D=k=>vnVal("rem",v,P,k),U=k=>VN_U(D(k)),c=ctxPer(),t=U("tipo"),R=VN_REM[t]||null,sn=vnEsNormal(D("sint"));
+   const ul=U("ult"),vig=!!(R&&!R.pro&&/MENOS DE/.test(ul)),perx=R&&R.per?vnPerTxt(R.per(c)):"";
    const obj=R?(R.v==="SE REMITE A"?"SE REMITE A "+t.replace(" (ATENCION EN SALUD BUCAL)"," PARA ATENCION EN SALUD BUCAL"):(R.v==="SE ORDENAN"?"SE ORDENAN ":"SE ORDENA ")+(R.pro?"LOS ":"")+t):"___";
-   return [vnSec("",[`PACIENTE ${vnSexW("MASCULINO","FEMENINA","")} DE ${I.edad} AÑOS, ETNIA ${I.etnia}, PROCEDENTE DE ${I.com}, A QUIEN ${obj.replace(/^SE /,"SE LE ").replace("SE LE REMITE A","SE REMITE A")}${R&&!R.pro?" COMO PARTE DE LA RUTA DE PROMOCION Y MANTENIMIENTO DE LA SALUD":""}.`,
-     R&&!R.pro?`ULTIMA ATENCION O EXAMEN DE ESTE TIPO: ${U("ult")}.`:"",`${R?R.s.replace(/[¿?]/g,"").toUpperCase().replace(/[ÁÉÍÓÚ]/g,ch=>"AEIOU"["ÁÉÍÓÚ".indexOf(ch)]):"SINTOMAS"}: ${U("sint")}.`,vnSV({sv:D("sv")})]),
+   return [vnSec("",[`PACIENTE ${vnSexW("MASCULINO","FEMENINA","")} DE ${I.edad} AÑOS, ETNIA ${I.etnia}, PROCEDENTE DE ${I.com}, ${vig&&sn?vnSexW("VALORADO","VALORADA","VALORADO(A)")+" PARA TAMIZAJE: "+t:"A QUIEN "+obj.replace(/^SE /,"SE LE ").replace("SE LE REMITE A","SE REMITE A")}${R&&!R.pro?" COMO PARTE DE LA RUTA DE PROMOCION Y MANTENIMIENTO DE LA SALUD":""}.`,
+     R&&!R.pro?`${R.l}: ${ul}.`:"",`${R?R.s.replace(/[¿?]/g,"").toUpperCase().replace(/[ÁÉÍÓÚ]/g,ch=>"AEIOU"["ÁÉÍÓÚ".indexOf(ch)]):"SINTOMAS"}: ${U("sint")}.`,vnSV({sv:D("sv")})]),
     vnSec("ANALISIS:",[R&&R.pro?(sn?"SIN SIGNOS DE ALARMA. EXAMENES QUE CORRESPONDEN A LA ATENCION SEGUN LA RES. 3280 DE 2018 ("+R.fr(c)+").":"REFIERE "+U("sint")+": VALORACION MEDICA PRIORITARIA, ADEMAS DE LOS EXAMENES."):
+     sn&&vig?`${vnSexW("USUARIO","USUARIA","USUARIO(A)")} ASINTOMATIC${vnSexW("O","A","O(A)")}. LA ULTIMA FUE ${ul}: ESTA VIGENTE SEGUN LA RES. 3280 DE 2018 (${R.fr(c)}); NO SE REPITE HOY.`:
      sn?`${vnSexW("USUARIO","USUARIA","USUARIO(A)")} ASINTOMATIC${vnSexW("O","A","O(A)")}; LE CORRESPONDE SEGUN LA RES. 3280 DE 2018 (${R?R.fr(c):"___"}).`:`REFIERE ${U("sint")}: NO ES TAMIZAJE, SE REMITE A CONSULTA DE MEDICINA.`]),
-    vnSec("PLAN:",[R?`${R.v==="SE REMITE A"?"REMISION":"ORDEN"}: ${R.x}${/^\d/.test(R.cups)?" (CUPS "+R.cups+")":""}.`:"ORDEN: ___.",/ODONTOLOGIA|MEDICINA/.test(t)?"SE EXPLICA LA FINALIDAD Y LA IMPORTANCIA DE ASISTIR A LA CITA.":"SE EXPLICA LA FINALIDAD, LA PREPARACION Y LA IMPORTANCIA DE RECLAMAR Y TRAER EL RESULTADO.","SE REGISTRA LA ORDEN Y LA FECHA PARA SEGUIMIENTO.",vnPie(D,U)])].filter(Boolean).join("\n\n")}},
+    vnSec("PLAN:",[vig&&sn?`SE PROGRAMA LA PROXIMA ${R.v==="SE REMITE A"?"ATENCION":"TOMA"} CUANDO SE CUMPLAN ${perx} DESDE LA ULTIMA. SE VERIFICA EL RESULTADO ANTERIOR EN EL SISTEMA.`:"",vig&&sn?"":R?`${R.v==="SE REMITE A"?"REMISION":"ORDEN"}: ${R.x}${/^\d/.test(R.cups)?" (CUPS "+R.cups+")":""}.`:"ORDEN: ___.",vig&&sn?"SE EDUCA EN SIGNOS DE ALARMA PARA CONSULTAR ANTES.":/ODONTOLOGIA|MEDICINA/.test(t)?"SE EXPLICA LA FINALIDAD Y LA IMPORTANCIA DE ASISTIR A LA CITA.":"SE EXPLICA LA FINALIDAD, LA PREPARACION Y LA IMPORTANCIA DE RECLAMAR Y TRAER EL RESULTADO.",vig&&sn?"":"SE REGISTRA LA ORDEN Y LA FECHA PARA SEGUIMIENTO.",vnPie(D,U)])].filter(Boolean).join("\n\n")}},
 
  micro:{g:"Atenciones separadas",t:"Micronutrientes y desparasitación",who:"Primera infancia, sin valoración integral",idSiempre:1,qs:[
   {k:"meses",q:"Edad en meses",def:(v,P)=>{const c=ctxPer();return c.m!=null?String(c.m):""},c:()=>ctxPer().m==null},
   {k:"sumi",q:"Qué se entrega hoy",def:v=>{const m=vnNums(VN_U(v.meses||String(ctxPer().m||"")))[0],o=[];if(!Number.isFinite(m))return"";if(m>=6&&m<24)o.push("MICRONUTRIENTES EN POLVO PARA FORTIFICACION CASERA");if(m>=24&&m<72)o.push("SUPLEMENTACION CON MICRONUTRIENTES (VITAMINA A)");if(m>=12&&m<72)o.push(m<24?"ALBENDAZOL 200 MG DOSIS UNICA":"ALBENDAZOL 400 MG DOSIS UNICA");return o.join("; ")||"NO LE CORRESPONDE POR EDAD"}},
-  {k:"ultima",q:"¿Cuándo recibió la última dosis?",def:"HACE MAS DE 6 MESES O NUNCA",o:["HACE MAS DE 6 MESES O NUNCA","HACE MENOS DE 6 MESES"]},
+  {k:"ultima",q:"¿Cuándo recibió por última vez micronutrientes o albendazol?",def:"HACE MAS DE 6 MESES O NUNCA",o:["HACE MAS DE 6 MESES O NUNCA","HACE MENOS DE 6 MESES"]},
   {k:"sint",q:"¿Está enfermo hoy (fiebre, diarrea, vómito)?",def:"NO",o:["NO","SI"]},
   Q.extra],
   b:(v,P,I)=>{const D=k=>vnVal("micro",v,P,k),U=k=>VN_U(D(k)),al=[];
