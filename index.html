@@ -272,7 +272,7 @@ textarea{width:100%;font:inherit;font-size:1.05rem;line-height:1.55;padding:14px
 .mb-dl{margin:0;padding:10px 14px 12px;display:grid;grid-template-columns:minmax(0,1fr);gap:2px}
 .mb-dl dt{font-size:.74rem;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);margin-top:8px}
 .mb-dl dd{margin:0;font-size:.95rem}
-.mb-dl dt.mb-al{color:var(--miss)}.mb-ul{margin:4px 0 0;padding-left:18px}.mb-ul li{margin:0 0 7px}.box .mb-ul{padding-left:18px}
+.mb-dl dt.mb-al{color:var(--miss)}.mb-ul{margin:4px 0 0;padding-left:18px}.sx-ck{display:flex;gap:8px;align-items:flex-start;padding:6px 0;font-size:.95rem}.sx-ck input{margin-top:4px;width:18px;height:18px;flex:none}.mb-ul li{margin:0 0 7px}.box .mb-ul{padding-left:18px}
 #mb-q{margin:0}
 @media (prefers-reduced-motion:no-preference){.tile,.btn,.notes-pick button{transition:background .15s,border-color .15s,box-shadow .15s}}
 </style>
@@ -1548,13 +1548,13 @@ const MB=[
 
  {id:"eda",g:"Niños",t:"Enfermedad diarreica aguda",no:"Notificación colectiva semanal; muerte en menor de 5 años, inmediata",
   ss:[["Tres o más deposiciones blandas o líquidas en 24 horas.","eda","24"]],
-  dx:[["Clasificar la deshidratación con la escala de la OMS: estado de conciencia, ojos hundidos, sed, pliegue cutáneo.","eda","24"],
+  dx:[["Clasificar la deshidratación con la escala OMS/AIEPI: grave con 2 o más de ojos hundidos, letárgico o inconsciente, pliegue de más de 2 segundos; algún grado con 2 o más de ojos hundidos, bebe ávidamente, irritable, pliegue de menos de 2 segundos.","eda","24 y 39"],
       ["Alto riesgo de deshidratación: 3 o más vómitos en una hora o 5 o más en cuatro horas.","eda","34"]],
   tx:[["Sin deshidratación: líquidos después de cada deposición (menores de 2 años, 50 a 100 ml; 2 años o más, 100 a 200 ml), seguir lactancia y comida.","eda","26"],
       ["Con algún grado de deshidratación: sales de rehidratación oral de baja osmolaridad, 50 a 100 ml/kg en 2 a 4 horas, revisando cada hora; por sonda nasogástrica si no recibe.","eda","27"],
       ["Deshidratación grave: lactato de Ringer 100 ml/kg (30 ml/kg en 30 minutos; luego 70 ml/kg en 5 horas y media si es menor de 12 meses, o en 2 horas y media si es mayor). Si no hay acceso venoso: sonda nasogástrica.","eda","28–29"],
       ["Zinc por 10 a 14 días: 10 mg al día en menores de 6 meses, 20 mg en mayores.","eda","32"],
-      ["Vómito: ondansetrón dosis única, 2 mg si pesa menos de 15 kg y 4 mg entre 15 y 30 kg. No antidiarreicos.","eda","33"],
+      ["Vómito con alto riesgo de deshidratación o que no tolera la rehidratación oral: ondansetrón dosis única oral, 2 mg si pesa menos de 15 kg y 4 mg entre 15 y 30 kg. No usarlo si hay sospecha de sepsis, obstrucción intestinal, abdomen agudo o convulsiones. No antidiarreicos ni metoclopramida.","eda","33–34"],
       ["No antibióticos de rutina; cuando están indicados, ácido nalidíxico 50 a 60 mg/kg al día por 7 días.","eda","31"]],
   es:[["Rehidratación en el puesto reevaluando cada hora; si el pulso sigue débil tras la carga, repetir 30 ml/kg.","eda","27–29"]],
   al:[["Criterios para hospitalizar: deshidratación grave, no recibe la vía oral, letargo o convulsiones, menor de 3 meses, desnutrición, sangre en las heces con compromiso general.","eda","25"]]},
@@ -1576,13 +1576,13 @@ const MB=[
   dx:[["Moderada: puntaje Z de peso para la talla entre −2 y −3. Severa: menor de −3 o edema bilateral.","dnt","16"],
       ["Perímetro braquial menor de 11,5 cm (6 a 59 meses) también es severa.","dnt","32"],
       ["Prueba de apetito con la fórmula terapéutica lista para consumir (FTLC).","dnt","33"],
-      ["Con complicaciones médicas es urgencia vital.","dnt","32"]],
+      ["Con complicaciones (choque, diarrea, infección, anemia severa, hipoglicemia, vomita todo, letargia, convulsión) es urgencia vital; criterios de manejo hospitalario.","dnt","32 y 35"]],
   tx:[["Manejo en casa solo si cumple los criterios: apetito conservado y sin complicaciones.","dnt","34"],
       ["Moderada: FTLC de 150 subiendo a 200 kcal/kg al día y agua 100 a 150 ml/kg al día.","dnt","71"],
       ["Severa en casa: de 80 subiendo a 100 kcal/kg al día, según la tabla 26.","dnt","72"],
       ["Amoxicilina 90 mg/kg al día cada 12 horas por 7 días. Albendazol 200 mg (12 a 23 meses) o 400 mg (24 meses o más).","dnt","51"]],
-  es:[["Mientras se remite: alimentar cada 2 a 3 horas para evitar hipoglicemia, abrigar para evitar hipotermia, no dar líquidos IV rápidos salvo choque.","dnt","32"]],
-  al:[["Prueba de apetito negativa, edema, signos de peligro, deshidratación, hipotermia, hipoglicemia, infección.","dnt","32–34"]]},
+  es:[["Mientras se remite: prevenir y tratar la hipoglicemia (glucometría), abrigar para evitar la hipotermia, no dar líquidos IV rápidos salvo choque.","dnt","38, 43, 47 y 49"]],
+  al:[["Prueba de apetito negativa, edema, signos de peligro, deshidratación, hipotermia, hipoglicemia, infección, respiración rápida para la edad.","dnt","32 y 35"]]},
 
  {id:"ofidico",g:"Urgencias",t:"Accidente ofídico",no:"SIVIGILA, individual (confirma código con epidemiología)",
   ss:[["Mordedura de serpiente con dolor, hinchazón, sangrado por la herida, encías u orina, o párpados caídos y dificultad para tragar o respirar.","ofi",""]],
@@ -1639,25 +1639,125 @@ const MB=[
 const MB_SEC=[["ss","Signos y síntomas: cuándo sospechar"],["dx","Diagnóstico en el puesto"],["tx","Tratamiento"],["es","Mientras llega la remisión"],["al","Signos de alarma: remitir urgente"]];
 function mbCita(f,p){if(!f)return "Práctica de registro y gestión del puesto (sin guía específica)";return MBF[f]+(p?`, p. ${p} del PDF`:", página por verificar")}
 function mbUL(arr){return `<ul class="mb-ul">${arr.map(([t,f,p])=>`<li>${esc(t)}<small class="qt-c">${esc(mbCita(f,p))}</small></li>`).join("")}</ul>`}
-function mbHomeHTML(){return `<section class="route"><div class="route-head"><h2>Morbilidad</h2><span>Lo más frecuente en la zona rural del Vaupés</span></div><div class="tiles"><button class="tile pc" type="button" id="t-mb"><b>Morbilidad frecuente</b><small>Signos, diagnóstico, tratamiento y qué hacer mientras llega la remisión, con su fuente</small></button><button class="tile pc" type="button" data-vn="morb"><b>Nota de morbilidad por voz</b><small>Consulta por enfermedad, pregunta por pregunta</small></button></div></section>`}
-function mbWire(){const b=$("t-mb");if(b)b.onclick=mbOpen}
-function mbOpen(){stopRec();st.view="mb";
+function mbHomeHTML(){return `<section class="route"><div class="route-head"><h2>Morbilidad</h2><span>Lo más frecuente en la zona rural del Vaupés</span></div><div class="tiles"><button class="tile pc" type="button" id="t-mb"><b>Morbilidad frecuente</b><small>Signos, diagnóstico, tratamiento y qué hacer mientras llega la remisión, con su fuente</small></button><button class="tile pc" type="button" id="t-sx"><b>No sé qué tiene</b><small>Empezar por el síntoma: signos de peligro, enfermedades probables y cuándo remitir</small></button><button class="tile pc" type="button" data-vn="morb"><b>Nota de morbilidad por voz</b><small>Consulta por enfermedad, pregunta por pregunta</small></button></div></section>`}
+function mbWire(){const b=$("t-mb");if(b)b.onclick=()=>mbOpen();const c=$("t-sx");if(c)c.onclick=()=>sxOpen()}
+function mbOpen(foco){stopRec();st.view="mb";
   const grupos=[...new Set(MB.map(x=>x.g))];
   $("app").innerHTML=`<div class="top"><button class="back" type="button" id="mb-back">← Inicio</button><span class="tag pc">Morbilidad</span></div>
   <header><h1>Morbilidad frecuente</h1><p class="sub">Zona rural del Vaupés. Para cada condición: signos y síntomas, diagnóstico en el puesto, tratamiento, qué hacer mientras llega la remisión y signos de alarma. Cada recomendación dice de qué guía sale.</p></header>
+  <div class="btns"><button class="btn primary" type="button" id="mb-sx">¿No sé qué tiene? Empezar por el síntoma</button></div>
   <div class="box warn"><h3>Si la remisión tarda días</h3>${mbUL(MB_ESPERA)}</div>
   <input id="mb-q" placeholder="Buscar: fiebre, diarrea, serpiente, úlcera…" autocomplete="off">
   <div id="mb-list"></div>
   <div class="btns"><button class="btn primary" type="button" data-vn="morb">Hacer nota de morbilidad por voz</button></div>
   <p class="foot">Fuentes: guías de práctica clínica y lineamientos vigentes del Ministerio de Salud, la OPS y la OMS. Las páginas son las del PDF oficial de cada guía; donde dice «página por verificar», la recomendación es de esa guía pero no se pudo confirmar la página. Los medicamentos se administran por orden médica (telemedicina) o protocolo de la ESE. Los códigos SIVIGILA se confirman con epidemiología.</p>`;
   const pinta=()=>{const q=plano($("mb-q").value);const L=MB.filter(x=>!q||plano([x.t,x.g,...x.ss.map(i=>i[0])].join(" ")).includes(q));
-    $("mb-list").innerHTML=grupos.map(g=>{const xs=L.filter(x=>x.g===g);return xs.length?`<p class="lab" style="margin:10px 0 6px">${esc(g)}</p>${xs.map(x=>`<details class="sec mb"><summary>${esc(x.t)}</summary><dl class="mb-dl">
+    $("mb-list").innerHTML=grupos.map(g=>{const xs=L.filter(x=>x.g===g);return xs.length?`<p class="lab" style="margin:10px 0 6px">${esc(g)}</p>${xs.map(x=>`<details class="sec mb" data-mb="${x.id}"><summary>${esc(x.t)}</summary><dl class="mb-dl">
       ${MB_SEC.map(([k,h])=>x[k]&&x[k].length?`<dt${k==="al"?' class="mb-al"':""}>${h}</dt><dd>${mbUL(x[k])}</dd>`:"").join("")}<dt>Notificación</dt><dd>${esc(x.no)}</dd></dl>
       <div class="btns" style="padding:0 14px 14px"><button class="btn" type="button" data-vnm="${x.id}">Nota de morbilidad para ${esc(x.t.toLowerCase())}</button></div></details>`).join("")}`:""}).join("")||`<p class="note-src">No encontré esa condición.</p>`;
     document.querySelectorAll("[data-vnm]").forEach(b=>b.onclick=()=>{const d=vnDraft("morb");d.cond=MB.find(z=>z.id===b.dataset.vnm).t.toUpperCase();S.set("dn2_vn_morb",JSON.stringify(d));vnOpen("morb")})};
   $("mb-q").oninput=pinta;pinta();
   document.querySelectorAll("#app > .btns [data-vn]").forEach(b=>b.onclick=()=>vnOpen(b.dataset.vn));
-  $("mb-back").onclick=()=>{home();window.scrollTo(0,0)};window.scrollTo(0,0)}
+  $("mb-sx").onclick=()=>sxOpen();
+  $("mb-back").onclick=()=>{home();window.scrollTo(0,0)};window.scrollTo(0,0);
+  if(foco){const d=document.querySelector(`details[data-mb="${foco}"]`);if(d){d.open=true;d.scrollIntoView({block:"start"})}}}
+/* ---------- No sé qué tiene: empezar por el síntoma (enfoque sindrómico) ---------- */
+MBF.aiepi="OPS, Manual clínico para el aprendizaje de AIEPI en enfermería, cuaderno de trabajo (OPS/FCH/CH/09.04.E, 2009), formulario de registro de 2 meses a 4 años";
+const SX_PEL={
+ n:{t:"Niño de 2 meses a 5 años · signos generales de peligro (AIEPI)",c:["aiepi","40"],s:["No puede beber ni tomar el pecho","Vomita todo lo que ingiere","Ha tenido convulsiones","Está letárgico o inconsciente"]},
+ a:{t:"Mayor de 5 años y adulto · abordaje ABCDE",c:["bec",""],s:["Vía aérea comprometida (estridor, no maneja secreciones)","Dificultad respiratoria o saturación baja","Signos de choque: frialdad, pulso débil, llenado capilar lento, hipotensión","Alteración de la conciencia o convulsión","Sangrado activo que no para","Glucometría baja"]},
+ m:{t:"Menor de 2 meses",c:["",""],s:["Cualquier enfermedad en menor de 2 meses"]}};
+const SX=[
+ {id:"fiebre",t:"Fiebre",ev:[
+   ["Fiebre por lo que dice la familia, al tocarlo o temperatura de 37,5 °C o más. Preguntar si viene de zona de malaria o de dengue y cuántos días lleva; si son más de 7, si ha sido todos los días.","aiepi","40"],
+   ["Buscar rigidez de nuca, sangrado, dolor o distensión abdominal, irritabilidad.","aiepi","40"],
+   ["Primero gota gruesa o prueba rápida para malaria, antes de tratar.","mal","15"]],
+  pi:[["malaria","Gota gruesa o prueba rápida positiva.","mal","15"],
+      ["dengue","Prueba de malaria negativa, fiebre de 2 a 7 días con dolor de cabeza, detrás de los ojos, muscular o articular; buscar signos de alarma.","den","46"],
+      ["tb","Tos con expectoración de más de 15 días, sudoración, pérdida de peso; en niños, fiebre de más de 8 días o contacto con un caso.","tb","29"],
+      ["ira","Fiebre con tos y respiración rápida o tiraje.","neu","24"],
+      ["eda","Fiebre con diarrea.","eda","24"]],
+  ro:[["Rigidez de nuca o sangrado con fiebre: enfermedad febril grave; telemedicina y remisión.","aiepi","40"],
+      ["Criterios de malaria complicada: postración, más de 2 convulsiones en 24 horas, ictericia, saturación menor de 92 %.","mal","54"],
+      ["Signos de alarma de dengue.","den","46"]]},
+ {id:"resp",t:"Tos o dificultad para respirar",ev:[
+   ["Contar la respiración en un minuto completo; ver tiraje subcostal; oír estridor y sibilancias.","aiepi","40"],
+   ["Respiración rápida: menor de 2 meses, 60 o más; de 2 a 11 meses, 50 o más; de 12 meses a 5 años, 40 o más por minuto.","dnt","35"],
+   ["Saturación de oxígeno: 94 % o menos entre 0 y 1500 msnm es criterio de hospitalización.","neu","43"]],
+  pi:[["ira","Neumonía: tos o dificultad para respirar con respiración rápida o tiraje (criterios AIEPI).","neu","24"],
+      ["ira","Bronquiolitis: menor de 2 años, primer episodio de sibilancias, precedido de 2 a 3 días de resfriado.","neu","27"],
+      ["tb","Tos con expectoración de más de 15 días (menos tiempo en población indígena y rural).","tb","29"],
+      ["anafilaxia","Dificultad súbita para respirar tras picadura, medicamento o alimento, con ronchas o hinchazón.","wao",""]],
+  ro:[["Saturación de 94 % o menos, tiraje, estridor, cianosis, signos de peligro.","neu","43 y 46"]]},
+ {id:"diarrea",t:"Diarrea o vómito",ev:[
+   ["Clasificar la deshidratación: grave con 2 o más de ojos hundidos, letárgico o inconsciente, pliegue que vuelve en más de 2 segundos; algún grado con 2 o más de ojos hundidos, bebe ávidamente, irritable, pliegue menor de 2 segundos.","eda","39"],
+   ["Alto riesgo de deshidratación: 3 o más vómitos en 1 hora o 5 o más en 4 horas.","eda","34"],
+   ["Preguntar si hay sangre en las heces y cuántos días lleva.","aiepi","40"],
+   ["Si hay fiebre: gota gruesa. Medir perímetro braquial y buscar edema por desnutrición.","mal","15"]],
+  pi:[["eda","Tres o más deposiciones blandas o líquidas en 24 horas.","eda","24"],
+      ["malaria","Diarrea con fiebre en zona endémica: la malaria concomitante es criterio de remisión.","eda","25"],
+      ["dnt","Diarrea en niño delgado o con edema: buscar desnutrición aguda.","dnt","32"],
+      ["dengue","Vómito persistente con fiebre: es signo de alarma de dengue.","den","46"]],
+  ro:[["Deshidratación grave o choque, letargia o convulsiones, vómito que impide la rehidratación oral, sospecha de abdomen quirúrgico, desnutrición, neumonía o sepsis asociadas.","eda","25"]]},
+ {id:"sangrado",t:"Sangrado",ev:[
+   ["Primero ABCDE: pulso, presión, llenado capilar y conciencia.","bec",""],
+   ["¿Está embarazada o en posparto? ¿Tiene fiebre? ¿Lo mordió una serpiente?","",""]],
+  pi:[["hpp","Sangrado abundante después del parto, útero blando.","hpp","12"],
+      ["dengue","Fiebre con sangrado de encías, nariz, vaginal u orina: signo de alarma.","den","46"],
+      ["malaria","Fiebre con sangrado: criterio de malaria complicada.","mal","54"],
+      ["ofidico","Sangrado tras mordedura de serpiente; hacer tubo seco a los 20 minutos.","oms_of",""]],
+  ro:[["Cualquier sangrado con signos de choque.","hpp","12"]]},
+ {id:"piel",t:"Lesión de piel o úlcera",ev:[["Tiempo de evolución, dolor, picazón, fiebre, si entra al monte, si hay más personas en la casa con lo mismo.","",""]],
+  pi:[["leish","Úlcera indolora, redonda, de bordes elevados, de más de 2 semanas.","lei",""],
+      ["piel","Picazón nocturna entre dedos y pliegues, costras amarillas o placas que descaman.","",""],
+      ["anafilaxia","Ronchas o hinchazón súbita con dificultad para respirar o mareo.","wao",""]],
+  ro:[["Fiebre con celulitis extensa o lesión que crece rápido; lesión en nariz o boca.","lei","13–14"]]},
+ {id:"mordedura",t:"Mordedura o picadura",ev:[["¿Qué animal fue? ¿Dónde y cuándo? Revisar la herida.","",""]],
+  pi:[["ofidico","Serpiente: dolor, hinchazón, sangrado; tubo seco a los 20 minutos.","oms_of",""],
+      ["rabia","Perro, gato o murciélago: clasificar la exposición.","rab","1"],
+      ["anafilaxia","Picadura de abeja u otro insecto con ronchas, hinchazón de labios o dificultad para respirar.","wao",""]],
+  ro:[["Tubo seco que no coagula, edema que avanza, párpados caídos; exposición grave a rabia; signos de anafilaxia.","ofi",""]]},
+ {id:"conciencia",t:"Convulsión, decaído o no responde",ev:[["ABCDE y glucometría ya.","bec",""],["Si hay fiebre: gota gruesa o prueba rápida.","mal","15"],["Si es gestante de 20 semanas o más o puérpera: presión arterial.","hta","4"]],
+  pi:[["grave","Paciente en mal estado sin causa clara: estabilizar primero.","bec",""],
+      ["convulsion","Movimientos involuntarios con pérdida de la conciencia.","bec",""],
+      ["malaria","Fiebre con postración o convulsiones: malaria complicada.","mal","54"],
+      ["preeclampsia","Gestante o puérpera con convulsión: eclampsia.","hta","4"]],
+  ro:[["Todo paciente que no responde o convulsiona es remisión urgente.","bec",""]]},
+ {id:"gestante",t:"Gestante o puérpera con síntomas",ev:[["Presión arterial en dos tomas, proteinuria con tira, temperatura, sangrado, movimientos fetales.","hta","4"],["Fiebre: gota gruesa; la gestante en primer trimestre con P. falciparum lleva otro esquema.","mal","16"],["Prueba treponémica rápida si no la tiene.","sif","40"]],
+  pi:[["preeclampsia","Presión de 160/110 o más, cefalea, visión borrosa, dolor epigástrico.","hta","4"],
+      ["hpp","Sangrado abundante después del parto.","hpp","12"],
+      ["malaria","Fiebre en zona endémica.","mal","16"],
+      ["sifilis","Prueba treponémica rápida reactiva.","sif","40"]],
+  ro:[["Presión de 160/110 o más, convulsión, sangrado, disminución de movimientos fetales.","hta","4"]]},
+ {id:"flaco",t:"Niño delgado, que no gana peso o con edema",ev:[["Peso, talla, puntaje Z de peso para la talla, perímetro braquial (6 a 59 meses), edema en ambos pies, prueba de apetito.","dnt","16 y 32–34"]],
+  pi:[["dnt","Puntaje Z menor de −2, edema o perímetro braquial menor de 11,5 cm.","dnt","16 y 32"],
+      ["tb","Niño que no gana peso, con fiebre de más de 8 días o contacto con un caso.","tb","29"]],
+  ro:[["Desnutrición con choque, diarrea, infección, anemia severa, hipoglicemia, vomita todo, letargia o convulsión: urgencia vital.","dnt","32"]]}
+];
+function sxOpen(){stopRec();st.view="sx";let edad="n",sint=null;
+  const pel=()=>{const P=SX_PEL[edad];
+    $("sx-pel").innerHTML=`<p class="qt-h">1 · Primero: ¿hay signos de peligro?</p><p class="note-src" style="margin:0 0 6px">${esc(P.t)}</p>${P.s.map((x,i)=>`<label class="sx-ck"><input type="checkbox" class="sx-pel" data-i="${i}"> ${esc(x)}</label>`).join("")}<small class="qt-c">${esc(edad==="m"?"En la app no hay guía para menores de 2 meses: telemedicina para todo menor de 2 meses enfermo.":mbCita(...P.c))}</small>`;
+    document.querySelectorAll(".sx-pel").forEach(c=>c.onchange=alerta);alerta()};
+  const pinta=()=>{const s=SX.find(x=>x.id===sint);
+    $("sx-res").innerHTML=s?`<p class="qt-h">3 · Evaluar</p>${mbUL(s.ev)}
+      <p class="qt-h">4 · Piensa en</p><ul class="mb-ul">${s.pi.map(([id,t,f,p])=>{const m=MB.find(z=>z.id===id);return `<li><b>${esc(m?m.t:id)}</b>: ${esc(t)}<small class="qt-c">${esc(mbCita(f,p))}</small><button type="button" class="btn sx-go" data-go="${id}" style="margin-top:4px">Ver ficha</button></li>`}).join("")}</ul>
+      <p class="qt-h" style="color:var(--miss)">Remitir urgente si</p>${mbUL(s.ro)}
+      <p class="note-src">Si no encaja en ninguna, o dudas: telemedicina con lo que evaluaste. No necesitas el diagnóstico para remitir; basta un signo de peligro.</p>`:"";
+    document.querySelectorAll(".sx-go").forEach(b=>b.onclick=()=>mbOpen(b.dataset.go));
+    document.querySelectorAll("[data-sx]").forEach(b=>b.classList.toggle("primary",b.dataset.sx===sint))};
+  const alerta=()=>{const n=[...document.querySelectorAll(".sx-pel:checked")].length;$("sx-alerta").innerHTML=(n||edad==="m")?`<div class="box warn"><h3>Remisión urgente</h3>${mbUL([["Hay un signo de peligro: estabiliza (ABCDE, glucometría, temperatura), telemedicina ya y gestiona la remisión. Sigue evaluando mientras tanto.",edad==="n"?"aiepi":"bec",edad==="n"?"40":""]])}</div>`:""};
+  $("app").innerHTML=`<div class="top"><button class="back" type="button" id="sx-back">← Morbilidad</button><span class="tag pc">No sé qué tiene</span></div>
+  <header><h1>Empezar por el síntoma</h1><p class="sub">Cuando no tienes claro el diagnóstico: primero la gravedad, luego el síntoma principal y las enfermedades probables. Cada paso dice de qué guía sale.</p></header>
+  <div class="btns" id="sx-edad"><button class="btn" type="button" data-ed="m">Menor de 2 meses</button><button class="btn" type="button" data-ed="n">2 meses a 5 años</button><button class="btn" type="button" data-ed="a">Mayor de 5 años y adulto</button></div>
+  <div id="sx-pel"></div><div id="sx-alerta"></div>
+  <p class="qt-h">2 · ¿Cuál es el síntoma principal?</p>
+  <div class="btns">${SX.map(x=>`<button class="btn" type="button" data-sx="${x.id}">${esc(x.t)}</button>`).join("")}</div>
+  <div id="sx-res"></div>
+  <p class="foot">Enfoque sindrómico: AIEPI para niños de 2 meses a 5 años y abordaje ABCDE de la OMS para mayores. Las páginas son las del PDF oficial; «página por verificar» indica que la recomendación es de esa guía pero no se confirmó la página.</p>`;
+  const ed=()=>document.querySelectorAll("[data-ed]").forEach(b=>b.classList.toggle("primary",b.dataset.ed===edad));
+  document.querySelectorAll("[data-ed]").forEach(b=>b.onclick=()=>{edad=b.dataset.ed;ed();pel()});
+  document.querySelectorAll("[data-sx]").forEach(b=>b.onclick=()=>{sint=b.dataset.sx;pinta();$("sx-res").scrollIntoView({behavior:"smooth",block:"start"})});
+  $("sx-back").onclick=()=>mbOpen();ed();pel();pinta();window.scrollTo(0,0)}
 VN.morb={g:"Morbilidad",t:"Consulta de morbilidad",who:"Enfermedad general, pregunta por pregunta",qs:[
   {k:"cond",q:"¿Qué sospechas?",o:MB.map(x=>x.t.toUpperCase()).concat(["OTRA"])},
   {k:"motivo",q:"Motivo de consulta en palabras del paciente o el acompañante"},
@@ -1740,7 +1840,7 @@ function wireMiDia(){const cb=$("md-cal");if(cb)cb.onclick=calOpen;
 function mdShow(t){const s=$("md-st");s.innerHTML="";const a=document.createElement("textarea");a.value=t;a.rows=7;a.readOnly=true;s.append("No se pudo copiar solo. Mantén presionado el texto y cópialo:",a);a.focus();a.select()}
 
 /* ---------- PANEL ---------- */
-const VERSION_APP="2026-10-18 v155";
+const VERSION_APP="2026-10-18 v156";
 function home(){
   stopRec();st.view="home";
   const rm=["precon","prenatal","parto","rn","ive"],rp=["pinf","inf","adol","juv","adul","vej"];
