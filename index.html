@@ -216,6 +216,52 @@ textarea{width:100%;font:inherit;font-size:1.05rem;line-height:1.55;padding:14px
 .md-mods button{border:1.5px solid var(--accent);background:var(--surface);color:var(--ink);border-radius:999px;padding:5px 12px;font-weight:700;font-size:.85rem}
 .md-stats{display:flex;flex-wrap:wrap;gap:6px}
 .md-stats .chip.alert{background:var(--miss-bg);color:var(--miss)}
+.cal-bar{display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap}
+.cal-nav{display:flex;align-items:center;gap:6px;flex-wrap:wrap}.cal-nav .btn{padding:8px 12px}
+.cal-lab{font-family:var(--f-display);font-size:1.05rem;margin-left:4px}
+.cal-seg{display:inline-flex;border:1.5px solid var(--line);border-radius:10px;overflow:hidden}
+.cal-seg button{border:0;background:var(--surface);color:var(--ink);padding:8px 14px;font-weight:700}
+.cal-seg button[aria-pressed="true"]{background:var(--accent);color:var(--accent-ink)}
+.cal-scroll{overflow-x:auto;border:1px solid var(--line);border-radius:10px;background:var(--surface)}
+.cal-wk{display:grid;grid-template-columns:48px repeat(var(--n),minmax(96px,1fr));min-width:calc(48px + var(--n) * 96px)}
+.cal-wk.uno{grid-template-columns:48px minmax(0,1fr);min-width:0}
+.cal-hd{padding:6px 4px;text-align:center;border-bottom:1px solid var(--line);font-size:.78rem;color:var(--muted);background:var(--surface)}
+.cal-hd b{display:block;font-family:var(--f-display);font-size:1.15rem;color:var(--ink)}
+.cal-hd.hoy b{color:var(--accent-ink);background:var(--accent);border-radius:999px;width:32px;height:32px;line-height:32px;margin:2px auto 0}
+.cal-ad{border-bottom:1px solid var(--line);border-left:1px solid var(--line);padding:3px;display:flex;flex-direction:column;gap:3px;min-height:30px;min-width:0}
+.cal-ad.lab{font-size:.66rem;color:var(--muted);border-left:0;justify-content:center;text-align:center}
+.cal-hrs{position:relative}.cal-hrs span{position:absolute;right:6px;font-family:var(--f-data);font-size:.68rem;color:var(--muted)}
+.cal-col{position:relative;border-left:1px solid var(--line);background-image:linear-gradient(var(--line) 1px,transparent 1px);cursor:copy}
+.cal-col.hoy{background-color:var(--accent-soft)}
+.ev{display:block;width:100%;text-align:left;border:0;border-left:4px solid;border-radius:6px;padding:3px 6px;font-size:.76rem;line-height:1.25;font-weight:700;color:var(--ink);overflow:hidden;cursor:pointer;min-width:0;white-space:nowrap;text-overflow:ellipsis}
+.evb{position:absolute;white-space:normal}
+.evb small{display:block;font-weight:400;color:var(--muted);margin-top:2px}
+.ev-h{font-family:var(--f-data);font-weight:500;font-size:.7rem;margin-right:4px;color:var(--muted)}
+.evb .ev-h{display:block}
+.evb.corto{white-space:nowrap;text-overflow:ellipsis;padding-top:2px;padding-bottom:2px}.evb.corto .ev-h{display:inline}
+.ev.done{opacity:.55;text-decoration:line-through}
+.ev-prog{background:var(--sky-soft);border-color:var(--sky)}
+.ev-busq{background:var(--rose-soft);border-color:var(--rose)}
+.ev-reg{background:var(--accent-soft);border-color:var(--accent)}
+.ev-com{background:var(--warn-bg);border-color:var(--warn)}
+.ev-adm{background:var(--bg);border-color:var(--muted)}
+.ev-ent{background:var(--miss-bg);border-color:var(--miss)}
+.ev-cita{background:var(--surface);border-color:var(--accent);outline:1px dashed var(--accent);outline-offset:-1px}
+.ev-otro{background:var(--surface);border-color:var(--ink);outline:1px solid var(--line);outline-offset:-1px}
+.cal-ley{display:flex;flex-wrap:wrap;gap:6px 14px;font-size:.8rem;color:var(--muted)}
+.cal-ley i{display:inline-block;width:14px;height:12px;border-radius:3px;border-left:4px solid;margin-right:6px;vertical-align:-1px}
+.cal-mes{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));border:1px solid var(--line);border-radius:10px;overflow:hidden;background:var(--surface)}
+.cal-mh{font-size:.72rem;font-weight:700;color:var(--muted);text-align:center;padding:6px 0;border-bottom:1px solid var(--line)}
+.cal-dc{min-height:92px;border-top:1px solid var(--line);border-left:1px solid var(--line);padding:3px;display:flex;flex-direction:column;gap:2px;min-width:0;cursor:pointer}
+.cal-mes>div:nth-child(7n+1){border-left:0}
+.cal-mes>.cal-dc:nth-child(-n+14){border-top:0}
+.cal-dc>b{font-family:var(--f-data);font-size:.78rem;align-self:flex-start;padding:0 4px}
+.cal-dc.fuera{background:var(--bg)}.cal-dc.fuera>b{color:var(--muted)}
+.cal-dc.hoy>b{background:var(--accent);color:var(--accent-ink);border-radius:999px;padding:0 6px}
+.cal-dc .ev{font-size:.66rem;padding:1px 4px;border-left-width:3px}
+.cal-mas{font-size:.66rem;color:var(--muted)}
+.cal-pop{background:var(--surface);border:2px solid var(--accent);border-radius:12px;padding:14px;display:flex;flex-direction:column;gap:10px}
+@media (max-width:520px){.cal-dc{min-height:64px}.cal-dc .ev{font-size:0;height:6px;padding:0;border-left-width:0;border-radius:3px;outline:0}.cal-dc .ev-adm{background:var(--muted)}.cal-dc .ev-prog{background:var(--sky)}.cal-dc .ev-busq{background:var(--rose)}.cal-dc .ev-reg,.cal-dc .ev-cita{background:var(--accent)}.cal-dc .ev-com{background:var(--warn)}.cal-dc .ev-ent{background:var(--miss)}.cal-dc .ev-otro{background:var(--ink)}}
 @media (prefers-reduced-motion:no-preference){.tile,.btn,.notes-pick button{transition:background .15s,border-color .15s,box-shadow .15s}}
 </style>
 
@@ -1267,6 +1313,124 @@ function vnHist(){stopRec();st.view="vnota";const a=vnNotas();
   document.querySelectorAll("[data-vhc]").forEach(b=>b.onclick=()=>{const t=$("vh-"+b.dataset.vhc);try{navigator.clipboard.writeText(t.value).then(()=>{b.textContent="Copiada"},()=>t.select())}catch(e){t.select()}});
   document.querySelectorAll("[data-vhd]").forEach(b=>b.onclick=()=>{if(b.dataset.armed!=="1"){b.dataset.armed="1";b.textContent="¿Seguro? Toca otra vez";return}const x=vnNotas();x.splice(+b.dataset.vhd,1);S.set("dn2_vnotas",JSON.stringify(x));vnHist()})}
 
+/* ======================= CALENDARIO (cronograma día / semana / mes) ======================= */
+const CAL_TIPOS={prog:"Atención programada",busq:"Búsqueda activa",reg:"Registro y reportes",com:"Comunitario / PIC",adm:"Administrativo",ent:"Entrega o fecha límite",cita:"Control de paciente",otro:"Otro"};
+const CAL_FIN="2026-12-31",CAL_H0=6,CAL_H1=19,CAL_HPX=46;
+const CAL_DIAS=["Dom","Lun","Mar","Mié","Jue","Vie","Sáb"];
+let CAL={vista:null,ref:null,form:null};
+function calJ(k,d){try{return JSON.parse(S.get(k)||"null")||d}catch(e){return d}}
+function calConf(){return calJ("dn2_cal_conf",{})}
+function calEnCampo(){const s=calConf().salida;return !!s&&hoy()>=s}
+function calISO(d){return d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0")}
+function calD(iso){const[y,m,d]=iso.split("-").map(Number);return new Date(y,m-1,d)}
+function calAdd(iso,n){const d=calD(iso);d.setDate(d.getDate()+n);return calISO(d)}
+function calMin(h){if(!h)return null;const[a,b]=h.split(":").map(Number);return a*60+(b||0)}
+function calPlanDia(f){const o=[],dow=calD(f).getDay(),c=calConf();
+  if(c.salida&&f===c.salida)o.push({t:"Salida a comunidad",tipo:"ent",nota:"Viaje al punto de atención asignado."});
+  if(c.salida&&f>=c.salida&&f<=CAL_FIN){const P=MD_PLAN[dow],pmT={1:"reg",2:"busq",3:"com",4:"busq",5:"adm"};
+    if(dow>=1&&dow<=5){o.push({t:"Apertura del punto",tipo:"adm",hi:"07:00",hf:"07:30",nota:"Insumos, nevera y temperatura; confirmar citados con el promotor (act. 08 · 14)."});
+      o.push({t:P.am,tipo:"prog",hi:"07:30",hf:"12:00",nota:P.amd});
+      o.push({t:P.pm,tipo:pmT[dow],hi:"14:00",hf:"16:00",nota:[P.pmd,P.pmr].filter(Boolean).join(" · ")});
+      o.push({t:dow===5?"Cierre: Prosoft, escaneo semanal y reunión de equipo":"Cierre: Prosoft y firmas del día",tipo:"reg",hi:"16:00",hf:"17:00",nota:"Todo registrado en Prosoft, formatos firmados y guardados en su carpeta (act. 04 · 17)."})}
+    if(dow===6)o.push({t:"Jornada concertada (si se acordó)",tipo:"com",hi:"07:30",hf:"12:00",nota:P.amd})}
+  MD_ENT.forEach(e=>{const due=e[0],hit=[[0,"Entregar cuenta de cobro + informe + soportes","ent"],[-1,"Imprimir, firmar y unir la cuenta de cobro","adm"],[-2,"Informe de actividades y certificado de supervisión","adm"],[-3,"Escanear lo último y verificar 18 de 18 soportes","adm"],[-5,"Pagar seguridad social y guardar la planilla","adm"],[-6,"Pedir al líder el certificado de permanencia","adm"],[-12,"Proyección y solicitud de medicamentos e insumos","adm"]];
+    hit.forEach(([n,t,tp])=>{if(calAdd(due,n)===f)o.push({t,tipo:tp,nota:"Entrega del "+e[2]+"."})})});
+  if(f===CAL_FIN)o.push({t:"Terminación del contrato 1785",tipo:"ent",nota:"Inventario final, devolución de insumos y entrega del punto."});
+  return o.map((x,i)=>Object.assign(x,{f,src:"plan",key:"p|"+f+"|"+plano(x.t).replace(/[^a-z0-9]+/g,"-").slice(0,40)}))}
+function calEventos(desde,hasta){const out=[],hide=calJ("dn2_cal_hide",{}),done=calJ("dn2_cal_done",{});
+  for(let f=desde;f<=hasta;f=calAdd(f,1))calPlanDia(f).forEach(e=>{if(!hide[e.key])out.push(e)});
+  agenda().filter(x=>!x.ok&&x.prox&&x.prox>=desde&&x.prox<=hasta).forEach(x=>out.push({key:"c|"+x.id,f:x.prox,t:"Control: "+(x.nom||x.doc||"paciente"),tipo:"cita",src:"cita",nota:[x.com,x.mot,x.tel].filter(Boolean).join(" · ")}));
+  calJ("dn2_cal_ev",[]).forEach(e=>{const lim=e.rep==="sem"?(e.hasta||CAL_FIN):e.f;for(let f=e.f;f<=lim&&f<=hasta;f=calAdd(f,7)){if(f>=desde&&!hide["m|"+e.id+"|"+f])out.push(Object.assign({},e,{f,key:"m|"+e.id+"|"+f,src:"mio",id:e.id}));if(e.rep!=="sem")break}});
+  out.forEach(e=>e.done=!!done[e.key]);
+  return out.sort((a,b)=>a.f<b.f?-1:a.f>b.f?1:(calMin(a.hi)??-1)-(calMin(b.hi)??-1))}
+function calLunes(iso){const d=calD(iso),w=(d.getDay()+6)%7;return calAdd(iso,-w)}
+function calEtiq(){const r=CAL.ref,d=calD(r);if(CAL.vista==="mes")return MD_MES[d.getMonth()].replace(/^./,c=>c.toUpperCase())+" "+d.getFullYear();
+  if(CAL.vista==="dia")return MD_DIAS[d.getDay()].replace(/^./,c=>c.toUpperCase())+" "+d.getDate()+" de "+MD_MES[d.getMonth()];
+  const a=calD(calLunes(r)),b=calD(calAdd(calLunes(r),6));return a.getDate()+(a.getMonth()!==b.getMonth()?" "+MD_MES[a.getMonth()].slice(0,3):"")+" – "+b.getDate()+" "+MD_MES[b.getMonth()].slice(0,3)+" "+b.getFullYear()}
+function calChip(e,corto){return `<button type="button" class="ev ev-${e.tipo}${e.done?" done":""}" data-ck="${esc(e.key)}" title="${esc(e.t)}">${e.hi&&!corto?`<span class="ev-h">${esc(e.hi)}</span>`:""}${esc(e.t)}</button>`}
+function calOpen(){stopRec();if(!CAL.vista)CAL.vista=window.innerWidth<640?"dia":"semana";if(!CAL.ref)CAL.ref=hoy();CAL.form=null;calRender();window.scrollTo(0,0)}
+function calRender(){st.view="cal";const c=calConf();
+  $("app").innerHTML=`<div class="top"><button class="back" type="button" id="cal-back">← Inicio</button><span class="tag pc">Calendario</span></div>
+  <header><h1>Cronograma</h1><p class="sub">Actividades proyectadas del contrato, tus controles y lo que vayas programando.</p></header>
+  ${c.salida?`<p class="note-src" style="margin:0">Salida a comunidad: <b>${esc(c.salida.split("-").reverse().join("/"))}</b> · <button class="lnk" type="button" id="cal-sal">Cambiar</button></p>`:`<div class="box warn"><h3>Modo preparación</h3><p style="margin:0 0 8px">El horario de campo se proyecta desde el día en que salgas a comunidad. Escribe la fecha cuando la tengas confirmada.</p><div class="btns"><input type="date" id="cal-sal-in" style="flex:1 1 160px"><button class="btn primary" type="button" id="cal-sal-ok">Guardar fecha</button></div></div>`}
+  <div class="cal-bar">
+   <div class="cal-nav"><button class="btn" type="button" id="cal-prev" aria-label="Anterior">‹</button><button class="btn" type="button" id="cal-hoy">Hoy</button><button class="btn" type="button" id="cal-next" aria-label="Siguiente">›</button><b class="cal-lab">${esc(calEtiq())}</b></div>
+   <div class="cal-seg" role="group" aria-label="Vista">${[["dia","Día"],["semana","Semana"],["mes","Mes"]].map(([v,l])=>`<button type="button" data-cv="${v}" aria-pressed="${CAL.vista===v}">${l}</button>`).join("")}</div>
+  </div>
+  <div class="btns"><button class="btn primary" type="button" id="cal-new">+ Programar actividad</button></div>
+  <div id="cal-panel"></div>
+  <div id="cal-body"></div>
+  <div class="cal-ley">${Object.entries(CAL_TIPOS).map(([k,v])=>`<span><i class="ev-${k}"></i>${esc(v)}</span>`).join("")}</div>
+  <p class="foot">Lo proyectado sale del plan de acción y de las fechas de entrega; tócalo para marcarlo hecho, moverlo o quitarlo. Tus actividades y cambios se guardan en este aparato.</p>`;
+  $("cal-back").onclick=()=>{home();window.scrollTo(0,0)};
+  if($("cal-sal"))$("cal-sal").onclick=()=>{const x=calConf();delete x.salida;S.set("dn2_cal_conf",JSON.stringify(x));calRender()};
+  if($("cal-sal-ok"))$("cal-sal-ok").onclick=()=>{const v=$("cal-sal-in").value;if(!v)return;const x=calConf();x.salida=v;S.set("dn2_cal_conf",JSON.stringify(x));CAL.ref=v;calRender()};
+  const paso={dia:1,semana:7,mes:0};
+  $("cal-prev").onclick=()=>{if(CAL.vista==="mes"){const d=calD(CAL.ref);d.setDate(1);d.setMonth(d.getMonth()-1);CAL.ref=calISO(d)}else CAL.ref=calAdd(CAL.ref,-paso[CAL.vista]);calRender()};
+  $("cal-next").onclick=()=>{if(CAL.vista==="mes"){const d=calD(CAL.ref);d.setDate(1);d.setMonth(d.getMonth()+1);CAL.ref=calISO(d)}else CAL.ref=calAdd(CAL.ref,paso[CAL.vista]);calRender()};
+  $("cal-hoy").onclick=()=>{CAL.ref=hoy();calRender()};
+  document.querySelectorAll("[data-cv]").forEach(b=>b.onclick=()=>{CAL.vista=b.dataset.cv;calRender()});
+  $("cal-new").onclick=()=>calForm({f:CAL.vista==="mes"?hoy():CAL.ref,hi:"08:00",hf:"09:00",tipo:"otro"});
+  CAL.vista==="mes"?calMes():calGrid(CAL.vista==="dia"?[CAL.ref]:Array.from({length:7},(_,i)=>calAdd(calLunes(CAL.ref),i)));
+  document.querySelectorAll("[data-ck]").forEach(b=>b.onclick=ev=>{ev.stopPropagation();calDetalle(b.dataset.ck)})}
+function calGrid(dias){const ev=calEventos(dias[0],dias[dias.length-1]),H=(CAL_H1-CAL_H0)*CAL_HPX,h=hoy(),uno=dias.length===1;
+  const col=f=>{const tm=ev.filter(e=>e.f===f&&e.hi).map(e=>Object.assign({},e,{a:calMin(e.hi),b:Math.max(calMin(e.hf||e.hi)||0,calMin(e.hi)+30)}));
+    const lanes=[];tm.forEach(e=>{let l=lanes.findIndex(z=>z<=e.a);if(l<0){l=lanes.length;lanes.push(0)}lanes[l]=e.b;e.l=l});const n=Math.max(1,lanes.length);
+    return tm.map(e=>{const top=(e.a-CAL_H0*60)/60*CAL_HPX,hgt=Math.max(22,(e.b-e.a)/60*CAL_HPX-2);return `<button type="button" class="ev ev-${e.tipo} evb${e.b-e.a<=45?" corto":""}${e.done?" done":""}" data-ck="${esc(e.key)}" style="top:${top}px;height:${hgt}px;left:calc(${e.l*100/n}% + 2px);width:calc(${100/n}% - 4px)"><span class="ev-h">${esc(e.hi)}${e.hf?"–"+esc(e.hf):""}</span>${esc(e.t)}${uno&&e.nota?`<small>${esc(e.nota)}</small>`:""}</button>`}).join("")};
+  $("cal-body").innerHTML=`<div class="cal-scroll"><div class="cal-wk${uno?" uno":""}" style="--n:${dias.length}">
+   <div class="cal-hd"></div>${dias.map(f=>`<div class="cal-hd${f===h?" hoy":""}"><span>${CAL_DIAS[calD(f).getDay()]}</span><b>${calD(f).getDate()}</b></div>`).join("")}
+   <div class="cal-ad lab">Todo el día</div>${dias.map(f=>`<div class="cal-ad">${ev.filter(e=>e.f===f&&!e.hi).map(e=>calChip(e)).join("")}</div>`).join("")}
+   <div class="cal-hrs" style="height:${H}px">${Array.from({length:CAL_H1-CAL_H0},(_,i)=>`<span style="top:${i*CAL_HPX}px">${CAL_H0+i}:00</span>`).join("")}</div>
+   ${dias.map(f=>`<div class="cal-col${f===h?" hoy":""}" data-cf="${f}" style="height:${H}px;background-size:100% ${CAL_HPX}px">${col(f)}</div>`).join("")}
+  </div></div>`;
+  document.querySelectorAll("[data-cf]").forEach(c=>c.onclick=e=>{if(e.target!==c)return;const y=e.offsetY,m=Math.floor(y/CAL_HPX*2)/2,hh=CAL_H0+m,hi=String(Math.floor(hh)).padStart(2,"0")+":"+(hh%1?"30":"00"),hf=String(Math.floor(hh+1)).padStart(2,"0")+":"+(hh%1?"30":"00");calForm({f:c.dataset.cf,hi,hf,tipo:"otro"})});
+  const sc=document.querySelector(".cal-scroll");if(sc&&uno===false){}
+}
+function calMes(){const d=calD(CAL.ref);d.setDate(1);const ini=calLunes(calISO(d)),fin=calAdd(ini,41),ev=calEventos(ini,fin),mes=d.getMonth(),h=hoy();
+  $("cal-body").innerHTML=`<div class="cal-mes">${["Lun","Mar","Mié","Jue","Vie","Sáb","Dom"].map(x=>`<div class="cal-mh">${x}</div>`).join("")}${Array.from({length:42},(_,i)=>{const f=calAdd(ini,i),fd=calD(f),es=ev.filter(e=>e.f===f),pri=es.filter(e=>!e.hi||e.tipo==="ent").concat(es.filter(e=>e.hi&&e.tipo!=="ent"));
+    return `<div class="cal-dc${fd.getMonth()!==mes?" fuera":""}${f===h?" hoy":""}" data-cd="${f}"><b>${fd.getDate()}</b>${pri.slice(0,3).map(e=>calChip(e,true)).join("")}${pri.length>3?`<span class="cal-mas">+${pri.length-3} más</span>`:""}</div>`}).join("")}</div>`;
+  document.querySelectorAll("[data-cd]").forEach(c=>c.onclick=e=>{if(e.target.closest("[data-ck]"))return;CAL.ref=c.dataset.cd;CAL.vista="dia";calRender()})}
+function calBuscar(key){const p=key.split("|"),f=p[0]==="c"?null:p[p.length-1].match(/^\d{4}-/)?p[p.length-1]:p[1];
+  if(p[0]==="p")return calPlanDia(p[1]).find(e=>e.key===key);
+  if(p[0]==="m"){const e=calJ("dn2_cal_ev",[]).find(x=>x.id===p[1]);return e?Object.assign({},e,{f:p[2],key,src:"mio"}):null}
+  const a=agenda().find(x=>x.id===p[1]);return a?{key,f:a.prox,t:"Control: "+(a.nom||a.doc||"paciente"),tipo:"cita",src:"cita",nota:[a.com,a.mot,a.tel].filter(Boolean).join(" · ")}:null}
+function calDetalle(key){const e=calBuscar(key);if(!e)return;const done=calJ("dn2_cal_done",{});
+  $("cal-panel").innerHTML=`<div class="cal-pop"><p class="lab">${esc(CAL_TIPOS[e.tipo]||"")}${e.src==="plan"?" · proyectada":e.src==="mio"?(e.rep==="sem"?" · se repite cada semana":" · programada por ti"):""}</p>
+   <h2>${esc(e.t)}</h2><p class="sub" style="margin:0">${esc(e.f.split("-").reverse().join("/"))}${e.hi?" · "+esc(e.hi)+(e.hf?" a "+esc(e.hf):""):" · todo el día"}</p>
+   ${e.nota?`<p style="margin:0">${esc(e.nota)}</p>`:""}
+   <label class="check"><input type="checkbox" id="cal-done"${done[key]?" checked":""}> Hecho</label>
+   <div class="btns">${e.src!=="cita"?`<button class="btn" type="button" id="cal-edit">${e.src==="plan"?"Mover o cambiar":"Editar"}</button><button class="btn" type="button" id="cal-del">${e.src==="plan"?"Quitar de este día":e.rep==="sem"?"Quitar solo este día":"Eliminar"}</button>`:""}${e.src==="mio"&&e.rep==="sem"?`<button class="btn" type="button" id="cal-delall">Eliminar toda la serie</button>`:""}<button class="btn" type="button" id="cal-x">Cerrar</button></div></div>`;
+  $("cal-panel").scrollIntoView({block:"nearest",behavior:"smooth"});
+  $("cal-x").onclick=()=>{$("cal-panel").innerHTML=""};
+  $("cal-done").onchange=ev=>{const d=calJ("dn2_cal_done",{});if(ev.target.checked)d[key]=1;else delete d[key];S.set("dn2_cal_done",JSON.stringify(d));calRender()};
+  const hide=()=>{const h=calJ("dn2_cal_hide",{});h[key]=1;S.set("dn2_cal_hide",JSON.stringify(h))};
+  if($("cal-edit"))$("cal-edit").onclick=()=>e.src==="plan"?calForm({f:e.f,hi:e.hi||"",hf:e.hf||"",tipo:e.tipo,t:e.t,nota:e.nota||"",reemplaza:key}):calForm(Object.assign({},calJ("dn2_cal_ev",[]).find(x=>x.id===e.id)));
+  if($("cal-del"))$("cal-del").onclick=()=>{const b=$("cal-del");if(b.dataset.armed!=="1"){b.dataset.armed="1";b.textContent="¿Seguro? Toca otra vez";return}
+    if(e.src==="mio"&&e.rep!=="sem"){S.set("dn2_cal_ev",JSON.stringify(calJ("dn2_cal_ev",[]).filter(x=>x.id!==e.id)))}else hide();calRender()};
+  if($("cal-delall"))$("cal-delall").onclick=()=>{const b=$("cal-delall");if(b.dataset.armed!=="1"){b.dataset.armed="1";b.textContent="¿Borrar la serie? Toca otra vez";return}S.set("dn2_cal_ev",JSON.stringify(calJ("dn2_cal_ev",[]).filter(x=>x.id!==e.id)));calRender()}}
+function calForm(v){const td=!v.hi;
+  $("cal-panel").innerHTML=`<form class="cal-pop" id="cal-fm"><h2>${v.id?"Editar actividad":v.reemplaza?"Mover o cambiar":"Programar actividad"}</h2>
+   <label class="bfl" for="cf-t"><span>Qué vas a hacer</span><input id="cf-t" required value="${esc(v.t||"")}" placeholder="Reunión con el capitán de Querarí"></label>
+   <div class="frow"><label for="cf-f">Fecha<input type="date" id="cf-f" required value="${esc(v.f||hoy())}"></label>
+    <label for="cf-hi">Desde<input type="time" id="cf-hi" value="${esc(v.hi||"")}"${td?" disabled":""}></label>
+    <label for="cf-hf">Hasta<input type="time" id="cf-hf" value="${esc(v.hf||"")}"${td?" disabled":""}></label></div>
+   <label class="check"><input type="checkbox" id="cf-td"${td?" checked":""}> Todo el día</label>
+   <div class="frow"><label for="cf-tp">Tipo<select id="cf-tp">${Object.entries(CAL_TIPOS).filter(([k])=>k!=="cita").map(([k,l])=>`<option value="${k}"${v.tipo===k?" selected":""}>${esc(l)}</option>`).join("")}</select></label>
+    <label for="cf-rp">Repetir<select id="cf-rp"${v.reemplaza?" disabled":""}><option value="no">No se repite</option><option value="sem"${v.rep==="sem"?" selected":""}>Cada semana hasta el 31 de diciembre</option></select></label></div>
+   <label class="bfl" for="cf-n"><span>Nota (opcional)</span><textarea id="cf-n" rows="2" style="min-height:60px">${esc(v.nota||"")}</textarea></label>
+   <div class="btns"><button class="btn primary" type="submit">Guardar</button><button class="btn" type="button" id="cf-x">Cancelar</button></div>
+   <p class="status" id="cf-st"></p></form>`;
+  $("cal-panel").scrollIntoView({block:"nearest",behavior:"smooth"});$("cf-t").focus();
+  $("cf-td").onchange=e=>{$("cf-hi").disabled=$("cf-hf").disabled=e.target.checked};
+  $("cf-x").onclick=()=>{$("cal-panel").innerHTML=""};
+  $("cal-fm").onsubmit=e=>{e.preventDefault();const t=$("cf-t").value.trim(),f=$("cf-f").value;if(!t||!f){$("cf-st").textContent="Escribe qué vas a hacer y la fecha.";return}
+    const allday=$("cf-td").checked,hi=allday?"":$("cf-hi").value,hf=allday?"":$("cf-hf").value;if(!allday&&!hi){$("cf-st").textContent="Pon la hora de inicio o marca «Todo el día».";return}
+    if(hf&&hi&&hf<=hi){$("cf-st").textContent="La hora final debe ser después de la inicial.";return}
+    const L=calJ("dn2_cal_ev",[]).filter(x=>x.id!==v.id),o={id:v.id||uid(),t,f,hi,hf,tipo:$("cf-tp").value,rep:v.reemplaza?"no":$("cf-rp").value,nota:$("cf-n").value.trim()};
+    L.push(o);S.set("dn2_cal_ev",JSON.stringify(L));
+    if(v.reemplaza){const h=calJ("dn2_cal_hide",{});h[v.reemplaza]=1;S.set("dn2_cal_hide",JSON.stringify(h))}
+    CAL.ref=f;calRender()}}
+
 /* ---------- MI DÍA: secretaria diaria del contrato 1785 ---------- */
 const MD_PLAN={
  1:{am:"Primera infancia e infancia (0–11)",amd:"Valoración integral C y D, agudeza visual, educación PAI y lactancia",mods:["pinf","inf"],pm:"SIVIGILA de la semana epidemiológica",pmd:"Notificación semanal y revisión de nacidos vivos y defunciones",pmr:"act. 12 · 13"},
@@ -1283,10 +1447,11 @@ function mdFecha(iso){const[y,m,d]=iso.split("-").map(Number);return new Date(y,
 function mdPeriodo(){const h=hoy();return MD_ENT.find(e=>e[0]>=h)||MD_ENT[MD_ENT.length-1]}
 function mdDias(){const e=mdPeriodo();return Math.round((mdFecha(e[0])-mdFecha(hoy()))/86400000)}
 function mdTareas(){const d=new Date().getDay(),r=mdDias(),t=[];
-  if(d>=1&&d<=5){t.push("Abrir el punto: insumos, nevera y temperatura anotada (act. 08)","Confirmar con el promotor los citados de hoy (act. 14)","Cada atención con su formato firmado o con huella del usuario","Todo registrado en Prosoft antes de cerrar (act. 04)","Fotos de evidencia del día guardadas (act. 17)")}
-  if(d===1)t.push("Reportar SIVIGILA de la semana, aunque sea notificación negativa (act. 12)");
-  if(d===5)t.push("Escanear a PDF todos los formatos de la semana","Reunión con auxiliares y promotores con lista firmada (act. 14)","Revisar kardex, lotes y vencimientos (act. 07 · 08)");
-  if(d===6)t.push("Si hubo jornada: lista o certificado firmado por el líder (act. 02)");
+  if(!calEnCampo())t.push("Avanzar en la lista «Antes de salir» del plan de acción","Confirmar fecha de salida, comunidad y transporte con la ESE");
+  if(d>=1&&d<=5&&calEnCampo()){t.push("Abrir el punto: insumos, nevera y temperatura anotada (act. 08)","Confirmar con el promotor los citados de hoy (act. 14)","Cada atención con su formato firmado o con huella del usuario","Todo registrado en Prosoft antes de cerrar (act. 04)","Fotos de evidencia del día guardadas (act. 17)")}
+  if(d===1&&calEnCampo())t.push("Reportar SIVIGILA de la semana, aunque sea notificación negativa (act. 12)");
+  if(d===5&&calEnCampo())t.push("Escanear a PDF todos los formatos de la semana","Reunión con auxiliares y promotores con lista firmada (act. 14)","Revisar kardex, lotes y vencimientos (act. 07 · 08)");
+  if(d===6&&calEnCampo())t.push("Si hubo jornada: lista o certificado firmado por el líder (act. 02)");
   if(d===0)t.push("Revisar cuántos soportes van de los 18");
   if(r>=11&&r<=13)t.push("Hacer la proyección y solicitud de medicamentos e insumos (act. 06)");
   if(r>=4&&r<=10)t.push("Pedir al líder el certificado de permanencia (act. 02)","Hacer constancias de «no se presentaron eventos» donde no hubo","Pagar seguridad social y guardar la planilla");
@@ -1304,14 +1469,14 @@ function miDiaHTML(){const n=new Date(),d=n.getDay(),P=MD_PLAN[d],e=mdPeriodo(),
   const mods=P.mods.length?`<div class="md-mods">${P.mods.map(m=>`<button type="button" data-mod="${m}">${esc(M[m].title)} →</button>`).join("")}</div>`:"";
   return `<section class="midia" aria-labelledby="md-h">
    <div class="md-top"><h2 id="md-h">Mi día · ${MD_DIAS[d]} ${n.getDate()} de ${MD_MES[n.getMonth()]}</h2><span class="md-cd${r<=3?" urg":""}">${cd}</span></div>
-   <div class="md-blk">
+   ${calEnCampo()?"":mdPrepHTML()}<div class="md-blk"${calEnCampo()?"":" hidden"}>
     <div class="md-b${pm?"":" now"}"><p class="lab">Mañana · 7:30 a 12:00</p><b>${esc(P.am)}</b><small>${esc(P.amd)}</small>${mods}</div>
     <div class="md-b${pm?" now":""}"><p class="lab">Tarde · 14:00 a 17:00</p><b>${esc(P.pm)}</b>${P.pmd?`<small>${esc(P.pmd)}</small>`:""}${P.pmr?`<span class="ref">${P.pmr}</span>`:""}</div>
    </div>
    <div class="md-stats"><span class="chip"><b>Hoy</b>${st.hoy} registros</span><span class="chip"><b>Periodo</b>${st.per} registros</span>${st.venc?`<span class="chip alert"><b>Citas</b>${st.venc} vencidas o para hoy</span>`:""}<span class="chip"><b>Soportes</b>${sop} / 18</span></div>
    ${T.length?`<details class="sec" id="md-tdet" open><summary>Tareas de hoy <span class="cnt" id="md-tc">${hechas} / ${T.length}</span></summary><ul class="items">${T.map((x,i)=>`<li><input type="checkbox" id="md-t${i}" data-mdt="${esc(x)}"${tk[x]?" checked":""}><label for="md-t${i}"><span>${esc(x)}</span></label></li>`).join("")}</ul></details>`:""}
    <details class="sec"><summary>Soportes para la entrega del ${esc(e[2])} <span class="cnt" id="md-sc">${sop} / 18</span></summary><ul class="items">${MD_SOP.map((x,i)=>`<li><input type="checkbox" id="md-s${i}" data-mds="${x.slice(0,2)}"${sk[x.slice(0,2)]?" checked":""}><label for="md-s${i}"><span>${esc(x)}</span></label></li>`).join("")}</ul><p class="note-src" style="padding:0 14px 12px">Marca cuando el soporte de esa actividad ya esté firmado y escaneado. Si no hubo eventos, cuenta la constancia firmada.</p></details>
-   <div class="btns"><button type="button" class="btn" id="md-copy">Copiar resumen para Claude</button></div>
+   <div class="btns"><button type="button" class="btn primary" id="md-cal">Ver calendario</button><button type="button" class="btn" id="md-copy">Copiar resumen para Claude</button></div>
    <p class="status" id="md-st" aria-live="polite"></p>
   </section>`}
 function mdResumen(){const n=new Date(),e=mdPeriodo(),st=mdStats(),T=mdTareas(),tk=mdGet("dn2_midia_"+hoy()),sk=mdGet("dn2_sop_"+e[0]);
@@ -1321,7 +1486,8 @@ function mdResumen(){const n=new Date(),e=mdPeriodo(),st=mdStats(),T=mdTareas(),
   if(T.length){L.push("Tareas hechas: "+T.filter(x=>tk[x]).length+" / "+T.length);const p=T.filter(x=>!tk[x]);if(p.length)L.push("Tareas pendientes: "+p.join("; "))}
   const fs=MD_SOP.filter(x=>!sk[x.slice(0,2)]);L.push("Soportes listos: "+(18-fs.length)+" / 18");if(fs.length)L.push("Soportes que faltan: "+fs.map(x=>x.slice(0,2)).join(", "));
   return L.join("\n")}
-function wireMiDia(){
+function mdPrepHTML(){const s=calConf().salida,n=s?Math.round((calD(s)-calD(hoy()))/864e5):null;return `<div class="md-b now"><p class="lab">Modo preparación</p><b>${s?(n===1?"Falta 1 día para salir a comunidad":"Faltan "+n+" días para salir a comunidad"):"Aún sin fecha de salida a comunidad"}</b><small>Formatos en blanco, medicamentos e insumos con acta, inventario inicial, equipos, contactos del líder y el promotor, Prosoft probado. ${s?"":"Pon la fecha de salida en el calendario para proyectar el horario de campo."}</small></div>`}
+function wireMiDia(){const cb=$("md-cal");if(cb)cb.onclick=calOpen;
   document.querySelectorAll("[data-mdt]").forEach(c=>c.onchange=()=>{const k="dn2_midia_"+hoy(),o=mdGet(k);if(c.checked)o[c.dataset.mdt]=1;else delete o[c.dataset.mdt];S.set(k,JSON.stringify(o));const T=mdTareas();$("md-tc").textContent=T.filter(x=>o[x]).length+" / "+T.length});
   document.querySelectorAll("[data-mds]").forEach(c=>c.onchange=()=>{const k="dn2_sop_"+mdPeriodo()[0],o=mdGet(k);if(c.checked)o[c.dataset.mds]=1;else delete o[c.dataset.mds];S.set(k,JSON.stringify(o));const n=MD_SOP.filter(x=>o[x.slice(0,2)]).length;$("md-sc").textContent=n+" / 18";document.querySelectorAll(".md-stats .chip").forEach(ch=>{if(ch.firstChild&&ch.firstChild.textContent==="Soportes")ch.lastChild.textContent=n+" / 18"})});
   const b=$("md-copy");if(b)b.onclick=()=>{const t=mdResumen(),ok=()=>{$("md-st").textContent="Resumen copiado. Pégalo en el chat con Claude."};
@@ -1329,7 +1495,7 @@ function wireMiDia(){
 function mdShow(t){const s=$("md-st");s.innerHTML="";const a=document.createElement("textarea");a.value=t;a.rows=7;a.readOnly=true;s.append("No se pudo copiar solo. Mantén presionado el texto y cópialo:",a);a.focus();a.select()}
 
 /* ---------- PANEL ---------- */
-const VERSION_APP="2026-10-17 v150";
+const VERSION_APP="2026-10-17 v151";
 function home(){
   stopRec();st.view="home";
   const rm=["precon","prenatal","parto","rn","ive"],rp=["pinf","inf","adol","juv","adul","vej"];
