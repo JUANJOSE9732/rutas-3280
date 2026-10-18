@@ -1138,23 +1138,44 @@ const VN={
   {k:"repro",q:"Aparato reproductor",def:"NO SE EXPLORA",o:["NO SE EXPLORA","INTEGRO"]},
   {k:"mamo",q:"Mamografía (50 a 69 años, cada 2 años)",def:(v,P)=>{const e=vnEdadA(v,P);return e>=50&&e<=69?"SE ORDENA MAMOGRAFIA":"NO APLICA POR EDAD"},o:["SE ORDENA MAMOGRAFIA","MAMOGRAFIA VIGENTE","NO APLICA POR EDAD"]},
   Q.control("1 AÑO"),Q.extra],
-  b:(v,P,I)=>{const ok=vnEsNormal(v.mamas),rp=!vnEsNormal(v.antper)||!vnEsNormal(v.antfam),sx=!vnEsNormal(v.sint),e=vnEdadA(v,P);
-   const ef=vnEF({ef:v.efo}).replace("APARIENCIA: BUEN ESTADO GENERAL","APARIENCIA: BUEN ESTADO GENERAL, CONSCIENTE, ORIENTADA Y COLABORADORA").replace("APARATO REPRODUCTOR: INTEGRO","APARATO REPRODUCTOR: "+VN_U(v.repro||"NO SE EXPLORA")).replace("MAMAS: NORMALES","MAMAS: PREVIO CONSENTIMIENTO VERBAL Y EN AMBIENTE PRIVADO. "+(ok?"INSPECCION SENTADA EN TRES POSICIONES: MAMAS SIMETRICAS, SIN RETRACCIONES, PIEL SIN EDEMA, ERITEMA NI ULCERAS, PEZONES SIN RETRACCION NI SECRECION. PALPACION EN DECUBITO POR FRANJAS VERTICALES CON TRES NIVELES DE PRESION, INCLUYENDO COLA AXILAR Y COMPLEJO AREOLA-PEZON: NO SE PALPAN MASAS. GANGLIOS AXILARES, SUPRA E INFRACLAVICULARES NO PALPABLES.":"INSPECCION SENTADA EN TRES POSICIONES Y PALPACION EN DECUBITO POR FRANJAS VERTICALES CON TRES NIVELES DE PRESION: "+VN_U(v.mamas)+"."));
-   const mm=VN_U(v.mamo);
-   return vnL([`PACIENTE FEMENINA DE ${I.edad} AÑOS, ETNIA ${I.etnia}, PROCEDENTE DE ${I.com}, QUIEN ACUDE PARA EXAMEN CLINICO DE MAMA (ECM) DE TAMIZAJE PARA DETECCION TEMPRANA DE CANCER DE MAMA. ${sx?"REFIERE: "+VN_U(v.sint)+".":"ASINTOMATICA: NIEGA MASAS, DOLOR, SECRECION POR PEZON O CAMBIOS EN PIEL O FORMA DE LAS MAMAS."}`,
-    `ANTECEDENTES PERSONALES DE CANCER DE MAMA, BIOPSIAS O RADIOTERAPIA EN TORAX: ${VN_U(v.antper)}. FAMILIARES DE CANCER DE MAMA U OVARIO (MADRE, HERMANA, HIJA): ${VN_U(v.antfam)}.`,
-    `${VN_U(v.gpcav)}. FUR: ${VN_U(v.fur)}. METODO DE PLANIFICACION: ${VN_U(v.metodo)}.`,
-    `ULTIMO ECM: ${VN_U(v.ecmant)}. ULTIMA MAMOGRAFIA: ${VN_U(v.mamoant)}.`,vnSV(v),"","EXAMEN FISICO:",ef,"","ANALISIS:",
-    ok&&!sx&&!rp?"USUARIA ASINTOMATICA, SIN FACTORES DE RIESGO PERSONALES NI HEREDOFAMILIARES IDENTIFICADOS, CON ECM NORMAL, EN EL MARCO DE LA RUTA DE PROMOCION Y MANTENIMIENTO DE LA SALUD (RES. 3280 DE 2018, NUMERAL 10). SE EXPLICAN LOS HALLAZGOS DE FORMA SENCILLA Y SE VERIFICA COMPRENSION.":"",
-    !ok?`SE IDENTIFICA HALLAZGO EN EL ECM: ${VN_U(v.mamas)}. SE SOLICITA ECOGRAFIA Y/O MAMOGRAFIA SEGUN EDAD Y SE REMITE A VALORACION MEDICA PRIORITARIA (RES. 3280 DE 2018, NUMERAL 10.9).`:"",
-    ok&&sx?`ECM SIN HALLAZGOS, PERO REFIERE SINTOMAS (${VN_U(v.sint)}): SE REMITE A VALORACION MEDICA.`:"",
-    rp?"SE IDENTIFICA FACTOR DE RIESGO PERSONAL O HEREDOFAMILIAR: SE DERIVA A LA RUTA INTEGRAL DE ATENCION DE CANCER DE MAMA PARA VALORACION MEDICA (RES. 3280 DE 2018, NUMERAL 10.5).":"",
-    "","PLAN:",!ok||sx?"1. VALORACION MEDICA PRIORITARIA; ECM ANUAL UNA VEZ DEFINIDA LA CONDUCTA.":`1. ECM ANUAL: PROXIMO CONTROL EN ${VN_U(v.control)}.`,
-    `2. MAMOGRAFIA BILATERAL CADA 2 AÑOS DE LOS 50 A LOS 69 AÑOS: ${mm}.`,
+  idSiempre:1,
+  aviso:(v,P)=>{const sx=vnSexo(v,P),e=vnEdadA(v,P);return sx==="M"?"El paciente seleccionado está registrado como hombre. Si es otra persona, vuelve al inicio y selecciona a la paciente correcta.":e<18?`La paciente tiene ${e} años: el examen clínico de mama de tamizaje es desde los 40 años (Res. 3280, 10.2). Verifica que sea la persona correcta.`:""},
+  b:(v,P,I)=>{const q0=k=>VN.mama.qs.find(x=>x&&x.k===k),D=k=>v[k]!=null&&v[k]!==""?v[k]:(q=>q?(typeof q.def==="function"?q.def(v,P):(q.def||"")):"")(q0(k)),U=k=>VN_U(D(k));
+   const ok=vnEsNormal(D("mamas")),rp=!vnEsNormal(D("antper"))||!vnEsNormal(D("antfam")),sx=!vnEsNormal(D("sint")),e=vnEdadA(v,P),anorm=!ok||sx||rp,mm=U("mamo");
+   const ef=vnEF({ef:D("efo")}).replace("APARIENCIA: BUEN ESTADO GENERAL","APARIENCIA: BUEN ESTADO GENERAL, CONSCIENTE, ORIENTADA Y COLABORADORA").replace("APARATO REPRODUCTOR: INTEGRO","APARATO REPRODUCTOR: "+U("repro")).replace("MAMAS: NORMALES","MAMAS: PREVIO CONSENTIMIENTO VERBAL Y EN AMBIENTE PRIVADO. "+(ok?"INSPECCION SENTADA EN TRES POSICIONES: MAMAS SIMETRICAS, SIN RETRACCIONES, PIEL SIN EDEMA, ERITEMA NI ULCERAS, PEZONES SIN RETRACCION NI SECRECION. PALPACION EN DECUBITO POR FRANJAS VERTICALES CON TRES NIVELES DE PRESION, INCLUYENDO COLA AXILAR Y COMPLEJO AREOLA-PEZON: NO SE PALPAN MASAS. GANGLIOS AXILARES, SUPRA E INFRACLAVICULARES NO PALPABLES.":"INSPECCION SENTADA EN TRES POSICIONES Y PALPACION EN DECUBITO POR FRANJAS VERTICALES CON TRES NIVELES DE PRESION: "+U("mamas")+"."));
+   const prox=fMas(hoy(),365);
+   /* sugerencias por edad (Res. 3280 de 2018) */
+   const sg=[];
+   if(e>=25&&e<30)sg.push("TAMIZAJE DE CANCER DE CUELLO UTERINO: CITOLOGIA, ESQUEMA 1-3-3, SI NO ESTA VIGENTE.");
+   if(e>=30&&e<=65)sg.push("TAMIZAJE DE CANCER DE CUELLO UTERINO: ADN-VPH, ESQUEMA 1-5-5, SI NO ESTA VIGENTE.");
+   if(e>=18)sg.push("TAMIZAJE DE RIESGO CARDIOVASCULAR Y METABOLICO (GLICEMIA, PERFIL LIPIDICO, CREATININA, UROANALISIS) CADA 5 AÑOS, CON VALORACION INTEGRAL POR MEDICINA.");
+   if(e>=50&&e<=75)sg.push("SANGRE OCULTA EN MATERIA FECAL CADA 2 AÑOS.");
+   if(e<50&&/NINGUN|NIEGA|^$/.test(U("metodo"))&&!/MENOPAUS/.test(U("fur")))sg.push("ASESORIA EN ANTICONCEPCION.");
+   sg.push("PRUEBA RAPIDA DE VIH Y HEPATITIS B SEGUN EXPOSICION AL RIESGO; VACUNACION SEGUN ESQUEMA PAI.");
+   const der=[];
+   if(!ok)der.push("REMISION PRIORITARIA A MEDICINA GENERAL CON ECOGRAFIA DE MAMA Y/O MAMOGRAFIA SEGUN EDAD (RES. 3280, 10.9).");
+   if(ok&&sx)der.push("VALORACION POR MEDICINA GENERAL POR SINTOMAS MAMARIOS REFERIDOS.");
+   if(rp)der.push("DERIVACION A LA RUTA INTEGRAL DE ATENCION DE CANCER DE MAMA POR FACTOR DE RIESGO PERSONAL O HEREDOFAMILIAR (RES. 3280, 10.5).");
+   const datos=vnL([`PACIENTE FEMENINA DE ${I.edad} AÑOS, ETNIA ${I.etnia}, PROCEDENTE DE ${I.com}, QUIEN ACUDE PARA EXAMEN CLINICO DE MAMA (ECM) DE TAMIZAJE PARA DETECCION TEMPRANA DE CANCER DE MAMA. ${sx?"REFIERE: "+U("sint")+".":"ASINTOMATICA: NIEGA MASAS, DOLOR, SECRECION POR PEZON O CAMBIOS EN PIEL O FORMA DE LAS MAMAS."}`,
+    `ANTECEDENTES PERSONALES DE CANCER DE MAMA, BIOPSIAS O RADIOTERAPIA EN TORAX: ${U("antper")}. FAMILIARES DE CANCER DE MAMA U OVARIO (MADRE, HERMANA, HIJA): ${U("antfam")}.`,
+    `PARIDAD: ${U("gpcav")}. FUR: ${U("fur")||"___"}. METODO DE PLANIFICACION: ${U("metodo")}.`,
+    `ULTIMO ECM: ${U("ecmant")}. ULTIMA MAMOGRAFIA: ${U("mamoant")}.`,vnSV(v)]);
+   const analisis=vnL(["ANALISIS:",
+    !anorm?"USUARIA ASINTOMATICA, SIN FACTORES DE RIESGO PERSONALES NI HEREDOFAMILIARES IDENTIFICADOS, CON ECM NORMAL, EN EL MARCO DE LA RUTA DE PROMOCION Y MANTENIMIENTO DE LA SALUD (RES. 3280 DE 2018, NUMERAL 10).":"",
+    !ok?`SE IDENTIFICA HALLAZGO EN EL ECM: ${U("mamas")}.`:"",
+    ok&&sx?`ECM SIN HALLAZGOS, PERO REFIERE SINTOMAS: ${U("sint")}.`:"",
+    rp?"SE IDENTIFICA FACTOR DE RIESGO PERSONAL O HEREDOFAMILIAR PARA CANCER DE MAMA.":"",
+    "SE EXPLICAN LOS HALLAZGOS DE FORMA SENCILLA Y SE VERIFICA COMPRENSION."]);
+   const plan=vnL(["PLAN:",
+    !ok||sx?"1. VALORACION MEDICA PRIORITARIA; ECM ANUAL UNA VEZ DEFINIDA LA CONDUCTA.":`1. ECM ANUAL: PROXIMO CONTROL EN ${U("control")}${/1 A/.test(U("control"))?" ("+prox+")":""}.`,
+    `2. MAMOGRAFIA BILATERAL CADA 2 AÑOS DE LOS 50 A LOS 69 AÑOS: ${mm}${/VIGENTE/.test(mm)?" (PROXIMA A LOS 2 AÑOS DE LA ULTIMA)":""}.`,
     "3. SE EDUCA EN FACTORES DE RIESGO Y AUTOEXAMEN MENSUAL (UNA SEMANA DESPUES DE LA MENSTRUACION O EN FECHA FIJA EN LA MENOPAUSIA), ACLARANDO QUE NO REEMPLAZA EL TAMIZAJE. SIGNOS DE ALARMA PARA CONSULTAR: MASA EN MAMA O AXILA, ENGROSAMIENTO O CAMBIO DE COLOR DE LA PIEL, RETRACCION O ULCERA DEL PEZON, ASIMETRIA NUEVA, SECRECION ESPONTANEA O SANGRADO POR EL PEZON.",
     "4. ESTILO DE VIDA SALUDABLE: ALIMENTACION BALANCEADA SEGUN DIETA TRADICIONAL, ACTIVIDAD FISICA 30 MINUTOS AL DIA, EVITAR ALCOHOL Y TABACO, CUIDADO DE LA SALUD MENTAL Y REDES DE APOYO, HIGIENE Y LAVADO DE MANOS.",
     "5. SE ENTREGA CARNE DE TAMIZAJE Y SE REGISTRA FECHA, TIPO DE EXAMEN Y RESULTADO.",
-    "PACIENTE TOLERA LA EXPLORACION SIN MOLESTIAS, COMPRENDE Y ACEPTA LAS INDICACIONES.",vnEsNormal(v.extra)?"":VN_U(v.extra)])}},
+    der.length?"REMISIONES Y DERIVACIONES:\n"+der.map(x=>"- "+x).join("\n"):"",
+    "SUGERENCIAS SEGUN EDAD (VERIFICAR VIGENCIA EN EL SISTEMA):\n"+sg.map(x=>"- "+x).join("\n"),
+    "PACIENTE TOLERA LA EXPLORACION SIN MOLESTIAS, COMPRENDE Y ACEPTA LAS INDICACIONES.",vnEsNormal(D("extra"))?"":U("extra")]);
+   return [datos,"EXAMEN FISICO:\n"+ef,analisis,plan].join("\n\n")}},
  av:{g:"Cursos de vida",t:"Agudeza visual",who:"Tamizaje con Snellen",qs:[
   {k:"acomp",q:"¿Quién acompaña al menor?",def:"MADRE",o:["MADRE","PADRE","CUIDADOR"],c:(v,P)=>vnEdadA(v,P)<18},
   {k:"sint",q:"¿Síntomas visuales, dolor, enrojecimiento o lagrimeo?",def:"NIEGA",o:["NIEGA"]},
@@ -1249,10 +1270,11 @@ function vnEdadA(v,P){const x=v._edad?vnNums(v._edad)[0]:+P.edad;return Number.i
 function vnEdadM(v,P){if(v._edad){const n=vnNums(v._edad)[0];return /mes/i.test(v._edad)?n:n*12}return P.meses}
 function vnSexo(v,P){if(v._sexo)return /^(m|h|masc|hombre|niño)/i.test(plano(v._sexo))?"M":"F";return P.sexo||"F"}
 function vnPreg(id){const P=vnPac(),pre=[];
-  if(!P.edad)pre.push({k:"_edad",q:"Edad de la persona",h:"En años, o en meses si es menor de 2 años: «18 meses»."});
+  const sie=VN[id].idSiempre;
+  if(!P.edad||sie)pre.push({k:"_edad",q:"Edad de la persona",h:"En años, o en meses si es menor de 2 años: «18 meses».",def:sie&&P.edad?P.edad:undefined});
   if(!P.sexo&&(id==="cyd"||id==="adol"||id==="av"||id==="vih"||id==="tbc"))pre.push({k:"_sexo",q:"Sexo",o:["MUJER","HOMBRE"]});
-  if(!P.com)pre.push({k:"_com",q:"Comunidad o barrio"});
-  if(!P.etnia)pre.push({k:"_etnia",q:"Etnia o pueblo",o:["CUBEO","TUCANO","DESANO","TUYUCA","GUANANO","PIRATAPUYO","SIRIANO","NO INDIGENA"]});
+  if(!P.com||sie)pre.push({k:"_com",q:"Procedencia: comunidad o barrio",def:sie&&P.com?P.com:undefined});
+  if(!P.etnia||sie)pre.push({k:"_etnia",q:"Etnia o pueblo",def:sie&&P.etnia?P.etnia:undefined,o:["CUBEO","TUCANO","DESANO","TUYUCA","GUANANO","PIRATAPUYO","SIRIANO","NO INDIGENA"]});
   return pre.concat(VN[id].qs)}
 /* estado y vista */
 let VNS=null;
@@ -1273,6 +1295,7 @@ function vnGuardar(){S.set("dn2_vn_"+VNS.id,JSON.stringify(VNS.v))}
 function vnRender(){st.view="vnota";const T=VN[VNS.id],P=vnPac();
   $("app").innerHTML=`<div class="top"><button class="back" type="button" id="vn-back">← Inicio</button><span class="tag pc">Nota por voz</span></div>
   <header><h1>${esc(T.t)}</h1><p class="sub">${P.nombre?`<b>${esc(P.nombre)}</b> · `:""}${P.edad?esc(P.edad)+" años · ":""}${esc(P.com||"sin comunidad")}${P.etnia?" · "+esc(P.etnia):""}</p></header>
+  ${T.aviso&&!VNS.fin&&T.aviso(VNS.v,P)?`<div class="box miss"><h3>Revisa el paciente</h3><p style="margin:0">${esc(T.aviso(VNS.v,P))}</p></div>`:""}
   <div id="vn-pane"></div>
   <p class="foot">La nota sale en mayúsculas con el texto fijo de tu plantilla. El audio se transcribe con el reconocimiento de voz del navegador (servidores de Google); si el paciente habla, pídele permiso.</p>`;
   $("vn-back").onclick=()=>{stopRec();window.speechSynthesis&&speechSynthesis.cancel();home();window.scrollTo(0,0)};
@@ -1282,7 +1305,7 @@ function vnPaso(){const L=vnLista2();if(VNS.i>=L.length){VNS.fin=true;vnRender()
   $("vn-pane").innerHTML=`<div class="gx" style="margin:0">
    <div class="gx-top"><span class="note-src">Pregunta ${VNS.i+1} de ${L.length}</span><span class="gx-mic" id="vn-mic"></span></div>
    <div class="gx-lab">${esc(q.q)}</div>${q.h?`<div class="gx-hint">${esc(q.h)}</div>`:""}
-   ${d?`<div class="gx-hint">Normal: <b>${esc(d)}</b></div>`:""}
+   ${d?`<div class="gx-hint">${q.k[0]==="_"?"Registrado":"Normal"}: <b>${esc(d)}</b></div>`:""}
    <div class="gx-val" id="vn-val" aria-live="polite">${val!=null?esc(val):"—"}</div>
    <div class="gx-heard" id="vn-heard"></div><div class="gx-msg" id="vn-msg" aria-live="polite"></div>
    ${q.o?`<div class="popts" style="grid-column:auto">${q.o.map(o=>`<button type="button" data-vo="${esc(o)}" aria-pressed="${val===o}">${esc(o)}</button>`).join("")}</div>`:""}
@@ -1325,8 +1348,8 @@ function vnEscuchar(){const m=$("vn-mic");if(!SR){if(m)m.textContent="Este naveg
 function vnHablar(txt){const ss=window.speechSynthesis;if(!ss){if(VNS.voz)vnEscuchar();return}
   stopRec();try{ss.cancel();const u=new SpeechSynthesisUtterance(txt);u.lang="es-CO";u.rate=1.05;u.onend=()=>{if(VNS&&VNS.voz&&st.view==="vnota")vnEscuchar()};u.onerror=u.onend;ss.speak(u)}catch(e){if(VNS.voz)vnEscuchar()}}
 function vnTexto(){const P=vnPac(),v=VNS.v;return VN[VNS.id].b(v,P,vnPid(P,v)).replace(/\n{3,}/g,"\n\n").trim()}
-function vnFinal(){const L=vnLista2(),falt=L.filter(q=>VNS.v[q.k]==null&&!vnDefault(q)),txt=vnTexto();
-  $("vn-pane").innerHTML=`${falt.length?`<div class="box miss"><h3>Faltan datos</h3><ul>${falt.map(q=>`<li><button class="lnk" type="button" data-vgo="${q.k}">${esc(q.q)}</button></li>`).join("")}</ul></div>`:""}
+function vnFinal(){const L=vnLista2(),falt=L.filter(q=>VNS.v[q.k]==null&&!vnDefault(q)),txt=vnTexto(),av=VN[VNS.id].aviso?VN[VNS.id].aviso(VNS.v,vnPac()):"";
+  $("vn-pane").innerHTML=`${av?`<div class="box miss"><h3>Revisa el paciente</h3><p style="margin:0">${esc(av)}</p></div>`:""}${falt.length?`<div class="box miss"><h3>Faltan datos</h3><ul>${falt.map(q=>`<li><button class="lnk" type="button" data-vgo="${q.k}">${esc(q.q)}</button></li>`).join("")}</ul></div>`:""}
   <div class="box warn"><h3>Revisa antes de copiar</h3><p style="margin:0">Las respuestas que no dictaste quedaron con el valor normal de la plantilla. Lee la nota completa y corrige lo que no aplique.</p></div>
   <textarea id="vn-nota" style="min-height:420px;font-size:.92rem">${esc(txt)}</textarea>
   <div class="btns"><button class="btn primary" type="button" id="vn-copy">Copiar nota</button><button class="btn" type="button" id="vn-save">Guardar en el celular</button></div>
