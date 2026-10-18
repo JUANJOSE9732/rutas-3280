@@ -262,6 +262,11 @@ textarea{width:100%;font:inherit;font-size:1.05rem;line-height:1.55;padding:14px
 .cal-mas{font-size:.66rem;color:var(--muted)}
 .cal-pop{background:var(--surface);border:2px solid var(--accent);border-radius:12px;padding:14px;display:flex;flex-direction:column;gap:10px}
 @media (max-width:520px){.cal-dc{min-height:64px}.cal-dc .ev{font-size:0;height:6px;padding:0;border-left-width:0;border-radius:3px;outline:0}.cal-dc .ev-adm{background:var(--muted)}.cal-dc .ev-prog{background:var(--sky)}.cal-dc .ev-busq{background:var(--rose)}.cal-dc .ev-reg,.cal-dc .ev-cita{background:var(--accent)}.cal-dc .ev-com{background:var(--warn)}.cal-dc .ev-ent{background:var(--miss)}.cal-dc .ev-otro{background:var(--ink)}}
+.qt{width:100%;border:1.5px solid var(--accent);border-radius:10px;padding:12px 14px;background:var(--surface);display:flex;flex-direction:column;gap:8px}
+.qt-h{margin:4px 0 0;font-weight:700;font-size:.9rem}
+.qt-l{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:6px}
+.qt-l li{display:flex;gap:10px;align-items:center;border:1px solid var(--line);border-radius:8px;padding:8px 10px}
+.sugg .qt .btn{border:1.5px solid var(--line);background:var(--surface);color:var(--ink);border-radius:8px;font-weight:700}
 @media (prefers-reduced-motion:no-preference){.tile,.btn,.notes-pick button{transition:background .15s,border-color .15s,box-shadow .15s}}
 </style>
 
@@ -1495,7 +1500,7 @@ function wireMiDia(){const cb=$("md-cal");if(cb)cb.onclick=calOpen;
 function mdShow(t){const s=$("md-st");s.innerHTML="";const a=document.createElement("textarea");a.value=t;a.rows=7;a.readOnly=true;s.append("No se pudo copiar solo. Mantén presionado el texto y cópialo:",a);a.focus();a.select()}
 
 /* ---------- PANEL ---------- */
-const VERSION_APP="2026-10-17 v151";
+const VERSION_APP="2026-10-18 v152";
 function home(){
   stopRec();st.view="home";
   const rm=["precon","prenatal","parto","rn","ive"],rp=["pinf","inf","adol","juv","adul","vej"];
@@ -1531,7 +1536,7 @@ function home(){
       <label for="f-edad">Edad<input id="f-edad" type="number" inputmode="numeric" min="0" placeholder="24"></label>
       <label for="f-uni">Unidad<select id="f-uni"><option value="a">años</option><option value="m">meses</option><option value="d">días</option></select></label>
       <label for="f-sexo">Sexo<select id="f-sexo"><option value="f">Mujer</option><option value="m">Hombre</option></select></label>
-      <label for="f-est">Situación<select id="f-est"><option value="">Ninguna especial</option><option value="ges">Gestante</option><option value="pos">Puérpera (hasta 42 días)</option><option value="pre">Quiere embarazarse</option><option value="ive">Pide IVE</option></select></label>
+      <label for="f-est">Situación<select id="f-est"><option value="">Ninguna especial</option><option value="ges">Gestante</option><option value="pos">Puérpera (hasta 42 días)</option><option value="pre">Quiere embarazarse</option><option value="ive">Pide IVE</option><option value="pf">Ya planifica (control)</option><option value="sr">Tos de más de 15 días</option></select></label>
     </div>
     <div class="sugg" id="sugg"><p>Escribe la edad para ver qué le corresponde.</p></div>
   </section>
@@ -1587,6 +1592,40 @@ function home(){
   pinta();
   window.scrollTo(0,0);
 }
+/* ---------- ¿Qué le toca hoy? (clasificación por edad, sexo y situación, Res. 3280) ---------- */
+function qtLista(a,sx,es){const f=sx==="f",L=[],E=(t,n,o)=>L.push(Object.assign({t,n,q:"ENF"},o||{})),R=(t,n)=>L.push({t,n,q:"MED"});
+  let cv=a<6?"Primera infancia":a<12?"Infancia":a<18?"Adolescencia":a<29?"Juventud":a<60?"Adultez":"Vejez";
+  if(es==="ges")E("Control prenatal","Captación antes de la semana 10. Con cualquier riesgo, remitir a medicina.",{mod:"prenatal"});
+  if(es==="ges")E("Pruebas rápidas de VIH y sífilis con asesoría","Cada trimestre de la gestación.",{vn:"vih"});
+  if(es==="pos"){E("Control posparto","Día 3 a 5 después del parto.",{mod:"parto"});E("Consejería en lactancia materna","",{vn:"lact"});E("Anticoncepción posevento","Implante o DIU antes de que pasen los riesgos de un nuevo embarazo.",{vn:"impl"})}
+  if(es==="pre")E("Atención preconcepcional","Ácido fólico, laboratorios y vacunas antes del embarazo.",{vn:"precon"});
+  if(es==="ive")E("Solicitud de IVE","Informar derechos y remitir a medicina el mismo día.",{mod:"ive"});
+  if(es==="sr")E("Sintomático respiratorio","Tos de más de 15 días: baciloscopia seriada, notificación y seguimiento.",{vn:"tbc"});
+  if(a<6)E("Valoración integral de primera infancia (C y D)","Enfermería: 2–3 m, 6–8 m, 9–11 m, 18–23 m, 30–35 m y 4 años. En las otras edades la hace medicina.",{vn:"cyd"});
+  else if(a<12)E("Valoración integral de infancia","Enfermería a los 7, 9 y 11 años; medicina a los 6, 8 y 10.");
+  else if(a<18)E("Control de adolescencia","Enfermería a los 13, 15 y 17 años; medicina a los 12, 14 y 16.",{vn:"adol"});
+  else if(a<29)E("Valoración integral de juventud","Dos en el periodo: una por medicina y otra por enfermería.");
+  else if(a<60)R("Valoración integral de adultez","La hace medicina, cada 5 años. Si no la tiene, remitir.");
+  else R("Valoración integral de vejez","La hace medicina, cada 3 años. Si no la tiene, remitir.");
+  if(a<2&&es!=="pos")E("Consejería en lactancia a la madre","",{vn:"lact"});
+  if(a>=3&&a<18)E("Tamizaje de agudeza visual","En las edades que indica la 3280.",{vn:"av"});
+  if(a>=60)E("Tamizaje de agudeza visual","Si está programado por la ESE.",{vn:"av"});
+  if(a>=10&&a<50&&es!=="ges"&&es!=="pos"&&es!=="pre"){if(es==="pf")E("Control de planificación","",{vn:"pfc"});else E("Asesoría en anticoncepción",f?"Si quiere iniciar un método.":"Preservativo y anticoncepción de la pareja.",f?{vn:"pf1"}:{})}
+  if(a>=12&&es!=="ges")E("Asesoría y prueba rápida de VIH","Según exposición al riesgo.",{vn:"vih"});
+  if(f&&a>=25&&a<=65&&es!=="ges")E("Tamizaje de cuello uterino",a<30?"25 a 29 años: citología (esquema 1-3-3).":a<=50?"30 a 50 años, rural disperso: ADN-VPH o Ver y Tratar (VIA/VILI).":"51 a 65 años: citología o ADN-VPH.",{vn:"ccu"});
+  if(f&&a>=40&&a<=69)E("Examen clínico de mama","Anual desde los 40 años. Se puede hacer solo, sin la valoración integral.",{vn:"mama"});
+  if(f&&a>=50&&a<=69)R("Mamografía","Cada 2 años de los 50 a los 69: ordenar o remitir según la ESE.");
+  if(a>=29)R("Riesgo cardiovascular y metabólico","Glicemia, perfil lipídico, creatinina y uroanálisis, por medicina.");
+  if(a>=50&&a<=75)R("Sangre oculta en heces","Cada 2 años de los 50 a los 75.");
+  if(!f&&a>=50&&a<=75)R("Tamizaje de próstata","PSA y tacto rectal cada 5 años de los 50 a los 75, por medicina.");
+  return{cv,L}}
+function qtHTML(a,sx,es){const {cv,L}=qtLista(a,sx,es),en=L.filter(x=>x.q==="ENF"),me=L.filter(x=>x.q==="MED");
+  const it=x=>`<li><div style="flex:1;min-width:0"><b>${esc(x.t)}</b>${x.n?`<small style="display:block;color:var(--muted)">${esc(x.n)}</small>`:""}</div>${x.vn?`<button type="button" class="btn" data-vn="${x.vn}" style="flex:none;padding:6px 10px;font-size:.8rem">Nota por voz</button>`:x.mod?`<button type="button" class="btn" data-mod="${x.mod}" style="flex:none;padding:6px 10px;font-size:.8rem">Abrir</button>`:""}</li>`;
+  return `<div class="qt"><p class="lab" style="margin:0">¿Qué le toca hoy? · ${esc(cv)}${es==="ges"||es==="pos"||es==="pre"||es==="ive"?" · Ruta materno perinatal":" · Ruta de promoción y mantenimiento"}</p>
+   <p class="qt-h">Lo haces tú (enfermería)</p><ul class="qt-l">${en.map(it).join("")}</ul>
+   ${me.length?`<p class="qt-h">Remitir u ordenar (medicina)</p><ul class="qt-l">${me.map(it).join("")}</ul>`:""}
+   <p class="note-src" style="margin:0">Los tamizajes se pueden hacer solos, sin la valoración integral: se registran como detección temprana dentro del curso de vida. Aprovecha el contacto para ofrecer los demás pendientes. Confirma la periodicidad con lo que tenga en Prosoft.</p></div>`}
+
 function sugerir(){
   const v=parseFloat($("f-edad").value),u=$("f-uni").value,sx=$("f-sexo").value,es=$("f-est").value;
   document.querySelectorAll(".tile.hl").forEach(t=>t.classList.remove("hl"));
@@ -1599,8 +1638,9 @@ function sugerir(){
   const uniq=[...new Set(out)];
   uniq.forEach(id=>{const t=$("t-"+id);if(t)t.classList.add("hl")});
   let extra="";if(sx==="f"&&anos<14&&(es==="ges"||es==="ive"))extra=`<p style="width:100%;color:var(--miss);font-weight:700">Menor de 14 años: activa la ruta de violencia sexual y notifica.</p>`;
-  $("sugg").innerHTML=uniq.map(id=>`<button data-mod="${id}">${esc(M[id].title)}</button>`).join("")+extra;
+  $("sugg").innerHTML=uniq.map(id=>`<button data-mod="${id}">${esc(M[id].title)}</button>`).join("")+extra+qtHTML(anos,sx,es);
   $("sugg").querySelectorAll("[data-mod]").forEach(b=>b.onclick=()=>openMod(b.dataset.mod));
+  $("sugg").querySelectorAll("[data-vn]").forEach(b=>b.onclick=()=>vnOpen(b.dataset.vn));
 }
 
 /* ---------- MÓDULO ---------- */
