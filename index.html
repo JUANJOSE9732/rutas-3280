@@ -1723,6 +1723,28 @@ const MB=[
   es:[["Control en 7 a 14 días.","",""]],
   al:[["Fiebre con celulitis extensa, lesiones que crecen rápido.","",""]]}
 ];
+/* ---------- Contexto de la persona identificada (lo usan morbilidad, «No sé qué tiene» y las notas) ---------- */
+function ctxPer(){const P=pac(),e=edadDe(P["FECHA NACIMIENTO"]),m=e?e.tm:(P.__edad?Math.round(+P.__edad*12):null);
+  return{nom:P["NOMBRE COMPLETO"]||"",m,a:m!=null?m/12:null,dias:e?e.d:null,sx:(P["GENERO"]||"").toUpperCase(),es:P.__est||"",com:P.__com||""}}
+const CTX_ES={ges:"gestante",pos:"puérpera",pre:"quiere embarazarse",ive:"pide IVE",pf:"planifica",sr:"tos de más de 15 días"};
+function ctxLinea(c){if(!c.nom&&c.m==null)return"";const ed=c.m==null?"":c.m<1&&c.dias!=null?c.dias+" días":c.m<24?c.m+" meses":Math.floor(c.a)+" años";
+  return [c.nom,ed,c.sx==="F"?"mujer":c.sx==="M"?"hombre":"",CTX_ES[c.es]||""].filter(Boolean).join(" · ")}
+function ctxCaja(c,txt){const l=ctxLinea(c);return l?`<div class="box" style="margin:8px 0"><p style="margin:0"><b>Atendiendo a:</b> ${esc(l)}</p>${txt?`<p class="note-src" style="margin:4px 0 0">${txt}</p>`:""}</div>`:`<p class="note-src">Sin persona identificada: identifícala en el inicio («¿A quién vas a atender?») y las sugerencias se ajustan a su edad, sexo y situación.</p>`}
+/* qué fichas priorizar y qué ajustar para esta persona */
+function mbPrior(c){const o=[],f=c.sx==="F";if(f&&c.es==="ges")o.push("preeclampsia","malaria","dengue","sifilis");if(f&&c.es==="pos")o.push("hpp","preeclampsia");if(c.m!=null&&c.m<60)o.push("eda","ira","dnt");if(c.es==="sr")o.push("tb");return[...new Set(o)]}
+function mbNoAplica(id,c){const f=c.sx==="F",g=f&&(c.es==="ges"||c.es==="pos");
+  if(id==="preeclampsia"&&c.sx&&!g)return"Es para gestantes desde la semana 20 o puérperas.";if(id==="hpp"&&c.sx&&!(f&&c.es==="pos"))return"Es para el posparto.";
+  if(id==="sifilis"&&c.sx&&!(f&&c.es==="ges"))return"Esta ficha es para la gestante.";if(["eda","ira","dnt"].includes(id)&&c.m!=null&&c.m>=60)return"La guía citada es para menores de 5 años.";return""}
+function mbCtx(id,c){const f=c.sx==="F",ges=f&&c.es==="ges",o=[];
+  if(id==="malaria"){if(ges)o.push(["Gestante: no dar primaquina. P. falciparum en el primer trimestre: quinina más clindamicina por 7 días. P. vivax: cloroquina y luego cloroquina semanal hasta poder dar primaquina.","mal","16–17"]);
+    if(f&&c.es==="pos")o.push(["Si lacta a un menor de 6 meses: no dar primaquina.","mal","15 y 17"]);if(c.m!=null&&c.m<6)o.push(["Menor de 6 meses: no dar primaquina.","mal","15 y 17"]);
+    if(c.a!=null&&c.a<6)o.push(["Menor de 6 años con malaria complicada y sin artesunato IM: artesunato rectal 10 mg/kg antes de remitir.","mal","18"])}
+  if(id==="dengue"){if(ges)o.push(["Gestante con dengue: el embarazo es criterio de hospitalización.","den","46–47"]);if(c.a!=null&&c.a<15)o.push(["Niño: hidratación por Holliday-Segar más 5 %; acetaminofén 10 mg/kg cada 6 horas. Metamizol solo en mayores de 15 años.","den","47–49"])}
+  if(id==="convulsion"&&f&&(c.es==="ges"||c.es==="pos"))o.push(["Gestante o puérpera: tratar como eclampsia con sulfato de magnesio; no diazepam.","hta","23"]);
+  if(id==="leish"&&c.a!=null&&c.a<12)o.push(["Niño: la opción de la directriz es miltefosina.","lei","14"]);
+  if(id==="tb"&&c.a!=null&&c.a<15)o.push(["Niño: sospechar con fiebre de más de 8 días, que no gana peso o contacto con un caso.","tb","29"]);
+  if(id==="anafilaxia"&&c.a!=null&&c.a<12)o.push(["Niño: adrenalina 0,01 mg/kg IM, máximo 0,3 mg.","wao",""]);
+  return o}
 const MB_SEC=[["ss","Signos y síntomas: cuándo sospechar"],["dx","Diagnóstico en el puesto"],["tx","Tratamiento"],["es","Mientras llega la remisión"],["al","Signos de alarma: remitir urgente"]];
 function mbCita(f,p){if(!f)return "Práctica de registro y gestión del puesto (sin guía específica)";return MBF[f]+(p?`, p. ${p} del PDF`:", página por verificar")}
 function mbUL(arr){return `<ul class="mb-ul">${arr.map(([t,f,p])=>`<li>${esc(t)}<small class="qt-c">${esc(mbCita(f,p))}</small></li>`).join("")}</ul>`}
@@ -1732,14 +1754,18 @@ function mbOpen(foco){stopRec();st.view="mb";
   const grupos=[...new Set(MB.map(x=>x.g))];
   $("app").innerHTML=`<div class="top"><button class="back" type="button" id="mb-back">← Inicio</button><span class="tag pc">Morbilidad</span></div>
   <header><h1>Morbilidad frecuente</h1><p class="sub">Zona rural del Vaupés. Para cada condición: signos y síntomas, diagnóstico en el puesto, tratamiento, qué hacer mientras llega la remisión y signos de alarma. Cada recomendación dice de qué guía sale.</p></header>
+  ${ctxCaja(ctxPer(),"Las fichas que aplican a esta persona salen primero y cada una muestra lo que cambia para ella.")}
+  ${(()=>{const c=ctxPer(),pr=mbPrior(c);return pr.length?`<div class="box"><h3>Para esta persona, revisa primero</h3><div class="btns">${pr.map(id=>{const x=MB.find(z=>z.id===id);return x?`<button class="btn" type="button" data-mbgo="${id}">${esc(x.t)}</button>`:""}).join("")}</div></div>`:""})()}
   <div class="btns"><button class="btn primary" type="button" id="mb-sx">¿No sé qué tiene? Empezar por el síntoma</button></div>
   <div class="box warn"><h3>Si la remisión tarda días</h3>${mbUL(MB_ESPERA)}</div>
   <input id="mb-q" placeholder="Buscar: fiebre, diarrea, serpiente, úlcera…" autocomplete="off">
   <div id="mb-list"></div>
   <div class="btns"><button class="btn primary" type="button" data-vn="morb">Hacer nota de morbilidad por voz</button></div>
   <p class="foot">Fuentes: guías de práctica clínica y lineamientos vigentes del Ministerio de Salud, la OPS y la OMS. Las páginas son las del PDF oficial de cada guía; donde dice «página por verificar», la recomendación es de esa guía pero no se pudo confirmar la página. Los medicamentos se administran por orden médica (telemedicina) o protocolo de la ESE. Los códigos SIVIGILA se confirman con epidemiología.</p>`;
-  const pinta=()=>{const q=plano($("mb-q").value);const L=MB.filter(x=>!q||plano([x.t,x.g,...x.ss.map(i=>i[0])].join(" ")).includes(q));
-    $("mb-list").innerHTML=grupos.map(g=>{const xs=L.filter(x=>x.g===g);return xs.length?`<p class="lab" style="margin:10px 0 6px">${esc(g)}</p>${xs.map(x=>`<details class="sec mb" data-mb="${x.id}"><summary>${esc(x.t)}</summary><dl class="mb-dl">
+  const C=ctxPer(),PR=mbPrior(C);document.querySelectorAll("[data-mbgo]").forEach(b=>b.onclick=()=>mbOpen(b.dataset.mbgo));
+  const pinta=()=>{const q=plano($("mb-q").value);const L=MB.filter(x=>!q||plano([x.t,x.g,...x.ss.map(i=>i[0])].join(" ")).includes(q)).sort((a,b)=>(PR.includes(b.id)?1:0)-(PR.includes(a.id)?1:0));
+    $("mb-list").innerHTML=grupos.map(g=>{const xs=L.filter(x=>x.g===g);return xs.length?`<p class="lab" style="margin:10px 0 6px">${esc(g)}</p>${xs.map(x=>`<details class="sec mb" data-mb="${x.id}"><summary>${esc(x.t)}${mbNoAplica(x.id,C)?' <small style="color:var(--muted);font-weight:400">· no aplica a esta persona</small>':""}</summary><dl class="mb-dl">
+      ${mbNoAplica(x.id,C)?`<dt>Ojo</dt><dd>${esc(mbNoAplica(x.id,C))}</dd>`:""}${mbCtx(x.id,C).length?`<dt style="color:var(--accent)">Para esta persona</dt><dd>${mbUL(mbCtx(x.id,C))}</dd>`:""}
       ${MB_SEC.map(([k,h])=>x[k]&&x[k].length?`<dt${k==="al"?' class="mb-al"':""}>${h}</dt><dd>${mbUL(x[k])}</dd>`:"").join("")}<dt>Notificación</dt><dd>${esc(x.no)}</dd></dl>
       <div class="btns" style="padding:0 14px 14px"><button class="btn" type="button" data-vnm="${x.id}">Nota de morbilidad para ${esc(x.t.toLowerCase())}</button></div></details>`).join("")}`:""}).join("")||`<p class="note-src">No encontré esa condición.</p>`;
     document.querySelectorAll("[data-vnm]").forEach(b=>b.onclick=()=>{const d=vnDraft("morb");d.cond=MB.find(z=>z.id===b.dataset.vnm).t.toUpperCase();S.set("dn2_vn_morb",JSON.stringify(d));vnOpen("morb")})};
@@ -1821,7 +1847,7 @@ const SX=[
       ["tb","Niño que no gana peso, con fiebre de más de 8 días o contacto con un caso.","tb","29"]],
   ro:[["Desnutrición con choque, diarrea, infección, anemia severa, hipoglicemia, vomita todo, letargia o convulsión: urgencia vital.","dnt","32"]]}
 ];
-function sxOpen(){stopRec();st.view="sx";let edad="n",sint=null;
+function sxOpen(){stopRec();st.view="sx";const C=ctxPer();let edad=C.m==null?"n":C.m<2?"m":C.m<60?"n":"a",sint=C.sx==="F"&&(C.es==="ges"||C.es==="pos")?"gestante":C.es==="sr"?"resp":null;
   const pel=()=>{const P=SX_PEL[edad];
     $("sx-pel").innerHTML=`<p class="qt-h">1 · Primero: ¿hay signos de peligro?</p><p class="note-src" style="margin:0 0 6px">${esc(P.t)}</p>${P.s.map((x,i)=>`<label class="sx-ck"><input type="checkbox" class="sx-pel" data-i="${i}"> ${esc(x)}</label>`).join("")}<small class="qt-c">${esc(edad==="m"?"En la app no hay guía para menores de 2 meses: telemedicina para todo menor de 2 meses enfermo.":mbCita(...P.c))}</small>`;
     document.querySelectorAll(".sx-pel").forEach(c=>c.onchange=alerta);alerta()};
@@ -1835,6 +1861,7 @@ function sxOpen(){stopRec();st.view="sx";let edad="n",sint=null;
   const alerta=()=>{const n=[...document.querySelectorAll(".sx-pel:checked")].length;$("sx-alerta").innerHTML=(n||edad==="m")?`<div class="box warn"><h3>Remisión urgente</h3>${mbUL([["Hay un signo de peligro: estabiliza (ABCDE, glucometría, temperatura), telemedicina ya y gestiona la remisión. Sigue evaluando mientras tanto.",edad==="n"?"aiepi":"bec",edad==="n"?"40":""]])}</div>`:""};
   $("app").innerHTML=`<div class="top"><button class="back" type="button" id="sx-back">← Morbilidad</button><span class="tag pc">No sé qué tiene</span></div>
   <header><h1>Empezar por el síntoma</h1><p class="sub">Cuando no tienes claro el diagnóstico: primero la gravedad, luego el síntoma principal y las enfermedades probables. Cada paso dice de qué guía sale.</p></header>
+  ${ctxCaja(C,C.m!=null?"El grupo de edad ya quedó elegido según sus datos"+(sint?" y el síntoma según su situación":"")+"; cámbialo si no corresponde.":"")}
   <div class="btns" id="sx-edad"><button class="btn" type="button" data-ed="m">Menor de 2 meses</button><button class="btn" type="button" data-ed="n">2 meses a 5 años</button><button class="btn" type="button" data-ed="a">Mayor de 5 años y adulto</button></div>
   <div id="sx-pel"></div><div id="sx-alerta"></div>
   <p class="qt-h">2 · ¿Cuál es el síntoma principal?</p>
@@ -1861,7 +1888,7 @@ VN.morb={g:"Morbilidad",t:"Consulta de morbilidad",who:"Enfermedad general, preg
   {k:"remision",q:"Remisión",def:"NO REQUIERE",o:["NO REQUIERE","SE GESTIONA REMISION, EN ESPERA DE TRANSPORTE","REMISION URGENTE EFECTIVA"]},
   {k:"notif",q:"Notificación SIVIGILA",def:"NO APLICA",o:["NO APLICA","SE NOTIFICA EVENTO","NOTIFICACION COLECTIVA SEMANAL"]},
   {k:"control",q:"Próximo control o vigilancia",def:"24 HORAS",o:["24 HORAS","48 HORAS","DIARIO HASTA COMPLETAR TRATAMIENTO","EN 7 DIAS"]},Q.extra],
-  b:(v,P,I)=>{const m=MB.find(x=>x.t.toUpperCase()===VN_U(v.cond));return vnL([`MOTIVO DE CONSULTA: ${VN_U(v.motivo)}`,`ENFERMEDAD ACTUAL: PACIENTE DE ${I.edad} AÑOS, PROCEDENTE DE ${I.com}, ETNIA ${I.etnia}, CON CUADRO DE ${VN_U(v.evol)} DE EVOLUCION CONSISTENTE EN ${VN_U(v.sint)}.`,`ANTECEDENTES, ALERGIAS Y MEDICAMENTOS: ${VN_U(v.antp)}. TRATAMIENTO TRADICIONAL O PREVIO: ${VN_U(v.trad)}.`,vnSV(v),"","EXAMEN FISICO:",vnEF(v,vnEdadA(v,P)<12),"",`PRUEBA EN EL PUESTO: ${VN_U(v.prueba)}.`,`IMPRESION DIAGNOSTICA: ${VN_U(v.dx||v.cond)}.`,VN_U(v.alarma)==="SI"?`PRESENTA SIGNOS DE ALARMA${m?": SE VIGILA "+VN_U(m.al.map(i=>i[0]).join(" ")):""}.`:`SIN SIGNOS DE ALARMA EN EL MOMENTO.`,"","PLAN:",`TELEMEDICINA: ${VN_U(v.tele)}.`,`CONDUCTA: ${VN_U(v.conducta)}.`,`REMISION: ${VN_U(v.remision)}.`,/ESPERA/.test(VN_U(v.remision))?"MIENTRAS SE CONCRETA LA REMISION SE DEJA VIGILANCIA DE SIGNOS VITALES Y SIGNOS DE ALARMA, SE REGISTRAN HORAS DE GESTION DE REFERENCIA Y TELEMEDICINA.":"",`NOTIFICACION: ${VN_U(v.notif)}${m&&/NOTIFICA/.test(VN_U(v.notif))?" ("+VN_U(m.no)+")":""}.`,"SE EDUCA AL PACIENTE Y LA FAMILIA EN SIGNOS DE ALARMA PARA CONSULTAR DE INMEDIATO.",`CONTROL: ${VN_U(v.control)}.`,vnEsNormal(v.extra)?"":VN_U(v.extra)])}};
+  b:(v,P,I)=>{const m=MB.find(x=>x.t.toUpperCase()===VN_U(v.cond));return vnL([`MOTIVO DE CONSULTA: ${VN_U(v.motivo)}`,`ENFERMEDAD ACTUAL: PACIENTE DE ${I.edad} AÑOS${{ges:", GESTANTE",pos:", PUERPERA"}[pac().__est]||""}, PROCEDENTE DE ${I.com}, ETNIA ${I.etnia}, CON CUADRO DE ${VN_U(v.evol)} DE EVOLUCION CONSISTENTE EN ${VN_U(v.sint)}.`,`ANTECEDENTES, ALERGIAS Y MEDICAMENTOS: ${VN_U(v.antp)}. TRATAMIENTO TRADICIONAL O PREVIO: ${VN_U(v.trad)}.`,vnSV(v),"","EXAMEN FISICO:",vnEF(v,vnEdadA(v,P)<12),"",`PRUEBA EN EL PUESTO: ${VN_U(v.prueba)}.`,`IMPRESION DIAGNOSTICA: ${VN_U(v.dx||v.cond)}.`,VN_U(v.alarma)==="SI"?`PRESENTA SIGNOS DE ALARMA${m?": SE VIGILA "+VN_U(m.al.map(i=>i[0]).join(" ")):""}.`:`SIN SIGNOS DE ALARMA EN EL MOMENTO.`,"","PLAN:",`TELEMEDICINA: ${VN_U(v.tele)}.`,`CONDUCTA: ${VN_U(v.conducta)}.`,`REMISION: ${VN_U(v.remision)}.`,/ESPERA/.test(VN_U(v.remision))?"MIENTRAS SE CONCRETA LA REMISION SE DEJA VIGILANCIA DE SIGNOS VITALES Y SIGNOS DE ALARMA, SE REGISTRAN HORAS DE GESTION DE REFERENCIA Y TELEMEDICINA.":"",`NOTIFICACION: ${VN_U(v.notif)}${m&&/NOTIFICA/.test(VN_U(v.notif))?" ("+VN_U(m.no)+")":""}.`,"SE EDUCA AL PACIENTE Y LA FAMILIA EN SIGNOS DE ALARMA PARA CONSULTAR DE INMEDIATO.",`CONTROL: ${VN_U(v.control)}.`,vnEsNormal(v.extra)?"":VN_U(v.extra)])}};
 
 /* ---------- MI DÍA: secretaria diaria del contrato 1785 ---------- */
 const MD_PLAN={
@@ -1927,7 +1954,7 @@ function wireMiDia(){const cb=$("md-cal");if(cb)cb.onclick=calOpen;
 function mdShow(t){const s=$("md-st");s.innerHTML="";const a=document.createElement("textarea");a.value=t;a.rows=7;a.readOnly=true;s.append("No se pudo copiar solo. Mantén presionado el texto y cópialo:",a);a.focus();a.select()}
 
 /* ---------- PANEL ---------- */
-const VERSION_APP="2026-10-18 v164";
+const VERSION_APP="2026-10-18 v165";
 function home(){
   stopRec();if(S.get(AT_KEY))atReiniciar();st.view="home";
   const rm=["precon","prenatal","parto","rn","ive"],rp=["pinf","inf","adol","juv","adul","vej"];
@@ -1983,6 +2010,7 @@ function home(){
   $("t-base").onclick=()=>{baseEdit=null;base({});window.scrollTo(0,0)};$("t-pacs").onclick=verPacientes;$("t-plant").onclick=plVista;$("t-vbase").onclick=verBase;
   document.querySelectorAll("[data-ag]").forEach(b=>b.onclick=()=>{if(b.dataset.armed!=="1"){b.dataset.armed="1";b.textContent="¿Seguro? Toca otra vez";return}setAgenda(agenda().map(x=>x.id===b.dataset.ag?Object.assign(x,{ok:hoy()}):x));home()});
   ["f-edad","f-uni","f-sexo","f-est"].forEach(i=>$(i).addEventListener("input",sugerir));
+  $("f-est").addEventListener("change",()=>{const P=pac();if($("f-est").value)P.__est=$("f-est").value;else delete P.__est;setPac(P)});
   const rapido=()=>{const P=pac(),v=parseFloat($("f-edad").value),u=$("f-uni").value;if(Number.isFinite(v)&&u==="a")P.__edad=String(v);else delete P.__edad;if(!P["GENERO"]||P.__sxr)Object.assign(P,{GENERO:$("f-sexo").value==="m"?"M":"F",__sxr:1});setPac(P)};
   ["f-edad","f-uni","f-sexo"].forEach(i=>$(i).addEventListener("change",rapido));
   const box=$("pac-f");wireNA(box);
@@ -1992,9 +2020,9 @@ function home(){
     if($("pac-new"))$("pac-new").onclick=()=>{const b=$("pac-new");if(b.dataset.armed!=="1"){b.dataset.armed="1";b.textContent="¿Borrar esta persona y sus borradores? Toca otra vez";return}
       S.del("dn2_pac");S.keys().filter(k=>/^dn2_[a-z]+_/.test(k)&&Object.keys(M).includes(k.split("_")[1])&&!k.endsWith("_note")).forEach(k=>S.del(k));home();$("pac-det").open=true};
     const e=edadDe(P["FECHA NACIMIENTO"]);if(e){if(e.y>=1){$("f-edad").value=e.y;$("f-uni").value="a"}else if(e.tm>=1){$("f-edad").value=e.tm;$("f-uni").value="m"}else{$("f-edad").value=e.d;$("f-uni").value="d"}}
-    if(P["GENERO"])$("f-sexo").value=P["GENERO"]==="F"?"f":"m";
+    if(P["GENERO"])$("f-sexo").value=P["GENERO"]==="F"?"f":"m";$("f-est").value=P.__est||"";
     const conocido=!!(e&&P["GENERO"]);["f-edad","f-uni","f-sexo"].forEach(i=>$(i).closest("label").hidden=conocido);sugerir()};
-  const save=()=>{const {datos}=revisar(box,false),o={};ID_KEYS.forEach(k=>{if(datos[k]&&!(k==="PUEBLO"&&datos[k]==="N/A"))o[k]=["NOMBRE COMPLETO","DIRECCION","EAPB NOMBRE","PUEBLO"].includes(k)?datos[k].toUpperCase():datos[k]});const c=$("pac-com").value.trim().toUpperCase();if(c)o.__com=c;const P0=pac();if(P0.__edad)o.__edad=P0.__edad;if(!o["GENERO"]&&P0.__sxr){o["GENERO"]=P0["GENERO"];o.__sxr=1}setPac(o);pinta()};
+  const save=()=>{const {datos}=revisar(box,false),o={};ID_KEYS.forEach(k=>{if(datos[k]&&!(k==="PUEBLO"&&datos[k]==="N/A"))o[k]=["NOMBRE COMPLETO","DIRECCION","EAPB NOMBRE","PUEBLO"].includes(k)?datos[k].toUpperCase():datos[k]});const c=$("pac-com").value.trim().toUpperCase();if(c)o.__com=c;const P0=pac();if(P0.__edad)o.__edad=P0.__edad;if(P0.__est)o.__est=P0.__est;if(!o["GENERO"]&&P0.__sxr){o["GENERO"]=P0["GENERO"];o.__sxr=1}setPac(o);pinta()};
   box.addEventListener("input",save);box.addEventListener("change",save);
   const recomp=()=>{const sx=(box.querySelector('[data-f="ETNIA"]')||{}).value;box.querySelectorAll("[data-wrap]").forEach(w=>{if(w.dataset.if)w.hidden=(box.querySelector(`[data-f="${CSS.escape(w.dataset.if)}"]`)||{}).value!==w.dataset.ifv})};
   box.addEventListener("change",recomp);recomp();
