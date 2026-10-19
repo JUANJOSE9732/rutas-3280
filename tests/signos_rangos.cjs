@@ -15,7 +15,15 @@ const F=await p.evaluate(()=>{const F=[],ok=(c,m)=>{if(!c)F.push(m)};
  t=ev('pinf',{tas:'65',tad:'40'});ok(/Sístole 65 baja para la edad \(menos de 74\)/.test(t),'hipotensión: '+t);
  per(15*12,'F','adol');t=ev('adol',{tas:'132',tad:'78',fr:'22'});ok(/130\/80 o más/.test(t),'TA adolescente');ok(/algo alta/.test(t),'FR 22 adolescente');
  per(40*12,'M','adul');t=ev('adul',{tas:'118',tad:'76',fc:'72',fr:'16',t:'36.6',spo2:'97'});ok(!/fuera|alta|baja|Fiebre/.test(t),'adulto normal sin alertas: '+t);
+ /* perímetros e imposibles */
+ per(1,'F','pinf');t=ev('pinf',{t:'36.5',ptor:'300',pabd:'500',pmun:'50'});ok(/torácico de 300 cm no es posible/.test(t)&&/abdominal de 500 cm no es posible/.test(t)&&/muñeca de 50 cm no es posible/.test(t),'perímetros imposibles: '+t);
+ t=ev('pinf',{t:'365',fc:'1100',tas:'60',tad:'80'});ok(/Temperatura de 365 °C no es posible/.test(t)&&/Frecuencia cardiaca de 1100/.test(t)&&/diástole \(80\) no puede/.test(t),'signos imposibles: '+t);
+ per(10*12,'M','inf');{const q=ivFor('inf'),i=q.findIndex(x=>x.campos==='antropoNNA');S.set(key('inf','cv'+i),JSON.stringify({peso:'40',talla:'140'}))}
+ t=ev('inf',{pabd:'75'});ok(/índice cintura\/talla 0,54/.test(t),'cintura/talla: '+t);t=ev('inf',{pabd:'60',ptor:'70',pmun:'15'});ok(!/no es posible|riesgo/.test(t),'perímetros normales sin alerta: '+t);
+ per(8,'F','pinf');{const q=ivFor('pinf'),i=q.findIndex(x=>x.campos==='antropoPI');S.set(key('pinf','cv'+i),JSON.stringify({peso:'8',talla:'68',pc:'42'}))}
+ t=ev('pinf',{ptor:'48'});ok(/mucho mayor que el cefálico/.test(t),'tórax mucho mayor que cabeza en lactante: '+t);
  /* en pantalla: borde y comentario */
+ per(40*12,'M','adul');
  S.set(key('adul','sgn'),JSON.stringify({fc:'130',spo2:'89'}));document.body.innerHTML='<div id="w">'+WIDGET.signosps.html('adul')+'</div>';WIDGET.signosps.wire('adul',()=>{});
  const fcI=document.querySelector('input[data-sgn="fc"]'),fcM=document.querySelector('[data-sgm="fc"]');ok(/fuera del rango/.test(fcM.textContent)&&fcI.style.borderWidth==='2px','FC marcada en rojo con comentario');
  ok(/urgencia/.test(document.querySelector('[data-sgm="spo2"]').textContent),'saturación 89 con comentario');

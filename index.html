@@ -1971,7 +1971,7 @@ function wireMiDia(){const cb=$("md-cal");if(cb)cb.onclick=calOpen;
 function mdShow(t){const s=$("md-st");s.innerHTML="";const a=document.createElement("textarea");a.value=t;a.rows=7;a.readOnly=true;s.append("No se pudo copiar solo. Mantén presionado el texto y cópialo:",a);a.focus();a.select()}
 
 /* ---------- PANEL ---------- */
-const VERSION_APP="2026-10-18 v175";
+const VERSION_APP="2026-10-18 v176";
 function home(){
   stopRec();if(S.get(AT_KEY))atReiniciar();st.view="home";
   const rm=["precon","prenatal","parto","rn","ive"],rp=["pinf","inf","adol","juv","adul","vej"];
@@ -7232,12 +7232,30 @@ function vnIdForm(){stopRec();if(VNS)VNS.voz=false;const P=pac(),tipos=(ALLF.fin
     else if(tas&&tad&&alto){if(m>=156&&(tas>=140||tad>=90)){c="bad";msg="Tensión "+tas+"/"+tad+" alta (140/90 o más): remite a medicina."}else if(m>=156&&(tas>=130||tad>=80)){c="warn";msg="Tensión "+tas+"/"+tad+" alta para la edad (130/80 o más): repite en reposo con el manguito adecuado; si persiste, medicina."}else if(tas>=alto[0]||tad>=alto[1]){c="warn";msg="Tensión "+tas+"/"+tad+" elevada para la edad (desde "+alto[0]+"/"+alto[1]+"): repite en reposo con el manguito adecuado; si persiste, medicina."}else c="ok"}
     else if(tas&&tad)c="ok"}
    put("tas",c,ref,msg);put("tad",c,"",msg?"":undefined)}
+  /* perímetros: rango posible para la edad y riesgo */
+  if(m!=null){const a=antro(id);let tl=num(a.talla);if(tl!=null&&tl<3)tl=tl*100;const pc=num(a.pc);
+   const PER={ptor:{n:"Perímetro torácico",r:m<1?[26,40]:m<12?[30,52]:m<60?[40,62]:m<144?[50,85]:[60,140],
+      ref:m<12?"En el bebé es 1 a 2 cm menor que el cefálico; se igualan hacia el año":"Mayor que el cefálico desde los 2 años"},
+     pabd:{n:"Perímetro abdominal",r:m<1?[25,45]:m<12?[30,55]:m<60?[40,65]:m<144?[45,95]:[50,160],
+      ref:m>=72?"Riesgo si la cintura es la mitad de la talla o más (índice 0,5)":"Abdomen globoso es normal en el niño pequeño"},
+     pmun:{n:"Perímetro de muñeca",r:m<12?[7,13]:m<60?[9,15]:m<144?[10,18]:[12,23],ref:"Sirve para la contextura (talla ÷ muñeca)"}};
+   Object.entries(PER).forEach(([k,d])=>{const x=num(v[k]),ref="Esperable a la edad: "+d.r[0]+" a "+d.r[1]+" cm. "+d.ref+".";
+    if(x==null){put(k,"",ref);return}
+    if(x<d.r[0]||x>d.r[1]){put(k,"bad",ref,d.n+" de "+coma(x)+" cm no es posible a esta edad (esperable "+d.r[0]+" a "+d.r[1]+" cm): revisa la medida o si quedó mal escrita.");return}
+    if(k==="ptor"&&pc&&m<12&&x>pc+3){put(k,"warn",ref,"Perímetro torácico ("+coma(x)+" cm) mucho mayor que el cefálico ("+coma(pc)+" cm) en el lactante: revisa las dos medidas; si se confirma, cabeza pequeña para el cuerpo, valora en Crecimiento.");return}
+    if(k==="ptor"&&pc&&m>=24&&x<pc-2){put(k,"warn",ref,"Perímetro torácico ("+coma(x)+" cm) menor que el cefálico ("+coma(pc)+" cm) después de los 2 años: revisa; puede indicar desnutrición o macrocefalia.");return}
+    if(k==="pabd"&&m>=72&&tl){const ict=Math.round(x/tl*100)/100;if(ict>=0.5){put(k,"warn",ref,"Cintura de "+coma(x)+" cm con talla de "+coma(tl)+" cm: índice cintura/talla "+coma(ict.toFixed(2))+" (0,5 o más): riesgo cardiometabólico; consejería en alimentación y actividad física, y glicemia y lípidos según la edad.");return}}
+    put(k,"ok",ref)})}
+  /* valores imposibles en los signos */
+  const IMP={t:[30,43,"Temperatura","°C"],fc:[20,260,"Frecuencia cardiaca","lpm"],fr:[4,120,"Frecuencia respiratoria","rpm"],tas:[40,260,"Sístole","mmHg"],tad:[20,160,"Diástole","mmHg"],spo2:[50,100,"Saturación","%"]};
+  Object.entries(IMP).forEach(([k,[lo,hi,n,u]])=>{const x=num(v[k]);if(x!=null&&(x<lo||x>hi))put(k,"bad",(R[k]&&R[k].ref)||"",n+" de "+coma(x)+" "+u+" no es posible: revisa la medida o si quedó mal escrita.")});
+  if(tas&&tad&&tad>=tas&&tad>=20&&tas>=40)put("tad","bad","","La diástole ("+tad+") no puede ser igual o mayor que la sístole ("+tas+"): revisa la toma.");
   return R}
  function sgCalc(id){const v=G(id,"sgn"),a=antro(id),p=num(a.peso);let tl=num(a.talla);if(tl!=null&&tl<3)tl=tl*100;
   const o={v,al:[]},tas=num(v.tas),tad=num(v.tad);if(tas&&tad)o.media=Math.round((tas+2*tad)/3);
   if(p&&tl){o.imc=Math.round(p/Math.pow(tl/100,2)*10)/10;o.sc=Math.round(Math.sqrt(p*tl/3600)*100)/100}
   const g=["go","gv","gm"].map(k=>num(v[k]));if(g.every(x=>x!=null))o.gl=g[0]+g[1]+g[2];
-  o.ev=sgEval(id);["t","fc","fr","tas","spo2"].forEach(k=>{const e=o.ev[k];if(e&&e.msg)o.al.push(e.msg)});
+  o.ev=sgEval(id);["t","fc","fr","tas","tad","spo2","ptor","pabd","pmun"].forEach(k=>{const e=o.ev[k];if(e&&e.msg)o.al.push(e.msg)});
   if(o.gl!=null&&o.gl<15)o.al.push("Glasgow "+o.gl+"/15: alteración de la conciencia, signo de peligro: remisión urgente.");
   return o}
  const GVA=[[5,"Orientado"],[4,"Confuso"],[3,"Palabras inapropiadas"],[2,"Sonidos incomprensibles"],[1,"Ninguna"]];
