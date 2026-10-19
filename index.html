@@ -1971,7 +1971,7 @@ function wireMiDia(){const cb=$("md-cal");if(cb)cb.onclick=calOpen;
 function mdShow(t){const s=$("md-st");s.innerHTML="";const a=document.createElement("textarea");a.value=t;a.rows=7;a.readOnly=true;s.append("No se pudo copiar solo. Mantén presionado el texto y cópialo:",a);a.focus();a.select()}
 
 /* ---------- PANEL ---------- */
-const VERSION_APP="2026-10-18 v176";
+const VERSION_APP="2026-10-18 v177";
 function home(){
   stopRec();if(S.get(AT_KEY))atReiniciar();st.view="home";
   const rm=["precon","prenatal","parto","rn","ive"],rp=["pinf","inf","adol","juv","adul","vej"];
@@ -7762,6 +7762,17 @@ function vnIdForm(){stopRec();if(VNS)VNS.voz=false;const P=pac(),tipos=(ALLF.fin
  [["pinf","ex_pinf"],["inf","ex_escolar"],["adol","ex_escolar"],["juv","ex_adulto"],["adul","ex_adulto"],["vej","ex_vejez"]].forEach(([m,s])=>{const k=m+"::"+L;IVX[k]=Object.assign(IVX[k]||{},{sistemas:s,c:[]})});
 })();
 
+/* ===== v177: valores imposibles en Estado nutricional del adulto (juventud, adultez, vejez) ===== */
+(function(){const _b=cvCalc;cvCalc=function(tipo,v){const r=_b(tipo,v);if(tipo!=="antropoA"||!v)return r;
+  let t=nv(v.talla);if(t!=null&&t<3)t=t*100;
+  const L={peso:["Peso","kg",25,250,nv(v.peso)],talla:["Talla","cm",100,220,t],cint:["Perímetro de cintura","cm",50,180,nv(v.cint)],mun:["Perímetro de muñeca","cm",10,25,nv(v.mun)]};
+  const malos=[];Object.entries(L).forEach(([k,[n,u,lo,hi,x]])=>{if(x==null||(x>=lo&&x<=hi))return;malos.push(k);r.flag=r.flag||{};r.m=r.m||{};r.flag[k]="imposible";if(!/fuera de lo esperado/.test(r.m[k]||""))r.m[k]="No es posible en un adulto ("+lo+" a "+hi+" "+u+"): revisa la medida";
+   r.al=(r.al||[]).filter(a=>!new RegExp("^"+n,"i").test(a)&&!(k==="cint"&&/cintura/i.test(a))&&!(k==="mun"&&/contextura|muñeca/i.test(a))&&!((k==="peso"||k==="talla")&&/IMC|obesidad|sobrepeso|bajo peso/i.test(a)))});
+  malos.forEach(k=>{const [n,u,,,x]=L[k];r.al.push(n+" de "+coma(x)+" "+u+" no es posible en un adulto: revisa la medida o si quedó mal escrita.")});
+  if(malos.includes("cint")&&typeof r.txt==="string")r.txt=r.txt.replace(/(perímetro de cintura [\d,.]+ cm) \(riesgo cardiometabólico\)/i,"$1");
+  if(malos.some(k=>k==="peso"||k==="talla")){r.imc=null;if(r.m)delete r.m.imc}
+  if(malos.length&&typeof r.txt==="string")r.txt=(r.txt?r.txt.replace(/\.?\s*$/,". "):"")+"Revisar: "+malos.map(k=>L[k][0].toLowerCase()+" "+coma(L[k][4])+" "+L[k][1]).join(", ")+" (valores no posibles).";
+  return r}})();
 /* ---------- arranque ---------- */
 /* los borradores guardados con la versión anterior de los módulos se reubican una sola vez */
 Object.keys(OLD_LAB).forEach(id=>{if(!M[id]||S.get(key(id,"ivlab")))return;let a={};try{a=JSON.parse(S.get(key(id,"iv"))||"{}")||{}}catch(e){}

@@ -22,6 +22,10 @@ const F=await p.evaluate(()=>{const F=[],ok=(c,m)=>{if(!c)F.push(m)};
  t=ev('inf',{pabd:'75'});ok(/índice cintura\/talla 0,54/.test(t),'cintura/talla: '+t);t=ev('inf',{pabd:'60',ptor:'70',pmun:'15'});ok(!/no es posible|riesgo/.test(t),'perímetros normales sin alerta: '+t);
  per(8,'F','pinf');{const q=ivFor('pinf'),i=q.findIndex(x=>x.campos==='antropoPI');S.set(key('pinf','cv'+i),JSON.stringify({peso:'8',talla:'68',pc:'42'}))}
  t=ev('pinf',{ptor:'48'});ok(/mucho mayor que el cefálico/.test(t),'tórax mucho mayor que cabeza en lactante: '+t);
+ /* adulto: estado nutricional con valores imposibles */
+ per(40*12,'M','adul');{const r=cvCalc('antropoA',{peso:'700',talla:'300',cint:'500',mun:'50'});ok(r.flag.peso&&r.flag.talla&&r.flag.cint&&r.flag.mun&&r.al.length===4&&!r.imc,'antropoA imposibles: '+JSON.stringify(r.al));
+  const r2=cvCalc('antropoA',{peso:'82',talla:'1.68',cint:'98'});ok(!/no es posible/.test(r2.al.join(' '))&&r2.imc,'antropoA normal sin falsos positivos')}
+ ['inf','adol','juv','adul','vej'].forEach(m=>{const q=ivFor(m);ok(q.some(x=>x.widget==='signosps')&&q.some(x=>/^ex_/.test(x.sistemas||'')),m+': falta signos o examen por regiones')});
  /* en pantalla: borde y comentario */
  per(40*12,'M','adul');
  S.set(key('adul','sgn'),JSON.stringify({fc:'130',spo2:'89'}));document.body.innerHTML='<div id="w">'+WIDGET.signosps.html('adul')+'</div>';WIDGET.signosps.wire('adul',()=>{});
