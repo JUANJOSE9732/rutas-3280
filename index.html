@@ -1971,7 +1971,7 @@ function wireMiDia(){const cb=$("md-cal");if(cb)cb.onclick=calOpen;
 function mdShow(t){const s=$("md-st");s.innerHTML="";const a=document.createElement("textarea");a.value=t;a.rows=7;a.readOnly=true;s.append("No se pudo copiar solo. Mantén presionado el texto y cópialo:",a);a.focus();a.select()}
 
 /* ---------- PANEL ---------- */
-const VERSION_APP="2026-10-18 v174";
+const VERSION_APP="2026-10-18 v175";
 function home(){
   stopRec();if(S.get(AT_KEY))atReiniciar();st.view="home";
   const rm=["precon","prenatal","parto","rn","ive"],rp=["pinf","inf","adol","juv","adul","vej"];
@@ -7199,16 +7199,45 @@ function vnIdForm(){stopRec();if(VNS)VNS.voz=false;const P=pac(),tipos=(ALLF.fin
   ["ptor","Perímetro torácico","cm",""],["pabd","Perímetro abdominal","cm",""],["pmun","Perímetro de muñeca","cm",""]];
  const GO=[[4,"Espontánea"],[3,"A la voz"],[2,"Al dolor"],[1,"Ninguna"]],GV=[[5,"Balbucea, sonríe, orientado"],[4,"Llanto consolable o confuso"],[3,"Llanto inconsolable o palabras inapropiadas"],[2,"Quejido o sonidos"],[1,"Ninguna"]],GM=[[6,"Movimientos espontáneos u obedece"],[5,"Localiza el dolor"],[4,"Retira al dolor"],[3,"Flexión anormal"],[2,"Extensión anormal"],[1,"Ninguna"]];
  const antro=id=>{for(let i=0;i<60;i++){try{const v=JSON.parse(S.get(key(id,"cv"+i))||"null");if(v&&(v.peso||v.talla))return v}catch(e){}}return{}};
- function sgCalc(id){const v=G(id,"sgn"),m=meses(id),a=antro(id),p=num(a.peso);let tl=num(a.talla);if(tl!=null&&tl<3)tl=tl*100;
+ /* rango de cada signo según la edad (y el sexo para la tensión de niños): c = ok | warn | bad */
+ const TA_NNA={M:[[98,52],[100,55],[101,58],[102,60],[103,63],[105,66],[106,68],[107,69],[107,70],[108,72],[110,74],[113,75]],F:[[98,54],[101,58],[102,60],[103,62],[104,64],[105,67],[106,68],[107,69],[108,71],[109,72],[111,74],[114,75]]};
+ function sgEval(id){const v=G(id,"sgn"),m=meses(id),R={},put=(k,c,ref,msg)=>{R[k]={c,ref,msg}};
+  const fr=num(v.fr),fc=num(v.fc),t=num(v.t),sp=num(v.spo2),tas=num(v.tas),tad=num(v.tad);
+  /* temperatura */
+  {const rn=m!=null&&m<2,ref=rn?"Normal 36,5 a 37,4 °C (axilar)":"Normal 36 a 37,4 °C";
+   if(t==null)put("t","",ref);
+   else if(rn&&(t>=37.5||t<36.5))put("t","bad",ref,"Temperatura "+coma(t)+" °C en menor de 2 meses ("+(t>=37.5?"fiebre: 37,5 o más":"hipotermia: menos de 36,5")+"): signo de enfermedad grave AIEPI, remite hoy.");
+   else if(t>=38)put("t","bad",ref,"Fiebre ("+coma(t)+" °C): busca la causa y, en zona de malaria, toma gota gruesa.");
+   else if(t>=37.5)put("t","warn",ref,"Febrícula ("+coma(t)+" °C): repite la toma en 30 minutos y busca la causa.");
+   else if(t<36)put("t","warn",ref,"Temperatura baja ("+coma(t)+" °C): repite la toma; si se confirma, hipotermia.");
+   else put("t","ok",ref)}
+  /* frecuencia cardiaca */
+  if(m!=null){const r=m<12?[100,160]:m<36?[90,150]:m<72?[80,140]:m<144?[70,120]:[60,100],ref="Normal a la edad: "+r[0]+" a "+r[1]+" lpm";
+   if(fc==null)put("fc","",ref);else if(fc<r[0]||fc>r[1])put("fc",(fc<r[0]-10||fc>r[1]+20)?"bad":"warn",ref,"Frecuencia cardiaca "+fc+" fuera del rango de la edad ("+r[0]+" a "+r[1]+")."+(fc>r[1]?" Repite en reposo, sin llanto ni fiebre; si sigue alta, medicina.":" Si está decaído o mal perfundido, remite hoy."));else put("fc","ok",ref)}
+  /* frecuencia respiratoria */
+  if(m!=null){const lim=m<2?60:m<12?50:m<60?40:m<144?30:25,bajo=m<12?25:m<60?20:m<144?16:12,ad=m>=144,ref=ad?"Normal 12 a 20 rpm":"Normal: "+bajo+" a "+(lim-1)+" rpm (AIEPI: rápida desde "+lim+")";
+   if(fr==null)put("fr","",ref);
+   else if(fr>=lim)put("fr","bad",ref,m<60?"Respiración rápida para la edad ("+fr+" rpm; el límite es "+lim+"): clasifica según AIEPI y remite.":"Frecuencia respiratoria "+fr+" rpm, alta para la edad (límite "+lim+"): valora dificultad respiratoria.");
+   else if(fr<bajo)put("fr","bad",ref,"Frecuencia respiratoria "+fr+" rpm, baja para la edad (menos de "+bajo+"): valora conciencia y esfuerzo para respirar; remite.");
+   else if(ad&&fr>20)put("fr","warn",ref,"Frecuencia respiratoria "+fr+" rpm, algo alta (normal 12 a 20): recuenta en reposo durante 1 minuto.");
+   else put("fr","ok",ref)}
+  /* saturación */
+  {const ref="Normal 95 % o más";if(sp==null)put("spo2","",ref);else if(sp<90)put("spo2","bad",ref,"Saturación "+sp+" %: muy baja, remite de urgencia con oxígeno si lo hay.");else if(sp<92)put("spo2","bad",ref,"Saturación "+sp+" %: baja, remite.");else if(sp<95)put("spo2","warn",ref,"Saturación "+sp+" %: algo baja; repite con la persona tranquila, el dedo tibio y el sensor bien puesto; si sigue así, medicina.");else put("spo2","ok",ref)}
+  /* tensión arterial */
+  if(m!=null){const a=Math.floor(m/12),sx=pac()["GENERO"]==="F"?"F":"M";let ref,c="",msg;
+   if(m>=216){ref="Normal: menos de 120/80; alta 140/90 o más";if(tas&&tad){if(tas>=160||tad>=110){c="bad";msg="Tensión "+tas+"/"+tad+" muy alta (160/110 o más): remite hoy a medicina."}else if(tas>=140||tad>=90){c="bad";msg="Tensión "+tas+"/"+tad+" alta (140/90 o más): repite en reposo y, si se confirma, remite a medicina."}else if(tas>=130||tad>=85){c="warn";msg="Tensión "+tas+"/"+tad+" en el límite alto: repite en reposo y vigila en el próximo control."}else if(tas<90||tad<60){c="warn";msg="Tensión baja ("+tas+"/"+tad+"): pregunta por mareo o desmayo; con síntomas, medicina."}else c="ok"}}
+   else{const hipo=m<1?60:m<12?70:m<120?70+2*a:90;let alto=null;if(m>=156)alto=[120,80];else if(a>=1)alto=TA_NNA[sx][Math.min(a,12)-1];
+    ref="Sístole mínima "+hipo+(alto?"; elevada desde "+alto[0]+"/"+alto[1]+" (compara con la tabla de percentiles)":"");
+    if(tas&&tas<hipo){c="bad";msg="Sístole "+tas+" baja para la edad (menos de "+hipo+"): con otros signos puede ser choque; remite hoy."}
+    else if(tas&&tad&&alto){if(m>=156&&(tas>=140||tad>=90)){c="bad";msg="Tensión "+tas+"/"+tad+" alta (140/90 o más): remite a medicina."}else if(m>=156&&(tas>=130||tad>=80)){c="warn";msg="Tensión "+tas+"/"+tad+" alta para la edad (130/80 o más): repite en reposo con el manguito adecuado; si persiste, medicina."}else if(tas>=alto[0]||tad>=alto[1]){c="warn";msg="Tensión "+tas+"/"+tad+" elevada para la edad (desde "+alto[0]+"/"+alto[1]+"): repite en reposo con el manguito adecuado; si persiste, medicina."}else c="ok"}
+    else if(tas&&tad)c="ok"}
+   put("tas",c,ref,msg);put("tad",c,"",msg?"":undefined)}
+  return R}
+ function sgCalc(id){const v=G(id,"sgn"),a=antro(id),p=num(a.peso);let tl=num(a.talla);if(tl!=null&&tl<3)tl=tl*100;
   const o={v,al:[]},tas=num(v.tas),tad=num(v.tad);if(tas&&tad)o.media=Math.round((tas+2*tad)/3);
   if(p&&tl){o.imc=Math.round(p/Math.pow(tl/100,2)*10)/10;o.sc=Math.round(Math.sqrt(p*tl/3600)*100)/100}
   const g=["go","gv","gm"].map(k=>num(v[k]));if(g.every(x=>x!=null))o.gl=g[0]+g[1]+g[2];
-  const fr=num(v.fr),fc=num(v.fc),t=num(v.t),sp=num(v.spo2);
-  if(m!=null&&fr!=null){const lim=m<2?60:m<12?50:m<60?40:m<144?30:25;if(fr>=lim)o.al.push(m<60?"Respiración rápida para la edad ("+fr+" rpm; el límite es "+lim+"): clasifica según AIEPI y remite.":"Frecuencia respiratoria "+fr+" rpm, alta para la edad (límite "+lim+"): valora dificultad respiratoria.")}
-  if(m!=null&&fc!=null){const r=m<12?[100,160]:m<36?[90,150]:m<72?[80,140]:m<144?[70,120]:[60,100];if(fc<r[0]||fc>r[1])o.al.push("Frecuencia cardiaca "+fc+" fuera del rango de la edad ("+r[0]+" a "+r[1]+").")}
-  if(m!=null&&m>=216&&tas&&tad){if(tas>=160||tad>=110)o.al.push("Tensión "+tas+"/"+tad+" muy alta (160/110 o más): remite hoy a medicina.");else if(tas>=140||tad>=90)o.al.push("Tensión "+tas+"/"+tad+" alta (140/90 o más): repite en reposo y, si se confirma, remite a medicina.")}
-  if(t!=null){if(t>=38)o.al.push("Fiebre ("+coma(t)+" °C): busca la causa y, en zona de malaria, toma gota gruesa.");else if(t<36)o.al.push("Temperatura baja ("+coma(t)+" °C): repite la toma; si se confirma, hipotermia.")}
-  if(sp!=null&&sp<92)o.al.push("Saturación "+sp+" %: baja, remite.");
+  o.ev=sgEval(id);["t","fc","fr","tas","spo2"].forEach(k=>{const e=o.ev[k];if(e&&e.msg)o.al.push(e.msg)});
   if(o.gl!=null&&o.gl<15)o.al.push("Glasgow "+o.gl+"/15: alteración de la conciencia, signo de peligro: remisión urgente.");
   return o}
  const GVA=[[5,"Orientado"],[4,"Confuso"],[3,"Palabras inapropiadas"],[2,"Sonidos incomprensibles"],[1,"Ninguna"]];
@@ -7217,7 +7246,7 @@ function vnIdForm(){stopRec();if(VNS)VNS.voz=false;const P=pac(),tipos=(ALLF.fin
  const selG=(k,ops,val)=>`<select data-sgn="${k}"><option value=""></option>${ops.map(([n,t])=>`<option value="${n}" ${String(val)===String(n)?"selected":""}>${n} · ${esc(t)}</option>`).join("")}</select>`;
  WIDGET.signosps={plantilla:id=>sgCampos(id).map(([k,l,u])=>l+(u?" ("+u+")":"")+": "+(k==="pvc"?"NO APLICA":"")).concat(["Glasgow ocular (1 a 4): 4","Glasgow verbal (1 a 5): 5","Glasgow motora (1 a 6): 6"]),
   html:id=>{const v=G(id,"sgn");return `<p class="note-src" style="margin:0 0 6px">${SG_OCULTO[id]?"Peso, talla, cintura (perímetro abdominal) y muñeca van en Estado nutricional":"Peso y talla van en Crecimiento"}; aquí se calculan el IMC, la superficie corporal y la presión media.</p>
-   <div class="pgrid">${sgCampos(id).map(([k,l,u,ph])=>`<label class="bfl"><span>${esc(l)}${u?" ("+u+")":""}</span><input data-sgn="${k}" inputmode="decimal" value="${esc(v[k]||"")}" placeholder="${esc(ph)}"></label>`).join("")}
+   <div class="pgrid">${sgCampos(id).map(([k,l,u,ph])=>`<label class="bfl"><span>${esc(l)}${u?" ("+u+")":""}</span><input data-sgn="${k}" inputmode="decimal" value="${esc(v[k]||"")}" placeholder="${esc(ph)}"><small data-sgm="${k}" style="font-size:.74rem;line-height:1.3;min-height:1.3em;color:var(--muted)"></small></label>`).join("")}
     <label class="bfl"><span>Presión media</span><input id="sg-media" readonly style="background:var(--accent-soft)"></label><label class="bfl"><span>IMC</span><input id="sg-imc" readonly style="background:var(--accent-soft)"></label><label class="bfl"><span>Superficie corporal (m²)</span><input id="sg-sc" readonly style="background:var(--accent-soft)"></label></div>
    <p class="lab" style="margin:10px 0 4px">Escala de Glasgow${(meses(id)!=null&&meses(id)<24)?" (adaptada a la edad)":""}</p>
    <div class="bgrid" style="padding:0"><label class="bfl"><span>Respuesta ocular</span>${selG("go",GO,v.go)}</label><label class="bfl"><span>Respuesta verbal</span>${selG("gv",(meses(id)!=null&&meses(id)<24)?GV:GVA,v.gv)}</label><label class="bfl"><span>Respuesta motora</span>${selG("gm",GM,v.gm)}</label></div>
@@ -7232,6 +7261,10 @@ function vnIdForm(){stopRec();if(VNS)VNS.voz=false;const P=pac(),tipos=(ALLF.fin
    o.al.forEach(x=>L.push(x));return L.filter(Boolean).join(" ")},
   wire:(id,save)=>{const up=()=>{const o=sgCalc(id);$("sg-media").value=o.media||"";$("sg-imc").value=o.imc?coma(o.imc):"";$("sg-sc").value=o.sc?coma(o.sc):"";
     const p=$("sg-gl");p.textContent=o.gl!=null?"Glasgow "+o.gl+"/15":"Glasgow: —";p.className="pill "+(o.gl!=null&&o.gl<15?"high":"low");
+    Object.entries(o.ev).forEach(([k,e])=>{const inp=document.querySelector(`input[data-sgn="${k}"]`),sm=document.querySelector(`[data-sgm="${k}"]`);if(!inp||!sm)return;
+     const col=e.c==="bad"?"var(--miss)":e.c==="warn"?"#b26a00":e.c==="ok"?"var(--accent)":"";inp.style.borderColor=e.c&&e.c!=="ok"?col:"";inp.style.borderWidth=e.c&&e.c!=="ok"?"2px":"";
+     sm.textContent=e.msg||(e.c==="ok"?"✓ "+(e.ref||"En rango"):(e.ref||""));sm.style.color=col||"var(--muted)";sm.style.fontWeight=e.c&&e.c!=="ok"?"700":"400"});
+    ["go","gv","gm"].forEach(k=>{const se=document.querySelector(`select[data-sgn="${k}"]`);if(se){const bad=o.gl!=null&&o.gl<15;se.style.borderColor=bad?"var(--miss)":"";se.style.borderWidth=bad?"2px":""}});
     const al=$("sg-al");al.hidden=!o.al.length;al.innerHTML=o.al.map(x=>`<p style="margin:0">${esc(x)}</p>`).join("");save()};
    document.querySelectorAll("[data-sgn]").forEach(e=>e.addEventListener(e.tagName==="SELECT"?"change":"input",()=>{const v=G(id,"sgn");v[e.dataset.sgn]=e.value.trim();SV(id,"sgn",v);up()}));up()}};
 
