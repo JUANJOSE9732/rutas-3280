@@ -350,7 +350,7 @@ const M = {
   facts:[["Medicina","1 m, 4–5 m, 12–18 m, 24–29 m, 3 a, 5 a"],["Enfermería","2–3 m, 6–8 m, 9–11 m, 18–23 m, 30–35 m, 4 a"]],
   alerts:["Hitos de la EAD-3 no alcanzados → valoración médica","Desviación de las curvas de crecimiento o desnutrición aguda → manejo y remisión","Signos generales de peligro AIEPI → remisión urgente","Sospecha de maltrato → ruta de violencia y notificación"],
   sections:[
-   {t:"Valoración",items:["Antecedentes perinatales: semanas y peso al nacer, hospitalización","Antecedentes personales: enfermedades, hospitalizaciones, alergias","Cuidados tradicionales: payé, rezos, plantas","Signos vitales: FC, FR, temperatura","Examen físico por sistemas, de cabeza a pies","Crecimiento: peso, talla, perímetro cefálico, curvas OMS","Desarrollo con EAD-3","Visión: reflejo rojo, fijación y seguimiento, estrabismo","Alimentación: lactancia, alimentación complementaria","Esquema de vacunación","Salud bucal","Familia: familiograma, red de apoyo, cuidado","Signos generales de peligro AIEPI"]},
+   {t:"Valoración",items:["Antecedentes perinatales: semanas y peso al nacer, hospitalización","Antecedentes personales: enfermedades, hospitalizaciones, alergias","Discapacidades del paciente","Cuidados tradicionales: payé, rezos, plantas","Revisión por sistemas y órganos de los sentidos","Signos vitales, Glasgow y perímetros","Examen físico por sistemas, de cabeza a pies","Crecimiento: peso, talla, perímetro cefálico, curvas OMS","Desarrollo con EAD-3","Visión: estructuras oculares y agudeza visual","Alimentación: lactancia, alimentación complementaria","Esquema de vacunación","Salud bucal","Familia: familiograma, red de apoyo, cuidado"]},
    {t:"Protección específica",items:["Vacunación según esquema PAI","Micronutrientes en polvo (fortificación casera) en las edades del cuadro de la 3280","Micronutrientes dos veces al año desde los 2 años","Desparasitación desde el año, dos veces al año","Barniz de flúor y profilaxis semestral desde el año","Sellantes desde los 3 años según criterio","Consejería en lactancia"]},
    {t:"Detección temprana",items:["Hemoglobina según riesgo (una vez)","Odontología anual desde los 6 meses"]},
    {t:"Educación",items:["Educación individual a padres o cuidadores","Signos de alarma para consultar de inmediato","Al menos dos ciclos educativos"]},
@@ -1966,7 +1966,7 @@ function wireMiDia(){const cb=$("md-cal");if(cb)cb.onclick=calOpen;
 function mdShow(t){const s=$("md-st");s.innerHTML="";const a=document.createElement("textarea");a.value=t;a.rows=7;a.readOnly=true;s.append("No se pudo copiar solo. Mantén presionado el texto y cópialo:",a);a.focus();a.select()}
 
 /* ---------- PANEL ---------- */
-const VERSION_APP="2026-10-18 v170";
+const VERSION_APP="2026-10-18 v162";
 function home(){
   stopRec();if(S.get(AT_KEY))atReiniciar();st.view="home";
   const rm=["precon","prenatal","parto","rn","ive"],rp=["pinf","inf","adol","juv","adul","vej"];
@@ -4386,15 +4386,16 @@ WIDGET.charlaPF={html:id=>pfHTML(id),txt:id=>pfTxt(id),
   wire:(id,save)=>{SM.wire(id,save);mmWire(id,save)}};
 
  /* ========== 6. APGAR FAMILIAR + ZARIT + MALTRATO ========== */
- const OA=[["Casi siempre",2],["A veces",1],["Casi nunca",0]];
+ const OA=[["Nunca",0],["Casi nunca",1],["Algunas veces",2],["Casi siempre",3],["Siempre",4]];
+ /* redacción y escala de PROSOFT: 5 preguntas de 0 a 4, total 0 a 20 */
  const APG=[
-  ["ada","Adaptación",OA,"¿Está satisfecho con la ayuda que recibe de su familia cuando tiene un problema?"],
-  ["par","Participación",OA,"¿Conversan entre ustedes los problemas que tienen en casa?"],
-  ["cre","Crecimiento",OA,"¿Las decisiones importantes se toman en conjunto en la casa?"],
-  ["afe","Afecto",OA,"¿Está satisfecho con el tiempo que usted y su familia pasan juntos?"],
-  ["res","Resolución",OA,"¿Siente que su familia lo quiere?"]];
- const APGI=p=>p>=7?{c:"low",t:"familia funcional"}:p>=4?{c:"high",t:"disfunción familiar leve"}:{c:"high",t:"disfunción familiar grave"};
- const APGT=[{l:0,h:4,n:"Grave",col:"#b91c1c"},{l:4,h:7,n:"Leve",col:"#ca8a04"},{l:7,h:11,n:"Funcional",col:"#16a34a"}];
+  ["ada","Adaptación",OA,"¿Le satisface la ayuda que recibe de su familia cuando tiene algún problema o necesidad?"],
+  ["par","Participación",OA,"¿Le satisface la participación que su familia brinda y permite?"],
+  ["cre","Crecimiento",OA,"¿Le satisface como su familia acepta y apoya sus deseos de emprender nuevas actividades?"],
+  ["afe","Afecto",OA,"¿Le satisface como su familia le expresa afecto y responde a sus emociones como rabia, tristeza y amor?"],
+  ["res","Resolución",OA,"¿Le satisface como comparte en familia el tiempo libre para estar juntos, los espacios en la casa, el dinero, etc.?"]];
+ const APGI=p=>p>=18?{c:"low",t:"buena función familiar"}:p>=14?{c:"high",t:"disfunción familiar leve"}:p>=10?{c:"high",t:"disfunción familiar moderada"}:{c:"high",t:"disfunción familiar severa"};
+ const APGT=[{l:0,h:10,n:"Severa",col:"#b91c1c"},{l:10,h:14,n:"Moderada",col:"#ea580c"},{l:14,h:18,n:"Leve",col:"#ca8a04"},{l:18,h:21,n:"Normal",col:"#16a34a"}];
  const OZ=[["Nunca",0],["Rara vez",1],["Algunas veces",2],["Bastantes veces",3],["Casi siempre",4]];
  const ZAR=[
   ["z1","¿Siente que, por el tiempo que dedica a cuidarlo, ya no le queda tiempo para usted?",OZ],
@@ -4420,8 +4421,8 @@ WIDGET.charlaPF={html:id=>pfHTML(id),txt:id=>pfTxt(id),
     <div style="display:flex;flex-direction:column;gap:4px">${MAL.map(([k,l])=>`<label class="bfl"><input type="checkbox" data-mal="${k}" ${vm[k]?"checked":""}> <span>${esc(l)}</span></label>`).join("")}</div>
     <div class="risk" style="margin-top:8px"><span class="pill low" data-malp>Sin signos marcados</span></div></details>`},
   txt:id=>{const L=[],va=G(id,"apg"),vz=G(id,"zar"),vm=G(id,"mal");
-   if(hechos(va,APG)){const p=suma(va,APG);L.push("APGAR familiar: "+p+"/10"+(hechos(va,APG)<APG.length?" (incompleto)":"")+", "+APGI(p).t+".");
-    if(p<7)L.push("Se remite a orientación familiar y se trabaja con la familia el acompañamiento a la persona mayor.")}
+   if(hechos(va,APG)){const p=suma(va,APG);L.push("APGAR familiar: "+p+"/20"+(hechos(va,APG)<APG.length?" (incompleto)":"")+", "+APGI(p).t+".");
+    if(p<18)L.push("Se remite a orientación familiar y se trabaja con la familia el acompañamiento a la persona mayor.")}
    if(hechos(vz,ZAR)){const p=suma(vz,ZAR);L.push("Escala de Zarit reducida aplicada al cuidador (Anexo 23): "+p+"/28"+(hechos(vz,ZAR)<ZAR.length?" (incompleto)":"")+", "+ZARI(p).t+".");
     if(ZARI(p).t==="sobrecarga intensa")L.push("Sobrecarga intensa del cuidador: se remite a la ruta de salud mental, se busca repartir el cuidado con otros familiares y se educa al cuidador en su propio autocuidado.");
     else if(ZARI(p).t==="sobrecarga leve")L.push("Sobrecarga leve: se orienta al cuidador en descanso, reparto de tareas y señales de agotamiento.")}
@@ -4430,7 +4431,7 @@ WIDGET.charlaPF={html:id=>pfHTML(id),txt:id=>pfTxt(id),
    if(mk.length)L.push("Signos de alarma de maltrato: "+mk.map(k=>N[k]).join(", ")+". Se activa la ruta de atención a víctimas de violencias, se notifica al SIVIGILA y se informa a la comisaría de familia o a la autoridad indígena según el caso.");
    return L.join(" ")},
   wire:(id,save)=>{const up=()=>{
-    pinta(id,"apg",APG,APGI,APGT,10);pinta(id,"zar",ZAR,ZARI,ZART,28);
+    pinta(id,"apg",APG,APGI,APGT,20);pinta(id,"zar",ZAR,ZARI,ZART,28);
     const vm={};document.querySelectorAll("[data-mal]").forEach(e=>{if(e.checked)vm[e.dataset.mal]=1});SV(id,"mal",vm);
     const n=Object.keys(vm).length,mp=document.querySelector("[data-malp]");
     if(mp){mp.textContent=n?n+" signo"+(n>1?"s":"")+" de maltrato: activa la ruta de violencias y notifica":"Sin signos marcados";mp.className="pill "+(n?"high":"low")}
@@ -5940,21 +5941,29 @@ window.addEventListener("online",()=>sync(false));
   [25,"25 a 36 meses",{c:"¿Usa posesivos como «mío», «tuyo» o «suyo»?",
     e:"¿Se mueve o canta con la música, y mastica alimentos duros sin atorarse?",
     i:"¿Muestra interés por comunicarse y jugar con otros niños?"}],
-  [37,"3 años 1 mes a 4 años",{c:"Después de un cuento, ¿responde preguntas de qué, cómo y cuándo?",
-    e:"¿Hace preguntas ante situaciones nuevas?",
-    i:"¿Expresa sentimientos e ideas a las personas cercanas?"}],
-  [49,"4 años 1 mes a 5 años",{c:"¿Sabe y repite rondas, canciones o cuentos cortos?",
-    e:"¿Usa frases de al menos cuatro palabras para contar lo que le pasó?",
-    i:"¿Responde a saludos, despedidas y expresiones como «gracias» o «por favor»?"}],
-  [61,"5 años 1 mes a 9 años",{c:"¿Cumple varias indicaciones dadas al mismo tiempo, en el orden correcto?",
-    e:"¿Se le entiende claramente al hablar y pronuncia bien todos los sonidos?",
+  [37,"3 años 1 mes a 4 años",{c:"En narraciones de hechos, cuentos o historias ¿el niño/a responde a preguntas de Qué, Cómo, Cuándo, etc.?",
+    e:"¿El niño/a hace preguntas cuando se presenta una situación nueva para él?",
+    i:"¿El niño/a expresa sus sentimientos, pensamientos, emociones, ideas cuando interactúa con personas cercanas?"}],
+  [49,"4 años 1 mes a 5 años",{c:"¿El niño/a sabe y repite rondas, canciones, cuentos, historias cortas o fragmentos?",
+    e:"¿El niño/a habla utilizando frases de al menos cuatro palabras para contar hechos o expresar diferentes situaciones?",
+    i:"¿El niño/a comprende y responde cuando las personas saludan, se despiden, dicen «gracias» o «por favor»?"}],
+  [61,"5 años 1 mes a 9 años",{c:"El niño/a cumple con varias indicaciones que se le dan al mismo tiempo, por ejemplo cuando usted le dice: «Primero te pones de pie, luego vas corriendo hasta la puerta y después das dos golpes con la mano» o «Trae el caballito, ponlo en el corral y dale de comer»",
+    e:"¿Cuándo el niño/a habla o cuenta una historia se entiende claramente lo que dice y pronuncia bien todos los sonidos?",
     i:"¿Sostiene conversaciones con familiares y con desconocidos, da su opinión y trata de convencer?"}],
   [109,"9 años 1 mes a 12 años 11 meses",{c:"¿Identifica errores en frases absurdas, se ríe de ellos e intenta corregirlos?",
     e:"¿Explica el porqué de situaciones, sentimientos y pensamientos con palabras abstractas?",
     i:"¿Conversa sobre distintos temas, escucha las ideas de otros y expresa acuerdo o desacuerdo con argumentos?"}]];
  /* ítem vestibular: dos rangos, desde los 3 años */
- const VV=[[36,"3 a 5 años","¿Disfruta columpiarse, girar y saltar, y camina derecho sin inclinarse ni caerse a cada rato?"],
-           [61,"5 años 1 mes a 12 años 11 meses","¿Disfruta dar vueltas sin caerse, pone las manos para protegerse al tropezar y le gustan los movimientos en distintas direcciones, velocidades y alturas?"]];
+ const VO={8:{c:"En la visualización y narración de un cuento, el evaluador observa que el niño/a responde a preguntas de Qué, Cómo, Cuándo, etc.",e:"En la interacción comunicativa, el evaluador observa que el niño/a hace diferentes preguntas.",i:"En la interacción comunicativa, el evaluador pide al acudiente que le pregunte al niño/a sobre sus sentimientos, pensamientos, emociones e ideas y observa el comportamiento."},
+  9:{c:"El evaluador le solicita al niño/a cantar alguna canción.",e:"El evaluador solicita al niño/a que cuente algo que le sucedió en un contexto particular y observa el uso de frases coherentes de al menos cuatro palabras.",i:"El evaluador identifica que el niño/a hace uso de reglas sociales, de manera guiada o espontáneamente, durante el contacto comunicativo."},
+  10:{c:"El evaluador observa que el niño/a ejecuta varias instrucciones dadas al mismo tiempo, en la secuencia adecuada.",e:"El evaluador solicita al niño que cuente algo que le sucedió en un contexto particular y observa que se entiende con claridad lo que dice y pronuncia bien todos los sonidos."}};
+ /* ítem vestibular (V) como en PROSOFT: 2 ítems de 3 a 5 años y 3 ítems de 5 años 1 mes a 12 años 11 meses */
+ const VV=[[36,"3 a 5 años",[["¿El niño/a disfruta actividades de movimientos del cuerpo como columpiarse, girar, dar botes, saltar?","El evaluador le solicita al niño/a que dé una vuelta sobre su propio eje y observa que mantiene el equilibrio."],
+            ["¿El niño/a camina recto, sin inclinarse hacia los lados y sin caerse constantemente?","El evaluador le solicita al niño/a que camine en línea recta y observa que puede hacerlo sin inclinarse hacia los lados."]]],
+           [61,"5 años 1 mes a 12 años 11 meses",[["¿El niño/a disfruta dar algunas vueltas sobre sí mismo, sin caerse?","El evaluador le pide al niño/a que dé tres vueltas sobre su propio eje, y observa que mantiene el equilibrio al detenerse."],
+            ["¿Cuándo el niño/a se tropieza, o siente que se va a caer, pone las manos para protegerse?","El evaluador observa, si tiene oportunidad, que el niño/a anticipa acciones de protección para evitar caídas."],
+            ["¿El niño/a disfruta del movimiento en varias direcciones, velocidades y alturas? Por ejemplo: subir al rodadero, ¿sube y baja, montaña rusa, que lo suban o bajen rápidamente?","El evaluador observa, si tiene oportunidad, que el niño/a disfruta hacer movimientos con su cuerpo en diferentes velocidades, direcciones y alturas."]]]];
+ const vk=(iv,j)=>"v"+iv+(j?"_"+j:"");
  const RIE=[["r1","Bajo peso al nacer, menor de 1.500 g"],
             ["r2","Nació antes de las 30 semanas (prematuro extremo)"],
             ["r3","Estuvo más de 30 días en cuidados intensivos neonatales"],
@@ -5985,12 +5994,12 @@ window.addEventListener("online",()=>sync(false));
   const rie=RIE.filter(([k])=>v[k]===1);
   const est=EST.filter((t,i)=>v["e"+i+"_p"]===0||v["e"+i+"_i"]===0);
   const neg=ca.filter(x=>x.val===0);
-  const iv=idxV(m),vest=iv>=0?v["v"+iv]:undefined;
-  const negV=vest===0?1:0;
+  const iv=idxV(m),vres=iv>=0?VV[iv][2].map((_,j)=>v[vk(iv,j)]):[];
+  const negV=vres.filter(x=>x===0).length,vest=negV?0:vres.some(x=>x===1)?1:undefined;
   const total=neg.length+negV;
   const menor2=m!=null&&m<24;
   const remite=(menor2&&rie.length>0)||est.length>0||total>=2;
-  return {rie,est,neg,total,vest,iv,ca,remite,urgente:total>=2,menor2,
+  return {rie,est,neg,total,vest,negV,iv,ca,remite,urgente:total>=2,menor2,
    sinNada:!rie.length&&!est.length&&!ca.some(x=>x.val!==undefined)&&vest===undefined};}
 
  const btn=(k,val,on)=>`<button type="button" class="btn" data-va="${k}" data-val="${val}" style="padding:4px 10px;font-size:.8rem;${on?(val===0?"background:var(--miss);color:#fff;border-color:var(--miss)":"background:var(--accent);color:#fff;border-color:var(--accent)"):""}">${val===1?"Sí":"No"}</button>`;
@@ -6016,9 +6025,10 @@ window.addEventListener("online",()=>sync(false));
      <span style="display:flex;gap:4px">${btn("e"+i+"_i",1,v["e"+i+"_i"]===1)}${btn("e"+i+"_i",0,v["e"+i+"_i"]===0)}</span></div></div>`).join("")}</div></details>
   <details class="sec" open><summary><span>${r.menor2?"3":"2"} · Comprensión, expresión e interacción</span><span class="cnt">${i0>=0?esc(VR[i0][1]):""}</span></summary><div style="padding:0 14px 14px">
    ${CAT.map(([k,nom])=>`<p class="lab" style="margin:8px 0 2px">${esc(nom)}</p>
-    ${(porCat[k]||[]).map((x,n)=>fila(k+x.rango,x.q,x.val,n?"Rango anterior ("+x.nom+"), porque la respuesta de arriba fue no":"")).join("")}`).join("")}
+    ${(porCat[k]||[]).map((x,n)=>fila(k+x.rango,x.q,x.val,[n?"Rango anterior ("+x.nom+"), porque la respuesta de arriba fue no":"",VO[x.rango]&&VO[x.rango][k]?"Observación directa: "+VO[x.rango][k]:""].filter(Boolean).join(" · "))).join("")}`).join("")}
    <p class="note-src" style="margin:8px 0 0">Si la respuesta de un rango es «no», el instrumento manda preguntar esa misma categoría en el rango anterior, hasta obtener un «sí».</p></div></details>
-  ${iv>=0?`<details class="sec" open><summary><span>${r.menor2?"4":"3"} · Vestibular</span><span class="cnt">${esc(VV[iv][1])}</span></summary><div style="padding:0 14px 14px">${fila("v"+iv,VV[iv][2],v["v"+iv])}</div></details>`:""}
+  ${iv>=0?`<details class="sec" open><summary><span>${r.menor2?"4":"3"} · Vestibular (V)</span><span class="cnt">${esc(VV[iv][1])}</span></summary><div style="padding:0 14px 14px">${VV[iv][2].map(([q,o],j)=>fila(vk(iv,j),q,v[vk(iv,j)],"Observación directa: "+o)).join("")}</div></details>`:""}
+  <div id="va-tab" style="margin-top:8px"></div>
   <div class="risk" style="margin-top:8px"><span class="pill low" id="va-p">Marca las respuestas</span></div>
   <p class="note-src" id="va-c" style="margin:4px 0 0"></p>`}
 
@@ -6035,9 +6045,12 @@ window.addEventListener("online",()=>sync(false));
    const porCat={};r.neg.forEach(x=>{(porCat[x.cat]=porCat[x.cat]||[]).push(x.nom)});
    L.push("Respuestas negativas en: "+Object.keys(porCat).map(k=>N[k]+" ("+porCat[k].join(", ")+")").join("; ")+".");
   } else if(r.ca.some(x=>x.val!==undefined)) L.push("Comprensión, expresión e interacción acordes a la edad.");
-  if(r.vest===0)L.push("Ítem vestibular negativo.");
+  if(r.vest===0)L.push("Ítem vestibular negativo"+(r.negV>1?" ("+r.negV+" respuestas negativas)":"")+".");
   else if(r.vest===1)L.push("Ítem vestibular acorde a la edad.");
   L.push("Total de respuestas negativas: "+r.total+".");
+  const nc=k=>r.neg.filter(x=>x.cat===k).length;
+  L.push("Respuestas negativas por ítem: comprensión (C) "+nc("c")+", expresión (E) "+nc("e")+", interacción (I) "+nc("i")+", vestibular (V) "+(r.negV||0)+".");
+  L.push("Remisión a evaluación de procesos de habla y lenguaje por fonoaudiología, evaluación audiológica o servicio de urgencias: "+(r.remite?"S":"N")+". ¿La remisión es urgente?: "+(r.remite&&r.urgente?"S":"N")+".");
   if(r.remite)L.push("Se remite a fonoaudiología y audiología"+(r.urgente?", de forma urgente por dos o más respuestas negativas":"")+".");
   else L.push("No cumple criterios de remisión por el VALE.");
   return L.join(" ")}
@@ -6050,6 +6063,8 @@ window.addEventListener("online",()=>sync(false));
    p.textContent=r.remite?(r.urgente?"Remisión urgente a fonoaudiología y audiología":"Remisión a fonoaudiología y audiología")
                         :"Sin criterios de remisión"+(r.total?" ("+r.total+" negativa"+(r.total>1?"s":"")+")":"");
    p.className="pill "+(r.remite?"high":"low");
+   const tb=$("va-tab");if(tb){const nc=k=>r.neg.filter(x=>x.cat===k).length;tb.innerHTML=`<table style="width:100%;border-collapse:collapse;font-size:.88rem"><tr><th style="text-align:left">Ítems</th><th style="text-align:right">Respuestas negativas</th></tr>${[["Comprensión (C)",nc("c")],["Expresión (E)",nc("e")],["Interacción (I)",nc("i")],["Vestibular (V)",r.negV||0],["Total",r.total]].map(([a,b])=>`<tr style="border-top:1px solid var(--line)"><td>${a}</td><td style="text-align:right;font-family:var(--f-data)">${b}</td></tr>`).join("")}</table>
+    <p style="margin:8px 0 0;font-size:.88rem">Remisión a evaluación de procesos de habla y lenguaje por fonoaudiología, evaluación audiológica o servicio de urgencias: <b>${r.remite?"S":"N"}</b> · ¿La remisión es urgente?: <b>${r.remite&&r.urgente?"S":"N"}</b></p>`}
    if(c){const m2=[];
     if(r.menor2&&r.rie.length)m2.push("Factor de riesgo perinatal presente.");
     if(r.est.length)m2.push("Alteración estructural: "+r.est.join(", ").toLowerCase()+".");
@@ -6118,25 +6133,29 @@ window.addEventListener("online",()=>sync(false));
 
  WIDGET.apgarfam={
   html:id=>{const q=QUIEN[id]||["a la persona",""];
-   return `<p class="note-src" style="margin:0 0 8px">APGAR familiar de Smilkstein, 5 preguntas, <b>0 a 2 puntos cada una, total 0 a 10</b>. Se le pregunta ${esc(q[0])}.${q[1]?" "+esc(q[1]):""}</p>
-   <details open><summary><b>APGAR familiar</b> — 0 a 10</summary>
-    <div style="display:flex;flex-direction:column;gap:6px;margin-top:6px">${items(id,"apg",APG)}</div>${cab("apg","Califica las 5 preguntas")}</details>
-   <p class="note-src" style="margin:8px 0 0">Si tu institución usa el anexo con 5 opciones por pregunta (0 a 4, total 0 a 20), dímelo: los puntos de corte son otros y hay que cambiarlos.</p>`},
+   const ac=(()=>{try{return JSON.parse(S.get(key(id,"apgac"))||"{}")||{}}catch(e){return{}}})();
+   return `<p class="note-src" style="margin:0 0 8px">APGAR familiar como en PROSOFT: 5 preguntas, <b>0 a 4 puntos cada una (0 nunca, 1 casi nunca, 2 algunas veces, 3 casi siempre, 4 siempre), total 0 a 20</b>. Se le pregunta ${esc(q[0])}.${q[1]?" "+esc(q[1]):""}</p>
+   <div class="bgrid" style="padding:0;margin-bottom:6px"><label class="bfl"><span>Nombre del acompañante</span><input data-apgac="nom" value="${esc(ac.nom||"")}"></label><label class="bfl"><span>Parentesco</span><input data-apgac="par" value="${esc(ac.par||"")}" placeholder="MADRE"></label></div>
+   <details open><summary><b>APGAR familiar</b> — 0 a 20</summary>
+    <div style="display:flex;flex-direction:column;gap:6px;margin-top:6px">${items(id,"apg",APG)}</div>${cab("apg","Califica las 5 preguntas")}</details>`},
   txt:id=>{const va=G(id,"apg");
    if(!hechos(va,APG))return "";
    const p=suma(va,APG),inc=hechos(va,APG)<APG.length,L=[];
-   L.push("APGAR familiar: "+p+"/10"+(inc?" (incompleto)":"")+", "+APGI(p).t+".");
-   if(p<4)L.push("Disfunción familiar grave: se remite a psicología y trabajo social, y se indaga por violencia intrafamiliar.");
-   else if(p<7)L.push("Disfunción familiar leve: se orienta a la familia y se deja como motivo de seguimiento en el próximo control.");
+   let ac={};try{ac=JSON.parse(S.get(key(id,"apgac"))||"{}")||{}}catch(e){}
+   L.push("APGAR familiar: "+p+"/20"+(inc?" (incompleto)":"")+", "+APGI(p).t+"."+(ac.nom||ac.par?" Responde "+[ac.nom,ac.par?"("+ac.par.toLowerCase()+")":""].filter(Boolean).join(" ")+".":""));
+   if(p<=9)L.push("Disfunción familiar severa: se remite a psicología y trabajo social, y se indaga por violencia intrafamiliar.");
+   else if(p<=13)L.push("Disfunción familiar moderada: se remite a psicología u orientación familiar y se deja en seguimiento.");
+   else if(p<=17)L.push("Disfunción familiar leve: se orienta a la familia y se deja como motivo de seguimiento en el próximo control.");
    return L.join(" ")},
-  wire:(id,save)=>{const up=()=>{pinta(id,"apg",APG,APGI,APGT,10);save()};
+  wire:(id,save)=>{const up=()=>{pinta(id,"apg",APG,APGI,APGT,20);save()};
+   document.querySelectorAll("[data-apgac]").forEach(e=>e.addEventListener("input",()=>{let ac={};try{ac=JSON.parse(S.get(key(id,"apgac"))||"{}")||{}}catch(x){}ac[e.dataset.apgac]=e.value.toUpperCase();S.set(key(id,"apgac"),JSON.stringify(ac));save()}));
    document.querySelectorAll('[data-gr^="apg."]').forEach(e=>e.addEventListener("change",up));up()}};
 
  /* el ítem, con la pauta propia de cada momento */
  const PAUTA={t:"Cómo se aplica",p:[
   "Son 5 preguntas: adaptación, participación, crecimiento, afecto y resolución.",
-  "Cada una vale de 0 a 2: casi nunca 0, a veces 1, casi siempre 2. El total va de 0 a 10 y la app lo suma.",
-  "7 a 10: familia funcional · 4 a 6: disfunción leve · 0 a 3: disfunción grave.",
+  "Cada una vale de 0 a 4: nunca 0, casi nunca 1, algunas veces 2, casi siempre 3, siempre 4. El total va de 0 a 20 y la app lo suma.",
+  "18 a 20: buena función familiar · 14 a 17: disfunción leve · 10 a 13: disfunción moderada · 9 o menos: disfunción severa.",
   "«Familia» es con quien vive y de quien depende, no necesariamente los padres biológicos.",
   "Pregúntalo a solas siempre que se pueda: delante de la familia las respuestas se maquillan.",
   "Un APGAR alterado no es un diagnóstico: es la puerta para indagar violencia, consumo, abandono o duelo."],r:"",b:""};
@@ -6790,9 +6809,10 @@ function plGenerar(tipo,id){const L=[],ln=s=>L.push(s),hr="=====================
   if(tipo==="MODULO"){let blk="";ivFor(id).forEach((x,i)=>{if(x.b!==blk){blk=x.b;ln("");ln("== "+blk.toUpperCase()+" ==")}
       ln("["+(i+1)+"] "+x.l);if(x.q&&plN(x.q)!==plN(x.l.replace(/…$/,"")))ln("    > "+(x.t==="ask"?"Pregunta: ":"Qué hacer: ")+x.q);
       const op=plOpc(id,x).map(c=>String(c).split("|")[0]);if(op.length)ln("    > Opciones: "+op.join(" · "));
-      if(x.widget||x.campos)ln("    > Escribe los valores; en la app revisa el cálculo de esta pregunta.");
+      const pf=x.widget&&WIDGET[x.widget]&&WIDGET[x.widget].plantilla?WIDGET[x.widget].plantilla:x.campos&&CAMPOS[x.campos]?CAMPOS[x.campos].filter(c=>!c.auto).map(c=>c.l+(c.u?" ("+c.u+")":"")+": "):null;
+      if(pf)ln("    > Llena cada línea debajo de R:. Lo que no hiciste, déjalo vacío.");else if(x.widget||x.campos)ln("    > Escribe los valores; en la app revisa el cálculo de esta pregunta.");
       if(x.siTxt&&typeof x.siTxt==="string")ln("    > Si no aplica por la edad: "+x.siTxt);
-      ln("R: ")})}
+      ln("R: ");if(pf)pf.forEach(s=>ln("  "+s))})}
   else{ln("");ln("== PREGUNTAS ==");VN[id].qs.forEach(q=>{ln("["+q.k+"] "+q.q);if(q.h)ln("    > "+q.h);
       if(q.def&&typeof q.def!=="function")ln("    > Normal: "+q.def);else if(typeof q.def==="function")ln("    > Si lo dejas vacío, la app lo sugiere según la edad.");
       if(q.o&&q.o.length>1)ln("    > Opciones: "+q.o.join(" · "));if(q.c)ln("    > Solo si aplica.");ln("R: ")})}
@@ -6807,7 +6827,7 @@ function plLeer(t){const r={tipo:null,id:null,datos:{},resp:{},otros:[],fecha:""
     if((m=s.match(/^R\s*:\s*(.*)$/i))){if(cur)cur.v.push(m[1]);else if(/^otros/.test(sec))r.otros.push(m[1]);return}
     if(sec==="datos iniciales"&&(m=s.match(/^([^:]+):(.*)$/))){r.datos[plN(m[1])]=m[2].trim();return}
     if(cur&&cur.v.length)cur.v.push(s);else if(/^otros/.test(sec))r.otros.push(s)});
-  Object.values(r.resp).forEach(x=>{x.v=x.v.join(" ").replace(/\s+/g," ").trim();if(/^_+$/.test(x.v))x.v=""});
+  Object.values(r.resp).forEach(x=>{x.raw=x.v.map(s=>s.trim()).filter(Boolean);x.v=x.v.map(s=>s.trim()).filter((s,i)=>s&&!(i>0&&/:\s*$/.test(s))).join("; ").replace(/\s+/g," ").trim();if(/^_+$/.test(x.v))x.v=""});
   r.otros=r.otros.join(" ").replace(/\s+/g," ").trim();return r}
 function plFecha(v){v=String(v||"").trim();if(/^\d{4}-\d{2}-\d{2}$/.test(v))return pD(v)?v:"";const m=v.match(/^(\d{1,2})[\/.\-](\d{1,2})[\/.\-](\d{2,4})$/);if(!m)return"";let y=m[3];if(y.length===2)y=(+y>40?"19":"20")+y;return isoDeTxt(m[1]+"/"+m[2]+"/"+y)}
 function plOpc(id,x){let c=[];try{c=x.c||[]}catch(e){}if(!c.length&&typeof IVX!=="undefined"&&IVX[id+"::"+x.q]&&Array.isArray(IVX[id+"::"+x.q].c))c=IVX[id+"::"+x.q].c;return c}
@@ -6838,7 +6858,7 @@ function plAplicar(texto){const r=plLeer(texto);if(!r.tipo||!r.id)return{err:"No
   if(r.tipo==="MODULO"){S.keys().filter(k=>k.startsWith("dn2_"+id+"_")&&!k.endsWith("_note")).forEach(k=>S.del(k));
     const q=ivFor(id),a={},ck={},usado=new Set();
     Object.values(r.resp).forEach(x=>{if(!x.v)return;let i=q.findIndex((z,j)=>!usado.has(j)&&plN(z.l.replace(/…$/,""))===plN(x.l.replace(/…$/,"")));if(i<0&&/^\d+$/.test(x.k)&&q[+x.k-1]&&!usado.has(+x.k-1))i=+x.k-1;
-      if(i<0){sin.push(x.l+": "+x.v);return}usado.add(i);a[i]=plOpcion(id,q[i],x.v);if(q[i].ck)ck[q[i].ck]=1;n++});
+      if(i<0){sin.push(x.l+": "+x.v);return}usado.add(i);{const W=q[i].widget&&WIDGET[q[i].widget];let ok=false;try{ok=!!(W&&W.desdeTexto&&W.desdeTexto(id,x.raw||[]))}catch(e){}a[i]=ok?(W.txt(id)||x.v):plOpcion(id,q[i],x.v)}if(q[i].ck)ck[q[i].ck]=1;n++});
     S.set(key(id,"iv"),JSON.stringify(a));S.set(key(id,"ivlab"),JSON.stringify(q.map(z=>z.l)));S.set(key(id,"ivi"),String(q.length));S.set(key(id,"chk"),JSON.stringify(ck));
     if(fecha)S.set(key(id,"fecha"),fecha);
     let dict=ivCompose(id);const ot=[r.otros].concat(sin).filter(Boolean);if(ot.length)dict+="\n\nOTROS DATOS\n- "+ot.join("\n- ");
@@ -6907,6 +6927,7 @@ function audModulo(id,f,d){const m=M[id],q=ivFor(id),a=ivAns(id),P=pac(),{o,set}
     const sum=re=>new RegExp("("+re+")[^.\\n]{0,60}(FORMUL|ENTREG|SUMINISTR|SE DA|INICIA)|(FORMUL|ENTREG|SUMINISTR)[^.\\n]{0,60}("+re+")").test(T);
     if(sum("ACIDO FOLICO"))set(59,"1");if(sum("SULFATO FERROSO|HIERRO"))set(60,"1");if(sum("CALCIO"))set(61,"1")}
   const vale=A(/VALE/);if(vale){set(63,f);if(/falla|alterad|riesgo|remit/i.test(vale))set(40,"4");else if(/pasa|normal|sin hallazgo|adecuad/i.test(vale))set(40,"5")}
+  const vis=A(/^Visión/);if(vis){const od=vis.match(/OD[^;]*?(20\s*\/\s*\d+)/),oi=vis.match(/OI[^;]*?(20\s*\/\s*\d+)/);if(od||oi){set(62,f);if(od)set(28,av202(od[1]));if(oi)set(27,av202(oi[1]))}}
   const ead=A(/^Desarrollo con EAD/);if(ead){if(/esperado|adecuado/i.test(ead)&&!/riesgo|sospecha/i.test(ead))[43,44,45,46].forEach(n=>set(n,"5"));
     else{const cod=/sospecha/i.test(ead)?"3":/riesgo/i.test(ead)?"4":"";if(cod){const ar=[[43,/gruesa/i],[44,/fina/i],[45,/personal|social/i],[46,/audici|lenguaje/i]];ar.forEach(([n,re])=>{if(re.test(ead))set(n,cod)})}}}
   if(hay(/Consejería en lactancia|lactancia/i)&&id!=="adol")set(51,f);
@@ -7124,6 +7145,163 @@ function vnIdForm(){stopRec();if(VNS)VNS.voz=false;const P=pac(),tipos=(ALLF.fin
 }
  const _home=home;
  home=function(){_home.apply(this,arguments);try{organizar()}catch(e){console.warn("bloques",e)}};
+})();
+
+/* ===== v162: lo que pregunta PROSOFT, dentro del módulo (primera infancia) =====
+   Genograma, revisión por sistemas con órganos de los sentidos, discapacidades, signos
+   completos con Glasgow y perímetros, y agudeza visual por ojo. Lo que la app ya
+   preguntaba se unificó: no hay dos preguntas sobre lo mismo. */
+(function(){
+ if(typeof WIDGET!=="object"||typeof IVX!=="object")return;
+ const G=(id,k)=>{try{return JSON.parse(S.get(key(id,k))||"{}")||{}}catch(e){return{}}};
+ const SV=(id,k,v)=>S.set(key(id,k),JSON.stringify(v));
+ const sn=(k,on,dt)=>`<span style="display:flex;gap:4px;flex:none">${["S","N"].map(x=>`<button type="button" class="btn" data-${dt}="${k}" data-val="${x}" style="padding:4px 12px;font-size:.82rem;min-width:44px;${on===x?(x==="S"?"background:var(--miss);color:#fff;border-color:var(--miss)":"background:var(--accent);color:#fff;border-color:var(--accent)"):""}">${x}</button>`).join("")}</span>`;
+ const fila=(t,ctrl)=>`<div style="display:flex;gap:8px;align-items:center;justify-content:space-between;border-bottom:1px solid var(--line);padding:5px 0"><span style="flex:1">${t}</span>${ctrl}</div>`;
+ const num=(v)=>{const n=parseFloat(String(v==null?"":v).replace(",","."));return Number.isFinite(n)?n:null};
+ const meses=id=>edadMesesMod(id);
+ const lista=a=>a.length<2?a.join(""):a.slice(0,-1).join(", ")+" y "+a[a.length-1];
+ const bindSN=(id,k,dt,save,def)=>{document.querySelectorAll(`[data-${dt}]`).forEach(b=>b.onclick=()=>{const v=G(id,k),f=b.dataset[dt];v[f]=b.dataset.val;SV(id,k,v);
+   document.querySelectorAll(`[data-${dt}="${f}"]`).forEach(z=>{const on=z.dataset.val===v[f];z.style.background=on?(z.dataset.val==="S"?"var(--miss)":"var(--accent)"):"";z.style.color=on?"#fff":"";z.style.borderColor=on?(z.dataset.val==="S"?"var(--miss)":"var(--accent)"):""});save()})};
+
+ /* ---------- Discapacidades del paciente ---------- */
+ const DIS=[["fis","Física"],["men","Mental"],["cog","Cognitiva"],["aud","Auditiva"],["vis","Visual"]];
+ WIDGET.discap={plantilla:DIS.map(([,l])=>l+" (S/N): N"),
+  html:id=>{const v=G(id,"dis");return `<p class="note-src" style="margin:0 0 6px">Como en PROSOFT: marca S solo si la tiene.</p>${DIS.map(([k,l])=>fila(esc(l)+" ?",sn(k,v[k]||"N","dis"))).join("")}`},
+  txt:id=>{const v=G(id,"dis"),si=DIS.filter(([k])=>v[k]==="S").map(([,l])=>l.toLowerCase());
+   return si.length?"Presenta discapacidad "+lista(si)+".":"Sin discapacidad física, mental, cognitiva, auditiva ni visual."},
+  wire:(id,save)=>{bindSN(id,"dis","dis",save);save()}};
+
+ /* ---------- Revisión por sistemas y órganos de los sentidos ---------- */
+ const SEN=[["ard","Ardor ojos"],["pru","Prurito"],["can","Cansancio ocular"],["vbo","Visión borrosa"],["tam","Tamizaje normal"],["lag","Lagrimeo"],["roj","Ojo rojo"],
+  ["dis","Disfonía"],["epi","Epistaxis"],["hip","Hipoacusia"],["obs","Obstrucción nasal"],["rin","Rinorrea"],["tin","Tinitus"]];
+ const SIS=[["cp","Sistema cardiopulmonar"],["ne","Sistema neurológico"],["di","Sistema digestivo"],["ps","Sistema psiquiátrico"],["de","Sistema dermatológico"],["gu","Sistema genitourinario"],["oa","Sistema osteoarticular"],["gi","Sistema ginecológico"]];
+ const giDef=id=>{const P=pac(),m=meses(id);return P["GENERO"]==="M"||(m!=null&&m<120)?"NO APLICA":"NORMAL"};
+ const rxV=id=>{const v=G(id,"rxs");SEN.forEach(([k])=>{if(!v[k])v[k]=k==="tam"?"":"N"});SIS.forEach(([k])=>{if(v["s_"+k]==null)v["s_"+k]=k==="gi"?giDef(id):"NORMAL"});return v};
+ WIDGET.rxsps={plantilla:SEN.map(([k,l])=>l+" (S/N): "+(k==="tam"?"":"N")).concat(SIS.map(([k,l])=>l+": "+(k==="gi"?"NO APLICA (niños y hombres)":"NORMAL"))),
+  html:id=>{const v=rxV(id);return `<details class="sec" open><summary><span>Órganos de los sentidos</span><span class="cnt">S / N</span></summary><div style="padding:0 14px 10px">
+    ${SEN.map(([k,l])=>fila(esc(l)+" ?",sn(k,v[k],"rxs"))).join("")}</div></details>
+   <details class="sec" open><summary><span>Revisión por sistemas</span><span class="cnt">obligatorio en PROSOFT</span></summary><div class="bgrid" style="padding:8px 14px 12px">
+    ${SIS.map(([k,l])=>`<label class="bfl" style="grid-column:1/-1"><span>${esc(l)} *</span><input data-rxt="${k}" value="${esc(v["s_"+k]||"")}"></label>`).join("")}</div></details>`},
+  txt:id=>{const v=rxV(id),pos=SEN.filter(([k])=>k!=="tam"&&v[k]==="S").map(([,l])=>l.toLowerCase()),neg=SEN.filter(([k])=>k!=="tam"&&v[k]!=="S").map(([,l])=>l.toLowerCase());
+   const L=["Revisión por sistemas. Órganos de los sentidos: "+(pos.length?"refiere "+lista(pos)+"; niega "+lista(neg):"niega "+lista(neg))+"."+(v.tam?" Tamizaje normal: "+(v.tam==="S"?"sí":"no")+".":"")];
+   L.push(SIS.map(([k,l])=>{const n=l.replace("Sistema ","");return n.charAt(0).toUpperCase()+n.slice(1)}).map((n,i)=>[n,SIS[i][0]]).map(([n,k])=>n+": "+(v["s_"+k]||"SIN DATO").toUpperCase()).join(". ")+".");return L.join(" ")},
+  wire:(id,save)=>{const v0=rxV(id);SV(id,"rxs",v0);bindSN(id,"rxs","rxs",save);
+   document.querySelectorAll("[data-rxt]").forEach(e=>e.addEventListener("input",()=>{const v=rxV(id);v["s_"+e.dataset.rxt]=e.value.toUpperCase();SV(id,"rxs",v);save()}));save()}};
+
+ /* ---------- Signos vitales, Glasgow y perímetros ---------- */
+ const SG=[["t","Temperatura","°C","36,5"],["fc","Frecuencia cardiaca","lpm","110"],["fr","Frecuencia respiratoria","rpm","30"],["tas","Sístole","mmHg","90"],["tad","Diástole","mmHg","60"],["pvc","PVC","","no aplica"],["spo2","Saturación O₂ (SpO₂)","%","97"],
+  ["ptor","Perímetro torácico","cm",""],["pabd","Perímetro abdominal","cm",""],["pmun","Perímetro de muñeca","cm",""]];
+ const GO=[[4,"Espontánea"],[3,"A la voz"],[2,"Al dolor"],[1,"Ninguna"]],GV=[[5,"Balbucea, sonríe, orientado"],[4,"Llanto consolable o confuso"],[3,"Llanto inconsolable o palabras inapropiadas"],[2,"Quejido o sonidos"],[1,"Ninguna"]],GM=[[6,"Movimientos espontáneos u obedece"],[5,"Localiza el dolor"],[4,"Retira al dolor"],[3,"Flexión anormal"],[2,"Extensión anormal"],[1,"Ninguna"]];
+ const antro=id=>{for(let i=0;i<60;i++){try{const v=JSON.parse(S.get(key(id,"cv"+i))||"null");if(v&&(v.peso||v.talla))return v}catch(e){}}return{}};
+ function sgCalc(id){const v=G(id,"sgn"),m=meses(id),a=antro(id),p=num(a.peso);let tl=num(a.talla);if(tl!=null&&tl<3)tl=tl*100;
+  const o={v,al:[]},tas=num(v.tas),tad=num(v.tad);if(tas&&tad)o.media=Math.round((tas+2*tad)/3);
+  if(p&&tl){o.imc=Math.round(p/Math.pow(tl/100,2)*10)/10;o.sc=Math.round(Math.sqrt(p*tl/3600)*100)/100}
+  const g=["go","gv","gm"].map(k=>num(v[k]));if(g.every(x=>x!=null))o.gl=g[0]+g[1]+g[2];
+  const fr=num(v.fr),fc=num(v.fc),t=num(v.t),sp=num(v.spo2);
+  if(m!=null&&fr!=null){const lim=m<2?60:m<12?50:m<60?40:30;if(fr>=lim)o.al.push("Respiración rápida para la edad ("+fr+" rpm; el límite es "+lim+"): clasifica según AIEPI y remite.")}
+  if(m!=null&&fc!=null){const r=m<12?[100,160]:m<36?[90,150]:m<72?[80,140]:[70,120];if(fc<r[0]||fc>r[1])o.al.push("Frecuencia cardiaca "+fc+" fuera del rango de la edad ("+r[0]+" a "+r[1]+").")}
+  if(t!=null){if(t>=38)o.al.push("Fiebre ("+coma(t)+" °C): busca la causa y, en zona de malaria, toma gota gruesa.");else if(t<36)o.al.push("Temperatura baja ("+coma(t)+" °C): repite la toma; si se confirma, hipotermia.")}
+  if(sp!=null&&sp<92)o.al.push("Saturación "+sp+" %: baja, remite.");
+  if(o.gl!=null&&o.gl<15)o.al.push("Glasgow "+o.gl+"/15: alteración de la conciencia, signo de peligro: remisión urgente.");
+  return o}
+ const selG=(k,ops,val)=>`<select data-sgn="${k}"><option value=""></option>${ops.map(([n,t])=>`<option value="${n}" ${String(val)===String(n)?"selected":""}>${n} · ${esc(t)}</option>`).join("")}</select>`;
+ WIDGET.signosps={plantilla:SG.map(([k,l,u])=>l+(u?" ("+u+")":"")+": "+(k==="pvc"?"NO APLICA":"")).concat(["Glasgow ocular (1 a 4): 4","Glasgow verbal (1 a 5): 5","Glasgow motora (1 a 6): 6"]),
+  html:id=>{const v=G(id,"sgn");return `<p class="note-src" style="margin:0 0 6px">Peso, talla, perímetro cefálico y braquial van en Crecimiento; aquí se calculan el IMC y la superficie corporal, y la presión media.</p>
+   <div class="pgrid">${SG.map(([k,l,u,ph])=>`<label class="bfl"><span>${esc(l)}${u?" ("+u+")":""}</span><input data-sgn="${k}" inputmode="decimal" value="${esc(v[k]||"")}" placeholder="${esc(ph)}"></label>`).join("")}
+    <label class="bfl"><span>Presión media</span><input id="sg-media" readonly style="background:var(--accent-soft)"></label><label class="bfl"><span>IMC</span><input id="sg-imc" readonly style="background:var(--accent-soft)"></label><label class="bfl"><span>Superficie corporal (m²)</span><input id="sg-sc" readonly style="background:var(--accent-soft)"></label></div>
+   <p class="lab" style="margin:10px 0 4px">Escala de Glasgow (adaptada a la edad)</p>
+   <div class="bgrid" style="padding:0"><label class="bfl"><span>Respuesta ocular</span>${selG("go",GO,v.go)}</label><label class="bfl"><span>Respuesta verbal</span>${selG("gv",GV,v.gv)}</label><label class="bfl"><span>Respuesta motora</span>${selG("gm",GM,v.gm)}</label></div>
+   <div class="risk" style="margin-top:6px"><span class="pill low" id="sg-gl">Glasgow: —</span></div><div class="box warn" id="sg-al" hidden></div>`},
+  txt:id=>{const o=sgCalc(id),v=o.v,P=[];if(!Object.keys(v).some(k=>v[k]))return"";
+   if(v.t)P.push("T "+v.t+" °C");if(v.fc)P.push("FC "+v.fc+" lpm");if(v.fr)P.push("FR "+v.fr+" rpm");if(v.tas&&v.tad)P.push("TA "+v.tas+"/"+v.tad+" mmHg"+(o.media?" (media "+o.media+")":""));
+   if(v.spo2)P.push("SpO2 "+v.spo2+" %");if(v.pvc&&!/no aplica/i.test(v.pvc))P.push("PVC "+v.pvc);
+   const L=[P.length?"Signos vitales: "+P.join(", ")+".":""];
+   if(o.gl!=null)L.push("Glasgow "+o.gl+"/15 (ocular "+v.go+", verbal "+v.gv+", motora "+v.gm+").");
+   const pe=[];if(v.ptor)pe.push("torácico "+v.ptor+" cm");if(v.pabd)pe.push("abdominal "+v.pabd+" cm");if(v.pmun)pe.push("de muñeca "+v.pmun+" cm");if(pe.length)L.push("Perímetro "+lista(pe)+".");
+   if(o.imc)L.push("IMC "+coma(o.imc)+"; superficie corporal "+coma(o.sc)+" m².");
+   o.al.forEach(x=>L.push(x));return L.filter(Boolean).join(" ")},
+  wire:(id,save)=>{const up=()=>{const o=sgCalc(id);$("sg-media").value=o.media||"";$("sg-imc").value=o.imc?coma(o.imc):"";$("sg-sc").value=o.sc?coma(o.sc):"";
+    const p=$("sg-gl");p.textContent=o.gl!=null?"Glasgow "+o.gl+"/15":"Glasgow: —";p.className="pill "+(o.gl!=null&&o.gl<15?"high":"low");
+    const al=$("sg-al");al.hidden=!o.al.length;al.innerHTML=o.al.map(x=>`<p style="margin:0">${esc(x)}</p>`).join("");save()};
+   document.querySelectorAll("[data-sgn]").forEach(e=>e.addEventListener(e.tagName==="SELECT"?"change":"input",()=>{const v=G(id,"sgn");v[e.dataset.sgn]=e.value.trim();SV(id,"sgn",v);up()}));up()}};
+
+ /* ---------- Visión: estructuras oculares y agudeza visual ---------- */
+ const VI=[["rr","Reflejo rojo presente y simétrico","S"],["fs","Fija y sigue objetos","S"],["es","Estrabismo","N"],["le","Leucocoria","N"]];
+ const DIST=["6 metros","3 metros","20 pies","10 pies"];
+ const viV=id=>{const v=G(id,"vis");VI.forEach(([k,,d])=>{if(!v[k])v[k]=d});if(v.eoi==null)v.eoi="NORMAL";if(v.eod==null)v.eod="NORMAL";return v};
+ const snl=t=>{const m=String(t||"").match(/(\d{1,3})\s*\/\s*(\d{1,4})/);return m?{n:+m[1],d:+m[2],t:m[1]+"/"+m[2]}:null};
+ function viCalc(id){const v=viV(id),m=meses(id),al=[];if(v.rr==="N")al.push("Reflejo rojo ausente o asimétrico: remite a oftalmología.");if(v.le==="S")al.push("Leucocoria: remisión prioritaria a oftalmología.");
+  if(v.es==="S")al.push("Estrabismo: remite a oftalmología.");if(v.fs==="N")al.push("No fija ni sigue objetos: remite a valoración médica.");
+  const oi=snl(v.oi),od=snl(v.od),pe=x=>x&&x.d/x.n;
+  [[oi,"izquierdo"],[od,"derecho"]].forEach(([x,o])=>{if(x&&pe(x)>40/20)al.push("Ojo "+o+" "+x.t+": peor que 20/40, remite a optometría u oftalmología.")});
+  if(oi&&od&&Math.abs(Math.log10(pe(oi))-Math.log10(pe(od)))>=0.2)al.push("Diferencia de dos líneas o más entre los ojos: remite a optometría u oftalmología.");
+  return{v,m,oi,od,al}}
+ WIDGET.visionps={plantilla:["Estructuras oculares OI: NORMAL","Estructuras oculares OD: NORMAL"].concat(VI.map(([,l,d])=>l+" (S/N): "+d)).concat(["Snellen OI (desde los 3 años, 20/__): ","Snellen OD (desde los 3 años, 20/__): ","Distancia de valoración: "]),
+  html:id=>{const {v,m}=viCalc(id),ok3=m==null||m>=36;
+   return `<div class="bgrid" style="padding:0"><label class="bfl"><span>Estructuras oculares · ojo izquierdo</span><input data-vit="eoi" value="${esc(v.eoi)}"></label><label class="bfl"><span>Estructuras oculares · ojo derecho</span><input data-vit="eod" value="${esc(v.eod)}"></label></div>
+    ${VI.map(([k,l])=>fila(esc(l),sn(k,v[k],"vis"))).join("")}
+    <p class="lab" style="margin:10px 0 4px">Agudeza visual · Snellen</p>
+    ${ok3?`<div class="bgrid" style="padding:0"><label class="bfl"><span>Ojo izquierdo (20/…)</span><input data-vit="oi" value="${esc(v.oi||"")}" placeholder="20/20"></label><label class="bfl"><span>Ojo derecho (20/…)</span><input data-vit="od" value="${esc(v.od||"")}" placeholder="20/20"></label>
+     <label class="bfl"><span>Distancia de valoración</span><select data-vit="dist"><option value=""></option>${DIST.map(d=>`<option ${v.dist===d?"selected":""}>${d}</option>`).join("")}</select></label></div>`
+     :`<p class="note-src" style="margin:0">Menor de 3 años: la agudeza visual con optotipos no aplica; basta con estructuras, reflejo rojo, fijación y seguimiento.</p>`}
+    <div class="box warn" id="vi-al" hidden></div>`},
+  txt:id=>{const {v,m,oi,od,al}=viCalc(id),L=["Estructuras oculares: ojo izquierdo "+String(v.eoi).toLowerCase()+", ojo derecho "+String(v.eod).toLowerCase()+"."];
+   L.push("Reflejo rojo "+(v.rr==="S"?"presente y simétrico":"ausente o asimétrico")+"; "+(v.fs==="S"?"fija y sigue objetos":"no fija ni sigue objetos")+"; "+(v.es==="S"?"con estrabismo":"sin estrabismo")+"; "+(v.le==="S"?"con leucocoria":"sin leucocoria")+".");
+   if(oi||od)L.push("Agudeza visual con Snellen"+(v.dist?" a "+v.dist:"")+": OD "+(od?od.t:"sin dato")+", OI "+(oi?oi.t:"sin dato")+".");else if(m!=null&&m<36)L.push("Agudeza visual con optotipos: no aplica por edad.");
+   return L.concat(al).join(" ")},
+  wire:(id,save)=>{const up=()=>{const {al}=viCalc(id),b=$("vi-al");if(b){b.hidden=!al.length;b.innerHTML=al.map(x=>`<p style="margin:0">${esc(x)}</p>`).join("")}save()};
+   SV(id,"vis",viV(id));bindSN(id,"vis","vis",up);
+   document.querySelectorAll("[data-vit]").forEach(e=>e.addEventListener(e.tagName==="SELECT"?"change":"input",()=>{const v=viV(id);v[e.dataset.vit]=e.tagName==="SELECT"?e.value:e.value.toUpperCase();SV(id,"vis",v);up()}));up()}};
+
+ /* ---------- Familia: genograma, red de apoyo y cuidado ---------- */
+ const RED=[["Adecuada","Familia con red de apoyo; cuidado adecuado; sin señales de riesgo."],["Riesgo social","Se identifica riesgo social (pobre red de apoyo, consumo de alcohol o violencia en el hogar); se remite a trabajo social."],["Sospecha de maltrato","Se identifican señales de maltrato o negligencia; se activa la ruta de violencia y se notifica."]];
+ const UNI={A:["año","años"],M:["mes","meses"],D:["día","días"]};
+ WIDGET.genograma={plantilla:["Padre edad (años): ","Madre edad (años): "].concat([1,2,3,4,5,6].map(n=>"Hermano "+n+" (sexo F/M, edad, unidad A/M/D): ")).concat(["Con quién vive: ","Red de apoyo y cuidado (Adecuada / Riesgo social / Sospecha de maltrato): Adecuada"]),
+  html:id=>{const v=G(id,"gen");return `<p class="note-src" style="margin:0 0 6px">Genograma como en PROSOFT. Unidad de edad: A = años, M = meses, D = días.</p>
+   <div class="bgrid" style="padding:0"><label class="bfl"><span>Padre · edad (años)</span><input data-gen="pa" inputmode="numeric" value="${esc(v.pa||"")}"></label><label class="bfl"><span>Madre · edad (años)</span><input data-gen="ma" inputmode="numeric" value="${esc(v.ma||"")}"></label></div>
+   ${[1,2,3,4,5,6].map(n=>`<div class="pgrid" style="margin-top:6px;grid-template-columns:auto 1fr 1fr 1fr;align-items:end"><b style="font-size:.86rem;padding-bottom:10px">Hermano ${n}</b>
+    <label class="bfl"><span>Sexo</span><select data-gen="h${n}s"><option></option><option ${v["h"+n+"s"]==="F"?"selected":""}>F</option><option ${v["h"+n+"s"]==="M"?"selected":""}>M</option></select></label>
+    <label class="bfl"><span>Unidad</span><select data-gen="h${n}u"><option ${(v["h"+n+"u"]||"A")==="A"?"selected":""}>A</option><option ${v["h"+n+"u"]==="M"?"selected":""}>M</option><option ${v["h"+n+"u"]==="D"?"selected":""}>D</option></select></label>
+    <label class="bfl"><span>Edad</span><input data-gen="h${n}e" inputmode="numeric" value="${esc(v["h"+n+"e"]||"")}"></label></div>`).join("")}
+   <label class="bfl" style="margin-top:8px"><span>Con quién vive</span><input data-gen="vive" value="${esc(v.vive||"")}" placeholder="PAPÁ, MAMÁ Y HERMANOS"></label>
+   <p class="lab" style="margin:10px 0 4px">Red de apoyo y cuidado</p><div class="popts" style="background:none;padding:0">${RED.map(([l])=>`<button type="button" data-genr="${l}" aria-pressed="${(v.red||"")===l}">${l}</button>`).join("")}</div>`},
+  txt:id=>{const v=G(id,"gen"),L=[],pa=[];if(v.pa)pa.push("padre de "+v.pa+" años");if(v.ma)pa.push("madre de "+v.ma+" años");
+   const hs=[1,2,3,4,5,6].filter(n=>v["h"+n+"e"]||v["h"+n+"s"]).map(n=>{const u=UNI[v["h"+n+"u"]||"A"],e=num(v["h"+n+"e"]);return (v["h"+n+"s"]==="F"?"hermana":v["h"+n+"s"]==="M"?"hermano":"hermano(a)")+(e!=null?" de "+e+" "+(e===1?u[0]:u[1]):"")});
+   if(pa.length||hs.length)L.push("Genograma: "+[pa.join(", "),hs.length?hs.length+" hermano(s): "+hs.join(", "):"sin hermanos registrados"].filter(Boolean).join("; ")+".");
+   if(v.vive)L.push("Vive con "+v.vive.toLowerCase()+".");const r=RED.find(([l])=>l===v.red);if(r)L.push(r[1]);return L.join(" ")},
+  wire:(id,save)=>{document.querySelectorAll("[data-gen]").forEach(e=>e.addEventListener(e.tagName==="SELECT"?"change":"input",()=>{const v=G(id,"gen");v[e.dataset.gen]=e.tagName==="SELECT"?e.value:e.value.toUpperCase();SV(id,"gen",v);save()}));
+   document.querySelectorAll("[data-genr]").forEach(b=>b.onclick=()=>{const v=G(id,"gen");v.red=v.red===b.dataset.genr?"":b.dataset.genr;SV(id,"gen",v);document.querySelectorAll("[data-genr]").forEach(z=>z.setAttribute("aria-pressed",String(z.dataset.genr===v.red)));save()})}};
+
+ /* ---------- de la plantilla del bloc de notas a los instrumentos ---------- */
+ const val=(L,lab)=>{const n=plN(lab);const r=L.find(x=>{const i=x.lastIndexOf(":");return i>0&&plN(x.slice(0,i))===n});return r?r.slice(r.lastIndexOf(":")+1).trim():null};
+ const snv=x=>x==null?null:/^s/i.test(x)?"S":/^n/i.test(x)?"N":null;
+ WIDGET.discap.desdeTexto=(id,L)=>{const v={};let n=0;DIS.forEach(([k,l])=>{const x=snv(val(L,l));if(x){v[k]=x;n++}});if(n)SV(id,"dis",v);return n>0};
+ WIDGET.rxsps.desdeTexto=(id,L)=>{const v={};let n=0;SEN.forEach(([k,l])=>{const x=snv(val(L,l));if(x){v[k]=x;n++}});SIS.forEach(([k,l])=>{const x=val(L,l);if(x){v["s_"+k]=x.replace(/\s*\(.*\)\s*$/,"").toUpperCase();n++}});if(n)SV(id,"rxs",v);return n>0};
+ WIDGET.signosps.desdeTexto=(id,L)=>{const v={};let n=0;SG.forEach(([k,l])=>{const x=val(L,l);if(x){v[k]=x;n++}});[["go","Glasgow ocular"],["gv","Glasgow verbal"],["gm","Glasgow motora"]].forEach(([k,l])=>{const x=val(L,l);if(x&&/\d/.test(x)){v[k]=x.match(/\d/)[0];n++}});if(n)SV(id,"sgn",v);return n>0};
+ WIDGET.visionps.desdeTexto=(id,L)=>{const v={};let n=0;const e1=val(L,"Estructuras oculares OI"),e2=val(L,"Estructuras oculares OD");if(e1){v.eoi=e1.toUpperCase();n++}if(e2){v.eod=e2.toUpperCase();n++}
+  VI.forEach(([k,l])=>{const x=snv(val(L,l));if(x){v[k]=x;n++}});const oi=val(L,"Snellen OI"),od=val(L,"Snellen OD"),di=val(L,"Distancia de valoración");
+  if(oi&&/\d/.test(oi)){v.oi=oi;n++}if(od&&/\d/.test(od)){v.od=od;n++}if(di){v.dist=di;n++}if(n)SV(id,"vis",v);return n>0};
+ WIDGET.genograma.desdeTexto=(id,L)=>{const v={};let n=0;const pa=val(L,"Padre edad"),ma=val(L,"Madre edad");if(pa){v.pa=pa.replace(/\D/g,"");n++}if(ma){v.ma=ma.replace(/\D/g,"");n++}
+  [1,2,3,4,5,6].forEach(h=>{const x=val(L,"Hermano "+h);if(!x)return;const sx=x.match(/\b([FM])\b/i),ed=x.match(/(\d+)/),un=x.match(/\b(\d+)\s*([AMD])\b/i)||x.match(/\b([AMD])\b(?!.*\b[FM]\b)/i);
+   if(sx)v["h"+h+"s"]=sx[1].toUpperCase();if(ed)v["h"+h+"e"]=ed[1];v["h"+h+"u"]=un?(un[2]||un[1]).toUpperCase():/mes/i.test(x)?"M":/d[ií]a/i.test(x)?"D":"A";n++});
+  const vi=val(L,"Con quién vive");if(vi){v.vive=vi.toUpperCase();n++}const rd=val(L,"Red de apoyo y cuidado");if(rd){const r=RED.find(([l])=>plN(rd).startsWith(plN(l)));if(r){v.red=r[0];n++}}
+  if(n)SV(id,"gen",v);return n>0};
+ if(WIDGET.apgarfam)WIDGET.apgarfam.desdeTexto=(id,L)=>{const ac={},v={};let n=0;const no=val(L,"Nombre del acompañante"),pr=val(L,"Parentesco");if(no){ac.nom=no.toUpperCase();n++}if(pr){ac.par=pr.toUpperCase();n++}
+  window.__ESC.APG.forEach((x,i)=>{const r=L.find(s=>s.startsWith((i+1)+"."));if(!r)return;const m=r.slice(r.lastIndexOf(":")+1).match(/[0-4]/);if(m){v[x[0]]=m[0];n++}});
+  if(Object.keys(ac).length)S.set(key(id,"apgac"),JSON.stringify(ac));if(Object.keys(v).length)S.set(key(id,"apg"),JSON.stringify(v));return n>0};
+ /* ---------- los ítems de primera infancia ---------- */
+ IVX["pinf::Discapacidades del paciente"]={widget:"discap",c:[]};
+ IVX["pinf::Revisión por sistemas y órganos de los sentidos"]={widget:"rxsps",c:[],pauta:{t:"Cómo se llena",p:["Pregunta al cuidador por cada síntoma de los órganos de los sentidos: S si lo tiene, N si no.","Los 8 sistemas son obligatorios en PROSOFT: deja NORMAL o escribe el hallazgo. Ginecológico: NO APLICA en niños y hombres."],r:"",b:""}};
+ IVX["pinf::Signos vitales, Glasgow y perímetros"]={widget:"signosps",c:[],pauta:{t:"Valores de referencia",p:["Respiración rápida (AIEPI): 60 o más en menores de 2 meses; 50 o más de 2 a 11 meses; 40 o más de 1 a 5 años.","Frecuencia cardiaca: lactante 100 a 160; de 1 a 3 años 90 a 150; de 3 a 6 años 80 a 140.","Fiebre: 38 °C o más. En zona de malaria, gota gruesa a todo niño con fiebre.","Tensión arterial desde los 3 años: compárala con la tabla por edad, sexo y talla.","Glasgow normal: 15/15. Menos de 15 es un signo de peligro."],r:"",b:""}};
+ IVX["pinf::Visión: estructuras oculares y agudeza visual"]={widget:"visionps",c:[]};
+ IVX["pinf::Familia: familiograma, red de apoyo, cuidado"]=Object.assign({},IVX["pinf::Familia: familiograma, red de apoyo, cuidado"]||{},{widget:"genograma",c:[]});
+ /* plantillas de los instrumentos que ya existían */
+ if(WIDGET.vale)WIDGET.vale.plantilla=["Rango de edad: ","Comprensión (S/N): ","Expresión (S/N): ","Interacción (S/N): ","Vestibular, desde los 3 años (S/N por ítem): ","Condiciones estructurales (orejas, labios, lengua, nariz, paladar, ojos, dientes, cuello, hombros) presentes y sin alteración (S/N): S","Remisión a fonoaudiología, evaluación audiológica o urgencias (S/N): ","¿La remisión es urgente? (S/N): "];
+ if(WIDGET.desarrollo)WIDGET.desarrollo.plantilla=["Motricidad gruesa: ","Motricidad fina adaptativa: ","Audición y lenguaje: ","Personal social: ","Clasificación (desarrollo esperado / riesgo / sospecha): "];
+ if(WIDGET.vacunas)WIDGET.vacunas.plantilla=["Esquema (completo / incompleto): ","Vacunas aplicadas hoy: ","Vacunas pendientes: "];
+ if(WIDGET.odonto)WIDGET.odonto.plantilla=["Barniz de flúor aplicado (S/N): ","Profilaxis (S/N): ","Remisión a odontología (S/N): "];
+ if(WIDGET.enfactual)WIDGET.enfactual.plantilla=["Motivo de consulta: ","Acompañante y parentesco: ","Estado (asintomático / con síntomas, cuáles y desde cuándo): ","Signos de peligro (puede beber o tomar el pecho, vomita todo, convulsiones, letárgico): ","Lactancia y alimentación: ","Apetito: ","Sueño: ","Diuresis y deposiciones: "];
+ if(WIDGET.apgarfam)WIDGET.apgarfam.plantilla=["Nombre del acompañante: ","Parentesco: "].concat(window.__ESC.APG.map((x,i)=>(i+1)+". "+x[3]+" (0 Nunca, 1 Casi nunca, 2 Algunas veces, 3 Casi siempre, 4 Siempre): "));
 })();
 
 /* ---------- arranque ---------- */

@@ -65,13 +65,22 @@ R:
     > Opciones: Normal · Temperatura alterada · Anomalía congénita
 R: 
 [10] Antropometría
-    > Escribe los valores; en la app revisa el cálculo de esta pregunta.
+    > Llena cada línea debajo de R:. Lo que no hiciste, déjalo vacío.
 R: 
+  Edad gestacional al nacer (semanas): 
+  Peso (g): 
+  Talla (cm): 
+  Perímetro cefálico (cm): 
+  Perímetro torácico (cm): 
 
 == ANTES DEL EGRESO ==
 [11] Signos vitales cada 6 horas
-    > Escribe los valores; en la app revisa el cálculo de esta pregunta.
+    > Llena cada línea debajo de R:. Lo que no hiciste, déjalo vacío.
 R: 
+  Temperatura (°C): 
+  Frec. cardiaca (lpm): 
+  Frec. respiratoria (rpm): 
+  Saturación O₂ (%): 
 [12] Tamizaje de cardiopatía: pulsioximetría pre y postductal a las 24 h
     > Escribe los valores; en la app revisa el cálculo de esta pregunta.
 R: 
@@ -89,8 +98,11 @@ R:
 R: 
 [17] Vacunas BCG y hepatitis B
     > Opciones: Aplicadas · Pendiente BCG · Madre con hepatitis B
-    > Escribe los valores; en la app revisa el cálculo de esta pregunta.
+    > Llena cada línea debajo de R:. Lo que no hiciste, déjalo vacío.
 R: 
+  Esquema (completo / incompleto): 
+  Vacunas aplicadas hoy: 
+  Vacunas pendientes: 
 [18] Hemoclasificación del RN; anti-D a la madre si aplica
     > Opciones: Tomada · Madre Rh negativo · Pendiente
 R: 
@@ -121,8 +133,12 @@ R:
     > Escribe los valores; en la app revisa el cálculo de esta pregunta.
 R: 
 [26] Temperatura, FC, FR
-    > Escribe los valores; en la app revisa el cálculo de esta pregunta.
+    > Llena cada línea debajo de R:. Lo que no hiciste, déjalo vacío.
 R: 
+  Temperatura (°C): 
+  Frec. cardiaca (lpm): 
+  Frec. respiratoria (rpm): 
+  Saturación O₂ (%): 
 [27] Ictericia
     > Opciones: Sin ictericia · Leve · Para remitir
 R: 

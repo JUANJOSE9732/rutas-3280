@@ -15,7 +15,7 @@ const R=await p.evaluate(()=>{
           'FECHA NACIMIENTO':d.toISOString().slice(0,10),'GENERO':'F','__com':'Q'});
   st.mod=mod;S.set(key(mod,'fecha'),hoy())};
  const set=(mod,o)=>S.set(key(mod,'apg'),JSON.stringify(o));
- const TODO={ada:'2',par:'2',cre:'2',afe:'2',res:'2'};
+ const TODO={ada:'4',par:'4',cre:'4',afe:'4',res:'4'};
 
  /* ===== 1. el ítem existe en los cinco momentos que le faltaban ===== */
  Object.keys(MOD).forEach(mod=>{
@@ -36,32 +36,35 @@ const R=await p.evaluate(()=>{
  /* ===== 3. es LA MISMA escala que la de vejez ===== */
  // mismo puntaje, misma clasificación en los seis módulos
  const clasif=(mod,o)=>{set(mod,o);return WIDGET[mod==='vej'?'apoyo':'apgarfam'].txt(mod)};
- const CASOS=[[TODO,'familia funcional',10],
-              [{ada:'1',par:'1',cre:'1',afe:'1',res:'1'},'disfunción familiar leve',5],
-              [{ada:'0',par:'0',cre:'0',afe:'1',res:'1'},'disfunción familiar grave',2]];
+ const CASOS=[[TODO,'buena función familiar',20],
+              [{ada:'3',par:'3',cre:'3',afe:'3',res:'3'},'disfunción familiar leve',15],
+              [{ada:'2',par:'2',cre:'2',afe:'3',res:'3'},'disfunción familiar moderada',12],
+              [{ada:'0',par:'0',cre:'0',afe:'1',res:'1'},'disfunción familiar severa',2]];
  CASOS.forEach(([o,esp,pts])=>{
   ['pinf','inf','adol','juv','adul','vej'].forEach(mod=>{
    monta(mod,MOD[mod]||70);
    const t=clasif(mod,o);
-   ok(new RegExp(esp).test(t),mod+' con '+pts+'/10 debía decir «'+esp+'»: '+t);
-   ok(new RegExp('APGAR familiar: '+pts+'/10').test(t),mod+' no reporta el puntaje '+pts+'/10: '+t)})});
+   ok(new RegExp(esp).test(t),mod+' con '+pts+'/20 debía decir «'+esp+'»: '+t);
+   ok(new RegExp('APGAR familiar: '+pts+'/20').test(t),mod+' no reporta el puntaje '+pts+'/20: '+t)})});
 
- /* ===== 4. los puntos de corte exactos (7 y 4) ===== */
+ /* ===== 4. los puntos de corte de PROSOFT (18, 14 y 10 sobre 20) ===== */
  monta('juv',22);
- ok(/familia funcional/.test(clasif('juv',{ada:'2',par:'2',cre:'2',afe:'1',res:'0'})),'7/10 debía ser funcional');
- ok(/disfunción familiar leve/.test(clasif('juv',{ada:'2',par:'2',cre:'1',afe:'1',res:'0'})),'6/10 debía ser disfunción leve');
- ok(/disfunción familiar leve/.test(clasif('juv',{ada:'2',par:'1',cre:'1',afe:'0',res:'0'})),'4/10 debía ser disfunción leve');
- ok(/disfunción familiar grave/.test(clasif('juv',{ada:'2',par:'1',cre:'0',afe:'0',res:'0'})),'3/10 debía ser disfunción grave');
+ ok(/buena función familiar/.test(clasif('juv',{ada:'4',par:'4',cre:'4',afe:'3',res:'3'})),'18/20 debía ser buena función');
+ ok(/disfunción familiar leve/.test(clasif('juv',{ada:'4',par:'4',cre:'3',afe:'3',res:'3'})),'17/20 debía ser disfunción leve');
+ ok(/disfunción familiar leve/.test(clasif('juv',{ada:'3',par:'3',cre:'3',afe:'3',res:'2'})),'14/20 debía ser disfunción leve');
+ ok(/disfunción familiar moderada/.test(clasif('juv',{ada:'3',par:'3',cre:'3',afe:'2',res:'2'})),'13/20 debía ser disfunción moderada');
+ ok(/disfunción familiar moderada/.test(clasif('juv',{ada:'2',par:'2',cre:'2',afe:'2',res:'2'})),'10/20 debía ser disfunción moderada');
+ ok(/disfunción familiar severa/.test(clasif('juv',{ada:'2',par:'2',cre:'2',afe:'2',res:'1'})),'9/20 debía ser disfunción severa');
 
  /* ===== 5. la conducta se deriva de la clasificación ===== */
  let t=clasif('juv',{ada:'0',par:'0',cre:'0',afe:'0',res:'0'});
- ok(/psicología y trabajo social/.test(t),'la disfunción grave debía remitir: '+t);
- ok(/violencia intrafamiliar/.test(t),'la disfunción grave debía hacer indagar violencia');
- t=clasif('juv',{ada:'1',par:'1',cre:'1',afe:'1',res:'1'});
+ ok(/psicología y trabajo social/.test(t),'la disfunción severa debía remitir: '+t);
+ ok(/violencia intrafamiliar/.test(t),'la disfunción severa debía hacer indagar violencia');
+ t=clasif('juv',{ada:'3',par:'3',cre:'3',afe:'3',res:'3'});
  ok(/se orienta a la familia/.test(t),'la disfunción leve debía orientar: '+t);
  ok(!/psicología y trabajo social/.test(t),'la disfunción leve no debía remitir a psicología');
  t=clasif('juv',TODO);
- ok(!/se orienta|psicología/.test(t),'la familia funcional no debía generar conducta: '+t);
+ ok(!/se orienta|psicología/.test(t),'la buena función familiar no debía generar conducta: '+t);
 
  /* ===== 6. incompleto se declara ===== */
  t=clasif('adul',{ada:'2',par:'2'});
@@ -76,7 +79,8 @@ const R=await p.evaluate(()=>{
  ok(/cuidador/.test(WIDGET.apgarfam.html('pinf')),'en primera infancia debía decir que se le pregunta al cuidador');
  monta('adol',15);
  ok(/a solas/.test(WIDGET.apgarfam.html('adol')),'en adolescencia debía decir que se pregunta a solas');
- ok(/0 a 2 puntos cada una, total 0 a 10/.test(WIDGET.apgarfam.html('adol')),'la pantalla no deja claro cuál versión de la escala es');
+ ok(/0 a 4 puntos cada una.*total 0 a 20/.test(WIDGET.apgarfam.html('adol')),'la pantalla no deja claro cuál versión de la escala es');
+ ok(/Nombre del acompañante/.test(WIDGET.apgarfam.html('pinf'))&&/Parentesco/.test(WIDGET.apgarfam.html('pinf')),'falta el acompañante y el parentesco de PROSOFT');
 
  /* ===== 9. el widget se arma y se cablea sin romperse ===== */
  Object.keys(MOD).forEach(mod=>{
@@ -91,9 +95,9 @@ const R=await p.evaluate(()=>{
   ok(sel.length===5,'en '+mod+' debían pintarse 5 preguntas, se pintaron '+sel.length);
   // calificar por la pantalla debe guardar y clasificar
   sel.forEach(s=>{s.value='0';s.dispatchEvent(new Event('change'))});
-  ok(/disfunción familiar grave/.test(WIDGET.apgarfam.txt(mod)),'en '+mod+' calificar en pantalla no llegó a la nota');
+  ok(/disfunción familiar severa/.test(WIDGET.apgarfam.txt(mod)),'en '+mod+' calificar en pantalla no llegó a la nota');
   const pill=host.querySelector('[data-grp="apg"]');
-  ok(pill&&/disfunción familiar grave/.test(pill.textContent),'en '+mod+' la pastilla no muestra la clasificación: '+(pill&&pill.textContent));
+  ok(pill&&/disfunción familiar severa/.test(pill.textContent),'en '+mod+' la pastilla no muestra la clasificación: '+(pill&&pill.textContent));
   host.remove()});
 
  /* ===== 10. la nota del módulo lo recoge ===== */
@@ -103,7 +107,7 @@ const R=await p.evaluate(()=>{
  const a=ivAns('juv');a[i]=WIDGET.apgarfam.txt('juv');
  S.set(key('juv','iv'),JSON.stringify(a));
  const nota=ivCompose('juv');
- ok(/APGAR familiar: 0\/10/.test(nota),'la nota del módulo no recoge el APGAR: '+nota.slice(0,200));
+ ok(/APGAR familiar: 0\/20/.test(nota),'la nota del módulo no recoge el APGAR: '+nota.slice(0,200));
 
  return F});
 await b.close();

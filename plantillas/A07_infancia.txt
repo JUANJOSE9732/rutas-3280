@@ -36,14 +36,25 @@ Madre, padre o cuidador - número de documento:
 
 == MOTIVO Y ENFERMEDAD ACTUAL ==
 [1] Enfermedad actual
-    > Escribe los valores; en la app revisa el cálculo de esta pregunta.
+    > Llena cada línea debajo de R:. Lo que no hiciste, déjalo vacío.
 R: 
+  Motivo de consulta: 
+  Acompañante y parentesco: 
+  Estado (asintomático / con síntomas, cuáles y desde cuándo): 
+  Signos de peligro (puede beber o tomar el pecho, vomita todo, convulsiones, letárgico): 
+  Lactancia y alimentación: 
+  Apetito: 
+  Sueño: 
+  Diuresis y deposiciones: 
 
 == VALORACIÓN ==
 [2] Esquema de vacunación
     > Opciones: Completo · Incompleto: se aplica · Incompleto: pendiente · Sin carné
-    > Escribe los valores; en la app revisa el cálculo de esta pregunta.
+    > Llena cada línea debajo de R:. Lo que no hiciste, déjalo vacío.
 R: 
+  Esquema (completo / incompleto): 
+  Vacunas aplicadas hoy: 
+  Vacunas pendientes: 
 [3] Antecedentes personales: enfermedades, hospitalizaciones, alergias
     > Opciones: Niega · Enfermedad · Hospitalización · Malaria previa · Alergia
 R: 
@@ -61,8 +72,10 @@ R:
 R: 
 [8] Crecimiento y estado nutricional
     > Opciones: Adecuado · Riesgo · Déficit · Obesidad
-    > Escribe los valores; en la app revisa el cálculo de esta pregunta.
+    > Llena cada línea debajo de R:. Lo que no hiciste, déjalo vacío.
 R: 
+  Peso (kg): 
+  Talla (cm): 
 [9] Desarrollo y desempeño escolar
     > Opciones: Adecuado · Problema escolar · Goodenough alterado · No escolarizado
 R: 
@@ -74,14 +87,29 @@ R:
     > Opciones: Normal · Visión alterada · Audición alterada · Sin optotipos
 R: 
 [12] Audición y comunicación (VALE)
-    > Escribe los valores; en la app revisa el cálculo de esta pregunta.
+    > Llena cada línea debajo de R:. Lo que no hiciste, déjalo vacío.
 R: 
+  Rango de edad: 
+  Comprensión (S/N): 
+  Expresión (S/N): 
+  Interacción (S/N): 
+  Vestibular, desde los 3 años (S/N por ítem): 
+  Condiciones estructurales (orejas, labios, lengua, nariz, paladar, ojos, dientes, cuello, hombros) presentes y sin alteración (S/N): S
+  Remisión a fonoaudiología, evaluación audiológica o urgencias (S/N): 
+  ¿La remisión es urgente? (S/N): 
 [13] Salud mental, violencias, acoso
     > Escribe los valores; en la app revisa el cálculo de esta pregunta.
 R: 
 [14] Dinámica familiar (APGAR familiar)
-    > Escribe los valores; en la app revisa el cálculo de esta pregunta.
+    > Llena cada línea debajo de R:. Lo que no hiciste, déjalo vacío.
 R: 
+  Nombre del acompañante: 
+  Parentesco: 
+  1. ¿Le satisface la ayuda que recibe de su familia cuando tiene algún problema o necesidad? (0 Nunca, 1 Casi nunca, 2 Algunas veces, 3 Casi siempre, 4 Siempre): 
+  2. ¿Le satisface la participación que su familia brinda y permite? (0 Nunca, 1 Casi nunca, 2 Algunas veces, 3 Casi siempre, 4 Siempre): 
+  3. ¿Le satisface como su familia acepta y apoya sus deseos de emprender nuevas actividades? (0 Nunca, 1 Casi nunca, 2 Algunas veces, 3 Casi siempre, 4 Siempre): 
+  4. ¿Le satisface como su familia le expresa afecto y responde a sus emociones como rabia, tristeza y amor? (0 Nunca, 1 Casi nunca, 2 Algunas veces, 3 Casi siempre, 4 Siempre): 
+  5. ¿Le satisface como comparte en familia el tiempo libre para estar juntos, los espacios en la casa, el dinero, etc.? (0 Nunca, 1 Casi nunca, 2 Algunas veces, 3 Casi siempre, 4 Siempre): 
 
 == DETECCIÓN TEMPRANA ==
 [15] Tamizaje de anemia (hemoglobina y hematocrito) una vez entre los 10…
@@ -95,9 +123,12 @@ R:
 R: 
 [17] Barniz de flúor y profilaxis dos veces al año
     > Opciones: Aplicado · Remitido · Ya recibió
-    > Escribe los valores; en la app revisa el cálculo de esta pregunta.
+    > Llena cada línea debajo de R:. Lo que no hiciste, déjalo vacío.
     > Si no aplica por la edad: No aplica: menor de 6 meses; la primera consulta de odontología es a los 6 meses.
 R: 
+  Barniz de flúor aplicado (S/N): 
+  Profilaxis (S/N): 
+  Remisión a odontología (S/N): 
 [18] Sellantes según necesidad
     > Opciones: Remitido · Ya tiene · No requiere
 R: 

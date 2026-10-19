@@ -1,0 +1,51 @@
+# APP: NOTA edu
+==================================
+NOTA: EDUCACIÓN PARA LA SALUD (Individual o a la familia)
+==================================
+> Cómo llenarla: escribe después de «R:». Si queda vacío, la app pone el valor normal
+>  que aparece en la ayuda. Las líneas con > son ayudas.
+
+== DATOS INICIALES ==
+Fecha de esta consulta (dd/mm/aaaa): 
+Comunidad o vereda: 
+Nombre completo: 
+Tipo de documento (CC / TI / RC / CE / PPT / PEP / MS / AS): 
+Número de documento: 
+Fecha de nacimiento (dd/mm/aaaa): 
+Sexo (F / M): 
+Teléfono: 
+Pertenencia étnica (INDIGENA / AFROCOLOMBIANO / RAIZAL / PALENQUERO / ROM / NINGUNA): 
+Pueblo indígena: 
+EAPB: 
+Régimen (SUBSIDIADO / CONTRIBUTIVO / ESPECIAL / NO AFILIADO): 
+Edad (solo si no sabe la fecha de nacimiento; años o meses): 
+
+== PREGUNTAS ==
+[mod] Modalidad
+    > Normal: INDIVIDUAL
+    > Opciones: INDIVIDUAL · DIRIGIDA A LA FAMILIA
+R: 
+[temas] Temas tratados
+    > Puedes dictar varios.
+    > Opciones: ESTILOS DE VIDA SALUDABLE (ALIMENTACION, ACTIVIDAD FISICA, SUEÑO) · SALUD SEXUAL Y REPRODUCTIVA, DERECHOS Y ANTICONCEPCION · PREVENCION DE ITS Y VIH · LACTANCIA MATERNA Y ALIMENTACION DEL MENOR · CUIDADO Y CRIANZA DEL NIÑO · SALUD MENTAL Y PREVENCION DE VIOLENCIAS · PREVENCION DEL CONSUMO DE ALCOHOL, TABACO Y SUSTANCIAS · HIGIENE, LAVADO DE MANOS Y AGUA SEGURA · PREVENCION DE MALARIA Y DENGUE (TOLDILLO, CRIADEROS) · SALUD BUCAL
+R: 
+[hall] Necesidad o hallazgo que motiva la educación
+    > Normal: EDUCACION SEGUN EL MOMENTO DEL CURSO DE VIDA
+R: 
+[comp] Comprensión
+    > Normal: COMPRENDE Y SE COMPROMETE CON LAS PRACTICAS DE CUIDADO
+    > Opciones: COMPRENDE Y SE COMPROMETE CON LAS PRACTICAS DE CUIDADO · REQUIERE REFUERZO
+R: 
+[grupal] ¿Se deriva a educación grupal?
+    > Normal: SI, A DOS CICLOS DE EDUCACION GRUPAL
+    > Opciones: SI, A DOS CICLOS DE EDUCACION GRUPAL · NO
+R: 
+[extra] ¿Algo más para agregar a la nota?
+    > Dicta cualquier dato adicional, o di «no».
+    > Normal: NO
+R: 
+
+== OTROS DATOS U OBSERVACIONES ==
+R: 
+
+# FIN

@@ -1,0 +1,101 @@
+# APP: NOTA pospar
+==================================
+NOTA: CONTROL POSPARTO (Puérpera entre el día 3 y 5)
+==================================
+> Cómo llenarla: escribe después de «R:». Si queda vacío, la app pone el valor normal
+>  que aparece en la ayuda. Las líneas con > son ayudas.
+
+== DATOS INICIALES ==
+Fecha de esta consulta (dd/mm/aaaa): 
+Comunidad o vereda: 
+Nombre completo: 
+Tipo de documento (CC / TI / RC / CE / PPT / PEP / MS / AS): 
+Número de documento: 
+Fecha de nacimiento (dd/mm/aaaa): 
+Sexo (F / M): 
+Teléfono: 
+Pertenencia étnica (INDIGENA / AFROCOLOMBIANO / RAIZAL / PALENQUERO / ROM / NINGUNA): 
+Pueblo indígena: 
+EAPB: 
+Régimen (SUBSIDIADO / CONTRIBUTIVO / ESPECIAL / NO AFILIADO): 
+Edad (solo si no sabe la fecha de nacimiento; años o meses): 
+
+== PREGUNTAS ==
+[dias] Días posparto
+    > Normal: 4
+R: 
+[via] Vía del parto
+    > Normal: VAGINAL
+    > Opciones: VAGINAL · CESAREA
+R: 
+[lugar] Lugar del parto y quién lo atendió
+    > Normal: INSTITUCIONAL
+    > Opciones: INSTITUCIONAL · DOMICILIARIO CON PARTERA · DOMICILIARIO SIN ATENCION
+R: 
+[sint] Signos de alarma
+    > Loquios con mal olor, sangrado abundante, fiebre, cefalea, visión borrosa, epigastralgia, dolor abdominal o torácico, disuria, mamas rojas o dolorosas, dolor o hinchazón en las piernas. «Niega» si ninguno.
+    > Normal: NIEGA
+R: 
+[lact] Lactancia
+    > Normal: EXCLUSIVA, BUEN AGARRE
+    > Opciones: EXCLUSIVA, BUEN AGARRE · CON DIFICULTAD · NO LACTA
+R: 
+[micc] Micción y deposición
+    > Normal: NORMALES
+R: 
+[depr] Preguntas de depresión posparto
+    > «Durante el último mes, ¿se ha preocupado porque con frecuencia se sentía triste, deprimida o sin esperanza?» «…¿sentía poco interés por realizar actividades y no le proporcionaban placer?»
+    > Normal: NEGATIVAS
+    > Opciones: NEGATIVAS · UNA POSITIVA · AMBAS POSITIVAS
+R: 
+[intr] Sexualidad e intención reproductiva
+    > Normal: SIN DUDAS SOBRE SEXUALIDAD; NO DESEA EMBARAZO EN LOS PROXIMOS 18 MESES
+R: 
+[viol] ¿Violencia de pareja o sexual?
+    > Normal: NIEGA
+    > Opciones: NIEGA · REFIERE
+R: 
+[sv] Signos vitales y medidas
+    > Diga: tensión 110 70, frecuencia 72, respiración 18, temperatura 36.5, peso 58, talla 155. Di «normal» para omitir.
+    > Normal: NORMAL
+R: 
+[utero] Útero y loquios
+    > Normal: UTERO CONTRAIDO E INVOLUCIONANDO, LOQUIOS ESCASOS SIN MAL OLOR
+R: 
+[perine] Periné, episiotomía o herida
+    > Normal: SIN SIGNOS DE INFECCION NI HEMATOMA
+R: 
+[mamas] Mamas y pezones
+    > Normal: SIN SIGNOS DE MASTITIS, PEZONES INDEMNES
+R: 
+[mmii] Miembros inferiores
+    > Normal: SIN EDEMA NI DOLOR
+R: 
+[rh] Rh materno y anti-D
+    > Normal: RH POSITIVO
+    > Opciones: RH POSITIVO · RH NEGATIVO, RECIBIO ANTI-D · RH NEGATIVO, SIN ANTI-D · NO CONOCIDO
+R: 
+[resm] Resultados maternos (VIH, sífilis, hepatitis B)
+    > Opciones: NO REACTIVOS, VERIFICADOS EN EL CARNE · NO CONOCIDOS
+R: 
+[vac] Vacunas pendientes de la gestación
+    > Normal: NINGUNA
+    > Opciones: NINGUNA · TD PENDIENTE
+R: 
+[metodo] Método anticonceptivo
+    > Si ya se lo pusieron antes del alta, dilo.
+    > Opciones: DIU POSPARTO · IMPLANTE SUBDERMICO · INYECTABLE TRIMESTRAL (DEPOPROVERA) · ORAL DE SOLO PROGESTINA · OCLUSION TUBARICA · CONDON · NO DESEA METODO
+R: 
+[analg] Analgesia
+    > Normal: NO REQUIERE
+    > Opciones: NO REQUIERE · IBUPROFENO 600 MG · ACETAMINOFEN SIN PASAR DE 4.000 MG AL DIA
+R: 
+[extra] ¿Algo más para agregar a la nota?
+    > Dicta cualquier dato adicional, o di «no».
+    > Normal: NO
+R: 
+
+== OTROS DATOS U OBSERVACIONES ==
+R: 
+
+# FIN

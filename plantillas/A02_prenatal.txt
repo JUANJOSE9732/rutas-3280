@@ -82,8 +82,15 @@ R:
 == ANTECEDENTES ==
 [12] Fórmula obstétrica
     > Opciones: Primigestante
-    > Escribe los valores; en la app revisa el cálculo de esta pregunta.
+    > Llena cada línea debajo de R:. Lo que no hiciste, déjalo vacío.
 R: 
+  G · Gestaciones (con esta): 
+  P · Partos (vaginales): 
+  C · Cesáreas: 
+  A · Abortos: 
+  E · Ectópicos: 
+  M · Molas: 
+  V · Hijos vivos: 
 [13] Último parto
     > Pregunta: ¿Cuándo fue su último parto? ¿Fue normal o por cesárea, a tiempo, y cuánto pesó el bebé?
     > Opciones: No aplica · Más de 18 meses · Menos de 18 meses · Más de 10 años
@@ -184,18 +191,30 @@ R:
 == VACUNACIÓN ==
 [35] Vacunas del embarazo
     > Pregunta: Revisa el carné: ¿qué vacunas tiene en este embarazo?
-    > Escribe los valores; en la app revisa el cálculo de esta pregunta.
+    > Llena cada línea debajo de R:. Lo que no hiciste, déjalo vacío.
 R: 
+  Esquema (completo / incompleto): 
+  Vacunas aplicadas hoy: 
+  Vacunas pendientes: 
 
 == EXAMEN FÍSICO ==
 [36] Signos vitales
     > Qué hacer: Registra los signos vitales.
-    > Escribe los valores; en la app revisa el cálculo de esta pregunta.
+    > Llena cada línea debajo de R:. Lo que no hiciste, déjalo vacío.
 R: 
+  TA sistólica (mmHg): 
+  TA diastólica (mmHg): 
+  Frec. cardiaca (lpm): 
+  Frec. respiratoria (rpm): 
+  Temperatura (°C): 
+  Saturación O₂ (%): 
 [37] Antropometría y ganancia de peso
     > Qué hacer: Registra peso y talla. Si es la primera consulta y está después de la semana 16, pregúntale cuánto pesaba antes del embarazo.
-    > Escribe los valores; en la app revisa el cálculo de esta pregunta.
+    > Llena cada línea debajo de R:. Lo que no hiciste, déjalo vacío.
 R: 
+  Peso actual (kg): 
+  Talla (m o cm): 
+  Peso antes del embarazo (kg): 
 [38] Examen por sistemas
     > Qué hacer: Examen cefalocaudal, incluida la cavidad bucal.
 R: 
@@ -206,8 +225,10 @@ R:
 [40] Valoración obstétrica
     > Qué hacer: Mide la altura uterina y escucha la frecuencia cardiaca fetal.
     > Opciones: Cefálica · Podálica · Transversa · Dos fetos · Aún no se define
-    > Escribe los valores; en la app revisa el cálculo de esta pregunta.
+    > Llena cada línea debajo de R:. Lo que no hiciste, déjalo vacío.
 R: 
+  Altura uterina (cm): 
+  Frecuencia cardiaca fetal (lpm): 
 
 == EXÁMENES ==
 [41] Exámenes de ingreso

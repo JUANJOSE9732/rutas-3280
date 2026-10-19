@@ -1,5 +1,5 @@
 PLANTILLAS DEL BLOC DE NOTAS - DICTADO DE NOTAS (Res. 3280 de 2018)
-Versión de la app: 2026-10-18 v158
+Versión de la app: 2026-10-18 v162
 ==================================
 
 PARA QUÉ SIRVEN
@@ -27,6 +27,9 @@ CÓMO LLENARLAS
        R: Fiebre: 38.5
        R: Enfermería: 18/12/2026
    - También puedes escribir texto libre: "R: Peso 9,8 kg, talla 76 cm".
+   - Los instrumentos (signos, Glasgow, visión, genograma, APGAR, revisión
+     por sistemas, discapacidades) traen sus campos debajo de R:, como en
+     PROSOFT: llena cada línea; la app calcula los puntajes al pasarla.
    - Deja vacío lo que no hiciste.
 4. No borres la primera línea (# APP: ...) ni los números [1], [2]...
    Las líneas que empiezan con > son ayudas: puedes dejarlas o borrarlas.

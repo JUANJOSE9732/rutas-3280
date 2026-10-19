@@ -137,12 +137,12 @@ const res=await p.evaluate(()=>{
  /* ---------- 7. APGAR y ZARIT ---------- */
  setup("vej",80,"F");
  const apg=o=>{put("vej","apg",o);put("vej","zar",{});put("vej","mal",{});return WIDGET.apoyo.txt("vej")};
- ok(/APGAR familiar: 10\/10, familia funcional/.test(apg({ada:"2",par:"2",cre:"2",afe:"2",res:"2"})),"APGAR 10 mal");
- ok(/7\/10, familia funcional/.test(apg({ada:"2",par:"2",cre:"1",afe:"1",res:"1"})),"APGAR 7 debía ser funcional");
- t=apg({ada:"1",par:"1",cre:"1",afe:"2",res:"1"});
- ok(/6\/10, disfunción familiar leve/.test(t)&&/orientación familiar/.test(t),"APGAR 6 mal: "+t);
- ok(/3\/10, disfunción familiar grave/.test(apg({ada:"1",par:"1",cre:"1",afe:"0",res:"0"})),"APGAR 3 mal");
- ok(/0\/10, disfunción familiar grave/.test(apg({ada:"0",par:"0",cre:"0",afe:"0",res:"0"})),"APGAR 0 mal");
+ ok(/APGAR familiar: 20\/20, buena función familiar/.test(apg({ada:"4",par:"4",cre:"4",afe:"4",res:"4"})),"APGAR 20 mal");
+ ok(/18\/20, buena función familiar/.test(apg({ada:"4",par:"4",cre:"4",afe:"3",res:"3"})),"APGAR 18 debía ser buena función");
+ t=apg({ada:"3",par:"3",cre:"3",afe:"3",res:"3"});
+ ok(/15\/20, disfunción familiar leve/.test(t)&&/orientación familiar/.test(t),"APGAR 15 mal: "+t);
+ ok(/12\/20, disfunción familiar moderada/.test(apg({ada:"3",par:"3",cre:"2",afe:"2",res:"2"})),"APGAR 12 mal");
+ ok(/0\/20, disfunción familiar severa/.test(apg({ada:"0",par:"0",cre:"0",afe:"0",res:"0"})),"APGAR 0 mal");
  const zar=o=>{put("vej","apg",{});put("vej","zar",o);put("vej","mal",{});return WIDGET.apoyo.txt("vej")};
  const z=n=>{const o={};let r=n;["z1","z2","z3","z4","z5","z6","z7"].forEach(k=>{const v=Math.min(4,r);o[k]=String(v);r-=v});return o};
  ok(/Zarit reducida.*: 0\/28, sin sobrecarga/.test(zar(z(0))),"Zarit 0 mal");

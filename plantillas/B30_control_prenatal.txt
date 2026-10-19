@@ -1,0 +1,130 @@
+# APP: NOTA prenat
+==================================
+NOTA: CONTROL PRENATAL (Primera consulta o control de seguimiento)
+==================================
+> Cómo llenarla: escribe después de «R:». Si queda vacío, la app pone el valor normal
+>  que aparece en la ayuda. Las líneas con > son ayudas.
+
+== DATOS INICIALES ==
+Fecha de esta consulta (dd/mm/aaaa): 
+Comunidad o vereda: 
+Nombre completo: 
+Tipo de documento (CC / TI / RC / CE / PPT / PEP / MS / AS): 
+Número de documento: 
+Fecha de nacimiento (dd/mm/aaaa): 
+Sexo (F / M): 
+Teléfono: 
+Pertenencia étnica (INDIGENA / AFROCOLOMBIANO / RAIZAL / PALENQUERO / ROM / NINGUNA): 
+Pueblo indígena: 
+EAPB: 
+Régimen (SUBSIDIADO / CONTRIBUTIVO / ESPECIAL / NO AFILIADO): 
+Edad (solo si no sabe la fecha de nacimiento; años o meses): 
+
+== PREGUNTAS ==
+[tipo] Tipo de consulta
+    > Normal: CONTROL DE SEGUIMIENTO
+    > Opciones: PRIMERA CONSULTA (INGRESO) · CONTROL DE SEGUIMIENTO
+R: 
+[opc] Antes de inscribir: opciones frente al embarazo y derecho a la IVE. ¿Qué decide?
+    > Res. 3280, 4.3.6.1.1: se informa antes de la inscripción.
+    > Normal: SE INFORMA; DECIDE CONTINUAR LA GESTACION
+    > Opciones: SE INFORMA; DECIDE CONTINUAR LA GESTACION · SE INFORMA; SOLICITA IVE
+    > Solo si aplica.
+R: 
+[fur] Fecha de la última menstruación
+    > Diga la fecha, o «no recuerda», «menopausia», «amenorrea por método».
+    > Opciones: NO RECUERDA · MENOPAUSIA · AMENORREA POR METODO
+R: 
+[eco] Ecografía: fecha y semanas
+    > Normal: NO TIENE
+R: 
+[eg] Edad gestacional
+    > La app la calcula con la FUR; corrígela si la ecografía la cambia: «24 semanas».
+    > Si lo dejas vacío, la app lo sugiere según la edad.
+R: 
+[gpcav] Paridad: gestaciones, partos, cesáreas, abortos y vivos
+    > Dílo como quieras: «dos gestas, un parto, un aborto, un vivo, cero cesáreas», «G2 P1 C0 A1 V1» o los cinco números en orden. Lo que no digas queda en cero. «Nuligesta» si nunca ha estado embarazada.
+R: 
+[mov] Movimientos fetales
+    > Si lo dejas vacío, la app lo sugiere según la edad.
+    > Opciones: PRESENTES · DISMINUIDOS · AUSENTES · AUN NO LOS PERCIBE
+R: 
+[sint] Síntomas o signos de alarma
+    > Cefalea, visión o audición, epigastralgia, edemas, actividad uterina, sangrado, salida de líquido, flujo, síntomas urinarios, tos. «Niega» si ninguno.
+    > Normal: NIEGA
+R: 
+[antr] Antecedentes personales y obstétricos de riesgo
+    > HTA, preeclampsia previa, diabetes, enfermedad renal o autoinmune, trombosis, cesárea, abortos, muertes perinatales, enfermedad mental, consumo. «Niega» si ninguno.
+    > Normal: NIEGA
+R: 
+[adh] ¿Toma los micronutrientes?
+    > Normal: SI, ADHERENTE
+    > Opciones: SI, ADHERENTE · NO LOS TOMA · AUN NO SE HAN FORMULADO
+    > Solo si aplica.
+R: 
+[viol] Tamizaje de violencia (4 preguntas)
+    > ¿DURANTE EL ÚLTIMO AÑO, ha sido humillada, menospreciada, insultada o amenazada por su pareja? ¿DURANTE EL ÚLTIMO AÑO, fue golpeada, bofeteada, pateada o lastimada físicamente de otra manera? ¿DESDE QUE ESTÁ EN GESTACIÓN, ha sido golpeada, bofeteada, pateada o lastimada físicamente de alguna manera? ¿DURANTE EL ÚLTIMO AÑO, fue forzada a tener relaciones sexuales?
+    > Normal: NEGATIVO
+    > Opciones: NEGATIVO · POSITIVO
+R: 
+[depr] Preguntas de riesgo de depresión
+    > Obligatorias en la semana 28 (Res. 3280, 4.3.6.1.5). Durante el mes pasado, ¿con frecuencia se ha sentido triste, deprimida o sin esperanza? Durante el mes pasado, ¿ha permanecido preocupada por tener poco interés o placer para hacer las cosas cotidianas?
+    > Normal: NEGATIVAS
+    > Opciones: NEGATIVAS · UNA POSITIVA · AMBAS POSITIVAS
+R: 
+[barr] ¿Barrera de idioma o de acceso?
+    > Normal: NO
+    > Opciones: NO · SI, REQUIERE INTERPRETE · SI, REQUIERE ALBERGUE MATERNO
+R: 
+[sv] Signos vitales y medidas
+    > Diga: tensión 110 70, frecuencia 72, respiración 18, temperatura 36.5, peso 58, talla 155. Di «normal» para omitir.
+    > Normal: NORMAL
+R: 
+[pesoi] Peso al inicio de la gestación (kg)
+    > Normal: NO CONOCIDO
+R: 
+[au] Altura uterina (cm)
+    > Si lo dejas vacío, la app lo sugiere según la edad.
+R: 
+[fcf] Frecuencia cardiaca fetal (lpm)
+    > Si lo dejas vacío, la app lo sugiere según la edad.
+R: 
+[pres] Situación y presentación fetal
+    > Normal: LONGITUDINAL CEFALICO
+    > Opciones: LONGITUDINAL CEFALICO · LONGITUDINAL PODALICO · TRANSVERSO
+    > Solo si aplica.
+R: 
+[ef] Examen físico: ¿normal o algún hallazgo?
+    > Di «normal» para dejar el examen de la plantilla, o dicta solo lo anormal con el sistema.
+    > Normal: NORMAL
+R: 
+[rap] Pruebas rápidas de hoy y resultado
+    > VIH (con asesoría), sífilis treponémica, hepatitis B, gota gruesa.
+    > Opciones: VIH Y SIFILIS NO REACTIVAS, GOTA GRUESA NEGATIVA · NO SE REALIZAN HOY
+R: 
+[labs] Resultados de exámenes que trae hoy
+    > Dicta los resultados (ej.: «hemoglobina 11,5, urocultivo negativo») o «sin resultados nuevos».
+    > Normal: SIN RESULTADOS NUEVOS
+R: 
+[riesgo] Clasificación del riesgo (Herrera y Hurtado)
+    > Se aplica en cada trimestre. Dicta el puntaje si lo tienes.
+    > Opciones: BAJO RIESGO · ALTO RIESGO
+R: 
+[med] Valoración por medicina
+    > Normal: PENDIENTE: SE PROGRAMA EN LA PROXIMA BRIGADA O POR TELEMEDICINA
+    > Opciones: PENDIENTE: SE PROGRAMA EN LA PROXIMA BRIGADA O POR TELEMEDICINA · REALIZADA POR TELEMEDICINA HOY · YA FUE VALORADA POR MEDICINA
+    > Solo si aplica.
+R: 
+[metpp] Método anticonceptivo elegido para el posparto
+    > Normal: EN ASESORIA
+    > Opciones: EN ASESORIA · DIU POSPARTO · IMPLANTE SUBDERMICO · INYECTABLE TRIMESTRAL · ORAL DE SOLO PROGESTINA · OCLUSION TUBARICA · CONDON
+R: 
+[extra] ¿Algo más para agregar a la nota?
+    > Dicta cualquier dato adicional, o di «no».
+    > Normal: NO
+R: 
+
+== OTROS DATOS U OBSERVACIONES ==
+R: 
+
+# FIN

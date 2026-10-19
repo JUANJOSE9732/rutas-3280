@@ -1,0 +1,47 @@
+# APP: NOTA micro
+==================================
+NOTA: MICRONUTRIENTES Y DESPARASITACIÓN (Primera infancia, sin valoración integral)
+==================================
+> Cómo llenarla: escribe después de «R:». Si queda vacío, la app pone el valor normal
+>  que aparece en la ayuda. Las líneas con > son ayudas.
+
+== DATOS INICIALES ==
+Fecha de esta consulta (dd/mm/aaaa): 
+Comunidad o vereda: 
+Nombre completo: 
+Tipo de documento (CC / TI / RC / CE / PPT / PEP / MS / AS): 
+Número de documento: 
+Fecha de nacimiento (dd/mm/aaaa): 
+Sexo (F / M): 
+Teléfono: 
+Pertenencia étnica (INDIGENA / AFROCOLOMBIANO / RAIZAL / PALENQUERO / ROM / NINGUNA): 
+Pueblo indígena: 
+EAPB: 
+Régimen (SUBSIDIADO / CONTRIBUTIVO / ESPECIAL / NO AFILIADO): 
+Edad (solo si no sabe la fecha de nacimiento; años o meses): 
+
+== PREGUNTAS ==
+[meses] Edad en meses
+    > Si lo dejas vacío, la app lo sugiere según la edad.
+    > Solo si aplica.
+R: 
+[sumi] Qué se entrega hoy
+    > Si lo dejas vacío, la app lo sugiere según la edad.
+R: 
+[ultima] ¿Cuándo recibió por última vez micronutrientes o albendazol?
+    > Normal: HACE MAS DE 6 MESES O NUNCA
+    > Opciones: HACE MAS DE 6 MESES O NUNCA · HACE MENOS DE 6 MESES
+R: 
+[sint] ¿Está enfermo hoy (fiebre, diarrea, vómito)?
+    > Normal: NO
+    > Opciones: NO · SI
+R: 
+[extra] ¿Algo más para agregar a la nota?
+    > Dicta cualquier dato adicional, o di «no».
+    > Normal: NO
+R: 
+
+== OTROS DATOS U OBSERVACIONES ==
+R: 
+
+# FIN

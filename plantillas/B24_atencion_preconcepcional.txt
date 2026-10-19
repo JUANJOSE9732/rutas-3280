@@ -48,8 +48,7 @@ R:
     > Normal: NO RECUERDA
 R: 
 [gpcav] Paridad: gestaciones, partos, cesáreas, abortos y vivos
-    > Diga los cinco números en orden: «dos uno cero cero dos».
-    > Normal: G0 P0 C0 A0 V0
+    > Dílo como quieras: «dos gestas, un parto, un aborto, un vivo, cero cesáreas», «G2 P1 C0 A1 V1» o los cinco números en orden. Lo que no digas queda en cero. «Nuligesta» si nunca ha estado embarazada.
 R: 
 [labs] Laboratorios recientes
     > Normal: NO PRESENTA

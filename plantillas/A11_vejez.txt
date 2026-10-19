@@ -43,8 +43,12 @@ R:
 R: 
 [4] Estado nutricional, TA
     > Opciones: Normal · Bajo peso · Sobrepeso · Obesidad
-    > Escribe los valores; en la app revisa el cálculo de esta pregunta.
+    > Llena cada línea debajo de R:. Lo que no hiciste, déjalo vacío.
 R: 
+  Peso (kg): 
+  Talla (m o cm): 
+  Perímetro de cintura (cm): 
+  Perímetro de muñeca (cm): 
 [5] Maltrato, abandono, red de apoyo
     > Escribe los valores; en la app revisa el cálculo de esta pregunta.
 R: 
@@ -73,8 +77,11 @@ R:
 
 == PROTECCIÓN ESPECÍFICA ==
 [12] Vacunación según esquema
-    > Escribe los valores; en la app revisa el cálculo de esta pregunta.
+    > Llena cada línea debajo de R:. Lo que no hiciste, déjalo vacío.
 R: 
+  Esquema (completo / incompleto): 
+  Vacunas aplicadas hoy: 
+  Vacunas pendientes: 
 [13] Profilaxis oral cada 2 años
     > Opciones: Remitido · Al día · Con hallazgos · Lesión sospechosa
 R: 

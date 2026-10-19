@@ -1,0 +1,92 @@
+# APP: NOTA rnctl
+==================================
+NOTA: VALORACIÓN DEL RECIÉN NACIDO (Primeros días de vida)
+==================================
+> Cómo llenarla: escribe después de «R:». Si queda vacío, la app pone el valor normal
+>  que aparece en la ayuda. Las líneas con > son ayudas.
+
+== DATOS INICIALES ==
+Fecha de esta consulta (dd/mm/aaaa): 
+Comunidad o vereda: 
+Nombre completo: 
+Tipo de documento (CC / TI / RC / CE / PPT / PEP / MS / AS): 
+Número de documento: 
+Fecha de nacimiento (dd/mm/aaaa): 
+Sexo (F / M): 
+Teléfono: 
+Pertenencia étnica (INDIGENA / AFROCOLOMBIANO / RAIZAL / PALENQUERO / ROM / NINGUNA): 
+Pueblo indígena: 
+EAPB: 
+Régimen (SUBSIDIADO / CONTRIBUTIVO / ESPECIAL / NO AFILIADO): 
+Edad (solo si no sabe la fecha de nacimiento; años o meses): 
+
+== PREGUNTAS ==
+[dias] Días de vida
+    > Si lo dejas vacío, la app lo sugiere según la edad.
+    > Solo si aplica.
+R: 
+[egn] Edad gestacional al nacer
+    > Normal: A TERMINO
+    > Opciones: A TERMINO · PRETERMINO
+R: 
+[pn] Peso al nacer (gramos)
+R: 
+[lugar] Lugar del parto
+    > Normal: INSTITUCIONAL
+    > Opciones: INSTITUCIONAL · DOMICILIARIO CON PARTERA · DOMICILIARIO SIN ATENCION
+R: 
+[alim] Alimentación
+    > Normal: LACTANCIA MATERNA EXCLUSIVA A LIBRE DEMANDA, 8 A 12 VECES AL DIA
+    > Opciones: LACTANCIA MATERNA EXCLUSIVA A LIBRE DEMANDA, 8 A 12 VECES AL DIA · LACTANCIA MAS OTROS LIQUIDOS O FORMULA
+R: 
+[toma] Observación de una toma
+    > Normal: BUENA POSICION Y BUEN AGARRE
+    > Opciones: BUENA POSICION Y BUEN AGARRE · AGARRE INADECUADO
+R: 
+[elim] Orina y deposiciones
+    > Normal: ORINA 6 O MAS VECES AL DIA, DEPOSICIONES AMARILLAS
+R: 
+[pel] Signos de peligro referidos
+    > No mama, vomita todo, convulsiona, muy dormido, respira rápido, fiebre o frialdad, amarillo, ombligo rojo. «Niega» si ninguno.
+    > Normal: NIEGA
+R: 
+[med] Peso hoy, temperatura, frecuencia cardiaca y respiratoria
+    > Ej.: «peso 2950 gramos, temperatura 36.8, frecuencia 140, respiración 44».
+R: 
+[ict] Ictericia
+    > Normal: NO
+    > Opciones: NO · CARA Y CUELLO · HASTA EL TORAX · HASTA EL ABDOMEN · MANOS Y PIES
+R: 
+[omb] Ombligo
+    > Normal: LIMPIO Y SECO, SIN ERITEMA NI SECRECION
+R: 
+[sat] Saturación preductal (mano derecha) y posductal (pie)
+    > Normal: NO SE TOMA
+R: 
+[ef] Resto del examen físico
+    > Normal: NORMAL
+R: 
+[vac] Vacunas BCG y hepatitis B
+    > Normal: APLICADAS
+    > Opciones: APLICADAS · PENDIENTES
+R: 
+[tam] Tamizajes: TSH, auditivo, visual, cardiopatía
+    > Normal: VERIFICADOS EN EL CARNE
+    > Opciones: VERIFICADOS EN EL CARNE · PENDIENTES
+R: 
+[madre] Resultados maternos (VIH, sífilis, hepatitis B, toxoplasma)
+    > Opciones: NO REACTIVOS · NO CONOCIDOS
+R: 
+[reg] Registro civil y afiliación
+    > Normal: REGISTRADO Y AFILIADO
+    > Opciones: REGISTRADO Y AFILIADO · PENDIENTE
+R: 
+[extra] ¿Algo más para agregar a la nota?
+    > Dicta cualquier dato adicional, o di «no».
+    > Normal: NO
+R: 
+
+== OTROS DATOS U OBSERVACIONES ==
+R: 
+
+# FIN

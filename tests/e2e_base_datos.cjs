@@ -52,7 +52,7 @@ const R=await p.evaluate(()=>{
   ['Fried','Fried \\(Anexo 27\\): 4/5'],
   ['Levántate y anda','Levántate y anda: 18 segundos'],
   ['Minimental','Minimental \\(Anexo 28\\): 18/30'],
-  ['APGAR','APGAR familiar: 5/10'],
+  ['APGAR','APGAR familiar: 5/20'],
   ['Zarit','Zarit reducida.*: 19/28'],
   ['FINDRISC','FINDRISC \\(Anexo 18\\): 17/26'],
   ['OMS','tablas de la OMS \\(Anexo 19\\)']]

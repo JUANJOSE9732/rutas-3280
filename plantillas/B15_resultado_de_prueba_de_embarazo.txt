@@ -36,8 +36,10 @@ R:
     > Opciones: CONTINUAR EL EMBARAZO E INGRESAR A CONTROL PRENATAL · INTERRUPCION VOLUNTARIA DEL EMBARAZO · DAR EN ADOPCION · AUN NO DECIDE
     > Solo si aplica.
 R: 
-[control] Fecha o tiempo del próximo control
+[control] Conducta y próximo control
+    > En comunidad sin médico, enfermería hace la primera consulta prenatal (Res. 3280, 4.3.6.1).
     > Si lo dejas vacío, la app lo sugiere según la edad.
+    > Opciones: INGRESO A CONTROL PRENATAL POR ENFERMERIA HOY Y VALORACION POR MEDICINA PENDIENTE (PROXIMA BRIGADA O TELEMEDICINA) · CITA PRIORITARIA CON MEDICINA GENERAL · REMISION A MEDICINA EL MISMO DIA PARA ATENCION DE IVE · NUEVA ASESORIA EN 1 SEMANA · 3 MESES
 R: 
 [extra] ¿Algo más para agregar a la nota?
     > Dicta cualquier dato adicional, o di «no».

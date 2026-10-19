@@ -1,0 +1,61 @@
+# APP: NOTA vac
+==================================
+NOTA: VACUNACIÓN (Solo vacunación, sin valoración integral)
+==================================
+> Cómo llenarla: escribe después de «R:». Si queda vacío, la app pone el valor normal
+>  que aparece en la ayuda. Las líneas con > son ayudas.
+
+== DATOS INICIALES ==
+Fecha de esta consulta (dd/mm/aaaa): 
+Comunidad o vereda: 
+Nombre completo: 
+Tipo de documento (CC / TI / RC / CE / PPT / PEP / MS / AS): 
+Número de documento: 
+Fecha de nacimiento (dd/mm/aaaa): 
+Sexo (F / M): 
+Teléfono: 
+Pertenencia étnica (INDIGENA / AFROCOLOMBIANO / RAIZAL / PALENQUERO / ROM / NINGUNA): 
+Pueblo indígena: 
+EAPB: 
+Régimen (SUBSIDIADO / CONTRIBUTIVO / ESPECIAL / NO AFILIADO): 
+Edad (solo si no sabe la fecha de nacimiento; años o meses): 
+
+== PREGUNTAS ==
+[carne] ¿Trae carné de vacunación?
+    > Normal: SI
+    > Opciones: SI · NO, SE REVISA EL REGISTRO NOMINAL (PAIWEB) · NO TIENE REGISTRO
+R: 
+[ant] Dosis previas según carné o registro
+    > Normal: ESQUEMA AL DIA PARA LA EDAD
+    > Opciones: ESQUEMA AL DIA PARA LA EDAD · ESQUEMA INCOMPLETO
+R: 
+[contra] Contraindicaciones o precauciones
+    > Fiebre alta o enfermedad aguda moderada o grave, reacción grave a una dosis anterior, alergias, inmunosupresión, gestación (para vacunas vivas).
+    > Normal: NIEGA
+R: 
+[sv] Signos vitales y medidas
+    > Diga: tensión 110 70, frecuencia 72, respiración 18, temperatura 36.5, peso 58, talla 155. Di «normal» para omitir.
+    > Normal: NORMAL
+R: 
+[bio] Vacunas aplicadas hoy: nombre, dosis, lote
+    > Ej.: «Td segunda dosis lote A123, influenza adulto lote B456».
+R: 
+[sitio] Vía y sitio
+    > Normal: SEGUN BIOLOGICO, EN EL SITIO RECOMENDADO POR EL PAI
+R: 
+[obs] Observación posvacunal
+    > Normal: SIN REACCIONES INMEDIATAS
+    > Opciones: SIN REACCIONES INMEDIATAS · PRESENTA REACCION
+R: 
+[prox] Próxima dosis o cita
+    > Normal: SEGUN ESQUEMA PAI
+R: 
+[extra] ¿Algo más para agregar a la nota?
+    > Dicta cualquier dato adicional, o di «no».
+    > Normal: NO
+R: 
+
+== OTROS DATOS U OBSERVACIONES ==
+R: 
+
+# FIN

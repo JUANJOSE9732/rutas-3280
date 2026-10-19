@@ -92,8 +92,14 @@ R:
 == EXAMINAR ==
 [18] Signos vitales y TA
     > Opciones: Normal · TA alta · Fiebre · Taquicardia
-    > Escribe los valores; en la app revisa el cálculo de esta pregunta.
+    > Llena cada línea debajo de R:. Lo que no hiciste, déjalo vacío.
 R: 
+  TA sistólica (mmHg): 
+  TA diastólica (mmHg): 
+  Frec. cardiaca (lpm): 
+  Frec. respiratoria (rpm): 
+  Temperatura (°C): 
+  Saturación O₂ (%): 
 [19] Involución uterina y loquios
     > Opciones: Normal · Subinvolución · Útero doloroso con fiebre · Sangrado aumentado
 R: 
@@ -117,8 +123,11 @@ R:
 R: 
 [25] Vacunas pendientes de la gestación
     > Opciones: Completas · Se aplica Td · Se aplica influenza · Pendiente
-    > Escribe los valores; en la app revisa el cálculo de esta pregunta.
+    > Llena cada línea debajo de R:. Lo que no hiciste, déjalo vacío.
 R: 
+  Esquema (completo / incompleto): 
+  Vacunas aplicadas hoy: 
+  Vacunas pendientes: 
 [26] Riesgo tromboembólico
     > Opciones: Bajo · Con factores
 R: 

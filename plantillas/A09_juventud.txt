@@ -33,8 +33,12 @@ Edad (solo si no sabe la fecha de nacimiento; años o meses):
 == VALORACIÓN ==
 [1] Estado nutricional, TA, hábitos
     > Opciones: Normal · Bajo peso · Sobrepeso · Obesidad
-    > Escribe los valores; en la app revisa el cálculo de esta pregunta.
+    > Llena cada línea debajo de R:. Lo que no hiciste, déjalo vacío.
 R: 
+  Peso (kg): 
+  Talla (m o cm): 
+  Perímetro de cintura (cm): 
+  Perímetro de muñeca (cm): 
 [2] Salud sexual y reproductiva, intención reproductiva (si quiere emba…
     > Qué hacer: Salud sexual y reproductiva, intención reproductiva (si quiere embarazarse: preconcepcional)
     > Opciones: Sin riesgo · Sin protección · Desea embarazo · Disfunción sexual · Sospecha de violencia
@@ -43,8 +47,15 @@ R:
     > Escribe los valores; en la app revisa el cálculo de esta pregunta.
 R: 
 [4] Dinámica familiar (APGAR familiar)
-    > Escribe los valores; en la app revisa el cálculo de esta pregunta.
+    > Llena cada línea debajo de R:. Lo que no hiciste, déjalo vacío.
 R: 
+  Nombre del acompañante: 
+  Parentesco: 
+  1. ¿Le satisface la ayuda que recibe de su familia cuando tiene algún problema o necesidad? (0 Nunca, 1 Casi nunca, 2 Algunas veces, 3 Casi siempre, 4 Siempre): 
+  2. ¿Le satisface la participación que su familia brinda y permite? (0 Nunca, 1 Casi nunca, 2 Algunas veces, 3 Casi siempre, 4 Siempre): 
+  3. ¿Le satisface como su familia acepta y apoya sus deseos de emprender nuevas actividades? (0 Nunca, 1 Casi nunca, 2 Algunas veces, 3 Casi siempre, 4 Siempre): 
+  4. ¿Le satisface como su familia le expresa afecto y responde a sus emociones como rabia, tristeza y amor? (0 Nunca, 1 Casi nunca, 2 Algunas veces, 3 Casi siempre, 4 Siempre): 
+  5. ¿Le satisface como comparte en familia el tiempo libre para estar juntos, los espacios en la casa, el dinero, etc.? (0 Nunca, 1 Casi nunca, 2 Algunas veces, 3 Casi siempre, 4 Siempre): 
 [5] Examen físico por sistemas, de cabeza a pies
     > Opciones: Normal · Hallazgo
 R: 
@@ -78,8 +89,11 @@ R:
     > Opciones: Entregados · Ya tiene · No desea
 R: 
 [13] Vacunación según esquema
-    > Escribe los valores; en la app revisa el cálculo de esta pregunta.
+    > Llena cada línea debajo de R:. Lo que no hiciste, déjalo vacío.
 R: 
+  Esquema (completo / incompleto): 
+  Vacunas aplicadas hoy: 
+  Vacunas pendientes: 
 [14] Profilaxis oral anual
     > Opciones: Remitido · Al día · Con hallazgos · Lesión sospechosa
 R: 

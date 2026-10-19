@@ -38,115 +38,214 @@ Madre, padre o cuidador - número de documento:
 
 == MOTIVO Y ENFERMEDAD ACTUAL ==
 [1] Enfermedad actual
-    > Escribe los valores; en la app revisa el cálculo de esta pregunta.
+    > Llena cada línea debajo de R:. Lo que no hiciste, déjalo vacío.
 R: 
+  Motivo de consulta: 
+  Acompañante y parentesco: 
+  Estado (asintomático / con síntomas, cuáles y desde cuándo): 
+  Signos de peligro (puede beber o tomar el pecho, vomita todo, convulsiones, letárgico): 
+  Lactancia y alimentación: 
+  Apetito: 
+  Sueño: 
+  Diuresis y deposiciones: 
 
 == VALORACIÓN ==
 [2] Esquema de vacunación
     > Opciones: Completo · Incompleto: se aplica · Incompleto: pendiente · Sin carné
-    > Escribe los valores; en la app revisa el cálculo de esta pregunta.
+    > Llena cada línea debajo de R:. Lo que no hiciste, déjalo vacío.
 R: 
+  Esquema (completo / incompleto): 
+  Vacunas aplicadas hoy: 
+  Vacunas pendientes: 
 [3] Antecedentes perinatales: semanas y peso al nacer, hospitalización
     > Opciones: Sin complicaciones · Prematuro · Bajo peso al nacer · Hospitalizado al nacer · No sabe
 R: 
 [4] Antecedentes personales: enfermedades, hospitalizaciones, alergias
     > Opciones: Niega · Enfermedad · Hospitalización · Malaria previa · Alergia
 R: 
-[5] Cuidados tradicionales: payé, rezos, plantas
+[5] Discapacidades del paciente
+    > Llena cada línea debajo de R:. Lo que no hiciste, déjalo vacío.
+R: 
+  Física (S/N): N
+  Mental (S/N): N
+  Cognitiva (S/N): N
+  Auditiva (S/N): N
+  Visual (S/N): N
+[6] Cuidados tradicionales: payé, rezos, plantas
     > Opciones: Sí · No · Plantas o remedios
 R: 
-[6] Signos vitales: FC, FR, temperatura
-    > Opciones: Normales · Fiebre · Respira rápido
+[7] Revisión por sistemas y órganos de los sentidos
+    > Llena cada línea debajo de R:. Lo que no hiciste, déjalo vacío.
 R: 
-[7] Examen físico por sistemas, de cabeza a pies
+  Ardor ojos (S/N): N
+  Prurito (S/N): N
+  Cansancio ocular (S/N): N
+  Visión borrosa (S/N): N
+  Tamizaje normal (S/N): 
+  Lagrimeo (S/N): N
+  Ojo rojo (S/N): N
+  Disfonía (S/N): N
+  Epistaxis (S/N): N
+  Hipoacusia (S/N): N
+  Obstrucción nasal (S/N): N
+  Rinorrea (S/N): N
+  Tinitus (S/N): N
+  Sistema cardiopulmonar: NORMAL
+  Sistema neurológico: NORMAL
+  Sistema digestivo: NORMAL
+  Sistema psiquiátrico: NORMAL
+  Sistema dermatológico: NORMAL
+  Sistema genitourinario: NORMAL
+  Sistema osteoarticular: NORMAL
+  Sistema ginecológico: NO APLICA (niños y hombres)
+[8] Signos vitales, Glasgow y perímetros
+    > Llena cada línea debajo de R:. Lo que no hiciste, déjalo vacío.
+R: 
+  Temperatura (°C): 
+  Frecuencia cardiaca (lpm): 
+  Frecuencia respiratoria (rpm): 
+  Sístole (mmHg): 
+  Diástole (mmHg): 
+  PVC: NO APLICA
+  Saturación O₂ (SpO₂) (%): 
+  Perímetro torácico (cm): 
+  Perímetro abdominal (cm): 
+  Perímetro de muñeca (cm): 
+  Glasgow ocular (1 a 4): 4
+  Glasgow verbal (1 a 5): 5
+  Glasgow motora (1 a 6): 6
+[9] Examen físico por sistemas, de cabeza a pies
     > Opciones: Normal · Hallazgo · Piel o parásitos
 R: 
-[8] Crecimiento: peso, talla, perímetro cefálico, curvas OMS
+[10] Crecimiento: peso, talla, perímetro cefálico, curvas OMS
     > Opciones: Adecuado · Riesgo · Desnutrición o talla baja · Desnutrición aguda
-    > Escribe los valores; en la app revisa el cálculo de esta pregunta.
+    > Llena cada línea debajo de R:. Lo que no hiciste, déjalo vacío.
 R: 
-[9] Desarrollo con EAD-3
+  Peso (kg): 
+  Talla (cm): 
+  Perímetro cefálico (cm): 
+  Perímetro braquial (cm): 
+[11] Desarrollo con EAD-3
     > Opciones: Adecuado · Riesgo · Sospecha de problema
-    > Escribe los valores; en la app revisa el cálculo de esta pregunta.
+    > Llena cada línea debajo de R:. Lo que no hiciste, déjalo vacío.
 R: 
-[10] Audición y comunicación (VALE)
-    > Escribe los valores; en la app revisa el cálculo de esta pregunta.
+  Motricidad gruesa: 
+  Motricidad fina adaptativa: 
+  Audición y lenguaje: 
+  Personal social: 
+  Clasificación (desarrollo esperado / riesgo / sospecha): 
+[12] Audición y comunicación (VALE)
+    > Llena cada línea debajo de R:. Lo que no hiciste, déjalo vacío.
 R: 
-[11] Visión: reflejo rojo, fijación y seguimiento, estrabismo
-    > Opciones: Normal · Alterado · Agudeza visual
+  Rango de edad: 
+  Comprensión (S/N): 
+  Expresión (S/N): 
+  Interacción (S/N): 
+  Vestibular, desde los 3 años (S/N por ítem): 
+  Condiciones estructurales (orejas, labios, lengua, nariz, paladar, ojos, dientes, cuello, hombros) presentes y sin alteración (S/N): S
+  Remisión a fonoaudiología, evaluación audiológica o urgencias (S/N): 
+  ¿La remisión es urgente? (S/N): 
+[13] Visión: estructuras oculares y agudeza visual
+    > Llena cada línea debajo de R:. Lo que no hiciste, déjalo vacío.
 R: 
-[12] Alimentación: lactancia, alimentación complementaria
+  Estructuras oculares OI: NORMAL
+  Estructuras oculares OD: NORMAL
+  Reflejo rojo presente y simétrico (S/N): S
+  Fija y sigue objetos (S/N): S
+  Estrabismo (S/N): N
+  Leucocoria (S/N): N
+  Snellen OI (desde los 3 años, 20/__): 
+  Snellen OD (desde los 3 años, 20/__): 
+  Distancia de valoración: 
+[14] Alimentación: lactancia, alimentación complementaria
     > Opciones: Adecuada · Inadecuada
 R: 
-[13] Salud bucal
+[15] Salud bucal
     > Opciones: Sana · Placa o caries · Pendiente odontología
 R: 
-[14] Familia: familiograma, red de apoyo, cuidado
-    > Opciones: Adecuada · Riesgo social · Sospecha de maltrato
+[16] Familia: familiograma, red de apoyo, cuidado
+    > Llena cada línea debajo de R:. Lo que no hiciste, déjalo vacío.
 R: 
-[15] Dinámica familiar (APGAR familiar)
-    > Escribe los valores; en la app revisa el cálculo de esta pregunta.
+  Padre edad (años): 
+  Madre edad (años): 
+  Hermano 1 (sexo F/M, edad, unidad A/M/D): 
+  Hermano 2 (sexo F/M, edad, unidad A/M/D): 
+  Hermano 3 (sexo F/M, edad, unidad A/M/D): 
+  Hermano 4 (sexo F/M, edad, unidad A/M/D): 
+  Hermano 5 (sexo F/M, edad, unidad A/M/D): 
+  Hermano 6 (sexo F/M, edad, unidad A/M/D): 
+  Con quién vive: 
+  Red de apoyo y cuidado (Adecuada / Riesgo social / Sospecha de maltrato): Adecuada
+[17] Dinámica familiar (APGAR familiar)
+    > Llena cada línea debajo de R:. Lo que no hiciste, déjalo vacío.
 R: 
-[16] Signos generales de peligro AIEPI
-    > Opciones: Ausentes · Presente
-R: 
+  Nombre del acompañante: 
+  Parentesco: 
+  1. ¿Le satisface la ayuda que recibe de su familia cuando tiene algún problema o necesidad? (0 Nunca, 1 Casi nunca, 2 Algunas veces, 3 Casi siempre, 4 Siempre): 
+  2. ¿Le satisface la participación que su familia brinda y permite? (0 Nunca, 1 Casi nunca, 2 Algunas veces, 3 Casi siempre, 4 Siempre): 
+  3. ¿Le satisface como su familia acepta y apoya sus deseos de emprender nuevas actividades? (0 Nunca, 1 Casi nunca, 2 Algunas veces, 3 Casi siempre, 4 Siempre): 
+  4. ¿Le satisface como su familia le expresa afecto y responde a sus emociones como rabia, tristeza y amor? (0 Nunca, 1 Casi nunca, 2 Algunas veces, 3 Casi siempre, 4 Siempre): 
+  5. ¿Le satisface como comparte en familia el tiempo libre para estar juntos, los espacios en la casa, el dinero, etc.? (0 Nunca, 1 Casi nunca, 2 Algunas veces, 3 Casi siempre, 4 Siempre): 
 
 == PROTECCIÓN ESPECÍFICA ==
-[17] Vacunación según esquema PAI
+[18] Vacunación según esquema PAI
     > Opciones: Aplicadas · Al día · Pendiente
 R: 
-[18] Micronutrientes en polvo (fortificación casera) en las edades del c…
+[19] Micronutrientes en polvo (fortificación casera) en las edades del c…
     > Qué hacer: Micronutrientes en polvo (fortificación casera) en las edades del cuadro de la 3280
     > Opciones: Entregados · Ya recibió · En descanso
     > Si no aplica por la edad: No aplica por edad: los micronutrientes en polvo son de los 6 a los 23 meses.
 R: 
-[19] Micronutrientes dos veces al año desde los 2 años
+[20] Micronutrientes dos veces al año desde los 2 años
     > Opciones: Entregados · Ya recibió
     > Si no aplica por la edad: No aplica por edad: la suplementación con hierro y vitamina A es de los 24 a los 59 meses.
 R: 
-[20] Desparasitación desde el año, dos veces al año
+[21] Desparasitación desde el año, dos veces al año
     > Opciones: Albendazol 400 mg · Ya recibió
     > Si no aplica por la edad: No aplica por edad: la desparasitación inicia al año.
 R: 
-[21] Barniz de flúor y profilaxis semestral desde el año
+[22] Barniz de flúor y profilaxis semestral desde el año
     > Opciones: Aplicado · Remitido · Ya recibió
-    > Escribe los valores; en la app revisa el cálculo de esta pregunta.
+    > Llena cada línea debajo de R:. Lo que no hiciste, déjalo vacío.
     > Si no aplica por la edad: No aplica: menor de 6 meses; la primera consulta de odontología es a los 6 meses.
 R: 
-[22] Sellantes desde los 3 años según criterio
+  Barniz de flúor aplicado (S/N): 
+  Profilaxis (S/N): 
+  Remisión a odontología (S/N): 
+[23] Sellantes desde los 3 años según criterio
     > Opciones: Remitido · Ya tiene · No requiere
 R: 
-[23] Consejería en lactancia
+[24] Consejería en lactancia
     > Opciones: Realizada · No aplica
 R: 
 
 == DETECCIÓN TEMPRANA ==
-[24] Hemoglobina según riesgo (una vez)
+[25] Hemoglobina según riesgo (una vez)
     > Opciones: Sin riesgo · Ordenada · Resultado normal · Resultado bajo
 R: 
-[25] Odontología anual desde los 6 meses
+[26] Odontología anual desde los 6 meses
     > Opciones: Al día · Remitido
 R: 
 
 == EDUCACIÓN ==
-[26] Educación individual a padres o cuidadores
+[27] Educación individual a padres o cuidadores
     > Opciones: Realizada
 R: 
-[27] Signos de alarma para consultar de inmediato
+[28] Signos de alarma para consultar de inmediato
     > Opciones: Realizada
 R: 
-[28] Al menos dos ciclos educativos
+[29] Al menos dos ciclos educativos
     > Opciones: Derivado (lo envío hoy) · Ya asistió a 2 o más · Asistió a 1 · Sin oferta · No aplica
 R: 
 
 == PLAN ==
-[29] Medicamentos y micronutrientes formulados
+[30] Medicamentos y micronutrientes formulados
     > Opciones: Según la edad · Ninguno
 R: 
-[30] Remisiones
+[31] Remisiones
     > Opciones: Ninguna · Odontología · Medicina · Vacunación · Nutrición o psicología
 R: 
-[31] Próximo control
+[32] Próximo control
     > Opciones: Enfermería · Medicina · Próxima brigada · Control en 1 mes
 R: 
 
