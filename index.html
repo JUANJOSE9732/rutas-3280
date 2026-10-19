@@ -1971,7 +1971,7 @@ function wireMiDia(){const cb=$("md-cal");if(cb)cb.onclick=calOpen;
 function mdShow(t){const s=$("md-st");s.innerHTML="";const a=document.createElement("textarea");a.value=t;a.rows=7;a.readOnly=true;s.append("No se pudo copiar solo. Mantén presionado el texto y cópialo:",a);a.focus();a.select()}
 
 /* ---------- PANEL ---------- */
-const VERSION_APP="2026-10-18 v177";
+const VERSION_APP="2026-10-18 v178";
 function home(){
   stopRec();if(S.get(AT_KEY))atReiniciar();st.view="home";
   const rm=["precon","prenatal","parto","rn","ive"],rp=["pinf","inf","adol","juv","adul","vej"];
@@ -4793,7 +4793,7 @@ function paneEntr(){
     ${x.sugEx?`<div class="guia" id="exs"></div>`:""}
     <div class="guia" id="iv-g" hidden></div>
     ${x.sistemas?`<div class="btns" style="margin:0"><button class="btn" type="button" id="sx-all">Todo normal</button><button class="btn" type="button" id="sx-clr">Borrar todo</button></div>
-      <div id="sx" style="display:flex;flex-direction:column;gap:10px">${SISTEMAS[x.sistemas].map(c=>`<div class="tool" style="padding:10px 12px;gap:6px" data-sxw="${c.k}">
+      <div id="sx" style="display:flex;flex-direction:column;gap:10px">${sxSet(x.sistemas).map(c=>`<div class="tool" style="padding:10px 12px;gap:6px" data-sxw="${c.k}">
         <div style="display:flex;justify-content:space-between;align-items:center;gap:8px"><b>${esc(c.l)}</b><button type="button" class="btn" data-sxn="${c.k}" style="padding:6px 12px;font-size:.85rem">Normal</button></div>
         <p class="note-src" style="margin:0">Qué buscar: ${esc(c.o)}</p>
         ${c.g?`<details><summary class="note-src" style="cursor:pointer;font-weight:700">Pruebas y hallazgos frecuentes</summary><ul class="note-src" style="margin:4px 0 0;padding-left:18px">${c.g.map(z=>`<li style="margin:3px 0">${esc(z)}</li>`).join("")}</ul></details>`:""}
@@ -4815,15 +4815,15 @@ function paneEntr(){
       const sm=document.querySelector(`[data-cvm="${k}"]`);if(sm){const t=r.m&&r.m[k];sm.textContent=t||sm.dataset.n;sm.style.color=!t?"var(--muted)":/^(Normal|Cuadra|Primigestante|Concuerda|IMC inicial|Grafícalo|Pregúntale|Adecuad|A término|Contextura)|ADECUADA$/.test(t)?"var(--accent)":"var(--miss)";sm.style.fontWeight=t?"700":"400"}});
     const b=$("cv-al");b.hidden=!(["antropoG","vitalesP","vitalesRN","antropoRN","antropoPI","antropoNNA","antropoA"].includes(x.campos)&&r.al.length);b.querySelector("ul").innerHTML=r.al.map(z=>`<li>${esc(z)}</li>`).join("");try{nutGraf(x.campos,r)}catch(e){console.warn(e)}return r};
   let sx={};try{sx=JSON.parse(S.get(key(id,"sx"+i))||"{}")}catch(e){}
-  const sxTxt=()=>x.sistemas?SISTEMAS[x.sistemas].filter(c=>(sx[c.k]||"").trim()).map(c=>c.l+": "+sx[c.k].trim().replace(/\.?$/,".")).join(" "):"";
-  const sxPinta=()=>{if(!x.sistemas)return;SISTEMAS[x.sistemas].forEach(c=>{const v=(sx[c.k]||"").trim(),inp=document.querySelector(`[data-sx="${c.k}"]`),nb=document.querySelector(`[data-sxn="${c.k}"]`),rr=document.querySelector(`[data-sxr="${c.k}"]`),w=document.querySelector(`[data-sxw="${c.k}"]`);
+  const sxTxt=()=>x.sistemas?sxSet(x.sistemas).filter(c=>(sx[c.k]||"").trim()).map(c=>c.l+": "+sx[c.k].trim().replace(/\.?$/,".")).join(" "):"";
+  const sxPinta=()=>{if(!x.sistemas)return;sxSet(x.sistemas).forEach(c=>{const v=(sx[c.k]||"").trim(),inp=document.querySelector(`[data-sx="${c.k}"]`),nb=document.querySelector(`[data-sxn="${c.k}"]`),rr=document.querySelector(`[data-sxr="${c.k}"]`),w=document.querySelector(`[data-sxw="${c.k}"]`);
     if(document.activeElement!==inp)inp.value=v;const esN=v===c.n||(c.ok&&!!v);nb.className="btn"+(v===c.n?" primary":"");nb.style.flex="none";rr.hidden=!v||esN||!c.r;w.style.borderColor=v&&!esN?"var(--miss)":v?"var(--accent)":"";
     document.querySelectorAll(`[data-sxx="${c.k}"]`).forEach(b=>b.setAttribute("aria-pressed",v.includes(b.dataset.v)))})};
   const valor=()=>x.widget?[WIDGET[x.widget].txt(id),ta.value.trim()].filter(Boolean).join(" "):x.sistemas?[sxTxt(),ta.value.trim()].filter(Boolean).join(" "):x.campos?[cvCalc(x.campos,cv).txt,cvObs(ta.value)].filter(Boolean).join(" "):ta.value;
   const save=()=>{const o=ivAns(id);if(x.campos){S.set(key(id,"cv"+i),JSON.stringify(cv));S.set(key(id,"cvo"+i),ta.value)}if(x.sistemas){S.set(key(id,"sx"+i),JSON.stringify(sx));S.set(key(id,"cvo"+i),ta.value)}if(x.widget)S.set(key(id,"cvo"+i),ta.value);if(x.campos==="antropoG"){let t=nv(cv.talla);if(t&&t>3)t=t/100;if(t)S.set(key(id,"eg_talla"),String(t));if(cv.peso)S.set(key(id,"eg_pact"),String(nv(cv.peso)));if(cv.ppre)S.set(key(id,"eg_ppre"),String(nv(cv.ppre)))}o[i]=valor();S.set(key(id,"iv"),JSON.stringify(o));S.del(key(id,"anal"));S.set(key(id,"dict"),ivCompose(id));
     if(x.ck){const c=checks(id),v=valor().trim();if(v&&!/^(no realizado|no aplica|no se realiza|se ofrece [^.]*no la acepta)/i.test(v))c[x.ck]=1;else delete c[x.ck];S.set(key(id,"chk"),JSON.stringify(c))}
     const hit=x.al&&ta.value.trim()&&x.al.test(ta.value);$("iv-al").hidden=!hit;if(hit)$("iv-alt").textContent=x.am};
-  if(x.sistemas){const L=SISTEMAS[x.sistemas];
+  if(x.sistemas){const L=sxSet(x.sistemas);
     document.querySelectorAll("[data-sx]").forEach(e=>e.addEventListener("input",()=>{sx[e.dataset.sx]=e.value;sxPinta();save()}));
     document.querySelectorAll("[data-sxn]").forEach(b=>b.onclick=()=>{const c=L.find(z=>z.k===b.dataset.sxn);sx[c.k]=sx[c.k]===c.n?"":c.n;sxPinta();save()});
     document.querySelectorAll("[data-sxx]").forEach(b=>b.onclick=()=>{const k=b.dataset.sxx,c=L.find(z=>z.k===k);let v=(sx[k]||"").trim();if(v===c.n)v="";if(v.includes(b.dataset.v))v=v.replace(b.dataset.v,"").replace(/^[,\s]+|[,\s]+$/g,"").replace(/,\s*,/g,",");else v=v?v+", "+b.dataset.v:b.dataset.v;sx[k]=v;sxPinta();save()});
@@ -6815,7 +6815,7 @@ function plGenerar(tipo,id){const L=[],ln=s=>L.push(s),hr="=====================
   if(tipo==="MODULO"){let blk="";ivFor(id).forEach((x,i)=>{if(x.b!==blk){blk=x.b;ln("");ln("== "+blk.toUpperCase()+" ==")}
       ln("["+(i+1)+"] "+x.l);if(x.q&&plN(x.q)!==plN(x.l.replace(/…$/,"")))ln("    > "+(x.t==="ask"?"Pregunta: ":"Qué hacer: ")+x.q);
       const op=plOpc(id,x).map(c=>String(c).split("|")[0]);if(op.length)ln("    > Opciones: "+op.join(" · "));
-      const _pl=x.widget&&WIDGET[x.widget]&&WIDGET[x.widget].plantilla,pf=_pl?(typeof _pl==="function"?_pl(id):_pl):x.sistemas&&SISTEMAS[x.sistemas]?["> Por región: escribe N si es normal o anota el hallazgo."].concat(SISTEMAS[x.sistemas].map(c=>c.l+": ")):x.campos&&CAMPOS[x.campos]?CAMPOS[x.campos].filter(c=>!c.auto).map(c=>c.l+(c.u?" ("+c.u+")":"")+": "):null;
+      const _pl=x.widget&&WIDGET[x.widget]&&WIDGET[x.widget].plantilla,pf=_pl?(typeof _pl==="function"?_pl(id):_pl):x.sistemas&&SISTEMAS[x.sistemas]?["> Por región: escribe N si es normal o anota el hallazgo."].concat(sxSet(x.sistemas).map(c=>c.l+": ")):x.campos&&CAMPOS[x.campos]?CAMPOS[x.campos].filter(c=>!c.auto).map(c=>c.l+(c.u?" ("+c.u+")":"")+": "):null;
       if(pf)ln("    > Llena cada línea debajo de R:. Lo que no hiciste, déjalo vacío.");else if(x.widget||x.campos)ln("    > Escribe los valores; en la app revisa el cálculo de esta pregunta.");
       if(x.siTxt&&typeof x.siTxt==="string")ln("    > Si no aplica por la edad: "+x.siTxt);
       ln("R: ");if(pf)pf.forEach(s=>ln("  "+s))})}
@@ -6864,7 +6864,7 @@ function plAplicar(texto){const r=plLeer(texto);if(!r.tipo||!r.id)return{err:"No
   if(r.tipo==="MODULO"){S.keys().filter(k=>k.startsWith("dn2_"+id+"_")&&!k.endsWith("_note")).forEach(k=>S.del(k));
     const q=ivFor(id),a={},ck={},usado=new Set();
     Object.values(r.resp).forEach(x=>{if(!x.v)return;let i=q.findIndex((z,j)=>!usado.has(j)&&plN(z.l.replace(/…$/,""))===plN(x.l.replace(/…$/,"")));if(i<0&&/^\d+$/.test(x.k)&&q[+x.k-1]&&!usado.has(+x.k-1))i=+x.k-1;
-      if(i<0){sin.push(x.l+": "+x.v);return}usado.add(i);if(q[i].sistemas&&SISTEMAS[q[i].sistemas]){const SL=SISTEMAS[q[i].sistemas],sx={};(x.raw||[]).forEach(r=>{const c=SL.slice().sort((u,w)=>w.l.length-u.l.length).find(z=>r.trim().toLowerCase().startsWith(z.l.toLowerCase()+":"));if(!c)return;const v=r.trim().slice(c.l.length+1).trim();if(c&&v)sx[c.k]=/^n(ormal)?\.?$/i.test(v)?c.n:v});if(Object.keys(sx).length){S.set(key(id,"sx"+i),JSON.stringify(sx));a[i]=SL.filter(c=>sx[c.k]).map(c=>c.l+": "+sx[c.k].replace(/\.?$/,".")).join(" ")}else a[i]=x.v;if(q[i].ck)ck[q[i].ck]=1;n++;return}{const W=q[i].widget&&WIDGET[q[i].widget];let ok=false;try{ok=!!(W&&W.desdeTexto&&W.desdeTexto(id,x.raw||[]))}catch(e){}a[i]=ok?(W.txt(id)||x.v):plOpcion(id,q[i],x.v)}if(q[i].ck)ck[q[i].ck]=1;n++});
+      if(i<0){sin.push(x.l+": "+x.v);return}usado.add(i);if(q[i].sistemas&&SISTEMAS[q[i].sistemas]){const SL=sxSet(q[i].sistemas),sx={};(x.raw||[]).forEach(r=>{const c=SL.slice().sort((u,w)=>w.l.length-u.l.length).find(z=>r.trim().toLowerCase().startsWith(z.l.toLowerCase()+":"));if(!c)return;const v=r.trim().slice(c.l.length+1).trim();if(c&&v)sx[c.k]=/^n(ormal)?\.?$/i.test(v)?c.n:v});if(Object.keys(sx).length){S.set(key(id,"sx"+i),JSON.stringify(sx));a[i]=SL.filter(c=>sx[c.k]).map(c=>c.l+": "+sx[c.k].replace(/\.?$/,".")).join(" ")}else a[i]=x.v;if(q[i].ck)ck[q[i].ck]=1;n++;return}{const W=q[i].widget&&WIDGET[q[i].widget];let ok=false;try{ok=!!(W&&W.desdeTexto&&W.desdeTexto(id,x.raw||[]))}catch(e){}a[i]=ok?(W.txt(id)||x.v):plOpcion(id,q[i],x.v)}if(q[i].ck)ck[q[i].ck]=1;n++});
     S.set(key(id,"iv"),JSON.stringify(a));S.set(key(id,"ivlab"),JSON.stringify(q.map(z=>z.l)));S.set(key(id,"ivi"),String(q.length));S.set(key(id,"chk"),JSON.stringify(ck));
     if(fecha)S.set(key(id,"fecha"),fecha);
     let dict=ivCompose(id);const ot=[r.otros].concat(sin).filter(Boolean);if(ot.length)dict+="\n\nOTROS DATOS\n- "+ot.join("\n- ");
@@ -7571,7 +7571,7 @@ function vnIdForm(){stopRec();if(VNS)VNS.voz=false;const P=pac(),tipos=(ALLF.fin
   x:["Distensión","Masa","Hígado o bazo grandes","Hernia umbilical","Hernia inguinal","Ombligo rojo o con secreción"],
   r:"Masa en el abdomen: remite pronto (en niños puede ser un tumor de riñón). Bazo grande: gota gruesa. Hernia inguinal: cirugía programada; si está dura, dolorosa y no se reduce, urgencia. Ombligo con rojo que se extiende a la piel: infección, remite hoy.",
   g:["Hernia umbilical: bulto en el ombligo que crece al llorar; casi todas cierran solas antes de los 4 a 5 años. No sirven monedas ni fajas.",
-   "Hernia inguinal: bulto en la ingle o en la bolsa del testículo que aparece al llorar o pujar; no cierra sola: cirugía.",
+   "Hernia inguinal: bulto en la ingle (en los niños puede bajar a la bolsa del testículo) que aparece al llorar o pujar; no cierra sola: cirugía. En las niñas, un bulto en la ingle puede ser el ovario: remite pronto.",
    "Hígado: palpa desde abajo hacia arriba por el lado derecho; en el lactante es normal hasta 2 cm bajo las costillas."]},
  {k:"gni",l:"Genitales y ano",n:"Genitales normoconfigurados; testículos en la bolsa; ano permeable y en posición normal.",
   o:"Siempre con el cuidador presente y explicando qué haces. Niños: testículos, hidrocele, salida de la orina. Niñas: labios, secreción. Ano.",
@@ -7773,6 +7773,50 @@ function vnIdForm(){stopRec();if(VNS)VNS.voz=false;const P=pac(),tipos=(ALLF.fin
   if(malos.some(k=>k==="peso"||k==="talla")){r.imc=null;if(r.m)delete r.m.imc}
   if(malos.length&&typeof r.txt==="string")r.txt=(r.txt?r.txt.replace(/\.?\s*$/,". "):"")+"Revisar: "+malos.map(k=>L[k][0].toLowerCase()+" "+coma(L[k][4])+" "+L[k][1]).join(", ")+" (valores no posibles).";
   return r}})();
+/* ===== v178: examen por regiones según el sexo de la persona =====
+   Las regiones con diferencias (genitales, tórax del escolar) traen una versión para niñas y
+   mujeres (F) y otra para niños y hombres (M). Sin sexo registrado se muestra la general. */
+function sxSet(name){const L=SISTEMAS[name]||[];let sx="";try{sx=(pac()||{})["GENERO"]||""}catch(e){}return L.map(c=>c[sx]?Object.assign({},c,c[sx]):c)}
+(function(){if(typeof SISTEMAS!=="object"||!SISTEMAS.ex_pinf)return;const f=(n,k)=>(SISTEMAS[n]||[]).find(c=>c.k===k);
+ const ABUSO="Lesiones o sospecha de abuso: activa la ruta de violencia sexual.";
+ Object.assign(f("ex_pinf","gni"),{
+  M:{n:"Genitales masculinos normoconfigurados; testículos en la bolsa; orificio urinario en la punta del pene; ano permeable y en posición normal.",
+   o:"Siempre con el cuidador presente y explicando qué haces. Testículos en la bolsa, hidrocele o hernia, salida de la orina, prepucio. Ano.",
+   x:["Testículo no descendido","Hidrocele","Hipospadias","Fimosis con dificultad para orinar","Lesiones o signos de abuso"],
+   r:"Testículo no descendido después de los 6 meses: cirugía pediátrica. Hipospadias: remite y no circuncidar. Prepucio que se infla al orinar o infecciones repetidas: medicina. "+ABUSO,
+   g:["Testículos: con la mano tibia, baja desde la ingle hacia la bolsa. Si sube y baja con facilidad es retráctil (normal).",
+    "Hidrocele: bolsa grande y blanda que se ilumina con la linterna; suele desaparecer antes del año. Si crece y decrece en el día, piensa en hernia.",
+    "Hipospadias: el orificio de la orina sale por debajo del pene y no en la punta.",
+    "Fimosis: es normal hasta los 3 a 4 años. No retraer el prepucio a la fuerza."]},
+  F:{n:"Genitales femeninos normoconfigurados; labios sin unión; sin secreción ni lesiones; ano permeable y en posición normal.",
+   o:"Siempre con el cuidador presente y explicando qué haces. Labios mayores y menores, clítoris, secreción, enrojecimiento o lesiones. Ano.",
+   x:["Sinequia de labios","Secreción o mal olor","Enrojecimiento (vulvitis)","Clítoris aumentado","Lesiones o signos de abuso"],
+   r:"Secreción purulenta, con sangre o que no mejora: medicina y descarta abuso. Clítoris aumentado: pediatría. "+ABUSO,
+   g:["Sinequia de labios menores: los labios quedan unidos por una línea fina; si no impide orinar, se vigila. No separarlos a la fuerza.",
+    "En la recién nacida es normal un flujo blanco escaso y hasta un sangrado leve en la primera semana, por las hormonas de la madre.",
+    "Vulvitis: enrojecimiento y picor por jabones, pañal húmedo u oxiuros (picor en el ano en la noche). Higiene solo con agua, de adelante hacia atrás, y ropa de algodón."]}});
+ Object.assign(f("ex_escolar","gni"),{
+  M:{n:"Genitales masculinos normoconfigurados para la edad; testículos en la bolsa; desarrollo puberal acorde a la edad.",
+   o:"Solo con consentimiento y con acompañante. Estadio de Tanner (vello y genitales), testículos en la bolsa, varicocele, prepucio.",
+   x:["Pubertad precoz","Pubertad tardía","Testículo no descendido","Varicocele","Fimosis","Lesiones o secreción","Signos de abuso"],
+   r:"Signos de pubertad antes de los 9 años, o testículos sin crecer a los 14: medicina. Lesiones o secreción: ITS y ruta de violencia sexual según la edad. Dolor fuerte y brusco de un testículo: torsión, urgencia.",
+   g:["Tanner en niños: 1 infantil; 2 crecen los testículos y aparece vello escaso (9 a 14 años); 3 crece el pene; 4 y 5 hasta el adulto.",
+    "Varicocele: venas como «bolsa de gusanos» encima del testículo izquierdo, más visibles de pie. Remite si duele o ese testículo es más pequeño.",
+    "Dolor fuerte y brusco de un testículo: torsión, cirugía antes de 6 horas."]},
+  F:{n:"Genitales femeninos normoconfigurados para la edad; desarrollo puberal acorde a la edad.",
+   o:"Solo con consentimiento y con acompañante. Estadio de Tanner (mamas y vello), flujo y lesiones. Pregunta por la menarquia.",
+   x:["Pubertad precoz","Pubertad tardía","Flujo anormal","Lesiones o secreción","Signos de abuso"],
+   r:"Botón mamario antes de los 8 años, sin botón mamario a los 13 o sin menarquia a los 15: medicina. Flujo anormal o lesiones: ITS y ruta de violencia sexual según la edad (en menores de 14 años toda relación sexual es violencia).",
+   g:["Tanner en niñas: 1 infantil; 2 botón mamario (primer signo, entre los 8 y 13 años); 3 y 4 la mama crece y aparece vello; 5 adulto.",
+    "La menarquia llega 2 a 3 años después del botón mamario, en promedio a los 12 o 13 años.",
+    "Flujo blanco o transparente, sin olor ni picor, en los meses antes de la menarquia es normal."]}});
+ const tor=f("ex_escolar","tor");Object.assign(tor,{
+  M:{x:["Sibilancias","Estertores","Soplo","Pecho hundido o en quilla","Ginecomastia"]},
+  F:{x:["Sibilancias","Estertores","Soplo","Pecho hundido o en quilla","Mamas asimétricas","Masa en la mama"],
+   r:"Soplo, sibilancias repetidas o estertores: medicina. Tos de más de 2 semanas: baciloscopia. Masa en la mama: medicina.",
+   g:["Al inicio de la pubertad es normal que una mama crezca antes que la otra o que el botón duela un poco.","Una masa dura, que crece o con secreción por el pezón: medicina."]}});
+ tor.x=["Sibilancias","Estertores","Soplo","Pecho hundido o en quilla"];
+})();
 /* ---------- arranque ---------- */
 /* los borradores guardados con la versión anterior de los módulos se reubican una sola vez */
 Object.keys(OLD_LAB).forEach(id=>{if(!M[id]||S.get(key(id,"ivlab")))return;let a={};try{a=JSON.parse(S.get(key(id,"iv"))||"{}")||{}}catch(e){}

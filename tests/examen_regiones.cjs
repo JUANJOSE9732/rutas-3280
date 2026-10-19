@@ -14,6 +14,13 @@ const F=await p.evaluate(()=>{const F=[],ok=(c,m)=>{if(!c)F.push(m)};const L='Ex
   R.forEach(c=>ok(c.n&&c.o&&c.x&&c.x.length&&c.r,m+': región incompleta '+c.l));
   if(T[m])ok(R.some(c=>(c.g||[]).some(g=>T[m].test(g))),m+': falta la guía '+T[m]);
   const t=plGenerar('MODULO',m);ok(R.every(c=>t.includes('  '+c.l+': ')),m+': la plantilla no trae las regiones')});
+ /* según el sexo */
+ const pers=(sx,a)=>{localStorage.clear();const d=pD(hoy());d.setUTCFullYear(d.getUTCFullYear()-a);setPac({'NOMBRE COMPLETO':'X','TIPO':'RC','DOCUMENTO ID.':'1','GENERO':sx,'FECHA NACIMIENTO':d.toISOString().slice(0,10)})};
+ const reg=(set,k)=>sxSet(set).find(c=>c.k===k),todo=c=>[c.n,c.o,c.r].concat(c.x,c.g||[]).join(' ');
+ pers('F',2);let c=reg('ex_pinf','gni');ok(!/test[ií]culo|hipospadias|prepucio|fimosis/i.test(todo(c)),'niña: no deben salir genitales masculinos: '+todo(c).slice(0,200));ok(/Sinequia/.test(todo(c)),'niña: sinequia');
+ pers('M',2);c=reg('ex_pinf','gni');ok(/Testículo no descendido/.test(todo(c))&&!/Sinequia|labios|clítoris/i.test(todo(c)),'niño: genitales masculinos');
+ pers('F',12);c=reg('ex_escolar','gni');ok(!/test[ií]culo|varicocele|torsión/i.test(todo(c))&&/menarquia/.test(todo(c)),'adolescente mujer');c=reg('ex_escolar','tor');ok(!/Ginecomastia/i.test(todo(c)),'mujer: sin ginecomastia');
+ pers('M',12);c=reg('ex_escolar','gni');ok(/Varicocele/.test(todo(c))&&!/menarquia|mama/i.test(todo(c)),'adolescente hombre');c=reg('ex_escolar','tor');ok(/Ginecomastia/.test(todo(c)),'hombre: ginecomastia');
  /* plantilla llena → regiones */
  let t=plGenerar('MODULO','adul').replace('Nombre completo: ','Nombre completo: PEDRO RUIZ');
  const lab=s=>s;t=t.split('\n').map(l=>{if(/^\s*Tipo de documento/i.test(l))return l.replace(/:.*/,': CC');if(/^\s*Número de documento/i.test(l))return l.replace(/:.*/,': 123');if(/^\s*Sexo/i.test(l))return l.replace(/:.*/,': M');if(/^\s*Edad/i.test(l))return l.replace(/:.*/,': 45');
