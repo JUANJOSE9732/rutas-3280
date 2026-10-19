@@ -41,31 +41,76 @@ R:
 [2] Antecedentes personales: enfermedades, hospitalizaciones, alergias
     > Opciones: Niega · Enfermedad · Hospitalización · Malaria previa · Alergia
 R: 
-[3] Antecedentes ginecológicos: menarquia, ciclos, última regla
+[3] Discapacidades del paciente
+    > Llena cada línea debajo de R:. Lo que no hiciste, déjalo vacío.
+R: 
+  Física (S/N): N
+  Mental (S/N): N
+  Cognitiva (S/N): N
+  Auditiva (S/N): N
+  Visual (S/N): N
+[4] Antecedentes ginecológicos: menarquia, ciclos, última regla
     > Opciones: Mujer · Sin menarquia · Irregulares · No aplica
     > Si no aplica por la edad: No aplica: hombre.
 R: 
-[4] Escolaridad o trabajo
+[5] Escolaridad o trabajo
     > Opciones: Estudia · Desertó · Trabaja
 R: 
-[5] Hábitos: alimentación, actividad física, pantallas, sueño
+[6] Hábitos: alimentación, actividad física, pantallas, sueño
     > Opciones: Saludables · Mala alimentación · Sedentario · Sueño alterado
 R: 
+[7] Revisión por sistemas y órganos de los sentidos
+    > Llena cada línea debajo de R:. Lo que no hiciste, déjalo vacío.
+R: 
+  Ardor ojos (S/N): N
+  Prurito (S/N): N
+  Cansancio ocular (S/N): N
+  Visión borrosa (S/N): N
+  Tamizaje normal (S/N): 
+  Lagrimeo (S/N): N
+  Ojo rojo (S/N): N
+  Disfonía (S/N): N
+  Epistaxis (S/N): N
+  Hipoacusia (S/N): N
+  Obstrucción nasal (S/N): N
+  Rinorrea (S/N): N
+  Tinitus (S/N): N
+  Sistema cardiopulmonar: NORMAL
+  Sistema neurológico: NORMAL
+  Sistema digestivo: NORMAL
+  Sistema psiquiátrico: NORMAL
+  Sistema dermatológico: NORMAL
+  Sistema genitourinario: NORMAL
+  Sistema osteoarticular: NORMAL
+  Sistema ginecológico: NO APLICA (niños y hombres)
 
 == VALORACIÓN ==
-[6] Signos vitales: FC, FR, temperatura y tensión arterial
-    > Opciones: Normales · TA elevada · Fiebre
+[8] Signos vitales, Glasgow y perímetros
+    > Llena cada línea debajo de R:. Lo que no hiciste, déjalo vacío.
 R: 
-[7] Examen físico por sistemas, de cabeza a pies
+  Temperatura (°C): 
+  Frecuencia cardiaca (lpm): 
+  Frecuencia respiratoria (rpm): 
+  Sístole (mmHg): 
+  Diástole (mmHg): 
+  PVC: NO APLICA
+  Saturación O₂ (SpO₂) (%): 
+  Perímetro torácico (cm): 
+  Perímetro abdominal (cm): 
+  Perímetro de muñeca (cm): 
+  Glasgow ocular (1 a 4): 4
+  Glasgow verbal (1 a 5): 5
+  Glasgow motora (1 a 6): 6
+[9] Examen físico por sistemas, de cabeza a pies
     > Opciones: Normal · Hallazgo · Piel o parásitos
 R: 
-[8] Crecimiento y estado nutricional
+[10] Crecimiento y estado nutricional
     > Opciones: Adecuado · Riesgo · Déficit · Obesidad
     > Llena cada línea debajo de R:. Lo que no hiciste, déjalo vacío.
 R: 
   Peso (kg): 
   Talla (cm): 
-[9] Audición y comunicación (VALE)
+[11] Audición y comunicación (VALE)
     > Llena cada línea debajo de R:. Lo que no hiciste, déjalo vacío.
     > Si no aplica por la edad: No aplica por edad: el VALE cubre hasta los 12 años 11 meses.
 R: 
@@ -77,13 +122,35 @@ R:
   Condiciones estructurales (orejas, labios, lengua, nariz, paladar, ojos, dientes, cuello, hombros) presentes y sin alteración (S/N): S
   Remisión a fonoaudiología, evaluación audiológica o urgencias (S/N): 
   ¿La remisión es urgente? (S/N): 
-[10] Salud sexual y reproductiva: inicio de relaciones, protección
+[12] Visión: estructuras oculares y agudeza visual
+    > Llena cada línea debajo de R:. Lo que no hiciste, déjalo vacío.
+R: 
+  Estructuras oculares OI: NORMAL
+  Estructuras oculares OD: NORMAL
+  Estrabismo (S/N): N
+  Snellen OI (20/__): 
+  Snellen OD (20/__): 
+  Distancia de valoración: 
+[13] Salud sexual y reproductiva: inicio de relaciones, protección
     > Opciones: Sin inicio · Inicio con protección · Inicio sin protección · Intención de inicio · Sospecha de violencia
 R: 
-[11] Salud mental, consumo de sustancias, violencias
+[14] Salud mental, consumo de sustancias, violencias
     > Escribe los valores; en la app revisa el cálculo de esta pregunta.
 R: 
-[12] Dinámica familiar (APGAR familiar)
+[15] Familia: familiograma, red de apoyo, cuidado
+    > Llena cada línea debajo de R:. Lo que no hiciste, déjalo vacío.
+R: 
+  Padre edad (años): 
+  Madre edad (años): 
+  Hermano 1 (sexo F/M, edad, unidad A/M/D): 
+  Hermano 2 (sexo F/M, edad, unidad A/M/D): 
+  Hermano 3 (sexo F/M, edad, unidad A/M/D): 
+  Hermano 4 (sexo F/M, edad, unidad A/M/D): 
+  Hermano 5 (sexo F/M, edad, unidad A/M/D): 
+  Hermano 6 (sexo F/M, edad, unidad A/M/D): 
+  Con quién vive: 
+  Red de apoyo y cuidado (Adecuada / Riesgo social / Sospecha de maltrato): Adecuada
+[16] Dinámica familiar (APGAR familiar)
     > Llena cada línea debajo de R:. Lo que no hiciste, déjalo vacío.
 R: 
   Nombre del acompañante: 
@@ -93,10 +160,10 @@ R:
   3. ¿Le satisface como su familia acepta y apoya sus deseos de emprender nuevas actividades? (0 Nunca, 1 Casi nunca, 2 Algunas veces, 3 Casi siempre, 4 Siempre): 
   4. ¿Le satisface como su familia le expresa afecto y responde a sus emociones como rabia, tristeza y amor? (0 Nunca, 1 Casi nunca, 2 Algunas veces, 3 Casi siempre, 4 Siempre): 
   5. ¿Le satisface como comparte en familia el tiempo libre para estar juntos, los espacios en la casa, el dinero, etc.? (0 Nunca, 1 Casi nunca, 2 Algunas veces, 3 Casi siempre, 4 Siempre): 
-[13] Proyecto de vida
+[17] Proyecto de vida
     > Opciones: Con proyecto · Sin proyecto claro · Riesgo social
 R: 
-[14] Esquema de vacunación
+[18] Esquema de vacunación
     > Llena cada línea debajo de R:. Lo que no hiciste, déjalo vacío.
 R: 
   Esquema (completo / incompleto): 
@@ -104,30 +171,30 @@ R:
   Vacunas pendientes: 
 
 == DETECCIÓN TEMPRANA ==
-[15] Prueba treponémica y VIH según exposición al riesgo, con asesoría
+[19] Prueba treponémica y VIH según exposición al riesgo, con asesoría
     > Opciones: Realizadas, no reactivas · Reactiva · Ordenadas · No indicadas
     > Si no aplica por la edad: No aplica: no ha iniciado relaciones sexuales.
 R: 
-[16] Tamizaje de anemia una vez entre los 14 y 17 años, solo mujeres
+[20] Tamizaje de anemia una vez entre los 14 y 17 años, solo mujeres
     > Opciones: Ordenado · Ya tiene, normal · Resultado bajo
 R: 
-[17] Prueba de embarazo si hay retraso menstrual u otros signos
+[21] Prueba de embarazo si hay retraso menstrual u otros signos
     > Opciones: No indicada · Negativa · Positiva
     > Si no aplica por la edad: No aplica: hombre.
 R: 
 
 == PROTECCIÓN ESPECÍFICA ==
-[18] Asesoría en anticoncepción y control
+[22] Asesoría en anticoncepción y control
     > Opciones: Realizada · No desea · No aplica
     > Escribe los valores; en la app revisa el cálculo de esta pregunta.
 R: 
-[19] Suministro por demanda: DIU, implante, oral, inyectable, preservativos
+[23] Suministro por demanda: DIU, implante, oral, inyectable, preservativos
     > Opciones: Implante · DIU · Inyectable · Oral · Solo condones · No aplica
 R: 
-[20] Vacunación según esquema
+[24] Vacunación según esquema
     > Opciones: Realizado · No realizado · No aplica
 R: 
-[21] Flúor y profilaxis dos veces al año; detartraje y sellantes según n…
+[25] Flúor y profilaxis dos veces al año; detartraje y sellantes según n…
     > Qué hacer: Flúor y profilaxis dos veces al año; detartraje y sellantes según necesidad
     > Llena cada línea debajo de R:. Lo que no hiciste, déjalo vacío.
     > Si no aplica por la edad: No aplica: menor de 6 meses; la primera consulta de odontología es a los 6 meses.
@@ -137,21 +204,21 @@ R:
   Remisión a odontología (S/N): 
 
 == EDUCACIÓN ==
-[22] Educación individual y familiar
+[26] Educación individual y familiar
     > Opciones: Realizada · Habilidades para la vida
 R: 
-[23] Al menos dos ciclos educativos
+[27] Al menos dos ciclos educativos
     > Opciones: Derivado (lo envío hoy) · Ya asistió a 2 o más · Asistió a 1 · Sin oferta · No aplica
 R: 
 
 == PLAN ==
-[24] Medicamentos y micronutrientes formulados
+[28] Medicamentos y micronutrientes formulados
     > Opciones: Según la edad · Ninguno
 R: 
-[25] Remisiones
+[29] Remisiones
     > Opciones: Ninguna · Odontología · Medicina · Vacunación · Nutrición o psicología
 R: 
-[26] Próximo control
+[30] Próximo control
     > Opciones: Enfermería · Medicina · Próxima brigada · Control en 1 mes
 R: 
 

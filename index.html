@@ -1966,7 +1966,7 @@ function wireMiDia(){const cb=$("md-cal");if(cb)cb.onclick=calOpen;
 function mdShow(t){const s=$("md-st");s.innerHTML="";const a=document.createElement("textarea");a.value=t;a.rows=7;a.readOnly=true;s.append("No se pudo copiar solo. Mantén presionado el texto y cópialo:",a);a.focus();a.select()}
 
 /* ---------- PANEL ---------- */
-const VERSION_APP="2026-10-18 v162";
+const VERSION_APP="2026-10-18 v171";
 function home(){
   stopRec();if(S.get(AT_KEY))atReiniciar();st.view="home";
   const rm=["precon","prenatal","parto","rn","ive"],rp=["pinf","inf","adol","juv","adul","vej"];
@@ -3705,8 +3705,8 @@ const _cvTextoA=cvDesdeTexto;cvDesdeTexto=function(tipo,t){return tipo==="antrop
   return r};
 })();
 
-(function(){const CH=["Normal|IMC normal (18,5 a 24,9); sin riesgo por perímetro de cintura; tensión arterial normal.","Bajo peso|IMC menor de 18,5: bajo peso; se indaga pérdida de peso y causas, se remite a medicina.","Sobrepeso|IMC de 25 a 29,9: sobrepeso; consejería en alimentación y actividad física.","Obesidad|IMC de 30 o más: obesidad; se remite a medicina para valorar riesgo cardiometabólico."];
- const PA={t:"Cómo valorar (Res. 2465 de 2016)",p:["Peso con ropa liviana y sin zapatos; talla de pie.","IMC (OMS): menos de 18,5 bajo peso; 18,5 a 24,9 normal; 25 a 29,9 sobrepeso; 30 o más obesidad.","Perímetro de cintura en el punto medio entre la última costilla y la cresta ilíaca, al final de una espiración: riesgo desde 80 cm en mujeres y 90 cm en hombres.","Toma la tensión arterial en reposo; si está elevada, repite y remite."],r:"",b:""};
+(function(){const CH=["Normal|IMC normal (18,5 a 24,9); sin riesgo por perímetro de cintura.","Bajo peso|IMC menor de 18,5: bajo peso; se indaga pérdida de peso y causas, se remite a medicina.","Sobrepeso|IMC de 25 a 29,9: sobrepeso; consejería en alimentación y actividad física.","Obesidad|IMC de 30 o más: obesidad; se remite a medicina para valorar riesgo cardiometabólico."];
+ const PA={t:"Cómo valorar (Res. 2465 de 2016)",p:["Peso con ropa liviana y sin zapatos; talla de pie.","IMC (OMS): menos de 18,5 bajo peso; 18,5 a 24,9 normal; 25 a 29,9 sobrepeso; 30 o más obesidad.","Perímetro de cintura en el punto medio entre la última costilla y la cresta ilíaca, al final de una espiración: riesgo desde 80 cm en mujeres y 90 cm en hombres.","La tensión arterial va en «Signos vitales, Glasgow y perímetros» (en reposo; si está elevada, repite y remite)."],r:"",b:""};
  [["juv","Estado nutricional, TA, hábitos"],["adul","Estado nutricional, TA, perímetro abdominal"],["vej","Estado nutricional, TA"]].forEach(([m,l])=>{IVX[m+"::"+l]={campos:"antropoA",keepc:1,c:CH,pauta:PA}})})();
 /* ---------- Cuadro de vacunación (vacuna × edad) con chequeo y sugeridos, guardado por persona ---------- */
 const VACS=[
@@ -6809,7 +6809,7 @@ function plGenerar(tipo,id){const L=[],ln=s=>L.push(s),hr="=====================
   if(tipo==="MODULO"){let blk="";ivFor(id).forEach((x,i)=>{if(x.b!==blk){blk=x.b;ln("");ln("== "+blk.toUpperCase()+" ==")}
       ln("["+(i+1)+"] "+x.l);if(x.q&&plN(x.q)!==plN(x.l.replace(/…$/,"")))ln("    > "+(x.t==="ask"?"Pregunta: ":"Qué hacer: ")+x.q);
       const op=plOpc(id,x).map(c=>String(c).split("|")[0]);if(op.length)ln("    > Opciones: "+op.join(" · "));
-      const pf=x.widget&&WIDGET[x.widget]&&WIDGET[x.widget].plantilla?WIDGET[x.widget].plantilla:x.campos&&CAMPOS[x.campos]?CAMPOS[x.campos].filter(c=>!c.auto).map(c=>c.l+(c.u?" ("+c.u+")":"")+": "):null;
+      const _pl=x.widget&&WIDGET[x.widget]&&WIDGET[x.widget].plantilla,pf=_pl?(typeof _pl==="function"?_pl(id):_pl):x.campos&&CAMPOS[x.campos]?CAMPOS[x.campos].filter(c=>!c.auto).map(c=>c.l+(c.u?" ("+c.u+")":"")+": "):null;
       if(pf)ln("    > Llena cada línea debajo de R:. Lo que no hiciste, déjalo vacío.");else if(x.widget||x.campos)ln("    > Escribe los valores; en la app revisa el cálculo de esta pregunta.");
       if(x.siTxt&&typeof x.siTxt==="string")ln("    > Si no aplica por la edad: "+x.siTxt);
       ln("R: ");if(pf)pf.forEach(s=>ln("  "+s))})}
@@ -7198,19 +7198,23 @@ function vnIdForm(){stopRec();if(VNS)VNS.voz=false;const P=pac(),tipos=(ALLF.fin
   if(p&&tl){o.imc=Math.round(p/Math.pow(tl/100,2)*10)/10;o.sc=Math.round(Math.sqrt(p*tl/3600)*100)/100}
   const g=["go","gv","gm"].map(k=>num(v[k]));if(g.every(x=>x!=null))o.gl=g[0]+g[1]+g[2];
   const fr=num(v.fr),fc=num(v.fc),t=num(v.t),sp=num(v.spo2);
-  if(m!=null&&fr!=null){const lim=m<2?60:m<12?50:m<60?40:30;if(fr>=lim)o.al.push("Respiración rápida para la edad ("+fr+" rpm; el límite es "+lim+"): clasifica según AIEPI y remite.")}
-  if(m!=null&&fc!=null){const r=m<12?[100,160]:m<36?[90,150]:m<72?[80,140]:[70,120];if(fc<r[0]||fc>r[1])o.al.push("Frecuencia cardiaca "+fc+" fuera del rango de la edad ("+r[0]+" a "+r[1]+").")}
+  if(m!=null&&fr!=null){const lim=m<2?60:m<12?50:m<60?40:m<144?30:25;if(fr>=lim)o.al.push(m<60?"Respiración rápida para la edad ("+fr+" rpm; el límite es "+lim+"): clasifica según AIEPI y remite.":"Frecuencia respiratoria "+fr+" rpm, alta para la edad (límite "+lim+"): valora dificultad respiratoria.")}
+  if(m!=null&&fc!=null){const r=m<12?[100,160]:m<36?[90,150]:m<72?[80,140]:m<144?[70,120]:[60,100];if(fc<r[0]||fc>r[1])o.al.push("Frecuencia cardiaca "+fc+" fuera del rango de la edad ("+r[0]+" a "+r[1]+").")}
+  if(m!=null&&m>=216&&tas&&tad){if(tas>=160||tad>=110)o.al.push("Tensión "+tas+"/"+tad+" muy alta (160/110 o más): remite hoy a medicina.");else if(tas>=140||tad>=90)o.al.push("Tensión "+tas+"/"+tad+" alta (140/90 o más): repite en reposo y, si se confirma, remite a medicina.")}
   if(t!=null){if(t>=38)o.al.push("Fiebre ("+coma(t)+" °C): busca la causa y, en zona de malaria, toma gota gruesa.");else if(t<36)o.al.push("Temperatura baja ("+coma(t)+" °C): repite la toma; si se confirma, hipotermia.")}
   if(sp!=null&&sp<92)o.al.push("Saturación "+sp+" %: baja, remite.");
   if(o.gl!=null&&o.gl<15)o.al.push("Glasgow "+o.gl+"/15: alteración de la conciencia, signo de peligro: remisión urgente.");
   return o}
+ const GVA=[[5,"Orientado"],[4,"Confuso"],[3,"Palabras inapropiadas"],[2,"Sonidos incomprensibles"],[1,"Ninguna"]];
+ const SG_OCULTO={juv:["pabd","pmun"],adul:["pabd","pmun"],vej:["pabd","pmun"]};
+ const sgCampos=id=>SG.filter(([k])=>!(SG_OCULTO[id]||[]).includes(k));
  const selG=(k,ops,val)=>`<select data-sgn="${k}"><option value=""></option>${ops.map(([n,t])=>`<option value="${n}" ${String(val)===String(n)?"selected":""}>${n} · ${esc(t)}</option>`).join("")}</select>`;
- WIDGET.signosps={plantilla:SG.map(([k,l,u])=>l+(u?" ("+u+")":"")+": "+(k==="pvc"?"NO APLICA":"")).concat(["Glasgow ocular (1 a 4): 4","Glasgow verbal (1 a 5): 5","Glasgow motora (1 a 6): 6"]),
-  html:id=>{const v=G(id,"sgn");return `<p class="note-src" style="margin:0 0 6px">Peso, talla, perímetro cefálico y braquial van en Crecimiento; aquí se calculan el IMC y la superficie corporal, y la presión media.</p>
-   <div class="pgrid">${SG.map(([k,l,u,ph])=>`<label class="bfl"><span>${esc(l)}${u?" ("+u+")":""}</span><input data-sgn="${k}" inputmode="decimal" value="${esc(v[k]||"")}" placeholder="${esc(ph)}"></label>`).join("")}
+ WIDGET.signosps={plantilla:id=>sgCampos(id).map(([k,l,u])=>l+(u?" ("+u+")":"")+": "+(k==="pvc"?"NO APLICA":"")).concat(["Glasgow ocular (1 a 4): 4","Glasgow verbal (1 a 5): 5","Glasgow motora (1 a 6): 6"]),
+  html:id=>{const v=G(id,"sgn");return `<p class="note-src" style="margin:0 0 6px">${SG_OCULTO[id]?"Peso, talla, cintura (perímetro abdominal) y muñeca van en Estado nutricional":"Peso y talla van en Crecimiento"}; aquí se calculan el IMC, la superficie corporal y la presión media.</p>
+   <div class="pgrid">${sgCampos(id).map(([k,l,u,ph])=>`<label class="bfl"><span>${esc(l)}${u?" ("+u+")":""}</span><input data-sgn="${k}" inputmode="decimal" value="${esc(v[k]||"")}" placeholder="${esc(ph)}"></label>`).join("")}
     <label class="bfl"><span>Presión media</span><input id="sg-media" readonly style="background:var(--accent-soft)"></label><label class="bfl"><span>IMC</span><input id="sg-imc" readonly style="background:var(--accent-soft)"></label><label class="bfl"><span>Superficie corporal (m²)</span><input id="sg-sc" readonly style="background:var(--accent-soft)"></label></div>
-   <p class="lab" style="margin:10px 0 4px">Escala de Glasgow (adaptada a la edad)</p>
-   <div class="bgrid" style="padding:0"><label class="bfl"><span>Respuesta ocular</span>${selG("go",GO,v.go)}</label><label class="bfl"><span>Respuesta verbal</span>${selG("gv",GV,v.gv)}</label><label class="bfl"><span>Respuesta motora</span>${selG("gm",GM,v.gm)}</label></div>
+   <p class="lab" style="margin:10px 0 4px">Escala de Glasgow${(meses(id)!=null&&meses(id)<24)?" (adaptada a la edad)":""}</p>
+   <div class="bgrid" style="padding:0"><label class="bfl"><span>Respuesta ocular</span>${selG("go",GO,v.go)}</label><label class="bfl"><span>Respuesta verbal</span>${selG("gv",(meses(id)!=null&&meses(id)<24)?GV:GVA,v.gv)}</label><label class="bfl"><span>Respuesta motora</span>${selG("gm",GM,v.gm)}</label></div>
    <div class="risk" style="margin-top:6px"><span class="pill low" id="sg-gl">Glasgow: —</span></div><div class="box warn" id="sg-al" hidden></div>`},
   txt:id=>{const o=sgCalc(id),v=o.v,P=[];if(!Object.keys(v).some(k=>v[k]))return"";
    if(v.t)P.push("T "+v.t+" °C");if(v.fc)P.push("FC "+v.fc+" lpm");if(v.fr)P.push("FR "+v.fr+" rpm");if(v.tas&&v.tad)P.push("TA "+v.tas+"/"+v.tad+" mmHg"+(o.media?" (media "+o.media+")":""));
@@ -7228,25 +7232,27 @@ function vnIdForm(){stopRec();if(VNS)VNS.voz=false;const P=pac(),tipos=(ALLF.fin
  /* ---------- Visión: estructuras oculares y agudeza visual ---------- */
  const VI=[["rr","Reflejo rojo presente y simétrico","S"],["fs","Fija y sigue objetos","S"],["es","Estrabismo","N"],["le","Leucocoria","N"]];
  const DIST=["6 metros","3 metros","20 pies","10 pies"];
- const viV=id=>{const v=G(id,"vis");VI.forEach(([k,,d])=>{if(!v[k])v[k]=d});if(v.eoi==null)v.eoi="NORMAL";if(v.eod==null)v.eod="NORMAL";return v};
+ const VIM={pinf:["rr","fs","es","le"],inf:["rr","es","le"]};const viItems=id=>VI.filter(([k])=>(VIM[id]||["es"]).includes(k));
+ const viV=id=>{const v=G(id,"vis");viItems(id).forEach(([k,,d])=>{if(!v[k])v[k]=d});if(v.eoi==null)v.eoi="NORMAL";if(v.eod==null)v.eod="NORMAL";return v};
  const snl=t=>{const m=String(t||"").match(/(\d{1,3})\s*\/\s*(\d{1,4})/);return m?{n:+m[1],d:+m[2],t:m[1]+"/"+m[2]}:null};
- function viCalc(id){const v=viV(id),m=meses(id),al=[];if(v.rr==="N")al.push("Reflejo rojo ausente o asimétrico: remite a oftalmología.");if(v.le==="S")al.push("Leucocoria: remisión prioritaria a oftalmología.");
+ function viCalc(id){const v=viV(id),m=meses(id),al=[],it=viItems(id).map(z=>z[0]);if(!it.includes("rr"))delete v.rr;if(!it.includes("fs"))delete v.fs;if(!it.includes("le"))delete v.le;if(v.rr==="N")al.push("Reflejo rojo ausente o asimétrico: remite a oftalmología.");if(v.le==="S")al.push("Leucocoria: remisión prioritaria a oftalmología.");
   if(v.es==="S")al.push("Estrabismo: remite a oftalmología.");if(v.fs==="N")al.push("No fija ni sigue objetos: remite a valoración médica.");
   const oi=snl(v.oi),od=snl(v.od),pe=x=>x&&x.d/x.n;
   [[oi,"izquierdo"],[od,"derecho"]].forEach(([x,o])=>{if(x&&pe(x)>40/20)al.push("Ojo "+o+" "+x.t+": peor que 20/40, remite a optometría u oftalmología.")});
   if(oi&&od&&Math.abs(Math.log10(pe(oi))-Math.log10(pe(od)))>=0.2)al.push("Diferencia de dos líneas o más entre los ojos: remite a optometría u oftalmología.");
   return{v,m,oi,od,al}}
- WIDGET.visionps={plantilla:["Estructuras oculares OI: NORMAL","Estructuras oculares OD: NORMAL"].concat(VI.map(([,l,d])=>l+" (S/N): "+d)).concat(["Snellen OI (desde los 3 años, 20/__): ","Snellen OD (desde los 3 años, 20/__): ","Distancia de valoración: "]),
+ WIDGET.visionps={plantilla:id=>["Estructuras oculares OI: NORMAL","Estructuras oculares OD: NORMAL"].concat(viItems(id).map(([,l,d])=>l+" (S/N): "+d)).concat(["Snellen OI ("+(id==="pinf"?"desde los 3 años, ":"")+"20/__): ","Snellen OD ("+(id==="pinf"?"desde los 3 años, ":"")+"20/__): ","Distancia de valoración: "]),
   html:id=>{const {v,m}=viCalc(id),ok3=m==null||m>=36;
    return `<div class="bgrid" style="padding:0"><label class="bfl"><span>Estructuras oculares · ojo izquierdo</span><input data-vit="eoi" value="${esc(v.eoi)}"></label><label class="bfl"><span>Estructuras oculares · ojo derecho</span><input data-vit="eod" value="${esc(v.eod)}"></label></div>
-    ${VI.map(([k,l])=>fila(esc(l),sn(k,v[k],"vis"))).join("")}
+    ${viItems(id).map(([k,l])=>fila(esc(l),sn(k,v[k],"vis"))).join("")}
     <p class="lab" style="margin:10px 0 4px">Agudeza visual · Snellen</p>
     ${ok3?`<div class="bgrid" style="padding:0"><label class="bfl"><span>Ojo izquierdo (20/…)</span><input data-vit="oi" value="${esc(v.oi||"")}" placeholder="20/20"></label><label class="bfl"><span>Ojo derecho (20/…)</span><input data-vit="od" value="${esc(v.od||"")}" placeholder="20/20"></label>
      <label class="bfl"><span>Distancia de valoración</span><select data-vit="dist"><option value=""></option>${DIST.map(d=>`<option ${v.dist===d?"selected":""}>${d}</option>`).join("")}</select></label></div>`
      :`<p class="note-src" style="margin:0">Menor de 3 años: la agudeza visual con optotipos no aplica; basta con estructuras, reflejo rojo, fijación y seguimiento.</p>`}
     <div class="box warn" id="vi-al" hidden></div>`},
   txt:id=>{const {v,m,oi,od,al}=viCalc(id),L=["Estructuras oculares: ojo izquierdo "+String(v.eoi).toLowerCase()+", ojo derecho "+String(v.eod).toLowerCase()+"."];
-   L.push("Reflejo rojo "+(v.rr==="S"?"presente y simétrico":"ausente o asimétrico")+"; "+(v.fs==="S"?"fija y sigue objetos":"no fija ni sigue objetos")+"; "+(v.es==="S"?"con estrabismo":"sin estrabismo")+"; "+(v.le==="S"?"con leucocoria":"sin leucocoria")+".");
+   const D={rr:x=>"reflejo rojo "+(x==="S"?"presente y simétrico":"ausente o asimétrico"),fs:x=>x==="S"?"fija y sigue objetos":"no fija ni sigue objetos",es:x=>x==="S"?"con estrabismo":"sin estrabismo",le:x=>x==="S"?"con leucocoria":"sin leucocoria"};
+   const fr=viItems(id).map(([k])=>D[k](v[k]));if(fr.length)L.push(fr.join("; ").replace(/^./,c=>c.toUpperCase())+".");
    if(oi||od)L.push("Agudeza visual con Snellen"+(v.dist?" a "+v.dist:"")+": OD "+(od?od.t:"sin dato")+", OI "+(oi?oi.t:"sin dato")+".");else if(m!=null&&m<36)L.push("Agudeza visual con optotipos: no aplica por edad.");
    return L.concat(al).join(" ")},
   wire:(id,save)=>{const up=()=>{const {al}=viCalc(id),b=$("vi-al");if(b){b.hidden=!al.length;b.innerHTML=al.map(x=>`<p style="margin:0">${esc(x)}</p>`).join("")}save()};
@@ -7279,7 +7285,7 @@ function vnIdForm(){stopRec();if(VNS)VNS.voz=false;const P=pac(),tipos=(ALLF.fin
  WIDGET.rxsps.desdeTexto=(id,L)=>{const v={};let n=0;SEN.forEach(([k,l])=>{const x=snv(val(L,l));if(x){v[k]=x;n++}});SIS.forEach(([k,l])=>{const x=val(L,l);if(x){v["s_"+k]=x.replace(/\s*\(.*\)\s*$/,"").toUpperCase();n++}});if(n)SV(id,"rxs",v);return n>0};
  WIDGET.signosps.desdeTexto=(id,L)=>{const v={};let n=0;SG.forEach(([k,l])=>{const x=val(L,l);if(x){v[k]=x;n++}});[["go","Glasgow ocular"],["gv","Glasgow verbal"],["gm","Glasgow motora"]].forEach(([k,l])=>{const x=val(L,l);if(x&&/\d/.test(x)){v[k]=x.match(/\d/)[0];n++}});if(n)SV(id,"sgn",v);return n>0};
  WIDGET.visionps.desdeTexto=(id,L)=>{const v={};let n=0;const e1=val(L,"Estructuras oculares OI"),e2=val(L,"Estructuras oculares OD");if(e1){v.eoi=e1.toUpperCase();n++}if(e2){v.eod=e2.toUpperCase();n++}
-  VI.forEach(([k,l])=>{const x=snv(val(L,l));if(x){v[k]=x;n++}});const oi=val(L,"Snellen OI"),od=val(L,"Snellen OD"),di=val(L,"Distancia de valoración");
+  viItems(id).forEach(([k,l])=>{const x=snv(val(L,l));if(x){v[k]=x;n++}});const oi=val(L,"Snellen OI"),od=val(L,"Snellen OD"),di=val(L,"Distancia de valoración");
   if(oi&&/\d/.test(oi)){v.oi=oi;n++}if(od&&/\d/.test(od)){v.od=od;n++}if(di){v.dist=di;n++}if(n)SV(id,"vis",v);return n>0};
  WIDGET.genograma.desdeTexto=(id,L)=>{const v={};let n=0;const pa=val(L,"Padre edad"),ma=val(L,"Madre edad");if(pa){v.pa=pa.replace(/\D/g,"");n++}if(ma){v.ma=ma.replace(/\D/g,"");n++}
   [1,2,3,4,5,6].forEach(h=>{const x=val(L,"Hermano "+h);if(!x)return;const sx=x.match(/\b([FM])\b/i),ed=x.match(/(\d+)/),un=x.match(/\b(\d+)\s*([AMD])\b/i)||x.match(/\b([AMD])\b(?!.*\b[FM]\b)/i);
@@ -7302,6 +7308,43 @@ function vnIdForm(){stopRec();if(VNS)VNS.voz=false;const P=pac(),tipos=(ALLF.fin
  if(WIDGET.odonto)WIDGET.odonto.plantilla=["Barniz de flúor aplicado (S/N): ","Profilaxis (S/N): ","Remisión a odontología (S/N): "];
  if(WIDGET.enfactual)WIDGET.enfactual.plantilla=["Motivo de consulta: ","Acompañante y parentesco: ","Estado (asintomático / con síntomas, cuáles y desde cuándo): ","Signos de peligro (puede beber o tomar el pecho, vomita todo, convulsiones, letárgico): ","Lactancia y alimentación: ","Apetito: ","Sueño: ","Diuresis y deposiciones: "];
  if(WIDGET.apgarfam)WIDGET.apgarfam.plantilla=["Nombre del acompañante: ","Parentesco: "].concat(window.__ESC.APG.map((x,i)=>(i+1)+". "+x[3]+" (0 Nunca, 1 Casi nunca, 2 Algunas veces, 3 Casi siempre, 4 Siempre): "));
+})();
+
+/* ===== v163: los instrumentos de PROSOFT en todos los cursos de vida =====
+   Infancia, adolescencia, juventud, adultez y vejez reciben discapacidades, revisión por
+   sistemas, signos con Glasgow, visión por ojo y genograma, como primera infancia.
+   Donde ya había una pregunta para lo mismo, se reemplaza: no queda repetida. */
+(function(){
+ if(typeof IVX!=="object"||!WIDGET.signosps)return;
+ const DIS="Discapacidades del paciente",RXS="Revisión por sistemas y órganos de los sentidos",SGN="Signos vitales, Glasgow y perímetros",VIS="Visión: estructuras oculares y agudeza visual",FAM="Familia: familiograma, red de apoyo, cuidado",APG="Dinámica familiar (APGAR familiar)";
+ const PAUTA_SG={t:"Cómo se llena",p:["Como en PROSOFT: temperatura, FC, FR, sístole, diástole, PVC (no aplica en consulta), SpO₂ y Glasgow por respuesta.","La presión media, el IMC y la superficie corporal los calcula la app con el peso y la talla.","Adultos: tensión de 140/90 o más, repite en reposo; si se confirma, remite a medicina. 160/110 o más, remite hoy."],r:"",b:""};
+ ["inf","adol","juv","adul","vej"].forEach(m=>{
+  IVX[m+"::"+DIS]={widget:"discap",c:[]};IVX[m+"::"+RXS]={widget:"rxsps",c:[]};IVX[m+"::"+SGN]={widget:"signosps",c:[],pauta:PAUTA_SG};
+  IVX[m+"::"+VIS]={widget:"visionps",c:[]};IVX[m+"::"+FAM]={widget:"genograma",c:[]}});
+ const sec=(m,l)=>M[m].sections.find(s=>s.items.includes(l));
+ const despues=(m,ref,l)=>{const s=sec(m,ref);if(!s||sec(m,l))return;s.items.splice(s.items.indexOf(ref)+1,0,l)};
+ const antes=(m,ref,l)=>{const s=sec(m,ref);if(!s||sec(m,l))return;s.items.splice(s.items.indexOf(ref),0,l)};
+ const cambia=(m,viejo,l)=>{const s=sec(m,viejo);if(!s||sec(m,l))return;s.items[s.items.indexOf(viejo)]=l};
+ const alInicio=(m,ls)=>{const s=M[m].sections.find(x=>x.t==="Valoración");if(!s)return;ls.slice().reverse().forEach(l=>{if(!sec(m,l))s.items.unshift(l)})};
+ try{/* infancia */
+  despues("inf","Antecedentes personales: enfermedades, hospitalizaciones, alergias",DIS);
+  despues("inf","Cuidados tradicionales: payé, rezos, plantas",RXS);
+  cambia("inf","Signos vitales: FC, FR, temperatura y tensión arterial",SGN);
+  cambia("inf","Agudeza visual y audición",VIS);
+  antes("inf",APG,FAM);
+ }catch(e){console.warn("v163 inf",e)}
+ try{/* adolescencia */
+  despues("adol","Antecedentes personales: enfermedades, hospitalizaciones, alergias",DIS);
+  despues("adol","Hábitos: alimentación, actividad física, pantallas, sueño",RXS);
+  cambia("adol","Signos vitales: FC, FR, temperatura y tensión arterial",SGN);
+  despues("adol","Audición y comunicación (VALE)",VIS);
+  antes("adol",APG,FAM);
+ }catch(e){console.warn("v163 adol",e)}
+ [["juv",APG],["adul",APG],["vej","Maltrato, abandono, red de apoyo"]].forEach(([m,refFam])=>{try{
+  alInicio(m,[DIS,RXS,SGN]);
+  despues(m,"Examen físico por sistemas, de cabeza a pies",VIS);
+  antes(m,refFam,FAM);
+ }catch(e){console.warn("v163 "+m,e)}});
 })();
 
 /* ---------- arranque ---------- */

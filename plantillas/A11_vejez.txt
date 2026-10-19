@@ -32,16 +32,62 @@ Capitado (SI / NO):
 Edad (solo si no sabe la fecha de nacimiento; años o meses): 
 
 == VALORACIÓN ==
-[1] Funcionalidad (actividades básicas e instrumentales)
+[1] Discapacidades del paciente
+    > Llena cada línea debajo de R:. Lo que no hiciste, déjalo vacío.
+R: 
+  Física (S/N): N
+  Mental (S/N): N
+  Cognitiva (S/N): N
+  Auditiva (S/N): N
+  Visual (S/N): N
+[2] Revisión por sistemas y órganos de los sentidos
+    > Llena cada línea debajo de R:. Lo que no hiciste, déjalo vacío.
+R: 
+  Ardor ojos (S/N): N
+  Prurito (S/N): N
+  Cansancio ocular (S/N): N
+  Visión borrosa (S/N): N
+  Tamizaje normal (S/N): 
+  Lagrimeo (S/N): N
+  Ojo rojo (S/N): N
+  Disfonía (S/N): N
+  Epistaxis (S/N): N
+  Hipoacusia (S/N): N
+  Obstrucción nasal (S/N): N
+  Rinorrea (S/N): N
+  Tinitus (S/N): N
+  Sistema cardiopulmonar: NORMAL
+  Sistema neurológico: NORMAL
+  Sistema digestivo: NORMAL
+  Sistema psiquiátrico: NORMAL
+  Sistema dermatológico: NORMAL
+  Sistema genitourinario: NORMAL
+  Sistema osteoarticular: NORMAL
+  Sistema ginecológico: NO APLICA (niños y hombres)
+[3] Signos vitales, Glasgow y perímetros
+    > Llena cada línea debajo de R:. Lo que no hiciste, déjalo vacío.
+R: 
+  Temperatura (°C): 
+  Frecuencia cardiaca (lpm): 
+  Frecuencia respiratoria (rpm): 
+  Sístole (mmHg): 
+  Diástole (mmHg): 
+  PVC: NO APLICA
+  Saturación O₂ (SpO₂) (%): 
+  Perímetro torácico (cm): 
+  Glasgow ocular (1 a 4): 4
+  Glasgow verbal (1 a 5): 5
+  Glasgow motora (1 a 6): 6
+[4] Funcionalidad (actividades básicas e instrumentales)
     > Escribe los valores; en la app revisa el cálculo de esta pregunta.
 R: 
-[2] Cognición y estado de ánimo
+[5] Cognición y estado de ánimo
     > Escribe los valores; en la app revisa el cálculo de esta pregunta.
 R: 
-[3] Riesgo de caídas
+[6] Riesgo de caídas
     > Escribe los valores; en la app revisa el cálculo de esta pregunta.
 R: 
-[4] Estado nutricional, TA
+[7] Estado nutricional, TA
     > Opciones: Normal · Bajo peso · Sobrepeso · Obesidad
     > Llena cada línea debajo de R:. Lo que no hiciste, déjalo vacío.
 R: 
@@ -49,56 +95,78 @@ R:
   Talla (m o cm): 
   Perímetro de cintura (cm): 
   Perímetro de muñeca (cm): 
-[5] Maltrato, abandono, red de apoyo
+[8] Familia: familiograma, red de apoyo, cuidado
+    > Llena cada línea debajo de R:. Lo que no hiciste, déjalo vacío.
+R: 
+  Padre edad (años): 
+  Madre edad (años): 
+  Hermano 1 (sexo F/M, edad, unidad A/M/D): 
+  Hermano 2 (sexo F/M, edad, unidad A/M/D): 
+  Hermano 3 (sexo F/M, edad, unidad A/M/D): 
+  Hermano 4 (sexo F/M, edad, unidad A/M/D): 
+  Hermano 5 (sexo F/M, edad, unidad A/M/D): 
+  Hermano 6 (sexo F/M, edad, unidad A/M/D): 
+  Con quién vive: 
+  Red de apoyo y cuidado (Adecuada / Riesgo social / Sospecha de maltrato): Adecuada
+[9] Maltrato, abandono, red de apoyo
     > Escribe los valores; en la app revisa el cálculo de esta pregunta.
 R: 
-[6] Examen físico por sistemas, de cabeza a pies
+[10] Examen físico por sistemas, de cabeza a pies
     > Opciones: Normal · Hallazgo
 R: 
+[11] Visión: estructuras oculares y agudeza visual
+    > Llena cada línea debajo de R:. Lo que no hiciste, déjalo vacío.
+R: 
+  Estructuras oculares OI: NORMAL
+  Estructuras oculares OD: NORMAL
+  Estrabismo (S/N): N
+  Snellen OI (20/__): 
+  Snellen OD (20/__): 
+  Distancia de valoración: 
 
 == DETECCIÓN TEMPRANA ==
-[7] Riesgo cardiovascular: glicemia, perfil lipídico, creatinina, uroan…
+[12] Riesgo cardiovascular: glicemia, perfil lipídico, creatinina, uroan…
     > Qué hacer: Riesgo cardiovascular: glicemia, perfil lipídico, creatinina, uroanálisis
     > Escribe los valores; en la app revisa el cálculo de esta pregunta.
 R: 
-[8] Cuello uterino hasta los 65 (citología o ADN-VPH)
+[13] Cuello uterino hasta los 65 (citología o ADN-VPH)
     > Opciones: Al día, normal · Se toma hoy · VIA/VILI positiva · Resultado anormal · Nunca o vencido · No acepta · No indicado
 R: 
-[9] Mama: mamografía y examen clínico hasta los 69
+[14] Mama: mamografía y examen clínico hasta los 69
     > Opciones: Al día, normal · Mamografía ordenada · Hallazgo anormal · BI-RADS 0, 3 o más
 R: 
-[10] Colon: sangre oculta cada 2 años hasta los 75
+[15] Colon: sangre oculta cada 2 años hasta los 75
     > Opciones: Al día, negativa · Ordenada · Positiva · Síntomas de alarma
     > Si no aplica por la edad: No aplica por edad: la tamización de colon es hasta los 75 años.
 R: 
-[11] Próstata (hombres): cada 5 años hasta los 75
+[16] Próstata (hombres): cada 5 años hasta los 75
     > Opciones: Al día, normal · Ordenado · Alterado · Síntomas urinarios
 R: 
 
 == PROTECCIÓN ESPECÍFICA ==
-[12] Vacunación según esquema
+[17] Vacunación según esquema
     > Llena cada línea debajo de R:. Lo que no hiciste, déjalo vacío.
 R: 
   Esquema (completo / incompleto): 
   Vacunas aplicadas hoy: 
   Vacunas pendientes: 
-[13] Profilaxis oral cada 2 años
+[18] Profilaxis oral cada 2 años
     > Opciones: Remitido · Al día · Con hallazgos · Lesión sospechosa
 R: 
 
 == EDUCACIÓN ==
-[14] Educación individual y a cuidadores
+[19] Educación individual y a cuidadores
     > Opciones: Realizada · Cuidador · Educación individual
 R: 
 
 == PLAN ==
-[15] Medicamentos y micronutrientes formulados
+[20] Medicamentos y micronutrientes formulados
     > Opciones: Según la edad · Ninguno
 R: 
-[16] Remisiones
+[21] Remisiones
     > Opciones: Ninguna · Odontología · Medicina · Vacunación · Nutrición o psicología
 R: 
-[17] Próximo control
+[22] Próximo control
     > Opciones: Enfermería · Medicina · Próxima brigada · Control en 1 mes
 R: 
 

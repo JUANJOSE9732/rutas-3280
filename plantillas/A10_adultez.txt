@@ -32,7 +32,53 @@ Capitado (SI / NO):
 Edad (solo si no sabe la fecha de nacimiento; años o meses): 
 
 == VALORACIÓN ==
-[1] Estado nutricional, TA, perímetro abdominal
+[1] Discapacidades del paciente
+    > Llena cada línea debajo de R:. Lo que no hiciste, déjalo vacío.
+R: 
+  Física (S/N): N
+  Mental (S/N): N
+  Cognitiva (S/N): N
+  Auditiva (S/N): N
+  Visual (S/N): N
+[2] Revisión por sistemas y órganos de los sentidos
+    > Llena cada línea debajo de R:. Lo que no hiciste, déjalo vacío.
+R: 
+  Ardor ojos (S/N): N
+  Prurito (S/N): N
+  Cansancio ocular (S/N): N
+  Visión borrosa (S/N): N
+  Tamizaje normal (S/N): 
+  Lagrimeo (S/N): N
+  Ojo rojo (S/N): N
+  Disfonía (S/N): N
+  Epistaxis (S/N): N
+  Hipoacusia (S/N): N
+  Obstrucción nasal (S/N): N
+  Rinorrea (S/N): N
+  Tinitus (S/N): N
+  Sistema cardiopulmonar: NORMAL
+  Sistema neurológico: NORMAL
+  Sistema digestivo: NORMAL
+  Sistema psiquiátrico: NORMAL
+  Sistema dermatológico: NORMAL
+  Sistema genitourinario: NORMAL
+  Sistema osteoarticular: NORMAL
+  Sistema ginecológico: NO APLICA (niños y hombres)
+[3] Signos vitales, Glasgow y perímetros
+    > Llena cada línea debajo de R:. Lo que no hiciste, déjalo vacío.
+R: 
+  Temperatura (°C): 
+  Frecuencia cardiaca (lpm): 
+  Frecuencia respiratoria (rpm): 
+  Sístole (mmHg): 
+  Diástole (mmHg): 
+  PVC: NO APLICA
+  Saturación O₂ (SpO₂) (%): 
+  Perímetro torácico (cm): 
+  Glasgow ocular (1 a 4): 4
+  Glasgow verbal (1 a 5): 5
+  Glasgow motora (1 a 6): 6
+[4] Estado nutricional, TA, perímetro abdominal
     > Opciones: Normal · Bajo peso · Sobrepeso · Obesidad
     > Llena cada línea debajo de R:. Lo que no hiciste, déjalo vacío.
 R: 
@@ -40,10 +86,23 @@ R:
   Talla (m o cm): 
   Perímetro de cintura (cm): 
   Perímetro de muñeca (cm): 
-[2] Hábitos, salud mental, violencias, consumo
+[5] Hábitos, salud mental, violencias, consumo
     > Escribe los valores; en la app revisa el cálculo de esta pregunta.
 R: 
-[3] Dinámica familiar (APGAR familiar)
+[6] Familia: familiograma, red de apoyo, cuidado
+    > Llena cada línea debajo de R:. Lo que no hiciste, déjalo vacío.
+R: 
+  Padre edad (años): 
+  Madre edad (años): 
+  Hermano 1 (sexo F/M, edad, unidad A/M/D): 
+  Hermano 2 (sexo F/M, edad, unidad A/M/D): 
+  Hermano 3 (sexo F/M, edad, unidad A/M/D): 
+  Hermano 4 (sexo F/M, edad, unidad A/M/D): 
+  Hermano 5 (sexo F/M, edad, unidad A/M/D): 
+  Hermano 6 (sexo F/M, edad, unidad A/M/D): 
+  Con quién vive: 
+  Red de apoyo y cuidado (Adecuada / Riesgo social / Sospecha de maltrato): Adecuada
+[7] Dinámica familiar (APGAR familiar)
     > Llena cada línea debajo de R:. Lo que no hiciste, déjalo vacío.
 R: 
   Nombre del acompañante: 
@@ -53,71 +112,80 @@ R:
   3. ¿Le satisface como su familia acepta y apoya sus deseos de emprender nuevas actividades? (0 Nunca, 1 Casi nunca, 2 Algunas veces, 3 Casi siempre, 4 Siempre): 
   4. ¿Le satisface como su familia le expresa afecto y responde a sus emociones como rabia, tristeza y amor? (0 Nunca, 1 Casi nunca, 2 Algunas veces, 3 Casi siempre, 4 Siempre): 
   5. ¿Le satisface como comparte en familia el tiempo libre para estar juntos, los espacios en la casa, el dinero, etc.? (0 Nunca, 1 Casi nunca, 2 Algunas veces, 3 Casi siempre, 4 Siempre): 
-[4] Salud sexual y reproductiva, anticoncepción
+[8] Salud sexual y reproductiva, anticoncepción
     > Opciones: Sin riesgo · Sin protección · Desea embarazo · Disfunción sexual · Sospecha de violencia · Climaterio
 R: 
-[5] Examen físico por sistemas, de cabeza a pies
+[9] Examen físico por sistemas, de cabeza a pies
     > Opciones: Normal · Hallazgo
 R: 
+[10] Visión: estructuras oculares y agudeza visual
+    > Llena cada línea debajo de R:. Lo que no hiciste, déjalo vacío.
+R: 
+  Estructuras oculares OI: NORMAL
+  Estructuras oculares OD: NORMAL
+  Estrabismo (S/N): N
+  Snellen OI (20/__): 
+  Snellen OD (20/__): 
+  Distancia de valoración: 
 
 == DETECCIÓN TEMPRANA ==
-[6] Riesgo cardiovascular y metabólico quinquenal: glicemia, perfil lip…
+[11] Riesgo cardiovascular y metabólico quinquenal: glicemia, perfil lip…
     > Qué hacer: Riesgo cardiovascular y metabólico quinquenal: glicemia, perfil lipídico, creatinina, uroanálisis
     > Escribe los valores; en la app revisa el cálculo de esta pregunta.
 R: 
-[7] Cuello uterino (Res. 3280, Directrices RPMS 9.2 y 9.5.1, p. 167–169…
+[12] Cuello uterino (Res. 3280, Directrices RPMS 9.2 y 9.5.1, p. 167–169…
     > Qué hacer: Cuello uterino (Res. 3280, Directrices RPMS 9.2 y 9.5.1, p. 167–169): 25 a 29 años citología, esquema 1-3-3; 30 a 65 años ADN-VPH, esquema 1-5-5, con muestra de citología en el mismo momento para triage; 30 a 50 años en área rural dispersa, también VIA-VILI con crioterapia (esquema 1-3-3), solo por personal entrenado y certificado; menores de 25 años, citología de oportunidad por criterio
     > Opciones: Normal · Alterado · No realizado
 R: 
-[8] Mama: examen clínico anual desde los 40; mamografía cada 2 años de …
+[13] Mama: examen clínico anual desde los 40; mamografía cada 2 años de …
     > Qué hacer: Mama: examen clínico anual desde los 40; mamografía cada 2 años de 50 a 69
     > Opciones: Examen normal · Mamografía al día · Mamografía ordenada · Hallazgo anormal · BI-RADS 0, 3 o más
 R: 
-[9] Colon: sangre oculta en heces cada 2 años desde los 50
+[14] Colon: sangre oculta en heces cada 2 años desde los 50
     > Opciones: Al día, negativa · Ordenada · Positiva · Síntomas de alarma
     > Si no aplica por la edad: No aplica por edad: la tamización de cáncer de colon es de 50 a 75 años.
 R: 
-[10] Próstata (hombres): PSA y tacto rectal cada 5 años desde los 50
+[15] Próstata (hombres): PSA y tacto rectal cada 5 años desde los 50
     > Opciones: Al día, normal · Ordenado · Alterado · Síntomas urinarios · No acepta
 R: 
-[11] Sífilis, VIH, hepatitis B según exposición
+[16] Sífilis, VIH, hepatitis B según exposición
     > Opciones: No indicadas · Realizadas, no reactivas · Hepatitis B no reactiva · Reactiva · Ordenadas
 R: 
-[12] Hepatitis C una vez desde los 50 o con antecedente de transfusión
+[17] Hepatitis C una vez desde los 50 o con antecedente de transfusión
     > Opciones: No indicada · Realizada, no reactiva · Ya la tiene · Reactiva · Ordenada
 R: 
 
 == PROTECCIÓN ESPECÍFICA ==
-[13] Anticoncepción y preservativos
+[18] Anticoncepción y preservativos
     > Opciones: Con método · Inicia o cambia · Método definitivo · Busca embarazo · No aplica
     > Escribe los valores; en la app revisa el cálculo de esta pregunta.
 R: 
-[14] Vacunación según esquema
+[19] Vacunación según esquema
     > Llena cada línea debajo de R:. Lo que no hiciste, déjalo vacío.
 R: 
   Esquema (completo / incompleto): 
   Vacunas aplicadas hoy: 
   Vacunas pendientes: 
-[15] Profilaxis oral cada 2 años
+[20] Profilaxis oral cada 2 años
     > Opciones: Remitido · Al día · Con hallazgos · Lesión sospechosa
 R: 
 
 == EDUCACIÓN ==
-[16] Educación individual
+[21] Educación individual
     > Opciones: Realizada · Educación individual · Educación familiar · Orientación familiar
 R: 
-[17] Ciclos educativos
+[22] Ciclos educativos
     > Opciones: Derivado (lo envío hoy) · Ya asistió a 2 o más · Asistió a 1 · Sin oferta · No aplica
 R: 
 
 == PLAN ==
-[18] Medicamentos y micronutrientes formulados
+[23] Medicamentos y micronutrientes formulados
     > Opciones: Según la edad · Ninguno
 R: 
-[19] Remisiones
+[24] Remisiones
     > Opciones: Ninguna · Odontología · Medicina · Vacunación · Nutrición o psicología
 R: 
-[20] Próximo control
+[25] Próximo control
     > Opciones: Enfermería · Medicina · Próxima brigada · Control en 1 mes
 R: 
 

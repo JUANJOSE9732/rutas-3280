@@ -58,35 +58,88 @@ R:
 [3] Antecedentes personales: enfermedades, hospitalizaciones, alergias
     > Opciones: Niega · Enfermedad · Hospitalización · Malaria previa · Alergia
 R: 
-[4] Hábitos: alimentación, actividad física, pantallas, sueño
+[4] Discapacidades del paciente
+    > Llena cada línea debajo de R:. Lo que no hiciste, déjalo vacío.
+R: 
+  Física (S/N): N
+  Mental (S/N): N
+  Cognitiva (S/N): N
+  Auditiva (S/N): N
+  Visual (S/N): N
+[5] Hábitos: alimentación, actividad física, pantallas, sueño
     > Opciones: Saludables · Mala alimentación · Sedentario · Sueño alterado
 R: 
-[5] Cuidados tradicionales: payé, rezos, plantas
+[6] Cuidados tradicionales: payé, rezos, plantas
     > Opciones: Sí · No · Plantas o remedios
 R: 
-[6] Signos vitales: FC, FR, temperatura y tensión arterial
-    > Opciones: Normales · TA elevada · Fiebre
+[7] Revisión por sistemas y órganos de los sentidos
+    > Llena cada línea debajo de R:. Lo que no hiciste, déjalo vacío.
 R: 
-[7] Examen físico por sistemas, de cabeza a pies
+  Ardor ojos (S/N): N
+  Prurito (S/N): N
+  Cansancio ocular (S/N): N
+  Visión borrosa (S/N): N
+  Tamizaje normal (S/N): 
+  Lagrimeo (S/N): N
+  Ojo rojo (S/N): N
+  Disfonía (S/N): N
+  Epistaxis (S/N): N
+  Hipoacusia (S/N): N
+  Obstrucción nasal (S/N): N
+  Rinorrea (S/N): N
+  Tinitus (S/N): N
+  Sistema cardiopulmonar: NORMAL
+  Sistema neurológico: NORMAL
+  Sistema digestivo: NORMAL
+  Sistema psiquiátrico: NORMAL
+  Sistema dermatológico: NORMAL
+  Sistema genitourinario: NORMAL
+  Sistema osteoarticular: NORMAL
+  Sistema ginecológico: NO APLICA (niños y hombres)
+[8] Signos vitales, Glasgow y perímetros
+    > Llena cada línea debajo de R:. Lo que no hiciste, déjalo vacío.
+R: 
+  Temperatura (°C): 
+  Frecuencia cardiaca (lpm): 
+  Frecuencia respiratoria (rpm): 
+  Sístole (mmHg): 
+  Diástole (mmHg): 
+  PVC: NO APLICA
+  Saturación O₂ (SpO₂) (%): 
+  Perímetro torácico (cm): 
+  Perímetro abdominal (cm): 
+  Perímetro de muñeca (cm): 
+  Glasgow ocular (1 a 4): 4
+  Glasgow verbal (1 a 5): 5
+  Glasgow motora (1 a 6): 6
+[9] Examen físico por sistemas, de cabeza a pies
     > Opciones: Normal · Hallazgo · Piel o parásitos
 R: 
-[8] Crecimiento y estado nutricional
+[10] Crecimiento y estado nutricional
     > Opciones: Adecuado · Riesgo · Déficit · Obesidad
     > Llena cada línea debajo de R:. Lo que no hiciste, déjalo vacío.
 R: 
   Peso (kg): 
   Talla (cm): 
-[9] Desarrollo y desempeño escolar
+[11] Desarrollo y desempeño escolar
     > Opciones: Adecuado · Problema escolar · Goodenough alterado · No escolarizado
 R: 
-[10] Test de la figura humana de Goodenough-Harris (obligatorio si hay q…
+[12] Test de la figura humana de Goodenough-Harris (obligatorio si hay q…
     > Qué hacer: Test de la figura humana de Goodenough-Harris (obligatorio si hay quejas escolares, opcional si no)
     > Escribe los valores; en la app revisa el cálculo de esta pregunta.
 R: 
-[11] Agudeza visual y audición
-    > Opciones: Normal · Visión alterada · Audición alterada · Sin optotipos
+[13] Visión: estructuras oculares y agudeza visual
+    > Llena cada línea debajo de R:. Lo que no hiciste, déjalo vacío.
 R: 
-[12] Audición y comunicación (VALE)
+  Estructuras oculares OI: NORMAL
+  Estructuras oculares OD: NORMAL
+  Reflejo rojo presente y simétrico (S/N): S
+  Estrabismo (S/N): N
+  Leucocoria (S/N): N
+  Snellen OI (20/__): 
+  Snellen OD (20/__): 
+  Distancia de valoración: 
+[14] Audición y comunicación (VALE)
     > Llena cada línea debajo de R:. Lo que no hiciste, déjalo vacío.
 R: 
   Rango de edad: 
@@ -97,10 +150,23 @@ R:
   Condiciones estructurales (orejas, labios, lengua, nariz, paladar, ojos, dientes, cuello, hombros) presentes y sin alteración (S/N): S
   Remisión a fonoaudiología, evaluación audiológica o urgencias (S/N): 
   ¿La remisión es urgente? (S/N): 
-[13] Salud mental, violencias, acoso
+[15] Salud mental, violencias, acoso
     > Escribe los valores; en la app revisa el cálculo de esta pregunta.
 R: 
-[14] Dinámica familiar (APGAR familiar)
+[16] Familia: familiograma, red de apoyo, cuidado
+    > Llena cada línea debajo de R:. Lo que no hiciste, déjalo vacío.
+R: 
+  Padre edad (años): 
+  Madre edad (años): 
+  Hermano 1 (sexo F/M, edad, unidad A/M/D): 
+  Hermano 2 (sexo F/M, edad, unidad A/M/D): 
+  Hermano 3 (sexo F/M, edad, unidad A/M/D): 
+  Hermano 4 (sexo F/M, edad, unidad A/M/D): 
+  Hermano 5 (sexo F/M, edad, unidad A/M/D): 
+  Hermano 6 (sexo F/M, edad, unidad A/M/D): 
+  Con quién vive: 
+  Red de apoyo y cuidado (Adecuada / Riesgo social / Sospecha de maltrato): Adecuada
+[17] Dinámica familiar (APGAR familiar)
     > Llena cada línea debajo de R:. Lo que no hiciste, déjalo vacío.
 R: 
   Nombre del acompañante: 
@@ -112,16 +178,16 @@ R:
   5. ¿Le satisface como comparte en familia el tiempo libre para estar juntos, los espacios en la casa, el dinero, etc.? (0 Nunca, 1 Casi nunca, 2 Algunas veces, 3 Casi siempre, 4 Siempre): 
 
 == DETECCIÓN TEMPRANA ==
-[15] Tamizaje de anemia (hemoglobina y hematocrito) una vez entre los 10…
+[18] Tamizaje de anemia (hemoglobina y hematocrito) una vez entre los 10…
     > Qué hacer: Tamizaje de anemia (hemoglobina y hematocrito) una vez entre los 10 y 13 años, solo niñas
     > Opciones: Ordenado · Ya tiene, normal · Resultado bajo
 R: 
 
 == PROTECCIÓN ESPECÍFICA ==
-[16] Vacunación según PAI (VPH a los 9 años según PAI vigente)
+[19] Vacunación según PAI (VPH a los 9 años según PAI vigente)
     > Opciones: Aplicadas · Al día · Pendiente
 R: 
-[17] Barniz de flúor y profilaxis dos veces al año
+[20] Barniz de flúor y profilaxis dos veces al año
     > Opciones: Aplicado · Remitido · Ya recibió
     > Llena cada línea debajo de R:. Lo que no hiciste, déjalo vacío.
     > Si no aplica por la edad: No aplica: menor de 6 meses; la primera consulta de odontología es a los 6 meses.
@@ -129,26 +195,26 @@ R:
   Barniz de flúor aplicado (S/N): 
   Profilaxis (S/N): 
   Remisión a odontología (S/N): 
-[18] Sellantes según necesidad
+[21] Sellantes según necesidad
     > Opciones: Remitido · Ya tiene · No requiere
 R: 
 
 == EDUCACIÓN ==
-[19] Educación individual y familiar
+[22] Educación individual y familiar
     > Opciones: Realizada · Sesiones de seguimiento
 R: 
-[20] Al menos dos ciclos educativos
+[23] Al menos dos ciclos educativos
     > Opciones: Derivado (lo envío hoy) · Ya asistió a 2 o más · Asistió a 1 · Sin oferta · No aplica
 R: 
 
 == PLAN ==
-[21] Medicamentos y micronutrientes formulados
+[24] Medicamentos y micronutrientes formulados
     > Opciones: Según la edad · Ninguno
 R: 
-[22] Remisiones
+[25] Remisiones
     > Opciones: Ninguna · Odontología · Medicina · Vacunación · Nutrición o psicología
 R: 
-[23] Próximo control
+[26] Próximo control
     > Opciones: Enfermería · Medicina · Próxima brigada · Control en 1 mes
 R: 
 
