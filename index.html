@@ -974,11 +974,16 @@ const EX_RPMS={
  adul:"Hombre de 50 años, valoración integral por enfermería. Hipertenso desde 2019, en tratamiento con losartán, refiere que no lo toma todos los días. TA 150/95, FC 78, FR 18, SpO2 96. Peso 82, talla 1,68. Niega diabetes, EPOC y cáncer. Última consulta de crónicos el 10 de marzo. Nunca le han hecho PSA ni sangre oculta. Se ordenan glicemia, perfil lipídico, creatinina, uroanálisis, PSA y sangre oculta. Canalizo a medicina general prioritaria. Seguimiento telefónico en dos semanas.",
  vej:"Mujer de 68 años, valoración integral. Diabética en control con metformina. TA 130/80, FC 74. Peso 60, talla 1,50. Se baña y viste sola; usa bastón fuera de casa. Una caída hace tres meses. Vive con su hija. Mamografía hace tres años. Se ordenan glicemia, perfil lipídico, creatinina, uroanálisis y sangre oculta. Remito a medicina por riesgo de caídas."};
 const CASO_EJ={adul:{
- resp:["Alterado. Peso 82 kg, talla 1,68 m, perímetro abdominal 98 cm. TA 150/95, FC 78, FR 18, T 36,5, SpO2 96 %.",
+ resp:["Sin discapacidad física, mental, cognitiva, auditiva ni visual.",
+  "Niega síntomas de los órganos de los sentidos. Sistemas cardiopulmonar, neurológico, digestivo, psiquiátrico, dermatológico, genitourinario y osteoarticular normales.",
+  "Signos vitales: T 36,5 °C, FC 78 lpm, FR 18 rpm, TA 150/95 mmHg, SpO2 96 %. Glasgow 15/15.",
+  "Alterado. Peso 82 kg, talla 1,68 m, perímetro abdominal 98 cm.",
   "Normal. Niega tabaco; chicha ocasional. Niega violencias. Sin síntomas de depresión.",
+  "Vive con la esposa y dos hijos de 12 y 9 años; red de apoyo adecuada.",
   "Normal. APGAR familiar 18 de 20: familia funcional.",
   "Normal. Pareja estable; no requiere anticoncepción.",
   "Normal. Buen estado general; cuello sin masas; ruidos cardiacos rítmicos sin soplos; pulmones sin agregados; abdomen blando; sin edemas.",
+  "Estructuras oculares normales, sin estrabismo. Agudeza visual OD 20/20, OI 20/25.",
   "Alterado. Hipertenso desde 2019 con losartán, no lo toma todos los días. Niega diabetes, EPOC y cáncer. Última consulta de crónicos el 10 de marzo de 2026. Se ordenan glicemia, perfil lipídico, creatinina y uroanálisis.",
   "No aplica (hombre).","No aplica (hombre).",
   "No realizado. Nunca le han hecho sangre oculta; se ordena hoy.",
@@ -1966,7 +1971,7 @@ function wireMiDia(){const cb=$("md-cal");if(cb)cb.onclick=calOpen;
 function mdShow(t){const s=$("md-st");s.innerHTML="";const a=document.createElement("textarea");a.value=t;a.rows=7;a.readOnly=true;s.append("No se pudo copiar solo. Mantén presionado el texto y cópialo:",a);a.focus();a.select()}
 
 /* ---------- PANEL ---------- */
-const VERSION_APP="2026-10-18 v171";
+const VERSION_APP="2026-10-18 v172";
 function home(){
   stopRec();if(S.get(AT_KEY))atReiniciar();st.view="home";
   const rm=["precon","prenatal","parto","rn","ive"],rp=["pinf","inf","adol","juv","adul","vej"];
@@ -7345,6 +7350,86 @@ function vnIdForm(){stopRec();if(VNS)VNS.voz=false;const P=pac(),tipos=(ALLF.fin
   despues(m,"Examen físico por sistemas, de cabeza a pies",VIS);
   antes(m,refFam,FAM);
  }catch(e){console.warn("v163 "+m,e)}});
+})();
+
+/* ===== v172: reflejos primitivos y reacciones posturales (opcional) =====
+   Recién nacido y primera infancia. Salen solo los que corresponden a la edad, cada uno con cómo
+   hacerlo y qué esperar. Es opcional: lo que no evalúes no se escribe en la nota.
+   Fuente: AIEPI (verificar el desarrollo del menor de 2 meses: Moro, cócleo-palpebral, succión)
+   y examen neurológico del recién nacido y del lactante. */
+(function(){
+ if(typeof WIDGET!=="object")return;
+ const G=(id)=>{try{return JSON.parse(S.get(key(id,"rfx"))||"{}")||{}}catch(e){return{}}};
+ const SV=(id,v)=>S.set(key(id,"rfx"),JSON.stringify(v));
+ /* k, nombre, [ver desde, ver hasta) en meses, [ausente es anormal desde, hasta), presente es anormal desde, admite asimetría, cómo hacerlo, qué esperar */
+ const RF=[
+  ["suc","Succión",[0,7],[0,99],null,0,
+   "Con el dedo limpio, la yema hacia el paladar, entra 2 a 3 cm en la boca; o mira una toma completa.",
+   "Succión fuerte, rítmica y coordinada con la deglución. Débil o ausente es signo de peligro (AIEPI): remite."],
+  ["bus","Búsqueda (hociqueo)",[0,7],[0,3],6,1,
+   "Bebé despierto y con hambre. Roza con el dedo la mejilla o la comisura de la boca, de cada lado.",
+   "Gira la cabeza hacia el lado tocado y abre la boca. Desaparece hacia los 3 a 4 meses."],
+  ["mor","Moro",[0,9],[0,3],6,1,
+   "Boca arriba sobre algo blando. Levanta la cabeza y los hombros unos centímetros sosteniendo la nuca y deja caer la cabeza 2 a 3 cm sobre tu mano, sin soltarla. También sirve un aplauso fuerte.",
+   "Abre los brazos y las manos y luego los recoge como en un abrazo; puede llorar. Debe ser igual en ambos lados: si un brazo no se mueve, piensa en fractura de clavícula o lesión del plexo braquial. Desaparece hacia los 4 a 6 meses."],
+  ["coc","Cócleo-palpebral",[0,25],[0,99],null,0,
+   "Aplaude fuerte a unos 30 cm de cada oído, por fuera de su vista.",
+   "Parpadea con el sonido. Si no parpadea, revisa el tamizaje auditivo y remite a audiología."],
+  ["ppa","Prensión palmar",[0,9],[0,3],6,1,
+   "Pon tu dedo en la palma del bebé, entrando por el lado del meñique. Hazlo en las dos manos.",
+   "Cierra la mano y aprieta tu dedo con la misma fuerza en ambas. Desaparece hacia los 3 a 4 meses, cuando empieza a agarrar a voluntad."],
+  ["ppl","Prensión plantar",[0,16],[0,8],13,1,
+   "Presiona con el pulgar la planta, justo debajo de la base de los dedos, en cada pie.",
+   "Flexiona los dedos del pie. Desaparece entre los 9 y 12 meses, antes de caminar."],
+  ["rtc","Tónico asimétrico del cuello (esgrimista)",[0,9],null,7,1,
+   "Boca arriba y tranquilo. Gira la cabeza despacio hacia un lado y sostenla 5 a 10 segundos; luego hacia el otro.",
+   "Estira el brazo y la pierna del lado de la cara y dobla los del lado de la nuca. Es anormal si queda fijo en esa postura sin poder salir o si sigue después de los 6 meses."],
+  ["gal","Galant (incurvación del tronco)",[0,9],[0,3],7,1,
+   "Boca abajo sobre tu mano. Desliza un dedo a 2 o 3 cm de la columna, de los hombros a la cadera, de un lado y después del otro.",
+   "Curva el tronco hacia el lado que tocaste. Si falta en un solo lado, piensa en lesión medular y remite. Desaparece hacia los 4 a 6 meses."],
+  ["mar","Marcha automática",[0,4],null,null,0,
+   "Sostenlo de pie por las axilas, con las plantas sobre una superficie plana, e inclínalo un poco hacia adelante.",
+   "Da pasos alternados. Desaparece hacia los 2 meses; no indica que vaya a caminar antes."],
+  ["bab","Babinski (plantar)",[0,25],null,null,1,
+   "Desliza algo romo (la uña o el mango del martillo) por el borde externo de la planta, del talón hacia los dedos, y cruzando bajo los dedos.",
+   "En el lactante es normal que el dedo gordo suba y los demás se abran en abanico hasta los 12 a 24 meses. Lo anormal es que sea distinto en un pie que en el otro."],
+  ["lan","Landau (reacción postural)",[3,16],[6,13],null,0,
+   "Sostenlo boca abajo en el aire con tu mano bajo el abdomen.",
+   "Levanta la cabeza y estira el tronco y las piernas. Aparece hacia los 3 a 4 meses; si a los 6 meses no lo hace, piensa en hipotonía y remite."],
+  ["par","Paracaídas (reacción de protección)",[6,25],[10,99],null,1,
+   "Sostenlo boca abajo por el tronco y bájalo rápido, cabeza primero, hacia la camilla.",
+   "Estira los brazos y abre las manos para protegerse, igual en ambos lados. Aparece entre los 6 y 9 meses y queda para siempre; si a los 10 meses no lo hace, remite."]];
+ const ver=(m,r)=>m==null||(m>=r[2][0]&&m<r[2][1]);
+ const items=id=>{const m=edadMesesMod(id);return RF.filter(r=>ver(m,r))};
+ const EST=[["P","Presente"],["A","Ausente"],["X","Asimétrico"]];
+ const ests=r=>r[5]?EST:EST.slice(0,2);
+ function calc(id){const v=G(id),m=edadMesesMod(id),hal=[],al=[];
+  items(id).forEach(r=>{const e=v[r[0]];if(!e)return;const n=r[1].replace(/ \(.*\)$/,"");
+   if(e==="P"){hal.push(n+" presente");if(r[4]!=null&&m!=null&&m>=r[4])al.push(n+" presente a los "+m+" meses, cuando ya debería haber desaparecido: remite a pediatría para valoración neurológica.")}
+   else if(e==="A"){hal.push(n+" ausente");if(r[3]&&(m==null||(m>=r[3][0]&&m<r[3][1])))al.push(n+" ausente a esta edad: "+(r[0]==="suc"?"signo de peligro, remite de inmediato.":r[0]==="coc"?"revisa el tamizaje auditivo y remite.":"remite a pediatría para valoración neurológica."))}
+   else{hal.push(n+" asimétrico");al.push(n+" asimétrico: remite a pediatría (descartar lesión del plexo braquial, fractura de clavícula o compromiso neurológico de un lado).")}});
+  return{hal,al,m}}
+ WIDGET.reflejos={
+  plantilla:id=>["> Opcional. Escribe P (presente), A (ausente) o X (asimétrico); deja vacío lo que no evaluaste."].concat(RF.filter(r=>id!=="rn"||r[2][0]<1).map(r=>r[1]+" (P/A"+(r[5]?"/X":"")+"): ")),
+  html:id=>{const v=G(id),m=edadMesesMod(id),L=items(id);
+   if(!L.length)return `<p class="note-src">A los ${m} meses ya no se evalúan reflejos primitivos: el neurodesarrollo se valora con la EAD-3. Puedes saltar esta pregunta.</p>`;
+   return `<p class="note-src" style="margin:0 0 8px"><b>Opcional.</b> Salen los que corresponden ${m==null?"a la edad":m<1?"al menor de 1 mes":"a los "+m+" meses"}. Toca «Cómo hacerlo» para ver la técnica. Lo que no marques no se escribe en la nota.</p>
+   ${L.map(r=>`<div style="border-bottom:1px solid var(--line);padding:6px 0">
+     <div style="display:flex;gap:8px;align-items:center;justify-content:space-between;flex-wrap:wrap"><span style="flex:1;min-width:150px">${esc(r[1])}</span>
+     <span style="display:flex;gap:4px">${ests(r).map(([e,l])=>`<button type="button" class="btn" data-rfx="${r[0]}" data-val="${e}" style="padding:4px 10px;font-size:.8rem;${v[r[0]]===e?(e==="P"?"background:var(--accent);color:#fff;border-color:var(--accent)":"background:var(--miss);color:#fff;border-color:var(--miss)"):""}">${l}</button>`).join("")}</span></div>
+     <details style="margin-top:4px"><summary class="note-src" style="cursor:pointer">Cómo hacerlo</summary><p class="note-src" style="margin:4px 0 0"><b>Técnica:</b> ${esc(r[6])}<br><b>Qué esperar:</b> ${esc(r[7])}</p></details></div>`).join("")}
+   <div id="rfx-al" style="margin-top:8px"></div>`},
+  txt:id=>{const o=calc(id);if(!o.hal.length)return"";return "Reflejos: "+o.hal.join(", ")+"."+(o.al.length?" "+o.al.join(" "):" Acordes a la edad.")},
+  wire:(id,save)=>{const up=()=>{const o=calc(id),b=document.getElementById("rfx-al");if(b)b.innerHTML=o.al.map(t=>`<p class="note-src" style="color:var(--miss);margin:2px 0">⚠ ${esc(t)}</p>`).join("")};
+   document.querySelectorAll("[data-rfx]").forEach(b=>b.onclick=()=>{const v=G(id),k=b.dataset.rfx;v[k]=v[k]===b.dataset.val?"":b.dataset.val;SV(id,v);
+    document.querySelectorAll(`[data-rfx="${k}"]`).forEach(z=>{const on=z.dataset.val===v[k];z.style.background=on?(z.dataset.val==="P"?"var(--accent)":"var(--miss)"):"";z.style.color=on?"#fff":"";z.style.borderColor=on?(z.dataset.val==="P"?"var(--accent)":"var(--miss)"):""});up();save()});up()},
+  desdeTexto:(id,L)=>{const v={};let n=0;RF.forEach(r=>{const ln=L.find(x=>{const i=x.lastIndexOf(":");return i>0&&plN(x.slice(0,i).replace(/\s*\([^)]*\)\s*$/,""))===plN(r[1])});if(!ln)return;
+    const x=ln.slice(ln.lastIndexOf(":")+1).trim().toUpperCase();const e=/^P/.test(x)?"P":/^A/.test(x)?"A":/^(X|ASIM)/.test(x)?"X":null;if(e){v[r[0]]=e;n++}});if(n)SV(id,v);return n>0}};
+ const RFL="Reflejos primitivos y reacciones posturales (opcional)";
+ const PA={t:"Para qué y cómo (AIEPI y examen neurológico)",p:["Opcional: complementa el examen físico. Los que AIEPI pide en el menor de 1 mes son Moro, cócleo-palpebral y succión, además de brazos y piernas flexionados (esos van en Desarrollo).","Evalúa con el bebé despierto, tranquilo y sin frío. Compara siempre los dos lados.","Remite si falta un reflejo que debería estar, si sigue uno que ya debió desaparecer o si es asimétrico."],r:"",b:""};
+ IVX["rn::"+RFL]={widget:"reflejos",c:[],pauta:PA};IVX["pinf::"+RFL]={widget:"reflejos",c:[],pauta:PA,si:()=>{const m=edadMesesMod("pinf");return m==null||m<25},siTxt:"No aplica a esta edad: el neurodesarrollo se valora con la EAD-3."};
+ try{const s=M.rn.sections.find(x=>x.items.includes("Observar una toma (posición y agarre)"));if(s&&!s.items.includes(RFL))s.items.push(RFL)}catch(e){}
+ try{const s=M.pinf.sections.find(x=>x.items.includes("Examen físico por sistemas, de cabeza a pies"));if(s&&!s.items.includes(RFL))s.items.splice(s.items.indexOf("Examen físico por sistemas, de cabeza a pies")+1,0,RFL)}catch(e){}
 })();
 
 /* ---------- arranque ---------- */

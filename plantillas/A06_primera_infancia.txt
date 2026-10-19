@@ -117,7 +117,24 @@ R:
 [9] Examen físico por sistemas, de cabeza a pies
     > Opciones: Normal · Hallazgo · Piel o parásitos
 R: 
-[10] Crecimiento: peso, talla, perímetro cefálico, curvas OMS
+[10] Reflejos primitivos y reacciones posturales (opcional)
+    > Llena cada línea debajo de R:. Lo que no hiciste, déjalo vacío.
+    > Si no aplica por la edad: No aplica a esta edad: el neurodesarrollo se valora con la EAD-3.
+R: 
+  > Opcional. Escribe P (presente), A (ausente) o X (asimétrico); deja vacío lo que no evaluaste.
+  Succión (P/A): 
+  Búsqueda (hociqueo) (P/A/X): 
+  Moro (P/A/X): 
+  Cócleo-palpebral (P/A): 
+  Prensión palmar (P/A/X): 
+  Prensión plantar (P/A/X): 
+  Tónico asimétrico del cuello (esgrimista) (P/A/X): 
+  Galant (incurvación del tronco) (P/A/X): 
+  Marcha automática (P/A): 
+  Babinski (plantar) (P/A/X): 
+  Landau (reacción postural) (P/A): 
+  Paracaídas (reacción de protección) (P/A/X): 
+[11] Crecimiento: peso, talla, perímetro cefálico, curvas OMS
     > Opciones: Adecuado · Riesgo · Desnutrición o talla baja · Desnutrición aguda
     > Llena cada línea debajo de R:. Lo que no hiciste, déjalo vacío.
 R: 
@@ -125,7 +142,7 @@ R:
   Talla (cm): 
   Perímetro cefálico (cm): 
   Perímetro braquial (cm): 
-[11] Desarrollo con EAD-3
+[12] Desarrollo con EAD-3
     > Opciones: Adecuado · Riesgo · Sospecha de problema
     > Llena cada línea debajo de R:. Lo que no hiciste, déjalo vacío.
 R: 
@@ -134,7 +151,7 @@ R:
   Audición y lenguaje: 
   Personal social: 
   Clasificación (desarrollo esperado / riesgo / sospecha): 
-[12] Audición y comunicación (VALE)
+[13] Audición y comunicación (VALE)
     > Llena cada línea debajo de R:. Lo que no hiciste, déjalo vacío.
 R: 
   Rango de edad: 
@@ -145,7 +162,7 @@ R:
   Condiciones estructurales (orejas, labios, lengua, nariz, paladar, ojos, dientes, cuello, hombros) presentes y sin alteración (S/N): S
   Remisión a fonoaudiología, evaluación audiológica o urgencias (S/N): 
   ¿La remisión es urgente? (S/N): 
-[13] Visión: estructuras oculares y agudeza visual
+[14] Visión: estructuras oculares y agudeza visual
     > Llena cada línea debajo de R:. Lo que no hiciste, déjalo vacío.
 R: 
   Estructuras oculares OI: NORMAL
@@ -157,13 +174,13 @@ R:
   Snellen OI (desde los 3 años, 20/__): 
   Snellen OD (desde los 3 años, 20/__): 
   Distancia de valoración: 
-[14] Alimentación: lactancia, alimentación complementaria
+[15] Alimentación: lactancia, alimentación complementaria
     > Opciones: Adecuada · Inadecuada
 R: 
-[15] Salud bucal
+[16] Salud bucal
     > Opciones: Sana · Placa o caries · Pendiente odontología
 R: 
-[16] Familia: familiograma, red de apoyo, cuidado
+[17] Familia: familiograma, red de apoyo, cuidado
     > Llena cada línea debajo de R:. Lo que no hiciste, déjalo vacío.
 R: 
   Padre edad (años): 
@@ -176,7 +193,7 @@ R:
   Hermano 6 (sexo F/M, edad, unidad A/M/D): 
   Con quién vive: 
   Red de apoyo y cuidado (Adecuada / Riesgo social / Sospecha de maltrato): Adecuada
-[17] Dinámica familiar (APGAR familiar)
+[18] Dinámica familiar (APGAR familiar)
     > Llena cada línea debajo de R:. Lo que no hiciste, déjalo vacío.
 R: 
   Nombre del acompañante: 
@@ -188,23 +205,23 @@ R:
   5. ¿Le satisface como comparte en familia el tiempo libre para estar juntos, los espacios en la casa, el dinero, etc.? (0 Nunca, 1 Casi nunca, 2 Algunas veces, 3 Casi siempre, 4 Siempre): 
 
 == PROTECCIÓN ESPECÍFICA ==
-[18] Vacunación según esquema PAI
+[19] Vacunación según esquema PAI
     > Opciones: Aplicadas · Al día · Pendiente
 R: 
-[19] Micronutrientes en polvo (fortificación casera) en las edades del c…
+[20] Micronutrientes en polvo (fortificación casera) en las edades del c…
     > Qué hacer: Micronutrientes en polvo (fortificación casera) en las edades del cuadro de la 3280
     > Opciones: Entregados · Ya recibió · En descanso
     > Si no aplica por la edad: No aplica por edad: los micronutrientes en polvo son de los 6 a los 23 meses.
 R: 
-[20] Micronutrientes dos veces al año desde los 2 años
+[21] Micronutrientes dos veces al año desde los 2 años
     > Opciones: Entregados · Ya recibió
     > Si no aplica por la edad: No aplica por edad: la suplementación con hierro y vitamina A es de los 24 a los 59 meses.
 R: 
-[21] Desparasitación desde el año, dos veces al año
+[22] Desparasitación desde el año, dos veces al año
     > Opciones: Albendazol 400 mg · Ya recibió
     > Si no aplica por la edad: No aplica por edad: la desparasitación inicia al año.
 R: 
-[22] Barniz de flúor y profilaxis semestral desde el año
+[23] Barniz de flúor y profilaxis semestral desde el año
     > Opciones: Aplicado · Remitido · Ya recibió
     > Llena cada línea debajo de R:. Lo que no hiciste, déjalo vacío.
     > Si no aplica por la edad: No aplica: menor de 6 meses; la primera consulta de odontología es a los 6 meses.
@@ -212,40 +229,40 @@ R:
   Barniz de flúor aplicado (S/N): 
   Profilaxis (S/N): 
   Remisión a odontología (S/N): 
-[23] Sellantes desde los 3 años según criterio
+[24] Sellantes desde los 3 años según criterio
     > Opciones: Remitido · Ya tiene · No requiere
 R: 
-[24] Consejería en lactancia
+[25] Consejería en lactancia
     > Opciones: Realizada · No aplica
 R: 
 
 == DETECCIÓN TEMPRANA ==
-[25] Hemoglobina según riesgo (una vez)
+[26] Hemoglobina según riesgo (una vez)
     > Opciones: Sin riesgo · Ordenada · Resultado normal · Resultado bajo
 R: 
-[26] Odontología anual desde los 6 meses
+[27] Odontología anual desde los 6 meses
     > Opciones: Al día · Remitido
 R: 
 
 == EDUCACIÓN ==
-[27] Educación individual a padres o cuidadores
+[28] Educación individual a padres o cuidadores
     > Opciones: Realizada
 R: 
-[28] Signos de alarma para consultar de inmediato
+[29] Signos de alarma para consultar de inmediato
     > Opciones: Realizada
 R: 
-[29] Al menos dos ciclos educativos
+[30] Al menos dos ciclos educativos
     > Opciones: Derivado (lo envío hoy) · Ya asistió a 2 o más · Asistió a 1 · Sin oferta · No aplica
 R: 
 
 == PLAN ==
-[30] Medicamentos y micronutrientes formulados
+[31] Medicamentos y micronutrientes formulados
     > Opciones: Según la edad · Ninguno
 R: 
-[31] Remisiones
+[32] Remisiones
     > Opciones: Ninguna · Odontología · Medicina · Vacunación · Nutrición o psicología
 R: 
-[32] Próximo control
+[33] Próximo control
     > Opciones: Enfermería · Medicina · Próxima brigada · Control en 1 mes
 R: 
 

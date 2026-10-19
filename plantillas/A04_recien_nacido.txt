@@ -148,12 +148,26 @@ R:
 [29] Observar una toma (posición y agarre)
     > Opciones: Adecuada · Se corrige
 R: 
+[30] Reflejos primitivos y reacciones posturales (opcional)
+    > Llena cada línea debajo de R:. Lo que no hiciste, déjalo vacío.
+R: 
+  > Opcional. Escribe P (presente), A (ausente) o X (asimétrico); deja vacío lo que no evaluaste.
+  Succión (P/A): 
+  Búsqueda (hociqueo) (P/A/X): 
+  Moro (P/A/X): 
+  Cócleo-palpebral (P/A): 
+  Prensión palmar (P/A/X): 
+  Prensión plantar (P/A/X): 
+  Tónico asimétrico del cuello (esgrimista) (P/A/X): 
+  Galant (incurvación del tronco) (P/A/X): 
+  Marcha automática (P/A): 
+  Babinski (plantar) (P/A/X): 
 
 == MADRE ==
-[30] Consejería en lactancia materna exclusiva
+[31] Consejería en lactancia materna exclusiva
     > Opciones: Realizada
 R: 
-[31] Con VIH confirmado: fórmula, no leche materna
+[32] Con VIH confirmado: fórmula, no leche materna
     > Opciones: No aplica · Fórmula
 R: 
 
