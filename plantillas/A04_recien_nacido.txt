@@ -151,7 +151,13 @@ R:
 [30] Reflejos primitivos y reacciones posturales (opcional)
     > Llena cada línea debajo de R:. Lo que no hiciste, déjalo vacío.
 R: 
-  > Opcional. Escribe P (presente), A (ausente) o X (asimétrico); deja vacío lo que no evaluaste.
+  > Opcional. Escribe P (presente o normal), A (ausente) o X (asimétrico o desviado); deja vacío lo que no evaluaste.
+  Pupilar fotomotor (directo) (P/A/X): 
+  Pupilar consensual (P/A): 
+  Parpadeo a la luz (deslumbramiento) (P/A): 
+  Corneal (parpadeo al tocar) (P/A/X): 
+  Reflejo corneal de luz (Hirschberg) (P/X): 
+  Ojos de muñeca (oculocefálico) (P/A): 
   Succión (P/A): 
   Búsqueda (hociqueo) (P/A/X): 
   Moro (P/A/X): 

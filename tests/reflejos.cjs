@@ -22,7 +22,11 @@ const F=await p.evaluate(()=>{const F=[],ok=(c,m)=>{if(!c)F.push(m)};const RFL='
  /* 11 meses sin paracaídas */
  nino(11);openMod('pinf');S.set(key('pinf','rfx'),JSON.stringify({par:'A'}));ok(/Paracaídas ausente a esta edad/.test(WIDGET.reflejos.txt('pinf')),'paracaídas ausente a los 11 meses');
  /* 3 años: no aplica */
- nino(36);openMod('pinf');q=ivFor('pinf');i=q.findIndex(x=>x.l===RFL);ok(!ivAplica('pinf',i),'a los 3 años no aplica');
+ nino(36);openMod('pinf');h=WIDGET.reflejos.html('pinf');ok(/Hirschberg/.test(h)&&/fotomotor/.test(h)&&!/Moro|Babinski/.test(h),'a los 3 años solo los oculares');
+ S.set(key('pinf','rfx'),JSON.stringify({fot:'X',hir:'X',con:'P'}));t=WIDGET.reflejos.txt('pinf');ok(/anisocoria/.test(t)&&/estrabismo/.test(t)&&/Pupilar consensual presente/.test(t),'oculares alterados: '+t);
+ nino(0,5);openMod('rn');h=WIDGET.reflejos.html('rn');['Pupilar fotomotor','Pupilar consensual','Parpadeo a la luz','Corneal (parpadeo al tocar)','Ojos de muñeca','Reflejos oculares'].forEach(z=>ok(h.includes(z),'rn: falta '+z));
+ S.set(key('rn','rfx'),JSON.stringify({hir:'X',ojm:'A',fot:'P'}));t=WIDGET.reflejos.txt('rn');ok(/antes de los 4 meses: vigila/.test(t)&&/Ojos de muñeca ausente/.test(t),'rn oculares: '+t);
+ ok(WIDGET.reflejos.desdeTexto('rn',['Reflejo corneal de luz (Hirschberg) (P/X): desviado','Pupilar fotomotor (directo) (P/A/X): P'])&&JSON.parse(S.get(key('rn','rfx'))).hir==='X','plantilla ocular');
  /* plantilla */
  const pl=plGenerar('MODULO','rn');ok(/Moro \(P\/A\/X\):/.test(pl)&&/Succión \(P\/A\):/.test(pl),'plantilla del recién nacido');
  nino(0,3);openMod('rn');ok(WIDGET.reflejos.desdeTexto('rn',['Moro (P/A/X): P','Succión (P/A): a','Paracaídas (P/A/X): ']),'desde texto');const v=JSON.parse(S.get(key('rn','rfx')));ok(v.mor==='P'&&v.suc==='A'&&!v.par,'lectura de la plantilla: '+JSON.stringify(v));

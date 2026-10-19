@@ -1971,7 +1971,7 @@ function wireMiDia(){const cb=$("md-cal");if(cb)cb.onclick=calOpen;
 function mdShow(t){const s=$("md-st");s.innerHTML="";const a=document.createElement("textarea");a.value=t;a.rows=7;a.readOnly=true;s.append("No se pudo copiar solo. Mantén presionado el texto y cópialo:",a);a.focus();a.select()}
 
 /* ---------- PANEL ---------- */
-const VERSION_APP="2026-10-18 v173";
+const VERSION_APP="2026-10-18 v174";
 function home(){
   stopRec();if(S.get(AT_KEY))atReiniciar();st.view="home";
   const rm=["precon","prenatal","parto","rn","ive"],rp=["pinf","inf","adol","juv","adul","vej"];
@@ -7353,82 +7353,116 @@ function vnIdForm(){stopRec();if(VNS)VNS.voz=false;const P=pac(),tipos=(ALLF.fin
  }catch(e){console.warn("v163 "+m,e)}});
 })();
 
-/* ===== v172: reflejos primitivos y reacciones posturales (opcional) =====
-   Recién nacido y primera infancia. Salen solo los que corresponden a la edad, cada uno con cómo
-   hacerlo y qué esperar. Es opcional: lo que no evalúes no se escribe en la nota.
+/* ===== v172-v174: reflejos (opcional) en recién nacido y primera infancia =====
+   Oculares (pupilares y corneales) hasta los 5 años; primitivos y posturales hasta los 2.
+   Salen solo los que corresponden a la edad, cada uno con cómo hacerlo y qué esperar.
+   Lo que no se evalúa no se escribe en la nota.
    Fuente: AIEPI (verificar el desarrollo del menor de 2 meses: Moro, cócleo-palpebral, succión)
-   y examen neurológico del recién nacido y del lactante. */
+   y examen neurológico y ocular del recién nacido y del lactante. */
 (function(){
  if(typeof WIDGET!=="object")return;
  const G=(id)=>{try{return JSON.parse(S.get(key(id,"rfx"))||"{}")||{}}catch(e){return{}}};
  const SV=(id,v)=>S.set(key(id,"rfx"),JSON.stringify(v));
- /* k, nombre, [ver desde, ver hasta) en meses, [ausente es anormal desde, hasta), presente es anormal desde, admite asimetría, cómo hacerlo, qué esperar */
+ const REM="remite a pediatría para valoración neurológica.";
+ /* g: grupo; ver: [desde,hasta) meses; aus: [desde,hasta) en que faltar es anormal; per: desde cuándo seguir presente es anormal;
+    est: estados; a: qué hacer si falta; x: qué hacer si es asimétrico; t: técnica; e: qué esperar */
+ const PAX=[["P","Presente"],["A","Ausente"],["X","Asimétrico"]],PA=[["P","Presente"],["A","Ausente"]];
  const RF=[
-  ["suc","Succión",[0,7],[0,99],null,0,
-   "Con el dedo limpio, la yema hacia el paladar, entra 2 a 3 cm en la boca; o mira una toma completa.",
-   "Succión fuerte, rítmica y coordinada con la deglución. Débil o ausente es signo de peligro (AIEPI): remite."],
-  ["bus","Búsqueda (hociqueo)",[0,7],[0,3],6,1,
-   "Bebé despierto y con hambre. Roza con el dedo la mejilla o la comisura de la boca, de cada lado.",
-   "Gira la cabeza hacia el lado tocado y abre la boca. Desaparece hacia los 3 a 4 meses."],
-  ["mor","Moro",[0,9],[0,3],6,1,
-   "Boca arriba sobre algo blando. Levanta la cabeza y los hombros unos centímetros sosteniendo la nuca y deja caer la cabeza 2 a 3 cm sobre tu mano, sin soltarla. También sirve un aplauso fuerte.",
-   "Abre los brazos y las manos y luego los recoge como en un abrazo; puede llorar. Debe ser igual en ambos lados: si un brazo no se mueve, piensa en fractura de clavícula o lesión del plexo braquial. Desaparece hacia los 4 a 6 meses."],
-  ["coc","Cócleo-palpebral",[0,25],[0,99],null,0,
-   "Aplaude fuerte a unos 30 cm de cada oído, por fuera de su vista.",
-   "Parpadea con el sonido. Si no parpadea, revisa el tamizaje auditivo y remite a audiología."],
-  ["ppa","Prensión palmar",[0,9],[0,3],6,1,
-   "Pon tu dedo en la palma del bebé, entrando por el lado del meñique. Hazlo en las dos manos.",
-   "Cierra la mano y aprieta tu dedo con la misma fuerza en ambas. Desaparece hacia los 3 a 4 meses, cuando empieza a agarrar a voluntad."],
-  ["ppl","Prensión plantar",[0,16],[0,8],13,1,
-   "Presiona con el pulgar la planta, justo debajo de la base de los dedos, en cada pie.",
-   "Flexiona los dedos del pie. Desaparece entre los 9 y 12 meses, antes de caminar."],
-  ["rtc","Tónico asimétrico del cuello (esgrimista)",[0,9],null,7,1,
-   "Boca arriba y tranquilo. Gira la cabeza despacio hacia un lado y sostenla 5 a 10 segundos; luego hacia el otro.",
-   "Estira el brazo y la pierna del lado de la cara y dobla los del lado de la nuca. Es anormal si queda fijo en esa postura sin poder salir o si sigue después de los 6 meses."],
-  ["gal","Galant (incurvación del tronco)",[0,9],[0,3],7,1,
-   "Boca abajo sobre tu mano. Desliza un dedo a 2 o 3 cm de la columna, de los hombros a la cadera, de un lado y después del otro.",
-   "Curva el tronco hacia el lado que tocaste. Si falta en un solo lado, piensa en lesión medular y remite. Desaparece hacia los 4 a 6 meses."],
-  ["mar","Marcha automática",[0,4],null,null,0,
-   "Sostenlo de pie por las axilas, con las plantas sobre una superficie plana, e inclínalo un poco hacia adelante.",
-   "Da pasos alternados. Desaparece hacia los 2 meses; no indica que vaya a caminar antes."],
-  ["bab","Babinski (plantar)",[0,25],null,null,1,
-   "Desliza algo romo (la uña o el mango del martillo) por el borde externo de la planta, del talón hacia los dedos, y cruzando bajo los dedos.",
-   "En el lactante es normal que el dedo gordo suba y los demás se abran en abanico hasta los 12 a 24 meses. Lo anormal es que sea distinto en un pie que en el otro."],
-  ["lan","Landau (reacción postural)",[3,16],[6,13],null,0,
-   "Sostenlo boca abajo en el aire con tu mano bajo el abdomen.",
-   "Levanta la cabeza y estira el tronco y las piernas. Aparece hacia los 3 a 4 meses; si a los 6 meses no lo hace, piensa en hipotonía y remite."],
-  ["par","Paracaídas (reacción de protección)",[6,25],[10,99],null,1,
-   "Sostenlo boca abajo por el tronco y bájalo rápido, cabeza primero, hacia la camilla.",
-   "Estira los brazos y abre las manos para protegerse, igual en ambos lados. Aparece entre los 6 y 9 meses y queda para siempre; si a los 10 meses no lo hace, remite."]];
- const ver=(m,r)=>m==null||(m>=r[2][0]&&m<r[2][1]);
+  {k:"fot",g:"oc",n:"Pupilar fotomotor (directo)",ver:[0,72],aus:[0,99],est:[["P","Presente"],["A","Ausente o lento"],["X","Pupilas desiguales"]],
+   a:"pupila que no se contrae o lo hace lento: remite hoy a medicina.",x:"pupilas desiguales (anisocoria): si es nueva, o hay golpe, decaimiento, vómito o convulsión, remite de inmediato; si es leve y de siempre, medicina.",
+   t:"En un lugar con poca luz, acerca la linterna desde un lado (no de frente) a un ojo durante 1 a 2 segundos y mira esa misma pupila. Repite en el otro ojo. Mira antes si las pupilas son iguales y redondas.",
+   e:"La pupila se achica rápido con la luz y vuelve a abrirse al retirarla; las dos pupilas son iguales y redondas. En prematuros de menos de 32 semanas puede no estar todavía."},
+  {k:"con",g:"oc",n:"Pupilar consensual",ver:[0,72],aus:[0,99],est:PA,
+   a:"no responde el ojo contrario: remite a medicina (posible lesión del nervio óptico o de la vía visual).",
+   t:"Ilumina un ojo y mira el OTRO. Con tu mano libre puedes hacer sombra entre los dos ojos para ver mejor. Repite del otro lado.",
+   e:"La pupila del ojo que no recibe la luz también se achica, al mismo tiempo y en la misma medida."},
+  {k:"des",g:"oc",n:"Parpadeo a la luz (deslumbramiento)",ver:[0,13],aus:[0,99],est:PA,
+   a:"no parpadea con la luz fuerte: sospecha de baja visión, remite a oftalmología.",
+   t:"Con los ojos del bebé abiertos, enciende de frente una luz fuerte (linterna) a unos 30 cm.",
+   e:"Cierra los ojos o parpadea con fuerza y a veces gira la cabeza. Está desde el nacimiento."},
+  {k:"cor",g:"oc",n:"Corneal (parpadeo al tocar)",ver:[0,72],aus:[0,99],est:PAX,
+   a:"no parpadea: remite a medicina (lesión de los nervios de la cara).",x:"parpadea solo de un lado: remite a medicina.",
+   t:"Opcional, no es de rutina. Tuerce la punta de un algodón limpio hasta dejar una mechita fina. Entra desde un lado, para que no la vea venir, y toca con suavidad el borde de la parte de color del ojo (no el centro). Una vez por ojo. Alternativa más suave: un soplo de aire leve sobre el ojo. No lo hagas si el ojo está rojo, lastimado o con secreción.",
+   e:"Parpadean los dos ojos al mismo tiempo, aunque toques solo uno."},
+  {k:"hir",g:"oc",n:"Reflejo corneal de luz (Hirschberg)",ver:[0,72],est:[["P","Centrado en ambos"],["X","Desviado en un ojo"]],
+   x:"sospecha de estrabismo; marca estrabismo en Visión y remite a oftalmología.",
+   t:"Sostén la linterna a 30 o 40 cm, a la altura de tus ojos, y pide que mire la luz (o llama su atención con un sonido). Mira dónde cae el puntito brillante en cada ojo.",
+   e:"El puntito de luz cae en el mismo sitio en las dos pupilas (en el centro o un poco hacia la nariz, igual en ambos). Si en un ojo cae hacia afuera o hacia adentro, ese ojo está desviado. Antes de los 4 meses puede desviarse a ratos; si es constante o sigue después, remite. Pliegues anchos en la nariz pueden parecer estrabismo (falso estrabismo): Hirschberg simétrico lo descarta."},
+  {k:"ojm",g:"oc",n:"Ojos de muñeca (oculocefálico)",ver:[0,3],aus:[0,1],est:PA,
+   a:"en el recién nacido, ojos que no se mueven al girar la cabeza: "+REM,
+   t:"Con el bebé boca arriba y los ojos abiertos, gira suavemente la cabeza hacia un lado y luego hacia el otro.",
+   e:"Los ojos se quedan atrás y se mueven hacia el lado contrario al giro, y luego se centran. Desaparece hacia los 2 a 3 meses, cuando el bebé ya fija la mirada."},
+  {k:"suc",g:"pr",n:"Succión",ver:[0,7],aus:[0,99],est:PA,
+   a:"succión débil o ausente: signo de peligro AIEPI, remite de inmediato.",
+   t:"Con el dedo limpio, la yema hacia el paladar, entra 2 a 3 cm en la boca; o mira una toma completa.",
+   e:"Succión fuerte, rítmica y coordinada con la deglución."},
+  {k:"bus",g:"pr",n:"Búsqueda (hociqueo)",ver:[0,7],aus:[0,3],per:6,est:PAX,a:REM,
+   t:"Bebé despierto y con hambre. Roza con el dedo la mejilla o la comisura de la boca, de cada lado.",
+   e:"Gira la cabeza hacia el lado tocado y abre la boca. Desaparece hacia los 3 a 4 meses."},
+  {k:"mor",g:"pr",n:"Moro",ver:[0,9],aus:[0,3],per:6,est:PAX,a:REM,
+   t:"Boca arriba sobre algo blando. Levanta la cabeza y los hombros unos centímetros sosteniendo la nuca y deja caer la cabeza 2 a 3 cm sobre tu mano, sin soltarla. También sirve un aplauso fuerte.",
+   e:"Abre los brazos y las manos y luego los recoge como en un abrazo; puede llorar. Debe ser igual en ambos lados: si un brazo no se mueve, piensa en fractura de clavícula o lesión del plexo braquial. Desaparece hacia los 4 a 6 meses."},
+  {k:"coc",g:"pr",n:"Cócleo-palpebral",ver:[0,25],aus:[0,99],est:PA,
+   a:"no parpadea con el sonido: revisa el tamizaje auditivo y remite a audiología.",
+   t:"Aplaude fuerte a unos 30 cm de cada oído, por fuera de su vista.",
+   e:"Parpadea con el sonido."},
+  {k:"ppa",g:"pr",n:"Prensión palmar",ver:[0,9],aus:[0,3],per:6,est:PAX,a:REM,
+   t:"Pon tu dedo en la palma del bebé, entrando por el lado del meñique. Hazlo en las dos manos.",
+   e:"Cierra la mano y aprieta tu dedo con la misma fuerza en ambas. Desaparece hacia los 3 a 4 meses, cuando empieza a agarrar a voluntad."},
+  {k:"ppl",g:"pr",n:"Prensión plantar",ver:[0,16],aus:[0,8],per:13,est:PAX,a:REM,
+   t:"Presiona con el pulgar la planta, justo debajo de la base de los dedos, en cada pie.",
+   e:"Flexiona los dedos del pie. Desaparece entre los 9 y 12 meses, antes de caminar."},
+  {k:"rtc",g:"pr",n:"Tónico asimétrico del cuello (esgrimista)",ver:[0,9],per:7,est:PAX,
+   t:"Boca arriba y tranquilo. Gira la cabeza despacio hacia un lado y sostenla 5 a 10 segundos; luego hacia el otro.",
+   e:"Estira el brazo y la pierna del lado de la cara y dobla los del lado de la nuca. Es anormal si queda fijo en esa postura sin poder salir o si sigue después de los 6 meses."},
+  {k:"gal",g:"pr",n:"Galant (incurvación del tronco)",ver:[0,9],aus:[0,3],per:7,est:PAX,a:REM,
+   t:"Boca abajo sobre tu mano. Desliza un dedo a 2 o 3 cm de la columna, de los hombros a la cadera, de un lado y después del otro.",
+   e:"Curva el tronco hacia el lado que tocaste. Si falta en un solo lado, piensa en lesión medular y remite. Desaparece hacia los 4 a 6 meses."},
+  {k:"mar",g:"pr",n:"Marcha automática",ver:[0,4],est:PA,
+   t:"Sostenlo de pie por las axilas, con las plantas sobre una superficie plana, e inclínalo un poco hacia adelante.",
+   e:"Da pasos alternados. Desaparece hacia los 2 meses; no indica que vaya a caminar antes."},
+  {k:"bab",g:"pr",n:"Babinski (plantar)",ver:[0,25],est:PAX,
+   t:"Desliza algo romo (la uña o el mango del martillo) por el borde externo de la planta, del talón hacia los dedos, y cruzando bajo los dedos.",
+   e:"En el lactante es normal que el dedo gordo suba y los demás se abran en abanico hasta los 12 a 24 meses. Lo anormal es que sea distinto en un pie que en el otro."},
+  {k:"lan",g:"pr",n:"Landau (reacción postural)",ver:[3,16],aus:[6,13],est:PA,a:"no lo hace: piensa en hipotonía y "+REM,
+   t:"Sostenlo boca abajo en el aire con tu mano bajo el abdomen.",
+   e:"Levanta la cabeza y estira el tronco y las piernas. Aparece hacia los 3 a 4 meses."},
+  {k:"par",g:"pr",n:"Paracaídas (reacción de protección)",ver:[6,25],aus:[10,99],est:PAX,a:REM,
+   t:"Sostenlo boca abajo por el tronco y bájalo rápido, cabeza primero, hacia la camilla.",
+   e:"Estira los brazos y abre las manos para protegerse, igual en ambos lados. Aparece entre los 6 y 9 meses y queda para siempre."}];
+ const GR={oc:"Reflejos oculares: pupilares y corneales",pr:"Reflejos primitivos y reacciones posturales"};
+ const ver=(m,r)=>m==null||(m>=r.ver[0]&&m<r.ver[1]);
  const items=id=>{const m=edadMesesMod(id);return RF.filter(r=>ver(m,r))};
- const EST=[["P","Presente"],["A","Ausente"],["X","Asimétrico"]];
- const ests=r=>r[5]?EST:EST.slice(0,2);
+ const corto=r=>r.n.replace(/ \(.*\)$/,"");
  function calc(id){const v=G(id),m=edadMesesMod(id),hal=[],al=[];
-  items(id).forEach(r=>{const e=v[r[0]];if(!e)return;const n=r[1].replace(/ \(.*\)$/,"");
-   if(e==="P"){hal.push(n+" presente");if(r[4]!=null&&m!=null&&m>=r[4])al.push(n+" presente a los "+m+" meses, cuando ya debería haber desaparecido: remite a pediatría para valoración neurológica.")}
-   else if(e==="A"){hal.push(n+" ausente");if(r[3]&&(m==null||(m>=r[3][0]&&m<r[3][1])))al.push(n+" ausente a esta edad: "+(r[0]==="suc"?"signo de peligro, remite de inmediato.":r[0]==="coc"?"revisa el tamizaje auditivo y remite.":"remite a pediatría para valoración neurológica."))}
-   else{hal.push(n+" asimétrico");al.push(n+" asimétrico: remite a pediatría (descartar lesión del plexo braquial, fractura de clavícula o compromiso neurológico de un lado).")}});
+  items(id).forEach(r=>{const e=v[r.k];if(!e||!r.est.some(z=>z[0]===e))return;const n=corto(r),lb=r.est.find(z=>z[0]===e)[1].toLowerCase();
+   if(r.k==="hir"){hal.push("Hirschberg "+(e==="P"?"centrado y simétrico":"desviado en un ojo"));if(e==="X")al.push(m!=null&&m<4?"Reflejo corneal de luz desviado antes de los 4 meses: vigila; si es constante, remite a oftalmología.":"Reflejo corneal de luz desviado: "+r.x);return}
+   if(e==="P"){hal.push(n+" presente");if(r.per!=null&&m!=null&&m>=r.per)al.push(n+" presente a los "+m+" meses, cuando ya debería haber desaparecido: "+REM)}
+   else if(e==="A"){hal.push(n+" "+lb);if(r.aus&&(m==null||(m>=r.aus[0]&&m<r.aus[1])))al.push(n+" "+lb+" a esta edad: "+(r.a||REM))}
+   else{hal.push(n+": "+lb);al.push(n+", "+lb+": "+(r.x||"remite a pediatría (descartar lesión del plexo braquial, fractura de clavícula o compromiso neurológico de un lado)."))}});
   return{hal,al,m}}
+ const boton=(r,e,l,on)=>`<button type="button" class="btn" data-rfx="${r.k}" data-val="${e}" style="padding:4px 10px;font-size:.8rem;${on?(e==="P"?"background:var(--accent);color:#fff;border-color:var(--accent)":"background:var(--miss);color:#fff;border-color:var(--miss)"):""}">${esc(l)}</button>`;
  WIDGET.reflejos={
-  plantilla:id=>["> Opcional. Escribe P (presente), A (ausente) o X (asimétrico); deja vacío lo que no evaluaste."].concat(RF.filter(r=>id!=="rn"||r[2][0]<1).map(r=>r[1]+" (P/A"+(r[5]?"/X":"")+"): ")),
+  plantilla:id=>{const L=RF.filter(r=>id!=="rn"||r.ver[0]<1);return["> Opcional. Escribe P (presente o normal), A (ausente) o X (asimétrico o desviado); deja vacío lo que no evaluaste."]
+   .concat(L.map(r=>r.n+" ("+r.est.map(z=>z[0]).join("/")+"): "))},
   html:id=>{const v=G(id),m=edadMesesMod(id),L=items(id);
-   if(!L.length)return `<p class="note-src">A los ${m} meses ya no se evalúan reflejos primitivos: el neurodesarrollo se valora con la EAD-3. Puedes saltar esta pregunta.</p>`;
-   return `<p class="note-src" style="margin:0 0 8px"><b>Opcional.</b> Salen los que corresponden ${m==null?"a la edad":m<1?"al menor de 1 mes":"a los "+m+" meses"}. Toca «Cómo hacerlo» para ver la técnica. Lo que no marques no se escribe en la nota.</p>
-   ${L.map(r=>`<div style="border-bottom:1px solid var(--line);padding:6px 0">
-     <div style="display:flex;gap:8px;align-items:center;justify-content:space-between;flex-wrap:wrap"><span style="flex:1;min-width:150px">${esc(r[1])}</span>
-     <span style="display:flex;gap:4px">${ests(r).map(([e,l])=>`<button type="button" class="btn" data-rfx="${r[0]}" data-val="${e}" style="padding:4px 10px;font-size:.8rem;${v[r[0]]===e?(e==="P"?"background:var(--accent);color:#fff;border-color:var(--accent)":"background:var(--miss);color:#fff;border-color:var(--miss)"):""}">${l}</button>`).join("")}</span></div>
-     <details style="margin-top:4px"><summary class="note-src" style="cursor:pointer">Cómo hacerlo</summary><p class="note-src" style="margin:4px 0 0"><b>Técnica:</b> ${esc(r[6])}<br><b>Qué esperar:</b> ${esc(r[7])}</p></details></div>`).join("")}
+   if(!L.length)return `<p class="note-src">A esta edad no hay reflejos para evaluar aquí. Puedes saltar esta pregunta.</p>`;
+   const edad=m==null?"a la edad":m<1?"al menor de 1 mes":"a los "+m+" meses";
+   return `<p class="note-src" style="margin:0 0 8px"><b>Opcional.</b> Salen los que corresponden ${edad}. Toca «Cómo hacerlo» para ver la técnica. Lo que no marques no se escribe en la nota.</p>
+   ${["oc","pr"].filter(g=>L.some(r=>r.g===g)).map(g=>`<p class="lab" style="margin:10px 0 2px">${GR[g]}</p>${L.filter(r=>r.g===g).map(r=>`<div style="border-bottom:1px solid var(--line);padding:6px 0">
+     <div style="display:flex;gap:8px;align-items:center;justify-content:space-between;flex-wrap:wrap"><span style="flex:1;min-width:150px">${esc(r.n)}</span>
+     <span style="display:flex;gap:4px;flex-wrap:wrap">${r.est.map(([e,l])=>boton(r,e,l,v[r.k]===e)).join("")}</span></div>
+     <details style="margin-top:4px"><summary class="note-src" style="cursor:pointer">Cómo hacerlo</summary><p class="note-src" style="margin:4px 0 0"><b>Técnica:</b> ${esc(r.t)}<br><b>Qué esperar:</b> ${esc(r.e)}</p></details></div>`).join("")}`).join("")}
    <div id="rfx-al" style="margin-top:8px"></div>`},
   txt:id=>{const o=calc(id);if(!o.hal.length)return"";return "Reflejos: "+o.hal.join(", ")+"."+(o.al.length?" "+o.al.join(" "):" Acordes a la edad.")},
   wire:(id,save)=>{const up=()=>{const o=calc(id),b=document.getElementById("rfx-al");if(b)b.innerHTML=o.al.map(t=>`<p class="note-src" style="color:var(--miss);margin:2px 0">⚠ ${esc(t)}</p>`).join("")};
    document.querySelectorAll("[data-rfx]").forEach(b=>b.onclick=()=>{const v=G(id),k=b.dataset.rfx;v[k]=v[k]===b.dataset.val?"":b.dataset.val;SV(id,v);
     document.querySelectorAll(`[data-rfx="${k}"]`).forEach(z=>{const on=z.dataset.val===v[k];z.style.background=on?(z.dataset.val==="P"?"var(--accent)":"var(--miss)"):"";z.style.color=on?"#fff":"";z.style.borderColor=on?(z.dataset.val==="P"?"var(--accent)":"var(--miss)"):""});up();save()});up()},
-  desdeTexto:(id,L)=>{const v={};let n=0;RF.forEach(r=>{const ln=L.find(x=>{const i=x.lastIndexOf(":");return i>0&&plN(x.slice(0,i).replace(/\s*\([^)]*\)\s*$/,""))===plN(r[1])});if(!ln)return;
-    const x=ln.slice(ln.lastIndexOf(":")+1).trim().toUpperCase();const e=/^P/.test(x)?"P":/^A/.test(x)?"A":/^(X|ASIM)/.test(x)?"X":null;if(e){v[r[0]]=e;n++}});if(n)SV(id,v);return n>0}};
+  desdeTexto:(id,L)=>{const v={};let n=0;RF.forEach(r=>{const ln=L.find(x=>{const i=x.lastIndexOf(":");return i>0&&plN(x.slice(0,i).replace(/\s*\([^)]*\)\s*$/,""))===plN(r.n)});if(!ln)return;
+    const x=ln.slice(ln.lastIndexOf(":")+1).trim().toUpperCase();let e=/^(P|C)/.test(x)?"P":/^A/.test(x)?"A":/^(X|ASIM|D)/.test(x)?"X":null;if(e&&!r.est.some(z=>z[0]===e))e=null;if(e){v[r.k]=e;n++}});if(n)SV(id,v);return n>0}};
  const RFL="Reflejos primitivos y reacciones posturales (opcional)";
- const PA={t:"Para qué y cómo (AIEPI y examen neurológico)",p:["Opcional: complementa el examen físico. Los que AIEPI pide en el menor de 1 mes son Moro, cócleo-palpebral y succión, además de brazos y piernas flexionados (esos van en Desarrollo).","Evalúa con el bebé despierto, tranquilo y sin frío. Compara siempre los dos lados.","Remite si falta un reflejo que debería estar, si sigue uno que ya debió desaparecer o si es asimétrico."],r:"",b:""};
- IVX["rn::"+RFL]={widget:"reflejos",c:[],pauta:PA};IVX["pinf::"+RFL]={widget:"reflejos",c:[],pauta:PA,si:()=>{const m=edadMesesMod("pinf");return m==null||m<25},siTxt:"No aplica a esta edad: el neurodesarrollo se valora con la EAD-3."};
+ const PAU={t:"Para qué y cómo (AIEPI y examen neurológico y ocular)",p:["Opcional: complementa el examen físico. Los que AIEPI pide en el menor de 1 mes son Moro, cócleo-palpebral y succión, además de brazos y piernas flexionados (esos van en Desarrollo).","Oculares (hasta los 5 años): pupilas a la luz (directo y consensual), parpadeo a la luz, corneal y reflejo corneal de luz (Hirschberg) para estrabismo. El reflejo rojo va en Visión.","Evalúa con el bebé despierto, tranquilo y sin frío. Compara siempre los dos lados.","Remite si falta un reflejo que debería estar, si sigue uno que ya debió desaparecer o si es asimétrico."],r:"",b:""};
+ IVX["rn::"+RFL]={widget:"reflejos",c:[],pauta:PAU};IVX["pinf::"+RFL]={widget:"reflejos",c:[],pauta:PAU};
  try{const s=M.rn.sections.find(x=>x.items.includes("Observar una toma (posición y agarre)"));if(s&&!s.items.includes(RFL))s.items.push(RFL)}catch(e){}
  try{const s=M.pinf.sections.find(x=>x.items.includes("Examen físico por sistemas, de cabeza a pies"));if(s&&!s.items.includes(RFL))s.items.splice(s.items.indexOf("Examen físico por sistemas, de cabeza a pies")+1,0,RFL)}catch(e){}
 })();
