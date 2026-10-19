@@ -217,11 +217,31 @@ R:
   Peso antes del embarazo (kg): 
 [38] Examen por sistemas
     > Qué hacer: Examen cefalocaudal, incluida la cavidad bucal.
+    > Llena cada línea debajo de R:. Lo que no hiciste, déjalo vacío.
 R: 
+  > Por región: escribe N si es normal o anota el hallazgo.
+  Aspecto general: 
+  Cabeza y cara: 
+  Cavidad bucal: 
+  Cuello: 
+  Mamas: 
+  Tórax: corazón y pulmones: 
+  Abdomen: 
+  Extremidades: 
+  Piel y faneras: 
+  Neurológico: 
 [39] Valoración ginecológica
     > Qué hacer: Valoración ginecológica de la primera consulta.
     > Opciones: No: sin insumos · No: no acepta
+    > Llena cada línea debajo de R:. Lo que no hiciste, déjalo vacío.
 R: 
+  > Por región: escribe N si es normal o anota el hallazgo.
+  Preparación: 
+  Genitales externos: 
+  Vagina y flujo: 
+  Cuello uterino: 
+  Toma de muestra: 
+  Tacto bimanual: 
 [40] Valoración obstétrica
     > Qué hacer: Mide la altura uterina y escucha la frecuencia cardiaca fetal.
     > Opciones: Cefálica · Podálica · Transversa · Dos fetos · Aún no se define

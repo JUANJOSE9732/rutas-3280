@@ -527,7 +527,7 @@ function ivFor(id){if(IV[id])return IV[id];if(IV_CACHE[id])return IV_CACHE[id];c
   m.sections.forEach((s,i)=>s.items.forEach((it,j)=>{const isQ=it.startsWith("Q:"),txt=isQ?it.slice(2):it,ask=isQ||ASK.test(s.t);
     q.push({b:s.t,t:ask?"ask":"do",l:txt.length>70?txt.slice(0,67)+"…":txt,q:txt,ck:i+"."+j,ref:(m.ref?m.ref+" · ":"")+"bloque «"+s.t+"» de la guía del módulo",
       c:isQ?["No","Sí"]:ask?["Niega","Sí, refiere","Sin hallazgos"]:EXAM.test(s.t)?["Normal","Alterado","No realizado"]:["Realizado","No realizado","No aplica"],
-      al:isQ?SI:undefined,am:isQ?(/golpead|forzada|humillada/i.test(txt)?"Violencia referida: activar la ruta de atención a víctimas y notificar.":"Tamizaje positivo: derivar a la ruta de salud mental."):undefined});const _x=(typeof IVX!=="undefined")&&IVX[id+"::"+txt];if(_x){const z=q[q.length-1];if(_x.c&&_x.c.length)z.c=_x.c;if(_x.cf)Object.defineProperty(z,"c",{get:_x.cf,set(){},configurable:true,enumerable:true});if(_x.widget){z.widget=_x.widget;z.c=[]}if(_x.campos){z.campos=_x.campos;if(!_x.keepc)z.c=[]}if(_x.dyn)z.dyn=_x.dyn;if(_x.pauta)z.pauta=_x.pauta;if(_x.si)z.si=_x.si;if(_x.siTxt)z.siTxt=_x.siTxt}}));
+      al:isQ?SI:undefined,am:isQ?(/golpead|forzada|humillada/i.test(txt)?"Violencia referida: activar la ruta de atención a víctimas y notificar.":"Tamizaje positivo: derivar a la ruta de salud mental."):undefined});const _x=(typeof IVX!=="undefined")&&IVX[id+"::"+txt];if(_x){const z=q[q.length-1];if(_x.c&&_x.c.length)z.c=_x.c;if(_x.cf)Object.defineProperty(z,"c",{get:_x.cf,set(){},configurable:true,enumerable:true});if(_x.widget){z.widget=_x.widget;z.c=[]}if(_x.campos){z.campos=_x.campos;if(!_x.keepc)z.c=[]}if(_x.sistemas){z.sistemas=_x.sistemas;z.c=[]}if(_x.dyn)z.dyn=_x.dyn;if(_x.pauta)z.pauta=_x.pauta;if(_x.si)z.si=_x.si;if(_x.siTxt)z.siTxt=_x.siTxt}}));
   return IV_CACHE[id]=q}
 /* ---------- Herrera y Hurtado ---------- */
 const HH=[
@@ -1971,7 +1971,7 @@ function wireMiDia(){const cb=$("md-cal");if(cb)cb.onclick=calOpen;
 function mdShow(t){const s=$("md-st");s.innerHTML="";const a=document.createElement("textarea");a.value=t;a.rows=7;a.readOnly=true;s.append("No se pudo copiar solo. Mantén presionado el texto y cópialo:",a);a.focus();a.select()}
 
 /* ---------- PANEL ---------- */
-const VERSION_APP="2026-10-18 v172";
+const VERSION_APP="2026-10-18 v173";
 function home(){
   stopRec();if(S.get(AT_KEY))atReiniciar();st.view="home";
   const rm=["precon","prenatal","parto","rn","ive"],rp=["pinf","inf","adol","juv","adul","vej"];
@@ -4796,6 +4796,7 @@ function paneEntr(){
       <div id="sx" style="display:flex;flex-direction:column;gap:10px">${SISTEMAS[x.sistemas].map(c=>`<div class="tool" style="padding:10px 12px;gap:6px" data-sxw="${c.k}">
         <div style="display:flex;justify-content:space-between;align-items:center;gap:8px"><b>${esc(c.l)}</b><button type="button" class="btn" data-sxn="${c.k}" style="padding:6px 12px;font-size:.85rem">Normal</button></div>
         <p class="note-src" style="margin:0">Qué buscar: ${esc(c.o)}</p>
+        ${c.g?`<details><summary class="note-src" style="cursor:pointer;font-weight:700">Pruebas y hallazgos frecuentes</summary><ul class="note-src" style="margin:4px 0 0;padding-left:18px">${c.g.map(z=>`<li style="margin:3px 0">${esc(z)}</li>`).join("")}</ul></details>`:""}
         <div class="sugg">${c.x.map(z=>`<button type="button" data-sxx="${c.k}" data-v="${esc(z)}" style="padding:5px 10px;font-size:.8rem">${esc(z)}</button>`).join("")}</div>
         <input data-sx="${c.k}" placeholder="Hallazgo (o toca Normal)">
         <p class="note-src" data-sxr="${c.k}" style="margin:0;color:var(--miss);font-weight:700" hidden>${esc(c.r)}</p></div>`).join("")}</div>`:""}
@@ -6814,7 +6815,7 @@ function plGenerar(tipo,id){const L=[],ln=s=>L.push(s),hr="=====================
   if(tipo==="MODULO"){let blk="";ivFor(id).forEach((x,i)=>{if(x.b!==blk){blk=x.b;ln("");ln("== "+blk.toUpperCase()+" ==")}
       ln("["+(i+1)+"] "+x.l);if(x.q&&plN(x.q)!==plN(x.l.replace(/…$/,"")))ln("    > "+(x.t==="ask"?"Pregunta: ":"Qué hacer: ")+x.q);
       const op=plOpc(id,x).map(c=>String(c).split("|")[0]);if(op.length)ln("    > Opciones: "+op.join(" · "));
-      const _pl=x.widget&&WIDGET[x.widget]&&WIDGET[x.widget].plantilla,pf=_pl?(typeof _pl==="function"?_pl(id):_pl):x.campos&&CAMPOS[x.campos]?CAMPOS[x.campos].filter(c=>!c.auto).map(c=>c.l+(c.u?" ("+c.u+")":"")+": "):null;
+      const _pl=x.widget&&WIDGET[x.widget]&&WIDGET[x.widget].plantilla,pf=_pl?(typeof _pl==="function"?_pl(id):_pl):x.sistemas&&SISTEMAS[x.sistemas]?["> Por región: escribe N si es normal o anota el hallazgo."].concat(SISTEMAS[x.sistemas].map(c=>c.l+": ")):x.campos&&CAMPOS[x.campos]?CAMPOS[x.campos].filter(c=>!c.auto).map(c=>c.l+(c.u?" ("+c.u+")":"")+": "):null;
       if(pf)ln("    > Llena cada línea debajo de R:. Lo que no hiciste, déjalo vacío.");else if(x.widget||x.campos)ln("    > Escribe los valores; en la app revisa el cálculo de esta pregunta.");
       if(x.siTxt&&typeof x.siTxt==="string")ln("    > Si no aplica por la edad: "+x.siTxt);
       ln("R: ");if(pf)pf.forEach(s=>ln("  "+s))})}
@@ -6863,7 +6864,7 @@ function plAplicar(texto){const r=plLeer(texto);if(!r.tipo||!r.id)return{err:"No
   if(r.tipo==="MODULO"){S.keys().filter(k=>k.startsWith("dn2_"+id+"_")&&!k.endsWith("_note")).forEach(k=>S.del(k));
     const q=ivFor(id),a={},ck={},usado=new Set();
     Object.values(r.resp).forEach(x=>{if(!x.v)return;let i=q.findIndex((z,j)=>!usado.has(j)&&plN(z.l.replace(/…$/,""))===plN(x.l.replace(/…$/,"")));if(i<0&&/^\d+$/.test(x.k)&&q[+x.k-1]&&!usado.has(+x.k-1))i=+x.k-1;
-      if(i<0){sin.push(x.l+": "+x.v);return}usado.add(i);{const W=q[i].widget&&WIDGET[q[i].widget];let ok=false;try{ok=!!(W&&W.desdeTexto&&W.desdeTexto(id,x.raw||[]))}catch(e){}a[i]=ok?(W.txt(id)||x.v):plOpcion(id,q[i],x.v)}if(q[i].ck)ck[q[i].ck]=1;n++});
+      if(i<0){sin.push(x.l+": "+x.v);return}usado.add(i);if(q[i].sistemas&&SISTEMAS[q[i].sistemas]){const SL=SISTEMAS[q[i].sistemas],sx={};(x.raw||[]).forEach(r=>{const c=SL.slice().sort((u,w)=>w.l.length-u.l.length).find(z=>r.trim().toLowerCase().startsWith(z.l.toLowerCase()+":"));if(!c)return;const v=r.trim().slice(c.l.length+1).trim();if(c&&v)sx[c.k]=/^n(ormal)?\.?$/i.test(v)?c.n:v});if(Object.keys(sx).length){S.set(key(id,"sx"+i),JSON.stringify(sx));a[i]=SL.filter(c=>sx[c.k]).map(c=>c.l+": "+sx[c.k].replace(/\.?$/,".")).join(" ")}else a[i]=x.v;if(q[i].ck)ck[q[i].ck]=1;n++;return}{const W=q[i].widget&&WIDGET[q[i].widget];let ok=false;try{ok=!!(W&&W.desdeTexto&&W.desdeTexto(id,x.raw||[]))}catch(e){}a[i]=ok?(W.txt(id)||x.v):plOpcion(id,q[i],x.v)}if(q[i].ck)ck[q[i].ck]=1;n++});
     S.set(key(id,"iv"),JSON.stringify(a));S.set(key(id,"ivlab"),JSON.stringify(q.map(z=>z.l)));S.set(key(id,"ivi"),String(q.length));S.set(key(id,"chk"),JSON.stringify(ck));
     if(fecha)S.set(key(id,"fecha"),fecha);
     let dict=ivCompose(id);const ot=[r.otros].concat(sin).filter(Boolean);if(ot.length)dict+="\n\nOTROS DATOS\n- "+ot.join("\n- ");
@@ -7430,6 +7431,250 @@ function vnIdForm(){stopRec();if(VNS)VNS.voz=false;const P=pac(),tipos=(ALLF.fin
  IVX["rn::"+RFL]={widget:"reflejos",c:[],pauta:PA};IVX["pinf::"+RFL]={widget:"reflejos",c:[],pauta:PA,si:()=>{const m=edadMesesMod("pinf");return m==null||m<25},siTxt:"No aplica a esta edad: el neurodesarrollo se valora con la EAD-3."};
  try{const s=M.rn.sections.find(x=>x.items.includes("Observar una toma (posición y agarre)"));if(s&&!s.items.includes(RFL))s.items.push(RFL)}catch(e){}
  try{const s=M.pinf.sections.find(x=>x.items.includes("Examen físico por sistemas, de cabeza a pies"));if(s&&!s.items.includes(RFL))s.items.splice(s.items.indexOf("Examen físico por sistemas, de cabeza a pies")+1,0,RFL)}catch(e){}
+})();
+
+/* ===== v173: examen físico por regiones en la valoración integral =====
+   Primera infancia, infancia, adolescencia, juventud, adultez y vejez: el examen de cabeza a
+   pies va por regiones, como en el preconcepcional. Cada región trae qué buscar, pruebas
+   sencillas, hallazgos frecuentes y qué hacer si está alterado. */
+(function(){
+ if(typeof SISTEMAS!=="object")return;
+ const PIEL_NNA="Moretones en bebés que no gatean, en orejas, cuello, nalgas o con forma de objeto, o quemaduras con forma: sospecha de maltrato, activa la ruta. Escabiosis: trata a toda la familia el mismo día. Úlcera que no sana: leishmaniasis, remite. Más de 5 manchas café con leche: pediatría.";
+ SISTEMAS.ex_pinf=[
+ {k:"gen",l:"Aspecto general",n:"Activo, reactivo, buen color, hidratado, sin dificultad para respirar.",
+  o:"Actividad y llanto, color (palidez, ictericia, cianosis), hidratación, signos de desnutrición y rasgos poco comunes de la cara o el cuerpo.",
+  x:["Decaído o letárgico","Pálido","Ictérico","Deshidratado","Emaciación visible","Edema en ambos pies","Rasgos dismórficos"],
+  r:"Letárgico, deshidratación grave, emaciación o edema en ambos pies: signo de peligro AIEPI, remite hoy. Palidez: hemoglobina y gota gruesa. Rasgos dismórficos: pediatría.",
+  g:["Pliegue cutáneo: pellizca la piel del abdomen, a mitad de camino entre el ombligo y el costado, y suéltala. Si regresa muy lento (más de 2 segundos): deshidratación grave.",
+   "Palidez palmar: compara la palma del niño con la tuya. Algo pálida: anemia; muy pálida (casi blanca): anemia grave.",
+   "Edema nutricional: presiona con el pulgar 3 segundos el dorso de los dos pies. Si queda hundido en ambos: desnutrición grave.",
+   "Ictericia en el menor de 2 meses: si aparece en las primeras 24 horas o llega a palmas y plantas, remite hoy."]},
+ {k:"cab",l:"Cabeza y fontanelas",n:"Normocéfalo, fontanela anterior normotensa (o cerrada según la edad), suturas sin cabalgamiento, cuero cabelludo sano.",
+  o:"Forma de la cabeza, fontanela anterior (tamaño y tensión), suturas y cuero cabelludo.",
+  x:["Fontanela abombada","Fontanela hundida","Fontanela cerrada antes de tiempo","Fontanela grande o abierta tarde","Cabeza aplanada (plagiocefalia)","Cefalohematoma","Pediculosis","Costra láctea o tiña"],
+  r:"Fontanela abombada con fiebre, vómito o irritabilidad: posible meningitis, remite hoy. Hundida: deshidratación, clasifica con AIEPI. Cierre antes de tiempo, fontanela muy grande o perímetro cefálico fuera de la curva: pediatría.",
+  g:["Fontanela anterior (el rombo de arriba): tócala con el niño sentado, tranquilo y sin llorar. Normal: blanda, plana, puede latir. Mide de 1 a 4 cm y cierra entre los 9 y 18 meses (puede llegar a 24).",
+   "Fontanela posterior (el triángulo de atrás): casi siempre cierra hacia los 2 meses.",
+   "Abombada con el niño sentado y calmado = tensa (más presión dentro de la cabeza: meningitis, hidrocefalia). Hundida = deshidratación.",
+   "Plagiocefalia por posición: la cabeza se aplana atrás o de un lado por dormir siempre igual. Se corrige cambiando el lado de la cabeza al dormir y poniéndolo boca abajo mientras está despierto. Si hay una cresta en una sutura o la frente se ve desviada: craneosinostosis, remite.",
+   "Cefalohematoma (no pasa de un hueso a otro) se reabsorbe en semanas; el caput o chichón del parto (sí cruza) desaparece en días."]},
+ {k:"orl",l:"Ojos, oídos, nariz y boca",n:"Conjuntivas rosadas, sin secreción; conductos auditivos sin secreción; nariz permeable; mucosa oral húmeda, paladar íntegro, dientes sin caries.",
+  o:"Conjuntivas (palidez, secreción), oídos (supuración, inflamación detrás de la oreja), nariz y boca (algodoncillo, paladar, frenillo, caries). La visión va en su propia pregunta.",
+  x:["Conjuntivitis","Conjuntivas pálidas","Oído supura","Inflamación detrás de la oreja","Muguet (algodoncillo)","Paladar hendido","Frenillo lingual corto","Caries"],
+  r:"Inflamación dolorosa detrás de la oreja: mastoiditis, remite hoy. Oído que supura: clasifica con AIEPI. Caries: odontología. Paladar hendido o frenillo que impide mamar: pediatría.",
+  g:["Oído: jala la oreja con suavidad hacia atrás y mira con linterna. Pus: otitis (menos de 14 días, aguda; 14 o más, crónica).",
+   "Muguet: placas blancas que no se quitan al frotar con una gasa. Revisa también el pezón de la madre.",
+   "Frenillo lingual corto: la lengua no pasa del labio o la punta hace forma de corazón. Si dificulta el agarre, valoración.",
+   "Primer diente entre los 6 y 12 meses. Una mancha blanca opaca junto a la encía es caries inicial: flúor y odontología."]},
+ {k:"cue",l:"Cuello y clavículas",n:"Cuello móvil, sin masas ni adenopatías; clavículas íntegras.",
+  o:"Que gire la cabeza a los dos lados, masas, ganglios y clavículas.",
+  x:["Tortícolis","Masa en el cuello","Adenopatías","Bulto o crepitación en clavícula"],
+  r:"Tortícolis o masa: pediatría (la fisioterapia temprana corrige la mayoría). Ganglio de más de 2 cm, duro o que crece: medicina. Clavícula fracturada: sujeta la manga a la camisa con un alfiler y remite.",
+  g:["Tortícolis congénita: cabeza inclinada a un lado y mentón girado al otro; a veces se palpa una bolita en el músculo del cuello.",
+   "Ganglios normales: pequeños (menos de 1 cm), móviles y no dolorosos. Alarma: más de 2 cm, duros, pegados, o con fiebre y pérdida de peso (piensa en tuberculosis).",
+   "Clavícula: pasa los dedos por toda su longitud. Bulto, crepitación, dolor o Moro asimétrico: fractura del parto."]},
+ {k:"tor",l:"Tórax: corazón y pulmones",n:"Tórax simétrico, sin tiraje; ruidos respiratorios sin agregados; ruidos cardiacos rítmicos sin soplos.",
+  o:"Forma del tórax, tiraje subcostal, sibilancias, estertores y soplos.",
+  x:["Tiraje subcostal","Sibilancias","Estertores","Soplo","Pecho hundido o en quilla","Botón mamario en el bebé"],
+  r:"Tiraje subcostal: neumonía grave según AIEPI, remite hoy. Soplo: pediatría, más si se cansa o suda al mamar, o se pone morado.",
+  g:["Tiraje subcostal: con el niño tranquilo y sin camisa, mira si la parte de abajo del tórax se hunde al tomar aire.",
+   "Cuenta la respiración durante 1 minuto completo, con el niño calmado.",
+   "Un soplo en un niño sin síntomas puede ser inocente, pero siempre lo confirma el médico.",
+   "El botón mamario del recién nacido es por las hormonas de la madre: no se exprime. El pecho un poco hundido (pectus) es frecuente y solo se vigila."]},
+ {k:"abd",l:"Abdomen y ombligo",n:"Abdomen blando, depresible, sin masas; ombligo sano; sin hernias.",
+  o:"Distensión, masas, hígado y bazo, ombligo y hernias en ombligo e ingles.",
+  x:["Distensión","Masa","Hígado o bazo grandes","Hernia umbilical","Hernia inguinal","Ombligo rojo o con secreción"],
+  r:"Masa en el abdomen: remite pronto (en niños puede ser un tumor de riñón). Bazo grande: gota gruesa. Hernia inguinal: cirugía programada; si está dura, dolorosa y no se reduce, urgencia. Ombligo con rojo que se extiende a la piel: infección, remite hoy.",
+  g:["Hernia umbilical: bulto en el ombligo que crece al llorar; casi todas cierran solas antes de los 4 a 5 años. No sirven monedas ni fajas.",
+   "Hernia inguinal: bulto en la ingle o en la bolsa del testículo que aparece al llorar o pujar; no cierra sola: cirugía.",
+   "Hígado: palpa desde abajo hacia arriba por el lado derecho; en el lactante es normal hasta 2 cm bajo las costillas."]},
+ {k:"gni",l:"Genitales y ano",n:"Genitales normoconfigurados; testículos en la bolsa; ano permeable y en posición normal.",
+  o:"Siempre con el cuidador presente y explicando qué haces. Niños: testículos, hidrocele, salida de la orina. Niñas: labios, secreción. Ano.",
+  x:["Testículo no descendido","Hidrocele","Hipospadias","Fimosis con dificultad para orinar","Sinequia de labios","Lesiones o signos de abuso"],
+  r:"Testículo no descendido después de los 6 meses: cirugía pediátrica. Hipospadias: remite y no circuncidar. Lesiones o sospecha de abuso: activa la ruta de violencia sexual.",
+  g:["Testículos: con la mano tibia, baja desde la ingle hacia la bolsa. Si sube y baja con facilidad es retráctil (normal).",
+   "Hidrocele: bolsa grande y blanda que se ilumina con la linterna; suele desaparecer antes del año.",
+   "Fimosis: es normal hasta los 3 a 4 años. Alarma: se infla el prepucio al orinar o hay infecciones repetidas. No retraer a la fuerza.",
+   "Sinequia de labios menores: los labios quedan unidos; si no impide orinar, se vigila."]},
+ {k:"cad",l:"Caderas",n:"Caderas sin limitación para abrir; pliegues simétricos; Ortolani, Barlow y Galeazzi negativos.",
+  o:"Displasia de cadera: pliegues de muslos y nalgas, apertura de las caderas, largo de las piernas y, si ya camina, la marcha.",
+  x:["Ortolani o Barlow positivo","Abre menos una cadera","Pliegues asimétricos","Una pierna más corta (Galeazzi)","Cojera o marcha de pato"],
+  r:"Cualquier hallazgo: remite a medicina para ecografía o radiografía y ortopedia pediátrica. Mientras tanto, no envolverlo con las piernas estiradas y juntas.",
+  g:["Ortolani (hasta los 3 meses): boca arriba y relajado, dobla caderas y rodillas a 90°, abre las piernas despacio hacia afuera empujando con tus dedos la parte de afuera del muslo hacia arriba. Un «clunk» (la cadera entra) es positivo.",
+   "Barlow: en la misma posición, junta las piernas y empuja suave hacia la camilla. Si sientes que la cadera se sale, es positivo.",
+   "Desde los 3 meses lo más confiable es la apertura: si no abre más de 60° o una abre menos que la otra, sospecha displasia.",
+   "Galeazzi: acostado, con caderas y rodillas dobladas y los pies juntos apoyados. Si una rodilla queda más baja, esa cadera puede estar luxada.",
+   "Más riesgo: niña, primer hijo, nació de nalgas, familiar con displasia, envolverlo con las piernas estiradas."]},
+ {k:"col",l:"Columna",n:"Columna alineada, sin fosita profunda, mechón de pelo ni masas en la línea media.",
+  o:"La línea media de la espalda: fosita, mechón de pelo, mancha, bulto y curvaturas.",
+  x:["Fosita sacra profunda o alta","Mechón de pelo o mancha en la línea media","Masa en la espalda","Curvatura anormal"],
+  r:"Fosita profunda, a más de 2,5 cm del ano, o con mechón, mancha o bulto: remite (descartar espina bífida oculta o médula anclada).",
+  g:["Fosita sacra simple: pequeña (menos de 5 mm), dentro del pliegue de las nalgas y con fondo visible: es normal.",
+   "Mancha mongólica (azul grisácea en la espalda baja y nalgas): normal en niños indígenas y mestizos, no es un golpe. Anótala para que nadie la confunda con maltrato."]},
+ {k:"ext",l:"Extremidades y pies",n:"Extremidades simétricas, con movilidad completa y sin deformidades; pies de forma normal.",
+  o:"Que mueva igual brazos y piernas, dedos (de más o unidos), forma de los pies, eje de las piernas y la marcha.",
+  x:["No mueve un brazo o una pierna","Dedos de más o unidos","Pie zambo (equino varo)","Antepié curvado hacia adentro","Piernas arqueadas (varo)","Piernas en X (valgo)","Pie plano","Camina en puntas"],
+  r:"Pie zambo, no mueve una extremidad o dedos de más: ortopedia o pediatría pronto. Piernas arqueadas o en X fuera de la edad, de un solo lado o que empeoran: medicina (descartar raquitismo). Camina en puntas después de los 3 años: pediatría.",
+  g:["Pie zambo: el pie está torcido hacia abajo y adentro y NO se corrige con tu mano. Se trata desde las primeras semanas con yesos (método Ponseti).",
+   "Antepié curvado hacia adentro (metatarso aducto) que SÍ se corrige con la mano: casi siempre mejora solo; estíralo suave en cada cambio de pañal.",
+   "Piernas arqueadas son normales hasta los 2 años; en X, entre los 3 y 7. Mide: arqueadas = espacio entre las rodillas con los tobillos juntos (alarma más de 6 cm); en X = espacio entre los tobillos con las rodillas juntas (alarma más de 8 cm).",
+   "Pie plano: normal hasta los 5 o 6 años. Pídele que se pare en puntas: si aparece el arco, es flexible y no necesita tratamiento.",
+   "Lo más importante es comparar los dos lados: la asimetría pesa más que la forma."]},
+ {k:"pie",l:"Piel",n:"Piel íntegra, hidratada, sin lesiones.",
+  o:"Color, lesiones, área del pañal, picor, manchas y moretones (dónde están y si coinciden con lo que cuentan).",
+  x:["Dermatitis del pañal","Escabiosis","Impétigo","Tiña","Hemangioma","Manchas café con leche","Moretones sin explicación","Quemaduras"],
+  r:PIEL_NNA,
+  g:["Escabiosis: granitos con mucho picor en la noche, entre los dedos, muñecas, axilas y cintura; en el bebé también en palmas, plantas y cabeza. Se trata a todos los de la casa el mismo día y se lava la ropa.",
+   "Impétigo: costras color miel alrededor de la nariz y la boca.",
+   "Hemangioma (mancha roja en fresa): crece los primeros meses y después se reduce. Remite si está en párpado, labio, nariz o zona del pañal, o si crece rápido.",
+   "Dermatitis del pañal: cambio frecuente, secar bien, crema de óxido de zinc; si hay puntos rojos alrededor, piensa en hongos."]},
+ {k:"neu",l:"Neurológico y tono",n:"Alerta, tono muscular normal, movimientos simétricos, interacción adecuada para la edad.",
+  o:"Tono (flojo o rígido), simetría, control de la cabeza e interacción. Los hitos van en Desarrollo y los reflejos en su pregunta.",
+  x:["Muy flojo (hipotonía)","Rígido (hipertonía)","Mueve un lado menos","Manos siempre empuñadas después de los 3 meses","Convulsiones referidas"],
+  r:"Alteración del tono o asimetría: pediatría o neurología. Convulsiones: signo de peligro AIEPI, remite hoy.",
+  g:["Suspensión ventral: sostenlo boca abajo con tu mano en su pecho. Hacia los 3 a 4 meses levanta la cabeza; si cuelga como un trapo, hipotonía.",
+   "De acostado a sentado: tómalo de las manos y súbelo despacio. Desde los 4 meses la cabeza acompaña al cuerpo y no se queda atrás.",
+   "Signo de la bufanda: lleva su mano hacia el hombro del otro lado. Si el codo pasa la mitad del pecho con mucha facilidad, hipotonía."]}];
+
+ SISTEMAS.ex_escolar=[
+ {k:"gen",l:"Aspecto general",n:"Buen estado general, alerta, hidratado, sin palidez.",
+  o:"Estado general, palidez, ánimo, higiene y signos de desnutrición u obesidad.",
+  x:["Pálido","Decaído o triste","Higiene deficiente","Cuello oscuro y aterciopelado (acantosis)"],
+  r:"Palidez: hemoglobina y gota gruesa. Acantosis: glicemia y medicina. Descuido marcado: indaga negligencia. Tristeza: tamizaje de salud mental.",
+  g:["Acantosis: piel oscura, gruesa y aterciopelada en la nuca, axilas o pliegues. No es suciedad ni se quita lavando: se relaciona con obesidad y resistencia a la insulina.",
+   "Palidez palmar: compara su palma con la tuya."]},
+ {k:"cab",l:"Cabeza, oídos, nariz y boca",n:"Cuero cabelludo sano; conjuntivas rosadas; oídos sin secreción; nariz permeable; dientes sin caries; amígdalas normales.",
+  o:"Cuero cabelludo, conjuntivas, oídos, nariz, dientes, encías y amígdalas. La visión va en su propia pregunta.",
+  x:["Pediculosis","Tiña de la cabeza","Conjuntivas pálidas","Oído supura","Amígdalas con placas","Caries","Respira por la boca"],
+  r:"Oído que supura: medicina. Amígdalas con pus y fiebre: medicina. Tiña de la cabeza: necesita tratamiento oral, medicina. Caries: odontología.",
+  g:["Piojos: busca liendres pegadas al pelo detrás de las orejas y en la nuca. Trata a toda la familia y revisa otra vez a los 7 días.",
+   "Tiña de la cabeza: placas redondas con pelos quebrados y escamas.",
+   "Respira por la boca y ronca: piensa en adenoides grandes o rinitis; valoración por medicina."]},
+ {k:"cue",l:"Cuello",n:"Cuello móvil, sin adenopatías; tiroides no palpable.",
+  o:"Ganglios, tiroides y masas.",x:["Adenopatías","Tiroides aumentada","Masa"],
+  r:"Ganglio de más de 2 cm, duro, pegado o con fiebre y pérdida de peso: medicina (piensa en tuberculosis). Tiroides grande: medicina.",
+  g:["Tiroides: de pie detrás de él, pon los dedos a los lados de la tráquea, bajo la manzana de Adán, y pídele que trague: la tiroides sube y baja. Si se ve o se palpa grande o con bolitas, remite."]},
+ {k:"tor",l:"Tórax: corazón, pulmones y mamas",n:"Tórax simétrico; ruidos respiratorios sin agregados; ruidos cardiacos rítmicos sin soplos.",
+  o:"Forma del tórax, sibilancias, estertores, soplos y desarrollo mamario.",
+  x:["Sibilancias","Estertores","Soplo","Pecho hundido o en quilla","Ginecomastia"],
+  r:"Soplo, sibilancias repetidas o estertores: medicina. Tos de más de 2 semanas: baciloscopia.",
+  g:["Ginecomastia puberal: botón bajo la areola en varones de 12 a 15 años, a veces doloroso; casi siempre desaparece en 1 a 2 años. Remite si mide más de 4 cm, es duro o aparece antes de los 10 años."]},
+ {k:"abd",l:"Abdomen",n:"Abdomen blando, depresible, no doloroso, sin masas ni visceromegalias.",
+  o:"Dolor, masas, hígado y bazo, hernias.",x:["Dolor a la palpación","Masa","Hígado o bazo grandes","Hernia"],
+  r:"Masa o dolor localizado: medicina. Bazo grande: gota gruesa."},
+ {k:"gni",l:"Genitales y desarrollo puberal",n:"Genitales normoconfigurados para la edad; desarrollo puberal acorde a la edad.",
+  o:"Solo con consentimiento y con acompañante. Estadio de Tanner (vello, mamas o genitales), testículos en la bolsa, varicocele.",
+  x:["Pubertad precoz","Pubertad tardía","Testículo no descendido","Varicocele","Lesiones o secreción","Signos de abuso"],
+  r:"Pubertad antes de los 8 años (niñas) o 9 (niños), o sin signos a los 13 (niñas) o 14 (niños): medicina. Lesiones o secreción: ITS y ruta de violencia sexual según la edad. Dolor brusco de un testículo: torsión, urgencia.",
+  g:["Tanner: 1 infantil; 2 comienza (botón mamario, crecen los testículos, vello escaso y fino); 3 y 4 avanza; 5 adulto. Anota el estadio.",
+   "Varicocele: venas como «bolsa de gusanos» encima del testículo izquierdo, más visibles de pie. Remite si duele o ese testículo es más pequeño.",
+   "Dolor fuerte y brusco de un testículo: torsión, cirugía antes de 6 horas."]},
+ {k:"col",l:"Columna (escoliosis)",n:"Columna alineada; hombros, escápulas y caderas simétricos; prueba de Adams negativa.",
+  o:"De espaldas y sin camisa: altura de los hombros y escápulas, espacio entre los brazos y la cintura; luego la prueba de Adams.",
+  x:["Hombro o escápula más alta","Cintura asimétrica","Giba en la prueba de Adams","Espalda encorvada","Lordosis marcada"],
+  r:"Giba en Adams o asimetría clara: medicina para radiografía (escoliosis). Es más importante entre los 10 y 15 años, cuando crecen rápido.",
+  g:["Prueba de Adams: de espaldas a ti, pies juntos y rodillas estiradas, que se incline hacia adelante dejando colgar los brazos. Mira la espalda a la altura de tus ojos: si un lado de las costillas o de la cintura queda más alto (giba), sospecha escoliosis.",
+   "Si la curva desaparece al inclinarse es postural; si la giba sigue, es estructural.",
+   "Espalda encorvada por postura se corrige al pararse derecho; si no se corrige, valoración.",
+   "El morral no debe pesar más del 10 % del peso del niño y se lleva en los dos hombros."]},
+ {k:"ext",l:"Extremidades y pies",n:"Extremidades simétricas, sin deformidades; marcha normal; pies sin alteraciones.",
+  o:"Eje de las piernas, rodillas, pies, uñas, marcha y dolor en articulaciones.",
+  x:["Piernas en X (valgo)","Piernas arqueadas (varo)","Pie plano rígido o doloroso","Dolor bajo la rodilla","Cojera","Juanete (hallux valgus)","Uña encarnada","Articulación inflamada"],
+  r:"Piernas en X con más de 8 cm entre tobillos después de los 7 años, arqueadas después de los 2, o de un solo lado: medicina. Cojera sin golpe, dolor que despierta en la noche o articulación inflamada: medicina pronto.",
+  g:["Eje: en X es normal hasta los 7 años; después debe ser casi recto. Mide el espacio entre los tobillos con las rodillas juntas.",
+   "Pie plano flexible (el arco aparece al pararse en puntas) no necesita plantillas si no duele. Si el arco no aparece o duele: medicina.",
+   "Dolor y bulto debajo de la rodilla en adolescentes que juegan fútbol (Osgood-Schlatter): reposo relativo y hielo; pasa al terminar el crecimiento.",
+   "Juanete (hallux valgus): el dedo gordo se desvía hacia los otros con un bulto en su base. Más frecuente con familia con juanetes o zapatos estrechos: zapato ancho.",
+   "Uña encarnada: se previene cortando la uña recta, no en curva."]},
+ {k:"pie",l:"Piel",n:"Piel íntegra, sin lesiones.",
+  o:"Lesiones, picor, manchas, úlceras, acné y cortes o moretones sin explicación.",
+  x:["Acné","Escabiosis","Hongos","Impétigo","Manchas claras","Úlcera que no sana","Mancha sin sensibilidad","Cortes de autolesión","Moretones sin explicación"],
+  r:"Úlcera que no sana: leishmaniasis, remite. Mancha sin sensibilidad: lepra, remite. Cortes en antebrazos o muslos: habla a solas, tamizaje de salud mental y ruta. Moretones sin explicación: indaga violencia.",
+  g:["Manchas claras con escama fina en la cara (pitiriasis alba): resequedad y sol; hidratar.",
+   "Manchas claras o café en el pecho y la espalda que descaman al rascar (pitiriasis versicolor): hongo, tratamiento antimicótico.",
+   "Úlcera de leishmaniasis: redonda, de bordes levantados, poco dolorosa y de más de 2 semanas: remite para frotis.",
+   "Sensibilidad de una mancha (lepra): con los ojos cerrados, toca con un algodón la mancha y la piel sana y pregunta si siente igual."]},
+ {k:"neu",l:"Neurológico",n:"Alerta, orientado, lenguaje y marcha normales, fuerza y coordinación conservadas.",
+  o:"Lenguaje, coordinación, fuerza y movimientos involuntarios.",
+  x:["Torpeza motora","Alteración de la marcha","Tics","Disminución de fuerza"],
+  r:"Alteración nueva o que empeora: medicina.",
+  g:["Coordinación: que camine en línea recta poniendo el talón delante de la punta, y que toque su nariz y tu dedo alternando."]}];
+
+ const PIES_AD={k:"pies",l:"Pies",n:"Pies sin deformidades, piel y uñas sanas, sensibilidad conservada.",
+  o:"Forma de los dedos, callos, uñas, hongos, heridas, pulsos y sensibilidad (sobre todo si tiene diabetes).",
+  x:["Juanete (hallux valgus)","Dedos en garra o martillo","Callos","Uña encarnada","Hongos en uñas o entre los dedos","Herida o úlcera","No siente el monofilamento"],
+  r:"Herida o úlcera en el pie de una persona con diabetes: remite hoy. Pérdida de sensibilidad: pie en riesgo, educación en cuidado del pie y medicina. Juanete doloroso o que impide calzarse: medicina.",
+  g:["Juanete (hallux valgus): el dedo gordo se desvía hacia los otros y aparece un bulto en su base. Sugiere zapato ancho y de punta redonda; remite si duele mucho o hay herida sobre el bulto.",
+   "Dedos en garra o martillo: los dedos quedan doblados; producen callos encima. Zapato con espacio para los dedos.",
+   "Monofilamento (si tiene diabetes): con los ojos cerrados, apoya el filamento hasta que se doble en 4 puntos de la planta de cada pie (dedo gordo y cabezas de los metatarsianos 1, 3 y 5) y pregunta si siente. Si no siente uno o más, pie en riesgo.",
+   "Pulsos: pedio (encima del pie, entre el primer y segundo dedo) y tibial posterior (detrás del tobillo, por dentro).",
+   "Uña encarnada y hongos: corte recto, secar bien entre los dedos."]};
+ const PIEL_AD={k:"piel",l:"Piel",n:"Piel íntegra, sin lesiones sospechosas.",
+  o:"Lunares, manchas, úlceras, hongos, manchas sin sensibilidad, heridas y moretones sin explicación.",
+  x:["Lunar sospechoso","Úlcera que no sana","Mancha sin sensibilidad","Hongos","Escabiosis","Moretones sin explicación"],
+  r:"Lunar sospechoso o herida que no cicatriza: medicina (dermatología). Úlcera crónica: leishmaniasis, remite. Mancha sin sensibilidad: lepra, remite. Moretones sin explicación: indaga violencia a solas.",
+  g:["Lunar sospechoso (ABCDE): Asimétrico, Bordes irregulares, Color variado, Diámetro mayor de 6 mm, Evolución (cambia, crece, sangra). En la planta del pie o bajo la uña también cuenta.",
+   "Sensibilidad de una mancha (lepra): con los ojos cerrados, toca con algodón la mancha y la piel sana y pregunta si siente igual.",
+   "Úlcera de leishmaniasis: redonda, de bordes levantados, poco dolorosa y de más de 2 semanas."]};
+ const COL_AD={k:"col",l:"Columna y espalda",n:"Columna alineada, movilidad conservada, sin dolor a la palpación.",
+  o:"Alineación, dolor, movilidad al agacharse y si el dolor baja a la pierna.",
+  x:["Dolor lumbar","Dolor que baja a la pierna","Rigidez","Curvatura anormal"],
+  r:"Dolor de espalda con fiebre, pérdida de peso, pérdida de fuerza en las piernas o de control de orina o deposición: remite hoy. Dolor que baja por la pierna: medicina.",
+  g:["Elevación de la pierna recta (Lasègue): acostado boca arriba, sube su pierna estirada. Si entre 30° y 70° aparece dolor que baja por detrás de la pierna, sugiere compresión de un nervio (ciática).",
+   "La mayoría del dolor lumbar mejora en semanas con actividad suave; el reposo prolongado empeora."]};
+ const MSUP={k:"msup",l:"Brazos y manos",n:"Miembros superiores simétricos, con movilidad y fuerza conservadas; manos sin deformidades.",
+  o:"Hombros, codos, muñecas y manos: dolor, deformidad, hormigueo, articulaciones inflamadas.",
+  x:["Hormigueo en la mano (túnel carpiano)","Nudos en los dedos","Articulaciones inflamadas","Dolor de hombro al levantar el brazo","Dolor de codo"],
+  r:"Articulaciones de las manos inflamadas en los dos lados, con rigidez de más de 30 minutos en la mañana: medicina (artritis). Hormigueo que despierta en la noche o pérdida de fuerza: medicina.",
+  g:["Phalen (túnel carpiano): junta el dorso de las dos manos con las muñecas dobladas 60 segundos. Si aparece hormigueo en los dedos pulgar, índice y medio, es positivo.",
+   "Tinel: golpea suave con el dedo la cara interna de la muñeca. Si da corrientazo hacia los dedos, es positivo.",
+   "Nudos duros en las últimas articulaciones de los dedos (nódulos de Heberden): artrosis, frecuente con la edad.",
+   "Dolor al levantar el brazo de lado entre 60° y 120°: problema del manguito del hombro."]};
+ const MINF={k:"minf",l:"Piernas",n:"Miembros inferiores simétricos, sin edemas ni várices, pulsos presentes.",
+  o:"Edemas, várices, color, temperatura, pulsos, rodillas y heridas.",
+  x:["Edema","Várices","Una pierna hinchada, roja y dolorosa","Úlcera en la pierna","Rodilla inflamada o con crujido"],
+  r:"Una sola pierna hinchada, caliente y dolorosa: posible trombosis, remite hoy. Edema en las dos piernas: medicina (corazón, riñón, hígado). Úlcera en la pierna: medicina.",
+  g:["Edema con fóvea (Godet): presiona con el pulgar 5 segundos sobre el hueso de la pierna. Si queda hundido, hay edema; anota hasta dónde sube (tobillo, media pierna, rodilla).",
+   "Várices: mírelas de pie. Con dolor, manchas oscuras en el tobillo o úlcera: medicina.",
+   "Úlcera venosa: en la parte interna del tobillo, con piel oscura alrededor. Úlcera arterial: en los dedos o el talón, muy dolorosa, con pie frío y pulsos débiles."]};
+ SISTEMAS.ex_adulto=[
+ {k:"gen",l:"Aspecto general",n:"Buen estado general, alerta, orientado, hidratado, sin palidez ni ictericia.",
+  o:"Conciencia, hidratación, palidez, ictericia, ánimo y marcha.",x:["Pálido","Ictérico","Deshidratado","Decaído"],
+  r:"Palidez: hemograma y gota gruesa. Ictericia o decaimiento marcado: medicina."},
+ {k:"cab",l:"Cabeza, cara y boca",n:"Normocéfalo; conjuntivas rosadas, escleras anictéricas; mucosa oral húmeda; dentadura en buen estado.",
+  o:"Cuero cabelludo, conjuntivas, escleras y boca (caries, encías, lesiones).",
+  x:["Conjuntivas pálidas","Escleras amarillas","Caries","Encías inflamadas o sangrantes","Lesión en la boca que no sana"],
+  r:"Lesión en la boca de más de 2 semanas: medicina (descartar cáncer). Caries o encías: odontología."},
+ {k:"cue",l:"Cuello",n:"Cuello móvil, tiroides no palpable, sin adenopatías ni ingurgitación yugular.",
+  o:"Tiroides, ganglios y venas del cuello.",x:["Tiroides aumentada","Nódulo tiroideo","Adenopatías","Venas del cuello distendidas"],
+  r:"Nódulo o tiroides grande: medicina. Ganglio de más de 2 cm, duro o que no se mueve: medicina. Venas distendidas con edema o ahogo: medicina pronto.",
+  g:["Tiroides: de pie detrás de la persona, pon los dedos a los lados de la tráquea y pídele que trague; la glándula sube y baja bajo tus dedos."]},
+ {k:"tor",l:"Tórax: corazón y pulmones",n:"Tórax simétrico; murmullo vesicular conservado sin agregados; ruidos cardiacos rítmicos sin soplos.",
+  o:"Ritmo, soplos, sibilancias, estertores y tos de más de 2 semanas.",x:["Soplo","Ritmo irregular","Sibilancias","Estertores","Tos de más de 2 semanas"],
+  r:"Soplo o ritmo irregular: medicina. Tos de más de 2 semanas: baciloscopia y medicina."},
+ {k:"abd",l:"Abdomen",n:"Abdomen blando, depresible, no doloroso, sin masas ni visceromegalias; sin hernias.",
+  o:"Dolor, masas, hígado y bazo, hernias en el ombligo, la ingle o cicatrices.",x:["Dolor a la palpación","Masa","Hígado o bazo grandes","Hernia"],
+  r:"Masa o visceromegalia: medicina; con fiebre y bazo grande, gota gruesa. Hernia dura y dolorosa que no se reduce: urgencia.",
+  g:["Hernia: pídele que tosa o puje de pie y mira la ingle y el ombligo; si sale un bulto que se reduce acostado, es una hernia."]},
+ COL_AD,MSUP,MINF,PIES_AD,PIEL_AD,
+ {k:"neu",l:"Neurológico",n:"Consciente, orientado, lenguaje y marcha normales, fuerza conservada.",
+  o:"Orientación, lenguaje, marcha, fuerza y sensibilidad.",x:["Alteración de la marcha","Alteración del lenguaje","Disminución de fuerza","Temblor"],
+  r:"Debilidad de un lado, boca desviada o lenguaje alterado de inicio súbito: posible ataque cerebral, remite de inmediato. Otra alteración nueva: medicina.",
+  g:["Fuerza: que apriete tus dedos con las dos manos al tiempo y empuje con los pies contra tus manos; compara los lados.",
+   "Ataque cerebral (cara, brazo, habla): cara desviada al sonreír, un brazo que cae al levantar los dos, habla enredada. Es urgencia."]}];
+
+ SISTEMAS.ex_vejez=SISTEMAS.ex_adulto.map(c=>Object.assign({},c));
+ (function(){const V=SISTEMAS.ex_vejez,f=k=>V.find(c=>c.k===k);
+  Object.assign(f("gen"),{o:"Conciencia, hidratación (la persona mayor casi no siente sed), palidez, ánimo, higiene y signos de descuido.",x:["Pálido","Deshidratado","Decaído","Descuidado"],r:"Deshidratación o decaimiento: medicina. Descuido marcado: indaga abandono o maltrato."});
+  Object.assign(f("cab"),{o:"Conjuntivas, boca (prótesis bien ajustada, heridas por la prótesis, caries, lesiones) y audición (cerumen).",x:["Conjuntivas pálidas","Prótesis mal ajustada","Herida en la boca","Lesión que no sana","Tapón de cerumen"],r:"Lesión en la boca de más de 2 semanas: medicina. Prótesis que lastima: odontología."});
+  const p=f("piel");Object.assign(p,{o:p.o+" Además: zonas de apoyo (sacro, talones, caderas) si pasa mucho tiempo acostado o sentado, y piel muy seca.",x:["Lesión por presión","Piel muy seca","Lunar sospechoso","Úlcera que no sana","Moretones sin explicación"],
+   r:"Lesión por presión: cambios de posición cada 2 horas, piel limpia y seca, y medicina. "+p.r,g:["Lesión por presión: presiona con un dedo la zona roja en el sacro o los talones; si no se pone blanca, ya hay daño (grado 1).","Piel seca y frágil: crema hidratante, baño sin agua muy caliente."].concat(p.g)});
+  const ms=f("msup");Object.assign(ms,{g:ms.g.concat(["Fuerza de agarre: si no logra apretar con firmeza tus dedos, piensa en fragilidad o sarcopenia."])});
+  const pi=f("pies");Object.assign(pi,{o:pi.o+" Si no alcanza a cortarse las uñas o a revisarse los pies, enséñale a la familia."});
+ })();
+
+ const L="Examen físico por sistemas, de cabeza a pies";
+ [["pinf","ex_pinf"],["inf","ex_escolar"],["adol","ex_escolar"],["juv","ex_adulto"],["adul","ex_adulto"],["vej","ex_vejez"]].forEach(([m,s])=>{const k=m+"::"+L;IVX[k]=Object.assign(IVX[k]||{},{sistemas:s,c:[]})});
 })();
 
 /* ---------- arranque ---------- */

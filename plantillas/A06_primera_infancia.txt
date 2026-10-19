@@ -115,8 +115,21 @@ R:
   Glasgow verbal (1 a 5): 5
   Glasgow motora (1 a 6): 6
 [9] Examen físico por sistemas, de cabeza a pies
-    > Opciones: Normal · Hallazgo · Piel o parásitos
+    > Llena cada línea debajo de R:. Lo que no hiciste, déjalo vacío.
 R: 
+  > Por región: escribe N si es normal o anota el hallazgo.
+  Aspecto general: 
+  Cabeza y fontanelas: 
+  Ojos, oídos, nariz y boca: 
+  Cuello y clavículas: 
+  Tórax: corazón y pulmones: 
+  Abdomen y ombligo: 
+  Genitales y ano: 
+  Caderas: 
+  Columna: 
+  Extremidades y pies: 
+  Piel: 
+  Neurológico y tono: 
 [10] Reflejos primitivos y reacciones posturales (opcional)
     > Llena cada línea debajo de R:. Lo que no hiciste, déjalo vacío.
     > Si no aplica por la edad: No aplica a esta edad: el neurodesarrollo se valora con la EAD-3.

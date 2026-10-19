@@ -102,8 +102,19 @@ R:
   Glasgow verbal (1 a 5): 5
   Glasgow motora (1 a 6): 6
 [9] Examen físico por sistemas, de cabeza a pies
-    > Opciones: Normal · Hallazgo · Piel o parásitos
+    > Llena cada línea debajo de R:. Lo que no hiciste, déjalo vacío.
 R: 
+  > Por región: escribe N si es normal o anota el hallazgo.
+  Aspecto general: 
+  Cabeza, oídos, nariz y boca: 
+  Cuello: 
+  Tórax: corazón, pulmones y mamas: 
+  Abdomen: 
+  Genitales y desarrollo puberal: 
+  Columna (escoliosis): 
+  Extremidades y pies: 
+  Piel: 
+  Neurológico: 
 [10] Crecimiento y estado nutricional
     > Opciones: Adecuado · Riesgo · Déficit · Obesidad
     > Llena cada línea debajo de R:. Lo que no hiciste, déjalo vacío.

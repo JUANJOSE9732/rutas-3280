@@ -189,11 +189,31 @@ R:
   Talla (m o cm): 
 [33] Examen por sistemas
     > Qué hacer: Examen cefalocaudal, incluida la cavidad bucal.
+    > Llena cada línea debajo de R:. Lo que no hiciste, déjalo vacío.
 R: 
+  > Por región: escribe N si es normal o anota el hallazgo.
+  Aspecto general: 
+  Cabeza y cara: 
+  Cavidad bucal: 
+  Cuello: 
+  Mamas: 
+  Tórax: corazón y pulmones: 
+  Abdomen: 
+  Extremidades: 
+  Piel y faneras: 
+  Neurológico: 
 [34] Valoración ginecológica
     > Qué hacer: Valoración ginecológica con especuloscopia.
     > Opciones: No: sin insumos · No: sin privacidad · No: no acepta
+    > Llena cada línea debajo de R:. Lo que no hiciste, déjalo vacío.
 R: 
+  > Por región: escribe N si es normal o anota el hallazgo.
+  Preparación: 
+  Genitales externos: 
+  Vagina y flujo: 
+  Cuello uterino: 
+  Toma de muestra: 
+  Tacto bimanual: 
 
 == PLAN ==
 [35] Exámenes solicitados

@@ -116,8 +116,20 @@ R:
     > Opciones: Sin riesgo · Sin protección · Desea embarazo · Disfunción sexual · Sospecha de violencia · Climaterio
 R: 
 [9] Examen físico por sistemas, de cabeza a pies
-    > Opciones: Normal · Hallazgo
+    > Llena cada línea debajo de R:. Lo que no hiciste, déjalo vacío.
 R: 
+  > Por región: escribe N si es normal o anota el hallazgo.
+  Aspecto general: 
+  Cabeza, cara y boca: 
+  Cuello: 
+  Tórax: corazón y pulmones: 
+  Abdomen: 
+  Columna y espalda: 
+  Brazos y manos: 
+  Piernas: 
+  Pies: 
+  Piel: 
+  Neurológico: 
 [10] Visión: estructuras oculares y agudeza visual
     > Llena cada línea debajo de R:. Lo que no hiciste, déjalo vacío.
 R: 

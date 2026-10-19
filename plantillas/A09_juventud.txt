@@ -116,8 +116,20 @@ R:
   4. ¿Le satisface como su familia le expresa afecto y responde a sus emociones como rabia, tristeza y amor? (0 Nunca, 1 Casi nunca, 2 Algunas veces, 3 Casi siempre, 4 Siempre): 
   5. ¿Le satisface como comparte en familia el tiempo libre para estar juntos, los espacios en la casa, el dinero, etc.? (0 Nunca, 1 Casi nunca, 2 Algunas veces, 3 Casi siempre, 4 Siempre): 
 [9] Examen físico por sistemas, de cabeza a pies
-    > Opciones: Normal · Hallazgo
+    > Llena cada línea debajo de R:. Lo que no hiciste, déjalo vacío.
 R: 
+  > Por región: escribe N si es normal o anota el hallazgo.
+  Aspecto general: 
+  Cabeza, cara y boca: 
+  Cuello: 
+  Tórax: corazón y pulmones: 
+  Abdomen: 
+  Columna y espalda: 
+  Brazos y manos: 
+  Piernas: 
+  Pies: 
+  Piel: 
+  Neurológico: 
 [10] Visión: estructuras oculares y agudeza visual
     > Llena cada línea debajo de R:. Lo que no hiciste, déjalo vacío.
 R: 
