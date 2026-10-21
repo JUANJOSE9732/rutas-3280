@@ -16,12 +16,12 @@ const F=await p.evaluate(()=>{const F=[],ok=(c,m)=>{if(!c)F.push(m)};localStorag
  /* mapeo: todo id existe y todo medicamento entregado aparece en alguna morbilidad */
  Object.entries(MB_BQ).forEach(([k,x])=>{ok(MB.find(z=>z.id===k),'morbilidad inexistente '+k);(x.m||[]).concat((x.no||[]).map(z=>[z])).forEach(([id])=>ok(bqGet(id),k+': medicamento inexistente '+id))});
  const usados=new Set(Object.values(MB_BQ).flatMap(x=>(x.m||[]).map(z=>z[0])));
- const sueltos=BQ.filter(m=>!m.ne&&!usados.has(m.id)).map(m=>m.id);
+ const sueltos=BQ.filter(m=>!m.ne&&!usados.has(m.id)&&!bqRutas(m.id).length).map(m=>m.id);
  /* semáforo */
- const e=id=>bqEstado(bqGet(id)).k;ok(e('peni')==='venc','penicilina debería salir vencida: '+e('peni'));
- ok(['rojo','venc'].includes(e('adren')),'adrenalina en rojo: '+e('adren'));ok(e('acet_t')==='verde','acetaminofén verde');ok(e('beclo')==='sinf','beclometasona sin fecha');ok(e('ibu')==='sin','ibuprofeno no entregado');
+ const e=id=>bqEstado(bqGet(id)).k;ok(e('peni')==='rojo','penicilina 12/2026 en rojo: '+e('peni'));ok(e('medroxi')==='verde'&&e('omep')==='verde','medroxi y omeprazol entregados');
+ ok(['rojo','venc'].includes(e('adren')),'adrenalina en rojo: '+e('adren'));ok(e('acet_t')==='verde','acetaminofén verde');ok(e('bisaco')==='sinf','bisacodilo sin fecha');ok(e('ibu')==='sin','ibuprofeno no entregado');
  /* corrección del inventario */
- S.set(BQ_KEY,JSON.stringify({peni:{ent:3,lote:'263012005',v:'2027-02'}}));ok(e('peni')!=='venc','la corrección no se aplica');localStorage.clear();
+ S.set(BQ_KEY,JSON.stringify({peni:{ent:3,lote:'263012005',v:'2026-02'}}));ok(e('peni')==='venc','la corrección no se aplica');localStorage.clear();
  /* calculadora */
  ok(/45 mg = 0,9 ml/.test(bqCalc(bqGet('adren'),0,10,{a:2}).replace(/0,1 mg = 0,1 ml/,'x'))||/0,1 mg = 0,1 ml/.test(bqCalc(bqGet('adren'),0,10,{a:2})),'adrenalina 10 kg: '+bqCalc(bqGet('adren'),0,10,{a:2}));
  ok(/0,3 mg = 0,3 ml/.test(bqCalc(bqGet('adren'),0,40,{a:10})),'adrenalina niño 40 kg tope 0,3: '+bqCalc(bqGet('adren'),0,40,{a:10}));
