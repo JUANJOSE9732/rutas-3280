@@ -1971,7 +1971,7 @@ function wireMiDia(){const cb=$("md-cal");if(cb)cb.onclick=calOpen;
 function mdShow(t){const s=$("md-st");s.innerHTML="";const a=document.createElement("textarea");a.value=t;a.rows=7;a.readOnly=true;s.append("No se pudo copiar solo. Mantén presionado el texto y cópialo:",a);a.focus();a.select()}
 
 /* ---------- PANEL ---------- */
-const VERSION_APP="2026-10-20 v180";
+const VERSION_APP="2026-10-21 v181";
 function home(){
   stopRec();if(S.get(AT_KEY))atReiniciar();st.view="home";
   const rm=["precon","prenatal","parto","rn","ive"],rp=["pinf","inf","adol","juv","adul","vej"];
@@ -8767,6 +8767,273 @@ function rutaBQWire(id){const box=$("ruta-bq");if(!box)return;
 function mbBQ(id,c){const x=MB_BQ[id];if(!x)return"";return `<dt style="color:var(--accent)">Del botiquín del puesto</dt><dd>${bqListaHTML(x,c).replace("No usar en este grupo:","No usar en esta condición:")}</dd>`}
 /* en la ficha del botiquín: en qué rutas se usa */
 function bqRutas(id){return Object.keys(RUTA_BQ).filter(k=>M[k]&&(RUTA_BQ[k].m||[]).some(z=>z[0]===id))}
+
+/* ======================= v181: CASOS PARA PRACTICAR (MORBILIDAD) =======================
+   Cada caso se apoya solo en la ficha de morbilidad de la app (MB) y cita la misma guía y página.
+   En cada pregunta la opción correcta es la primera del arreglo «o»; al mostrarla se barajan. */
+const CASOS=[
+ {id:"c-mal1",mb:"malaria",t:"Niño con fiebre y escalofrío",
+  p:"Niño de 9 años, 30 kg, pueblo cubeo, de una comunidad del Querarí. Fiebre desde hace 3 días con escalofrío y sudoración. Está despierto, come y camina. Sin convulsiones ni ictericia.",
+  q:[{q:"¿Qué haces antes de dar cualquier antimalárico?",o:["Gota gruesa o prueba rápida para confirmar","Dar cloroquina de una vez y confirmar después","Esperar 48 horas a ver si la fiebre cede","Dar acetaminofén y citar en una semana"],e:"En todo caso sospechoso se confirma con gota gruesa o prueba rápida antes de tratar. Si no se conoce la especie, se trata como P. falciparum.",f:"mal",p:"15–16"},
+     {q:"Sale P. vivax. Las tabletas de cloroquina son de 250 mg (150 mg de base). ¿Cuántas le das el día 1?",o:["2 tabletas (300 mg de base = 10 mg/kg)","1 tableta","4 tabletas","5 tabletas (25 mg/kg en un solo día)"],e:"Cloroquina 10 mg/kg de base el día 1, 10 mg/kg el día 2 y 5 mg/kg el día 3. Con 30 kg: 300 mg de base = 2 tabletas el día 1, 2 el día 2 y 1 el día 3.",f:"mal",p:"47 y 162"},
+     {q:"Para la cura radical, ¿qué primaquina corresponde?",o:["0,25 mg/kg al día por 14 días: 7,5 mg diarios","Dosis única de 15 mg","0,75 mg/kg al día por 3 días","No necesita primaquina"],e:"P. vivax, cura radical: primaquina 0,25 mg/kg al día por 14 días. No en gestantes, menores de 6 meses, mujeres que lactan a menores de 6 meses ni déficit de G6PD.",f:"mal",p:"17 y 162"}]},
+ {id:"c-mal2",mb:"malaria",t:"Adulto con P. falciparum",
+  p:"Hombre de 40 años, 60 kg, pesca en el río. Fiebre y dolor de cabeza. La prueba rápida es positiva para P. falciparum. Sin signos de malaria complicada.",
+  q:[{q:"¿Cómo das el arteméter + lumefantrina 20/120 mg?",o:["4 tabletas dos veces al día por 3 días, con comida grasa","2 tabletas al día por 7 días","4 tabletas en dosis única","1 tableta cada 8 horas por 5 días"],e:"Dos veces al día por 3 días (6 dosis), con comida grasa. Con 35 kg o más: 4 tabletas por dosis.",f:"mal",p:"15 y 28"},
+     {q:"¿Qué se añade para cortar la transmisión?",o:["Primaquina dosis única de 0,25 mg/kg (15 mg)","Primaquina por 14 días","Cloroquina por 3 días","Nada más"],e:"En P. falciparum se añade primaquina dosis única de 0,25 mg/kg, con las mismas exclusiones (gestantes, menores de 6 meses, lactancia de menores de 6 meses).",f:"mal",p:"15"},
+     {q:"Al segundo día está postrado y la remisión tarda. ¿Qué indica la guía?",o:["Dosis única de artesunato IM antes de referir, por orden médica","Duplicar la dosis de arteméter + lumefantrina","Dar dexametasona y esperar","Seguir igual y controlar en 3 días"],e:"La postración es criterio de malaria complicada. Si la remisión tarda: dosis única de artesunato IM antes de referir (rectal en menores de 6 años si no hay IM), por orden médica.",f:"mal",p:"18 y 54"}]},
+ {id:"c-mal3",mb:"malaria",t:"Gestante con malaria",
+  p:"Mujer de 22 años con 10 semanas de embarazo. Fiebre y escalofrío. La gota gruesa muestra P. falciparum, sin signos de malaria complicada.",
+  q:[{q:"¿Cuál es el tratamiento en el primer trimestre?",o:["Quinina más clindamicina por 7 días","Arteméter + lumefantrina con primaquina","Cloroquina por 3 días","Primaquina por 14 días"],e:"Gestante en primer trimestre con P. falciparum: quinina más clindamicina por 7 días.",f:"mal",p:"16–17"},
+     {q:"¿Puede recibir primaquina?",o:["No, está contraindicada en gestantes","Sí, en dosis única","Sí, por 14 días","Solo si pesa más de 50 kg"],e:"La primaquina no se da en gestantes, menores de 6 meses, mujeres que lactan a menores de 6 meses ni con déficit de G6PD.",f:"mal",p:"15 y 17"},
+     {q:"¿Cuál de estos hallazgos la convierte en malaria complicada?",o:["Saturación de 90 %","Fiebre de 38,5 °C","Dolor de cabeza","Escalofrío"],e:"Es complicada con postración, más de 2 convulsiones en 24 horas, ictericia, saturación menor de 92 % o hiperparasitemia mayor de 10 %.",f:"mal",p:"54"}]},
+ {id:"c-den1",mb:"dengue",t:"Fiebre con dolor detrás de los ojos",
+  p:"Mujer de 30 años, no gestante. Cuarto día de fiebre con dolor detrás de los ojos y dolor muscular. Gota gruesa negativa. Tolera la vía oral y no tiene signos de alarma.",
+  q:[{q:"Pide algo para el dolor. ¿Qué le das?",o:["Acetaminofén 500 mg cada 6 horas (máximo 4 g al día)","Ibuprofeno 400 mg cada 8 horas","Diclofenaco 75 mg IM","Aspirina 500 mg"],e:"En dengue: acetaminofén. No usar AINE (ibuprofeno, diclofenaco, aspirina) ni corticoides.",f:"den",p:"48–49"},
+     {q:"¿Cómo la hidratas?",o:["Sales de rehidratación oral con vasos medidos, hasta 3000 ml al día","Solo agua cuando tenga sed","Líquidos IV en el puesto","Restringir líquidos para no edematizarla"],e:"Sin signos de alarma: hidratación oral intensa con sales de rehidratación oral, usando vasos medidos; adultos hasta 3000 ml al día.",f:"den",p:"47"},
+     {q:"Mañana ya no tiene fiebre. ¿Qué haces?",o:["Seguir el control diario hasta 48 horas después de que ceda la fiebre","Darle de alta: ya pasó","Citarla en un mes","Suspender las sales"],e:"La fase crítica empieza cuando baja la fiebre: control diario hasta 48 horas después de que ceda.",f:"den",p:"46"}]},
+ {id:"c-den2",mb:"dengue",t:"Niño con dengue que vomita",
+  p:"Niño de 9 años con 5 días de fiebre. Hoy vomitó 3 veces en una hora y tiene dolor abdominal intenso y continuo.",
+  q:[{q:"¿Cómo lo clasificas?",o:["Dengue con signos de alarma","Dengue sin signos de alarma","Gastroenteritis, no es dengue","Dengue grave solo si hay sangrado"],e:"Dolor abdominal intenso y continuo y vómito persistente (3 o más en una hora) son signos de alarma.",f:"den",p:"46"},
+     {q:"¿Qué conducta corresponde?",o:["Líquidos IV con cristaloides y remisión","Sales orales en casa y control en 48 horas","Ondansetrón y alta","Metamizol para el dolor y observar"],e:"Con un signo de alarma o más: líquidos IV con cristaloides; es criterio de hospitalización y remisión.",f:"den",p:"46–48"},
+     {q:"¿Puedes darle metamizol para el dolor?",o:["No: en dengue el metamizol es solo para mayores de 15 años","Sí, 500 mg cada 6 horas","Sí, en dosis única","Sí, por vía IM"],e:"Metamizol solo en mayores de 15 años, 500 mg cada 6 horas por máximo 72 horas. En niños: acetaminofén 10 mg/kg cada 6 horas.",f:"den",p:"48–49"}]},
+ {id:"c-eda1",mb:"eda",t:"Diarrea en niña de 18 meses",
+  p:"Niña de 18 meses, 10 kg. Diarrea líquida desde ayer, 6 deposiciones. Tiene los ojos hundidos, bebe ávidamente, está irritable y el pliegue cutáneo regresa en menos de 2 segundos. Recibe el pecho.",
+  q:[{q:"¿Cómo clasificas la deshidratación?",o:["Algún grado de deshidratación","Sin deshidratación","Deshidratación grave","No se puede clasificar sin laboratorio"],e:"Algún grado: 2 o más de ojos hundidos, bebe ávidamente, irritable, pliegue de menos de 2 segundos. Grave: 2 o más de ojos hundidos, letárgico o inconsciente, pliegue de más de 2 segundos.",f:"eda",p:"24 y 39"},
+     {q:"¿Cuánto suero oral le das y en cuánto tiempo?",o:["500 a 1000 ml (50 a 100 ml/kg) en 2 a 4 horas, revisando cada hora","100 ml después de cada deposición, nada más","2 litros en una hora","Suspender el pecho y dar solo suero"],e:"Con algún grado de deshidratación: sales de rehidratación oral de baja osmolaridad, 50 a 100 ml/kg en 2 a 4 horas, revisando cada hora. Seguir la lactancia.",f:"eda",p:"27"},
+     {q:"¿Qué más le formulas?",o:["Zinc 20 mg al día por 10 a 14 días","Loperamida","Metoclopramida","Antibiótico de rutina"],e:"Zinc por 10 a 14 días: 10 mg al día en menores de 6 meses y 20 mg en mayores. No antidiarreicos ni metoclopramida; no antibióticos de rutina.",f:"eda",p:"32–34"}]},
+ {id:"c-eda2",mb:"eda",t:"Lactante letárgico con diarrea",
+  p:"Niño de 8 meses, 7 kg. Diarrea abundante desde hace 2 días. Está letárgico, con ojos hundidos y el pliegue regresa en más de 2 segundos.",
+  q:[{q:"¿Cómo lo clasificas?",o:["Deshidratación grave","Algún grado de deshidratación","Sin deshidratación","Desnutrición, no deshidratación"],e:"Grave con 2 o más de: ojos hundidos, letárgico o inconsciente, pliegue de más de 2 segundos.",f:"eda",p:"24 y 39"},
+     {q:"Lograste acceso venoso. ¿Cuánto lactato de Ringer pasas en los primeros 30 minutos?",o:["210 ml (30 ml/kg)","70 ml (10 ml/kg)","700 ml (100 ml/kg)","490 ml (70 ml/kg)"],e:"Lactato de Ringer 100 ml/kg: 30 ml/kg en 30 minutos y luego 70 ml/kg en 5 horas y media si es menor de 12 meses. Con 7 kg: 210 ml y luego 490 ml.",f:"eda",p:"28–29"},
+     {q:"Si no consigues acceso venoso, ¿qué haces mientras llega la remisión?",o:["Rehidratar por sonda nasogástrica","Esperar el transporte sin dar nada","Dar el suero por cucharadas cada hora y nada más","Aplicar líquidos IM"],e:"Si no hay acceso venoso: sonda nasogástrica. La deshidratación grave es criterio para hospitalizar.",f:"eda",p:"25 y 28–29"}]},
+ {id:"c-eda3",mb:"eda",t:"Niño que vomita todo el suero",
+  p:"Niño de 3 años, 14 kg, con diarrea y algún grado de deshidratación. Vomitó 4 veces en la última hora y no tolera el suero oral. No convulsiona, el abdomen está blando y no parece séptico.",
+  q:[{q:"¿Qué riesgo tiene?",o:["Alto riesgo de deshidratación (3 o más vómitos en una hora)","Ninguno: el vómito es normal","Solo riesgo si tiene fiebre","Riesgo solo si pasa de 10 vómitos"],e:"Alto riesgo de deshidratación: 3 o más vómitos en una hora o 5 o más en cuatro horas.",f:"eda",p:"34"},
+     {q:"¿Qué antiemético corresponde, si lo ordena medicina?",o:["Ondansetrón oral dosis única de 2 mg","Metoclopramida 10 mg","Dimenhidrinato cada 8 horas","Ondansetrón 8 mg cada 8 horas por 3 días"],e:"Ondansetrón dosis única oral: 2 mg si pesa menos de 15 kg y 4 mg entre 15 y 30 kg. No metoclopramida en niños con diarrea.",f:"eda",p:"33–34"},
+     {q:"¿En cuál de estas situaciones NO usarías ondansetrón?",o:["Abdomen agudo o sospecha de obstrucción intestinal","Vómito con algún grado de deshidratación","Niño que no tolera el suero","Niño mayor de 2 años"],e:"No usarlo si hay sospecha de sepsis, obstrucción intestinal, abdomen agudo o convulsiones.",f:"eda",p:"33–34"}]},
+ {id:"c-ira1",mb:"ira",t:"Tos y respiración rápida",
+  p:"Niño de 2 años, 12 kg, con tos y fiebre desde hace 3 días. Contaste 46 respiraciones en un minuto completo. Sin tiraje, saturación de 96 %, bebe bien.",
+  q:[{q:"¿Qué antibiótico y dosis corresponde a la neumonía?",o:["Amoxicilina 90 mg/kg al día por 5 días: 1080 mg al día","Amoxicilina 50 mg/kg al día por 10 días","Azitromicina por 3 días","No necesita antibiótico"],e:"Neumonía: amoxicilina 90 mg/kg al día por 5 días; mantenerla también durante el traslado si se remite.",f:"neu",p:"46"},
+     {q:"¿Cuándo lo controlas?",o:["A las 48 horas","En 15 días","Solo si empeora","En una semana"],e:"Neumonía no grave: control a las 48 horas.",f:"neu",p:"43–46"},
+     {q:"En el control la saturación está en 93 %. ¿Qué haces?",o:["Remitir para hospitalizar (94 % o menos, en zonas de 0 a 1500 msnm)","Seguir igual en casa","Cambiar a azitromicina","Darle salbutamol y citar en 48 horas"],e:"Saturación de 94 % o menos en zonas de 0 a 1500 msnm, como Mitú: hospitalizar. Sin oxígeno disponible: telemedicina y remisión urgente.",f:"neu",p:"43"}]},
+ {id:"c-ira2",mb:"ira",t:"Lactante con sibilancias",
+  p:"Niña de 7 meses. Hace 3 días empezó con mocos y ahora tiene tos, silbido en el pecho y crépitos. Es su primer episodio. Saturación de 96 %, sin tiraje.",
+  q:[{q:"¿Cuál es el diagnóstico más probable?",o:["Bronquiolitis","Crisis de asma","Neumonía bacteriana","Tuberculosis"],e:"Bronquiolitis: menor de 2 años con primer episodio de sibilancias o crépitos, precedido de síntomas de resfriado.",f:"neu",p:"27"},
+     {q:"¿Qué tratamiento indica la guía?",o:["Ninguno de estos: sin antibiótico, sin salbutamol, sin corticoide ni jarabes","Salbutamol inhalado cada 20 minutos","Amoxicilina por 5 días","Prednisolona por 3 días"],e:"Bronquiolitis: no antibióticos, no salbutamol, no solución salina al 3 % ambulatoria, no adrenalina nebulizada, no corticoides, no jarabes para la tos.",f:"neu",p:"45 y 49–55"},
+     {q:"Si hubiera que trasladarla con oxígeno, ¿a cuánto?",o:["Por cánula, máximo 1 litro por minuto","5 litros por minuto con máscara","Sin oxígeno, solo aspirar","10 litros por minuto"],e:"Traslado con oxígeno por cánula, máximo 1 litro por minuto.",f:"neu",p:"43"}]},
+ {id:"c-dnt1",mb:"dnt",t:"Niño muy delgado",
+  p:"Niño de 2 años y medio, 9,8 kg. El peso para la talla está en −3,4 DE. Sin edema. Pasa la prueba de apetito con la fórmula terapéutica. No tiene diarrea, fiebre ni otros signos de peligro.",
+  q:[{q:"¿Cómo lo clasificas?",o:["Desnutrición aguda severa","Desnutrición aguda moderada","Riesgo de desnutrición","Talla baja"],e:"Moderada: puntaje Z de peso para la talla entre −2 y −3. Severa: menor de −3 o edema bilateral.",f:"dnt",p:"16"},
+     {q:"¿Puede manejarse en casa?",o:["Sí, porque tiene apetito y no tiene complicaciones","No, toda desnutrición severa se hospitaliza","Sí, aunque no hubiera pasado la prueba de apetito","Solo si pesa más de 10 kg"],e:"El manejo en casa es posible solo si cumple los criterios: apetito conservado y sin complicaciones.",f:"dnt",p:"34"},
+     {q:"¿Qué medicamentos de rutina le corresponden?",o:["Amoxicilina 90 mg/kg al día cada 12 horas por 7 días y albendazol 400 mg","Solo vitamina A","Metronidazol por 7 días","Ningún medicamento"],e:"Amoxicilina 90 mg/kg al día cada 12 horas por 7 días. Albendazol 200 mg de 12 a 23 meses o 400 mg de 24 meses en adelante.",f:"dnt",p:"51"}]},
+ {id:"c-dnt2",mb:"dnt",t:"Brazo delgado y pies hinchados",
+  p:"Niña de 14 meses. Perímetro braquial de 11,2 cm. Tiene edema en ambos pies, está decaída y vomita todo lo que recibe.",
+  q:[{q:"¿Qué significa el perímetro braquial de 11,2 cm?",o:["Desnutrición aguda severa (menor de 11,5 cm de 6 a 59 meses)","Desnutrición moderada","Es normal para la edad","Solo sirve en mayores de 5 años"],e:"Perímetro braquial menor de 11,5 cm entre 6 y 59 meses es desnutrición severa, igual que el edema bilateral.",f:"dnt",p:"16 y 32"},
+     {q:"Con el vómito y el decaimiento, ¿cuál es la conducta?",o:["Urgencia vital: remisión para manejo hospitalario","Fórmula terapéutica en casa y control en 7 días","Prueba de apetito y si la pasa, a casa","Desparasitar y citar al mes"],e:"Con complicaciones (choque, diarrea, infección, anemia severa, hipoglicemia, vomita todo, letargia, convulsión) es urgencia vital, con criterios de manejo hospitalario.",f:"dnt",p:"32 y 35"},
+     {q:"¿Qué haces mientras llega el transporte?",o:["Glucometría para tratar la hipoglicemia, abrigarla y no dar líquidos IV rápidos salvo choque","Bolos de líquidos IV rápidos aunque no esté en choque","Bañarla con agua fría","Nada hasta que llegue al hospital"],e:"Mientras se remite: prevenir y tratar la hipoglicemia, abrigar para evitar la hipotermia, no dar líquidos IV rápidos salvo choque.",f:"dnt",p:"38, 43, 47 y 49"}]},
+ {id:"c-ofi",mb:"ofidico",t:"Mordedura en la chagra",
+  p:"Hombre de 35 años mordido por una serpiente en el pie mientras trabajaba en la chagra, hace una hora. El pie está hinchado y le sangran las encías. Un familiar ya le amarró un trapo en la pierna.",
+  q:[{q:"¿Qué haces con el miembro?",o:["Inmovilizarlo, retirar el amarre y la ropa apretada; sin cortar, succionar ni hielo","Dejar el torniquete hasta llegar al hospital","Cortar y succionar la herida","Poner hielo y una pomada"],e:"Inmovilizar el miembro, retirar anillos y ropa apretada. Sin torniquete, sin cortar, sin succionar, sin hielo, sin remedios en la herida.",f:"ofi",p:""},
+     {q:"La sangre en el tubo de vidrio no coagula a los 20 minutos. ¿Qué significa?",o:["Envenenamiento con trastorno de la coagulación","Que la prueba se hizo mal: repetirla mañana","Que no hubo envenenamiento","Que necesita vitamina K"],e:"Prueba del tubo seco a los 20 minutos: si no coagula, hay envenenamiento con trastorno de la coagulación. Se repite cada 6 horas.",f:"oms_of",p:""},
+     {q:"Con la sangre que no coagula, ¿qué evitas?",o:["Aplicar inyecciones intramusculares","Canalizar una vena","Tomar signos vitales cada hora","Medir el perímetro del miembro"],e:"No aplicar inyecciones IM si la sangre no coagula. Líquidos IV si hay acceso.",f:"oms_of",p:""},
+     {q:"¿Cómo se aplica el antiveneno?",o:["Por orden médica (telemedicina) y con adrenalina a mano","En cualquier dosis apenas llegue","Solo si el paciente lo pide","No sirve después de una hora"],e:"El antiveneno es el único tratamiento específico; se aplica por orden médica y con adrenalina a mano por el riesgo de reacción. Remisión inmediata y ficha SIVIGILA.",f:"ofi",p:""}]},
+ {id:"c-rab",mb:"rabia",t:"Mordedura de murciélago",
+  p:"Niña de 6 años. La mamá cuenta que en la madrugada un murciélago le mordió el dedo del pie mientras dormía en la hamaca. Tiene una herida pequeña.",
+  q:[{q:"¿Qué haces primero con la herida?",o:["Lavarla con agua y jabón abundantes durante 10 a 15 minutos","Cubrirla sin lavar","Suturarla de inmediato","Aplicar alcohol y dejarla así"],e:"Lavar la herida con agua y jabón abundantes durante 10 a 15 minutos.",f:"rab",p:"1"},
+     {q:"¿Cómo clasificas la exposición?",o:["Exposición grave: todo contacto con murciélago lo es","Exposición leve, porque la herida es pequeña","Sin exposición","Depende de si el murciélago estaba enfermo"],e:"El contacto con murciélago es exposición grave, igual que las heridas en cabeza, cara, cuello, manos, genitales o múltiples o profundas.",f:"rab",p:"1"},
+     {q:"¿Qué profilaxis necesita?",o:["Vacuna antirrábica más suero antirrábico, gestionada el mismo día","Solo vacuna en 4 dosis","Observar al murciélago 10 días","Antibiótico y control en una semana"],e:"Exposición grave: vacuna más suero antirrábico. La profilaxis es urgente: telemedicina el mismo día. Se notifica en SIVIGILA (ficha de agresión por animal potencialmente transmisor de rabia).",f:"rab",p:"1"}]},
+ {id:"c-ana1",mb:"anafilaxia",t:"Reacción después de una inyección",
+  p:"Mujer de 28 años, 60 kg. A los 10 minutos de una inyección de penicilina benzatínica le salen ronchas por todo el cuerpo, le silba el pecho y la presión está en 80/50.",
+  q:[{q:"¿Qué es lo primero que aplicas?",o:["Adrenalina intramuscular en la cara anterolateral del muslo","Loratadina oral","Hidrocortisona IV y esperar","Salbutamol inhalado"],e:"Adrenalina IM en el muslo. Antihistamínicos y corticoides no reemplazan a la adrenalina.",f:"wao",p:""},
+     {q:"Con la ampolla de 1 mg/ml, ¿qué dosis le pones?",o:["0,5 mg (0,5 ml): 0,01 mg/kg con máximo de 0,5 mg en adultos","0,6 mg (0,6 ml)","1 mg (la ampolla completa)","0,1 mg"],e:"0,01 mg/kg, máximo 0,5 mg en adultos y 0,3 mg en niños. Con 60 kg el cálculo da 0,6 mg, pero el máximo es 0,5 mg. Se repite a los 5 a 15 minutos si no mejora.",f:"wao",p:""},
+     {q:"¿En qué posición la dejas?",o:["Acostada boca arriba con las piernas elevadas","De pie para que respire mejor","Sentada con las piernas colgando","Boca abajo"],e:"Acostar boca arriba con piernas elevadas (sentada si le falta el aire; de lado si vomita o está embarazada). No ponerla de pie de golpe.",f:"wao",p:""},
+     {q:"Ya mejoró. ¿Qué sigue?",o:["Observarla varias horas por riesgo de reacción bifásica y reportar farmacovigilancia","Mandarla a casa enseguida","Aplicar la segunda dosis de penicilina","Solo anotarlo en la historia"],e:"Observar varias horas por riesgo de reacción bifásica; más tiempo si necesitó más de una dosis. Si fue por medicamento: farmacovigilancia.",f:"wao",p:""}]},
+ {id:"c-ana2",mb:"anafilaxia",t:"Niño después de la vacuna",
+  p:"Niño de 5 años, 20 kg. Minutos después de una vacuna se le hinchan los labios y tiene ronquera y dificultad para respirar.",
+  q:[{q:"¿Qué dosis de adrenalina IM (1 mg/ml) le aplicas?",o:["0,2 mg (0,2 ml)","0,5 mg (0,5 ml)","0,02 mg","1 mg"],e:"Niño: 0,01 mg/kg IM, máximo 0,3 mg. Con 20 kg: 0,2 mg = 0,2 ml.",f:"wao",p:""},
+     {q:"¿Cómo se notifica?",o:["Como evento adverso posvacunal (ESAVI)","No se notifica","Como intoxicación","Solo con una nota en el carné"],e:"Si la anafilaxia fue por vacuna: evento adverso posvacunal (ESAVI).",f:"wao",p:""},
+     {q:"¿Cuál de estos es signo de alarma en la anafilaxia?",o:["Voz ronca o estridor","Ronchas en los brazos","Picor","Estornudos"],e:"Signos de alarma: estridor, voz ronca, hipotensión, alteración de la conciencia, falta de respuesta a dos dosis de adrenalina.",f:"wao",p:""}]},
+ {id:"c-ecl",mb:"convulsion",t:"Gestante que convulsiona",
+  p:"Gestante de 19 años, 34 semanas. La traen porque convulsionó en la casa. Presión de 170/112.",
+  q:[{q:"¿Qué estás pensando?",o:["Eclampsia","Epilepsia","Malaria cerebral, sin más","Hipoglicemia, y nada más"],e:"Gestante desde la semana 20 o puérpera que convulsiona: pensar en eclampsia. También tomar glucometría y temperatura.",f:"hta",p:"4"},
+     {q:"¿Qué medicamento es el de elección, por orden médica?",o:["Sulfato de magnesio 4 g IV en 10 a 15 minutos y luego 1 g por hora","Diazepam IV","Fenitoína IV","Ninguno, solo remitir"],e:"Eclampsia: sulfato de magnesio 4 g IV en 10 a 15 minutos y luego 1 g por hora durante 24 horas. Si recurre: 2 a 4 g IV en 5 minutos. No usar diazepam ni fenitoína.",f:"hta",p:"23"},
+     {q:"Con sulfato de magnesio, ¿qué vigilas cada hora?",o:["Reflejos, frecuencia respiratoria y diuresis","Solo la temperatura","Glucometría cada 10 minutos","Nada especial"],e:"Con sulfato de magnesio vigilar reflejos, frecuencia respiratoria y diuresis cada hora. Es emergencia: remisión inmediata.",f:"hta",p:"23"}]},
+ {id:"c-pre",mb:"preeclampsia",t:"Gestante con dolor de cabeza",
+  p:"Gestante de 32 años, 30 semanas. Dolor de cabeza intenso desde ayer y ve lucecitas. Presión de 162/112 en dos tomas.",
+  q:[{q:"¿Cómo la clasificas?",o:["Preeclampsia severa","Hipertensión crónica sin importancia","Migraña del embarazo","Normal para las 30 semanas"],e:"Es preeclampsia severa con presión de 160/110 o más, o con cefalea, alteraciones visuales, dolor epigástrico, clonus o signos de HELLP.",f:"hta",p:"4"},
+     {q:"¿Cuál es la conducta?",o:["Emergencia: remisión inmediata, sulfato de magnesio por orden médica, acostada de lado izquierdo","Acetaminofén y control en una semana","Losartán y control en un mes","Reposo en casa"],e:"Es emergencia: remisión inmediata. Sulfato de magnesio por orden médica (telemedicina); acostada de lado izquierdo con acceso venoso.",f:"hta",p:"23"},
+     {q:"¿Qué antihipertensivos contempla la guía para la hipertensión severa, por orden médica?",o:["Labetalol IV, hidralazina IV o nifedipino oral","Losartán o enalapril","Hidroclorotiazida","Propranolol oral"],e:"Hipertensión severa: labetalol IV, hidralazina IV o nifedipino oral, por orden médica. Losartán y enalapril están contraindicados en el embarazo.",f:"hta",p:"23"}]},
+ {id:"c-hpp",mb:"hpp",t:"Sangrado después del parto",
+  p:"Mujer que tuvo su parto en la comunidad hace 40 minutos. Sangra mucho; en la bolsa colectora van 700 ml. El útero está blando, pulso de 118 y está pálida.",
+  q:[{q:"¿Cómo confirmas la hemorragia posparto?",o:["Midiendo la pérdida (bolsa colectora o pesando paños): 500 ml o más","Calculándola a ojo","Esperando a que se desmaye","Por el color de la sangre"],e:"Medir la pérdida de sangre en vez de calcularla a ojo; 500 ml o más, o menos con signos de inestabilidad, es hemorragia posparto.",f:"hpo",p:""},
+     {q:"¿Qué haces de inmediato?",o:["Código rojo: pedir ayuda, dos accesos venosos, masaje uterino y oxitocina","Darle agua y esperar","Ponerle compresas y citar mañana","Solo remitir sin hacer nada"],e:"Activar código rojo: pedir ayuda, oxígeno, dos accesos venosos con catéter 14 o 16, sonda vesical, abrigarla; masaje uterino y compresión bimanual.",f:"hpp",p:"12–15"},
+     {q:"¿Cómo das la oxitocina?",o:["5 UI IV lenta, más 30 UI en 500 ml para 4 horas","10 UI IM y nada más","40 UI IV directa en bolo","No se usa si ya nació la placenta"],e:"Oxitocina 5 UI IV lenta, más 30 UI en 500 ml para 4 horas.",f:"hpp",p:"15"},
+     {q:"Sigue sangrando y su presión es de 150/100. ¿Qué segunda línea NO puedes usar?",o:["Metilergonovina","Misoprostol si no hay otra opción","Masaje uterino","Compresión bimanual"],e:"Metilergonovina 0,2 mg IM está contraindicada si hay hipertensión. Misoprostol 800 mcg sublingual solo si no hay oxitocina ni metilergonovina. Ácido tranexámico 1 g IV si no cede.",f:"hpp",p:"15–17"}]},
+ {id:"c-sif",mb:"sifilis",t:"Prueba rápida reactiva en el control prenatal",
+  p:"Gestante de 26 años, 16 semanas, sin síntomas. La prueba treponémica rápida sale reactiva. No sabe cuándo se infectó y niega alergia a la penicilina.",
+  q:[{q:"¿Qué esquema le corresponde?",o:["Penicilina benzatínica 2.400.000 UI IM semanal por 3 semanas","2.400.000 UI IM en dosis única","Amoxicilina oral por 10 días","Esperar la confirmación en el hospital"],e:"Sífilis temprana: 2.400.000 UI IM dosis única. Tardía o de duración desconocida: 2.400.000 UI IM semanal por 3 semanas.",f:"sif",p:"46"},
+     {q:"¿Le haces prueba de alergia a la penicilina antes?",o:["No: la guía indica no hacer prueba de alergia","Sí, siempre","Solo si es la primera vez","Sí, intradérmica"],e:"No hacer prueba de alergia a la penicilina. Si hay alergia confirmada: desensibilización (telemedicina antes de aplicar).",f:"sif",p:"42 y 46"},
+     {q:"¿Qué haces con la pareja?",o:["Notificarla y tratarla con la tarjeta de notificación","Nada, solo se trata a la gestante","Esperar a que tenga síntomas","Hacerle solo la prueba"],e:"Notificar y tratar a la pareja con tarjeta de notificación. No esperar la remisión para la primera dosis de la gestante.",f:"sif",p:"46 y 53"}]},
+ {id:"c-tb",mb:"tb",t:"Tos de varias semanas",
+  p:"Hombre de 45 años, pueblo tukano. Tose con flema desde hace 3 semanas y ha perdido peso. No tiene dificultad respiratoria.",
+  q:[{q:"¿Qué es?",o:["Un sintomático respiratorio: hay que estudiarlo para tuberculosis","Una gripa que se quita sola","Asma","Nada, porque no tiene fiebre"],e:"Sintomático respiratorio: tos con expectoración de más de 15 días; en población rural e indígena se puede usar menos tiempo.",f:"tb",p:"29"},
+     {q:"¿Qué le ordenas?",o:["Baciloscopia o prueba molecular, y prueba de VIH con asesoría","Solo radiografía","Jarabe para la tos","Antibiótico por 7 días"],e:"Baciloscopia o prueba molecular según disponibilidad, y prueba de VIH con asesoría.",f:"tb",p:"29–30"},
+     {q:"Mientras llega el resultado, ¿qué le indicas en casa?",o:["Tapabocas, ventilación y aislamiento respiratorio","Nada especial","Dormir con la familia en la misma hamaca","Iniciar el tratamiento antituberculoso por su cuenta"],e:"Tapabocas, ventilación y aislamiento respiratorio en casa mientras llega el resultado. El tratamiento es estrictamente supervisado y lo indica medicina.",f:"tb",p:"30"}]},
+ {id:"c-itu",mb:"itu",t:"Ardor al orinar",
+  p:"Mujer de 28 años, no gestante. Ardor al orinar, orina muchas veces y poquito. Sin fiebre ni dolor en la espalda. La tira tiene nitritos positivos.",
+  q:[{q:"¿Qué le das?",o:["Nitrofurantoína 100 mg cada 12 horas por 5 días","Ciprofloxacino por 14 días","Gentamicina IM","Solo agua"],e:"Cistitis en mujer no gestante: nitrofurantoína 100 mg cada 12 horas por 5 días, o trimetoprim-sulfametoxazol 160/800 mg cada 12 horas por 3 días.",f:"aware",p:""},
+     {q:"Si estuviera embarazada de 30 semanas, ¿qué cambia?",o:["Cefalexina 500 mg cada 6 horas por 7 días (o nitrofurantoína antes de la semana 38), con urocultivo de control","Nada, igual","Ciprofloxacino","No se trata en el embarazo"],e:"Gestante: cefalexina 500 mg cada 6 horas por 7 días o nitrofurantoína (no desde la semana 38), por orden médica, con urocultivo de control.",f:"aware",p:""},
+     {q:"¿Cuál de estos hallazgos sugiere pielonefritis?",o:["Fiebre con dolor en la espalda baja y vómito","Ardor al orinar","Orinar muchas veces","Orina turbia"],e:"Pielonefritis: además de lo de la cistitis, fiebre, escalofrío, dolor en la espalda baja y vómito. Telemedicina.",f:"aware",p:""}]},
+ {id:"c-gar",mb:"garganta",t:"Dolor de garganta con fiebre",
+  p:"Niño de 7 años, 25 kg. Fiebre, amígdalas con pus y ganglios del cuello dolorosos. No tiene tos ni mocos.",
+  q:[{q:"¿Qué es lo más probable?",o:["Faringitis bacteriana probable","Faringitis viral","Resfriado común","Otitis"],e:"Faringitis bacteriana probable: fiebre, amígdalas con pus, ganglios del cuello dolorosos, sin tos, en mayores de 3 años. Con tos, mocos o ronquera casi siempre es viral.",f:"aware",p:""},
+     {q:"Si eliges penicilina benzatínica IM, ¿qué dosis?",o:["600.000 UI (pesa menos de 27 kg)","1.200.000 UI","2.400.000 UI","300.000 UI"],e:"Penicilina benzatínica IM dosis única: 600.000 UI si pesa menos de 27 kg y 1.200.000 UI si pesa 27 kg o más.",f:"aware",p:""},
+     {q:"Y si eliges amoxicilina, ¿cómo?",o:["1 g una vez al día por 10 días (50 mg/kg con máximo 1 g)","500 mg cada 8 horas por 3 días","90 mg/kg al día por 5 días","Una sola dosis"],e:"Amoxicilina por 10 días: niños 50 mg/kg una vez al día, máximo 1 g. Con 25 kg el cálculo da 1250 mg, así que se da el máximo: 1 g.",f:"aware",p:""}]},
+ {id:"c-oti",mb:"garganta",t:"Dolor de oído en lactante",
+  p:"Niño de 18 meses, 11 kg. Llora y se toca el oído, tiene fiebre. En la otoscopia el tímpano está rojo y abombado.",
+  q:[{q:"¿Qué amoxicilina le corresponde?",o:["80 a 90 mg/kg al día en 2 tomas por 10 días","50 mg/kg una vez al día por 5 días","Dosis única","No necesita antibiótico"],e:"Otitis media: amoxicilina 80 a 90 mg/kg al día en 2 tomas por 5 días; 10 días en menores de 2 años o casos graves.",f:"aware",p:""},
+     {q:"¿Cuál de estos es signo de alarma?",o:["Hinchazón y dolor detrás de la oreja","Fiebre de 38 °C","Llanto","Se toca el oído"],e:"Hinchazón y dolor detrás de la oreja (mastoiditis), rigidez de nuca o no poder tragar son signos de alarma.",f:"aware",p:""},
+     {q:"¿Cuándo lo vuelves a ver si no mejora?",o:["En 48 a 72 horas","En 15 días","En un mes","No hace falta"],e:"Control en 48 a 72 horas si no mejora.",f:"aware",p:""}]},
+ {id:"c-asm",mb:"asma",t:"Crisis de sibilancias",
+  p:"Niña de 8 años con asma. Desde la noche tiene tos, silbido en el pecho y le cuesta respirar. Habla frases completas. Saturación de 94 %.",
+  q:[{q:"¿Cómo das el salbutamol en la primera hora?",o:["Con inhalocámara, 4 a 10 inhalaciones cada 20 minutos","2 inhalaciones cada 6 horas","Jarabe de salbutamol","Una sola inhalación"],e:"Salbutamol con inhalocámara cada 20 minutos en la primera hora: adultos y niños de 6 a 11 años, 4 a 10 inhalaciones; 5 años o menos, 2 inhalaciones.",f:"gina",p:""},
+     {q:"Si fuera una crisis moderada o grave, ¿qué añades?",o:["Ipratropio y prednisolona 1 a 2 mg/kg al día (máximo 40 mg) por 3 a 5 días","Amoxicilina","Loratadina","Jarabe para la tos"],e:"Crisis moderada o grave: añadir ipratropio y prednisolona (niños 1 a 2 mg/kg al día, máximo 40 mg, por 3 a 5 días).",f:"gina",p:""},
+     {q:"¿Cuál de estos signos obliga a remitir?",o:["Tórax silencioso o saturación menor de 92 %","Tos en la noche","Silbido leve","Mejoría después de la primera hora"],e:"Alarma: no puede hablar, somnolienta o confundida, cianosis, saturación menor de 92 %, tórax silencioso, no mejora tras la primera hora.",f:"gina",p:""}]},
+ {id:"c-vag",mb:"vaginal",t:"Flujo vaginal con picor",
+  p:"Mujer de 25 años, no gestante. Flujo amarillo verdoso, espumoso, con picor. Tiene pareja estable.",
+  q:[{q:"¿Qué es lo más probable?",o:["Tricomoniasis","Candidiasis","Vaginosis bacteriana","Flujo normal"],e:"Tricomoniasis: flujo amarillo verdoso, espumoso, con picor. Vaginosis: flujo gris con olor a pescado. Candidiasis: flujo blanco grumoso con picor y ardor.",f:"its",p:""},
+     {q:"¿Qué tratamiento corresponde?",o:["Metronidazol 500 mg cada 12 horas por 7 días y tratar a la pareja","Fluconazol 150 mg","Clotrimazol vaginal","Solo duchas vaginales"],e:"Vaginosis o tricomoniasis: metronidazol 500 mg cada 12 horas por 7 días o tinidazol 2 g dosis única. En tricomoniasis, tratar a la pareja; condón hasta terminar el tratamiento de los dos.",f:"its",p:""},
+     {q:"Otra paciente, gestante, tiene flujo blanco grumoso con picor. ¿Qué le das?",o:["Clotrimazol vaginal por 7 días","Fluconazol 150 mg oral","Metronidazol oral","Tinidazol 2 g"],e:"Candidiasis: fluconazol 150 mg dosis única en no gestantes; en gestantes, clotrimazol vaginal por 7 días.",f:"its",p:""},
+     {q:"¿Qué más le ofreces a toda mujer con flujo?",o:["Pruebas rápidas de VIH y sífilis","Nada más","Citología el mismo día siempre","Una ecografía"],e:"Preguntar por la pareja y el riesgo de ITS, y ofrecer pruebas rápidas de VIH y sífilis.",f:"its",p:""}]},
+ {id:"c-par",mb:"parasitos",t:"Picor en el ano por la noche",
+  p:"Niño de 5 años, 20 kg. La mamá cuenta que en la noche se rasca la cola y no duerme bien. En la casa viven 6 personas.",
+  q:[{q:"¿Qué parásito sospechas?",o:["Oxiuros","Giardia","Ameba","Áscaris"],e:"Picor en el ano en la noche orienta a oxiuros. Diarrea grasosa y gases: giardia; lombrices en heces o vómito: áscaris; diarrea con moco y sangre: ameba.",f:"sth",p:""},
+     {q:"¿Qué le das?",o:["Pamoato de pirantel 220 mg (11 mg/kg) y repetir a las 2 semanas","Metronidazol por 7 días","Ivermectina 3 mg","Tinidazol por 3 días"],e:"Áscaris u oxiuros: pamoato de pirantel 11 mg/kg dosis única (máximo 1 g); en oxiuros repetir a las 2 semanas.",f:"fmo",p:""},
+     {q:"¿Y la familia?",o:["Tratar a toda la familia y reforzar lavado de manos y uñas cortas","Solo tratar al niño","Tratar solo a los niños","No hace falta"],e:"En oxiuros se trata a toda la familia. Medidas: lavado de manos, uñas cortas, agua hervida, letrina, calzado.",f:"fmo",p:""}]},
+ {id:"c-dol",mb:"dolor",t:"Fiebre y dolor de cuerpo",
+  p:"Hombre de 38 años con fiebre desde ayer y dolor en todo el cuerpo. Pide «la inyección de diclofenaco».",
+  q:[{q:"¿Qué haces antes de pensar en un AINE?",o:["Gota gruesa y descartar dengue, sangrado, úlcera y enfermedad renal","Aplicar el diclofenaco porque lo pide","Dar dipirona IM sin más","Nada, es una gripa"],e:"En Vaupés toda fiebre lleva gota gruesa. Antes de un AINE se descarta dengue, sangrado, úlcera, enfermedad renal y embarazo avanzado.",f:"den",p:"48–49"},
+     {q:"¿Cuál es la primera opción para el dolor y la fiebre?",o:["Acetaminofén 500 mg a 1 g cada 6 a 8 horas","Diclofenaco 75 mg IM","Tramadol","Ibuprofeno"],e:"Primera opción: acetaminofén 500 mg a 1 g cada 6 a 8 horas (niños 10 a 15 mg/kg).",f:"den",p:"48–49"},
+     {q:"Si medicina ordena tramadol, ¿con qué medicamento nunca lo combinas?",o:["Sertralina","Acetaminofén","Omeprazol","Loratadina"],e:"Dolor intenso: tramadol 50 a 100 mg por orden médica; nunca con sertralina.",f:"fmo",p:""}]},
+ {id:"c-que",mb:"herida",t:"Quemadura con agua caliente",
+  p:"Niño de 3 años que se volcó una olla de agua caliente. Tiene ampollas en el pecho y el brazo; la extensión es de unas 12 palmas de su mano.",
+  q:[{q:"¿Qué haces primero con la quemadura?",o:["Enfriarla con agua corriente durante 20 minutos","Poner hielo directo","Untar aceite o crema dental","Reventar las ampollas"],e:"Quemadura de segundo grado: enfriar con agua corriente 20 minutos, lavar y cubrir con sulfadiazina de plata.",f:"fmo",p:""},
+     {q:"¿Qué extensión tiene y qué significa?",o:["Cerca del 12 %: en un niño más del 10 % es criterio para remitir","2 %: se maneja en casa","12 %: se maneja en casa porque es menos del 15 %","No se puede saber sin médico"],e:"La palma de la mano del paciente es 1 %. Remitir: más del 10 % en niños o del 15 % en adultos, o en cara, manos, genitales o articulaciones, circular o eléctrica.",f:"fmo",p:""},
+     {q:"Otro día, para suturar a un niño de 20 kg, ¿cuánta lidocaína al 2 % es el máximo?",o:["4,5 ml (90 mg = 4,5 mg/kg)","20 ml","10 ml","1 ml"],e:"Suturar con lidocaína al 2 % sin pasar de 4,5 mg/kg. Con 20 kg: 90 mg; al 2 % hay 20 mg por ml, así que el máximo son 4,5 ml.",f:"fmo",p:""}]},
+ {id:"c-hta",mb:"hta",t:"Paciente hipertensa que queda embarazada",
+  p:"Mujer de 36 años con hipertensión crónica en tratamiento con enalapril. Viene feliz porque tiene la prueba de embarazo positiva.",
+  q:[{q:"¿Qué haces con el enalapril?",o:["Telemedicina para cambiarlo: está contraindicado en el embarazo","Seguir igual","Cambiarlo por losartán","Suspender todo sin avisar a medicina"],e:"Si queda embarazada: losartán y enalapril están contraindicados; telemedicina para cambiarlos.",f:"hta2",p:""},
+     {q:"¿Cuál de estas combinaciones nunca se usa?",o:["Enalapril con losartán","Losartán con hidroclorotiazida","Amlodipino con enalapril","Hidroclorotiazida sola"],e:"Nunca enalapril con losartán.",f:"hta2",p:""},
+     {q:"Otro paciente crónico llega con 186/114, dolor en el pecho y falta de aire. ¿Qué es?",o:["Signo de alarma: remisión urgente","Lo de siempre: control el próximo mes","Ansiedad","Que no se tomó la pastilla, nada más"],e:"Alarma: presión de 180/110 o más con dolor de pecho, falta de aire, debilidad de un lado del cuerpo, confusión o visión borrosa.",f:"hta2",p:""}]},
+ {id:"c-dm",mb:"dm",t:"Diabético sudoroso y tembloroso",
+  p:"Hombre de 58 años con diabetes tipo 2. Llega sudoroso y tembloroso pero despierto y responde. Glucometría de 55 mg/dl.",
+  q:[{q:"¿Qué le das?",o:["15 g de azúcar (3 cucharaditas en agua) y repetir la glucometría a los 15 minutos","Metformina","Nada y esperar","Insulina"],e:"Hipoglicemia con el paciente despierto: 15 g de azúcar (3 cucharaditas en agua) y repetir glucometría a los 15 minutos.",f:"dm2",p:""},
+     {q:"Si no despertara, ¿qué haría falta?",o:["Dextrosa al 10 % IV, que no está en el botiquín: telemedicina y remisión","Azúcar por la boca aunque esté inconsciente","Metformina","Esperar a que despierte solo"],e:"Si no despierta: dextrosa al 10 % IV, que no está en el botiquín del puesto.",f:"dm2",p:""},
+     {q:"Otro día tiene diarrea intensa y vómito. ¿Qué haces con la metformina?",o:["Suspenderla mientras dure la diarrea, el vómito o la deshidratación","Duplicar la dosis","Seguir igual","Darla con más agua"],e:"Suspender la metformina mientras dure una diarrea o vómito intenso o deshidratación.",f:"dm2",p:""}]},
+ {id:"c-gas",mb:"gastritis",t:"Gestante con dolor en la boca del estómago",
+  p:"Gestante de 24 años, 33 semanas. Consulta por dolor en la boca del estómago desde la mañana. Pide un omeprazol.",
+  q:[{q:"¿Qué es lo primero que haces?",o:["Tomar la presión arterial: puede ser preeclampsia","Darle el omeprazol y despedirla","Darle metoclopramida","Recomendar no comer ají"],e:"Gestante con dolor en la boca del estómago: tomar la presión (preeclampsia). El dolor epigástrico es criterio de severidad.",f:"hta",p:"4"},
+     {q:"En un adulto con gastritis, ¿cuál de estos es signo de alarma?",o:["Heces negras o vómito en cuncho de café","Agrieras después de comer","Llenura","Ardor leve"],e:"Alarma: vómito con sangre o en cuncho de café, heces negras, pérdida de peso, dificultad para tragar, mayor de 55 años con síntomas nuevos.",f:"fmo",p:""}]},
+ {id:"c-lei",mb:"leish",t:"Úlcera que no sana",
+  p:"Hombre de 30 años que caza en el monte. Tiene una úlcera redonda de bordes elevados en la pierna desde hace un mes. No le duele.",
+  q:[{q:"¿Qué sospechas y qué haces antes de tratar?",o:["Leishmaniasis cutánea: confirmar con frotis directo antes de tratar","Infección común: dicloxacilina","Quemadura: sulfadiazina","Nada, sanará sola"],e:"Úlcera indolora, redonda, de bordes elevados, de más de 2 semanas, en persona que entra al monte. Confirmar antes de tratar: frotis directo de la lesión si hay quién lo lea.",f:"lei",p:""},
+     {q:"¿Es una urgencia vital?",o:["No: mantener la curación limpia y no dejarla sin confirmar","Sí, remisión inmediata","Sí, si tiene más de 2 cm","Solo si hay fiebre"],e:"No es urgencia vital. Alarma: lesión en nariz o boca, lesiones múltiples o grandes, gestante, niño pequeño. El tratamiento lo decide medicina.",f:"lei",p:"13–14"}]},
+ {id:"c-esc",mb:"piel",t:"Toda la familia se rasca",
+  p:"Niña de 6 años con picazón que empeora en la noche y lesiones entre los dedos y en los pliegues. Los hermanos también se rascan.",
+  q:[{q:"¿Qué es lo más probable?",o:["Escabiosis","Impétigo","Tiña","Alergia a la comida"],e:"Escabiosis: picazón nocturna con lesiones entre dedos y pliegues. Impétigo: costras amarillas. Tiña: placas que descaman.",f:"",p:""},
+     {q:"¿Cómo se organiza el tratamiento?",o:["Tratar a todos los convivientes a la vez y lavar ropa y hamacas","Tratar solo a la niña","Tratar primero a la niña y una semana después al resto","Solo lavar la ropa"],e:"En escabiosis se trata a todos los convivientes a la vez y se lavan ropa y hamacas, con tratamiento por orden médica. Control en 7 a 14 días.",f:"",p:""}]},
+ {id:"c-urt",mb:"alergia",t:"Ronchas después de comer",
+  p:"Mujer de 34 años con ronchas que pican en brazos y tronco después de comer pescado ahumado. Respira bien, sin mareo y con presión normal.",
+  q:[{q:"¿Qué tienes que descartar primero?",o:["Anafilaxia: compromiso respiratorio, presión baja o síntomas digestivos intensos","Malaria","Dengue","Nada"],e:"Descartar anafilaxia: piel más respiración, presión baja o síntomas digestivos intensos. Si la hay, se usa la ficha de anafilaxia.",f:"wao",p:""},
+     {q:"Sin anafilaxia, ¿qué le das?",o:["Loratadina 10 mg al día","Adrenalina IM","Prednisolona por 3 semanas","Amoxicilina"],e:"Loratadina 10 mg al día (niños de 2 a 12 años con 30 kg o menos, 5 mg). Clorfeniramina o difenhidramina en la noche si el picor no deja dormir.",f:"fmo",p:""},
+     {q:"¿Qué más haces?",o:["Anotar el pescado como alergia en la historia y evitarlo","Nada más","Decirle que coma más para acostumbrarse","Suspender toda la comida"],e:"Retirar la causa (medicamento, alimento) y anotarla como alergia en la historia.",f:"puesto",p:""}]},
+ {id:"c-grv",mb:"grave",t:"Lo traen en hamaca",
+  p:"Hombre de 50 años que traen en hamaca desde la chagra. Está frío, pálido, confundido y respira rápido.",
+  q:[{q:"¿En qué orden lo abordas?",o:["ABCDE: vía aérea, respiración, circulación, déficit neurológico con glucometría, exposición","Primero la historia clínica completa","Primero la gota gruesa y luego todo lo demás","Primero llamar a la familia"],e:"Abordaje ABCDE en orden: vía aérea, respiración (oxígeno si hay), circulación (controlar sangrado, acceso venoso, cristaloides si hay choque), déficit neurológico y glucemia, exposición y temperatura.",f:"bec",p:""},
+     {q:"¿Cada cuánto lo reevalúas?",o:["Cada 15 a 30 minutos y después de cada intervención","Cada 4 horas","Una vez al llegar","Solo cuando llegue el transporte"],e:"Reevaluar ABCDE cada 15 a 30 minutos y después de cada intervención; anotar todo con hora.",f:"bec",p:""},
+     {q:"Si la remisión tarda, ¿qué dejas registrado?",o:["La orden médica de telemedicina con nombre y hora, y la hora de cada gestión","Nada, se registra al final","Solo los signos vitales del ingreso","Solo el nombre del paciente"],e:"Telemedicina el mismo día con la orden escrita (nombre del médico y hora), la hora de cada gestión y, si no hay transporte, acta de contingencia.",f:"puesto",p:""}]}
+];
+/* progreso guardado solo en este celular: {idCaso:{b:mejor aciertos,u:último,n:preguntas,f:fecha}} */
+function caProg(){try{return JSON.parse(S.get("dn2_casos")||"{}")||{}}catch(e){return{}}}
+function caGuardar(id,ok,n){const P=caProg(),x=P[id]||{b:0};P[id]={b:Math.max(x.b||0,ok),u:ok,n,f:hoy()};S.set("dn2_casos",JSON.stringify(P))}
+function caMB(c){return MB.find(z=>z.id===c.mb)||{t:c.mb,g:""}}
+function caFuente(q){return q.f==="puesto"?mbCita("",""):q.f?mbCita(q.f,q.p):"Ficha de morbilidad de la app (sin guía específica citada)"}
+function caMezcla(n){const a=[...Array(n).keys()];for(let i=n-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]]}return a}
+function caResumen(){const P=caProg(),hechos=CASOS.filter(c=>P[c.id]);const tot=hechos.reduce((s,c)=>s+P[c.id].n,0),ok=hechos.reduce((s,c)=>s+P[c.id].u,0);
+  return{hechos:hechos.length,perf:CASOS.filter(c=>P[c.id]&&P[c.id].u===P[c.id].n).length,rep:CASOS.filter(c=>P[c.id]&&P[c.id].u<P[c.id].n).length,pct:tot?Math.round(ok*100/tot):null}}
+/* lista de casos */
+function caLista(filtro){stopRec();st.view="casos";filtro=filtro||"todos";const P=caProg(),R=caResumen();
+  const grupos=[...new Set(CASOS.map(c=>caMB(c).g))];
+  const F=[["todos",`Todos (${CASOS.length})`],["pend",`Sin hacer (${CASOS.length-R.hechos})`],["rep",`Para repasar (${R.rep})`]];
+  $("app").innerHTML=`<div class="top"><button class="back" type="button" id="ca-back">← Inicio</button><span class="tag pc">Casos</span></div>
+  <header><h1>Casos para practicar</h1><p class="sub">Casos de morbilidad del Vaupés con preguntas de opción múltiple. Cada respuesta se explica con la misma guía y página de la ficha de morbilidad, y puedes abrir la ficha desde el caso.</p></header>
+  <div class="ca-res"><div><b>${R.hechos}/${CASOS.length}</b><small>casos hechos</small></div><div><b>${R.pct==null?"—":R.pct+" %"}</b><small>aciertos en el último intento</small></div><div><b>${R.perf}</b><small>sin errores</small></div></div>
+  <div class="btns"><button class="btn primary" type="button" id="ca-azar">${R.hechos<CASOS.length?"Un caso que no he hecho":"Un caso al azar"}</button>${R.rep?`<button class="btn" type="button" id="ca-rep">Repasar uno con errores</button>`:""}</div>
+  <div class="btns" id="ca-f">${F.map(([k,t])=>`<button class="btn bq-mini${k===filtro?" primary":""}" type="button" data-caf="${k}">${esc(t)}</button>`).join("")}</div>
+  <div id="ca-list">${grupos.map(g=>{const xs=CASOS.filter(c=>caMB(c).g===g&&(filtro==="todos"||(filtro==="pend"&&!P[c.id])||(filtro==="rep"&&P[c.id]&&P[c.id].u<P[c.id].n)));
+    return xs.length?`<p class="lab" style="margin:12px 0 6px">${esc(g)}</p>${xs.map(c=>{const x=P[c.id];const chip=!x?`<span class="ca-chip">${c.q.length} preguntas</span>`:`<span class="ca-chip ${x.u===x.n?"ok":"bad"}">${x.u}/${x.n}</span>`;
+      return `<button class="ca-it" type="button" data-cago="${c.id}"><span><b>${esc(c.t)}</b><small>${esc(caMB(c).t)}</small></span>${chip}</button>`}).join("")}`:""}).join("")||`<p class="note-src">No hay casos en este grupo.</p>`}</div>
+  ${R.hechos?`<div class="btns" style="margin-top:14px"><button class="btn bq-mini" type="button" id="ca-reset">Borrar mi progreso</button></div>`:""}
+  <p class="foot">Los casos son ejercicios de estudio armados con las fichas de morbilidad de la app. No reemplazan el criterio clínico ni los protocolos de la ESE; los medicamentos se administran por orden médica (telemedicina) o protocolo de la ESE. Tu progreso queda solo en este celular.</p>`;
+  $("ca-back").onclick=()=>{home();window.scrollTo(0,0)};
+  document.querySelectorAll("[data-caf]").forEach(b=>b.onclick=()=>caLista(b.dataset.caf));
+  document.querySelectorAll("[data-cago]").forEach(b=>b.onclick=()=>caOpen(b.dataset.cago));
+  const pick=xs=>xs.length?xs[Math.floor(Math.random()*xs.length)].id:null;
+  $("ca-azar").onclick=()=>{const p=pick(CASOS.filter(c=>!P[c.id]))||pick(CASOS);caOpen(p)};
+  const r=$("ca-rep");if(r)r.onclick=()=>caOpen(pick(CASOS.filter(c=>P[c.id]&&P[c.id].u<P[c.id].n)));
+  const z=$("ca-reset");if(z)z.onclick=()=>{if(confirm("¿Borrar el progreso de los casos en este celular?")){S.del("dn2_casos");caLista()}};
+  window.scrollTo(0,0)}
+/* un caso: preguntas una por una */
+let CA=null;
+function caOpen(id,i){const c=CASOS.find(z=>z.id===id);if(!c)return caLista();stopRec();st.view="caso";
+  if(!CA||CA.id!==id||i==null)CA={id,i:0,ok:0,resp:[],ord:c.q.map(q=>caMezcla(q.o.length))};if(i!=null)CA.i=i;
+  const fin=CA.i>=c.q.length,m=caMB(c);
+  $("app").innerHTML=`<div class="top"><button class="back" type="button" id="ca-back">← Casos</button><span class="tag pc">${fin?"Resultado":`Pregunta ${CA.i+1} de ${c.q.length}`}</span></div>
+  <header><h1>${esc(c.t)}</h1><p class="sub">${esc(m.g)} · ${esc(m.t)}</p></header>
+  <div class="box ca-caso"><p style="margin:0">${esc(c.p)}</p></div>
+  ${c.q.slice(0,fin?c.q.length:CA.i).map((q,k)=>`<div class="ca-prev ${CA.resp[k]===0?"ok":"bad"}"><b>${k+1}. ${esc(q.q)}</b><span>${CA.resp[k]===0?"✓ ":"✗ "}${esc(q.o[0])}</span></div>`).join("")}
+  ${fin?caFinHTML(c):caPregHTML(c)}`;
+  $("ca-back").onclick=()=>{CA=null;caLista()};
+  if(fin){$("ca-otra").onclick=()=>{CA=null;caOpen(id)};$("ca-sig").onclick=()=>{const k=CASOS.findIndex(z=>z.id===id);CA=null;caOpen(CASOS[(k+1)%CASOS.length].id)};$("ca-ficha").onclick=()=>caFicha(c);
+    const l=$("ca-lista");if(l)l.onclick=()=>{CA=null;caLista()}}
+  else document.querySelectorAll("[data-caop]").forEach(b=>b.onclick=()=>caResponder(c,+b.dataset.caop));
+  window.scrollTo(0,0)}
+function caPregHTML(c){const q=c.q[CA.i];return `<p class="qt-h" style="margin:16px 0 8px">${esc(q.q)}</p><div class="ca-ops" id="ca-ops">${CA.ord[CA.i].map(j=>`<button class="ca-op" type="button" data-caop="${j}">${esc(q.o[j])}</button>`).join("")}</div><div id="ca-fb"></div>`}
+function caResponder(c,j){const q=c.q[CA.i];if(CA.resp[CA.i]!=null)return;CA.resp[CA.i]=j;if(j===0)CA.ok++;
+  document.querySelectorAll("[data-caop]").forEach(b=>{const k=+b.dataset.caop;b.disabled=true;if(k===0)b.classList.add("ok");else if(k===j)b.classList.add("bad")});
+  const ult=CA.i===c.q.length-1;
+  $("ca-fb").innerHTML=`<div class="box ca-fb ${j===0?"ok":"bad"}"><h3>${j===0?"Correcto":"No es esa"}</h3>${j===0?"":`<p style="margin:0 0 6px"><b>La respuesta es:</b> ${esc(q.o[0])}</p>`}<p style="margin:0">${esc(q.e)}</p><small class="qt-c">${esc(caFuente(q))}</small></div>
+   <div class="btns"><button class="btn primary" type="button" id="ca-next">${ult?"Ver resultado":"Siguiente pregunta"}</button><button class="btn" type="button" id="ca-fic">Ver la ficha</button></div>`;
+  if(ult)caGuardar(c.id,CA.ok,c.q.length);
+  $("ca-next").onclick=()=>caOpen(c.id,CA.i+1);$("ca-fic").onclick=()=>caFicha(c,true);
+  $("ca-fb").scrollIntoView({block:"nearest",behavior:"smooth"})}
+function caFinHTML(c){const n=c.q.length,ok=CA.ok;
+  return `<div class="box ca-fb ${ok===n?"ok":"bad"}" style="margin-top:12px"><h3>${ok}/${n} correctas</h3><p style="margin:0">${ok===n?"Muy bien: dominas este caso.":ok>=n/2?"Vas bien. Repasa la ficha y vuelve a intentarlo.":"Repasa la ficha de esta condición antes de volver a intentarlo."}</p></div>
+  <div class="btns"><button class="btn primary" type="button" id="ca-sig">Siguiente caso</button><button class="btn" type="button" id="ca-otra">Repetir este caso</button><button class="btn" type="button" id="ca-ficha">Ver la ficha de ${esc(caMB(c).t.toLowerCase())}</button><button class="btn" type="button" id="ca-lista">Todos los casos</button></div>`}
+/* abrir la ficha de morbilidad y volver al caso donde iba */
+function caFicha(c,enCurso){const vuelta=enCurso?CA.i:null,guard=CA;mbOpen(c.mb);const b=$("mb-back");if(b){b.textContent="← Volver al caso";b.onclick=()=>{CA=guard;if(vuelta!=null&&CA)caOpen(c.id,CA.resp[vuelta]!=null?vuelta+1:vuelta);else caOpen(c.id,c.q.length)}}}
+/* mosaico en la sección Morbilidad del inicio y botón dentro de Morbilidad frecuente */
+function mbHomeHTML(){const n=bqResumen(),al=n.venc+n.rojo,R=caResumen();return `<section class="route"><div class="route-head"><h2>Morbilidad</h2><span>Lo más frecuente en la zona rural del Vaupés</span></div><div class="tiles"><button class="tile pc" type="button" id="t-mb"><b>Morbilidad frecuente</b><small>Signos, diagnóstico, tratamiento con lo que hay en el botiquín y qué hacer mientras llega la remisión</small></button><button class="tile pc" type="button" id="t-sx"><b>No sé qué tiene</b><small>Empezar por el síntoma: signos de peligro, enfermedades probables y cuándo remitir</small></button><button class="tile pc" type="button" id="t-bq">${al?'<span class="dot" title="Medicamentos vencidos o por vencer"></span>':""}<b>Botiquín del puesto</b><small>${al?`${al} vencido${al===1?"":"s"} o por vencer en 3 meses · `:""}Posología, efectos, contraindicaciones e interacciones</small></button><button class="tile pc" type="button" id="t-ca"><b>Casos para practicar</b><small>${CASOS.length} casos de opción múltiple${R.hechos?` · ${R.hechos} hechos`:""}, con la explicación y la guía de cada respuesta</small></button><button class="tile pc" type="button" data-vn="morb"><b>Nota de morbilidad por voz</b><small>Consulta por enfermedad, pregunta por pregunta</small></button></div></section>`}
+function mbWire(){const b=$("t-mb");if(b)b.onclick=()=>mbOpen();const c=$("t-sx");if(c)c.onclick=()=>sxOpen();const d=$("t-bq");if(d)d.onclick=()=>{st.bqDe=null;bqOpen()};const e=$("t-ca");if(e)e.onclick=()=>{CA=null;caLista()}}
+mbOpen=(function(orig){return function(foco){orig(foco);const s=$("mb-bq");if(s&&!$("mb-ca")){s.insertAdjacentHTML("afterend",`<button class="btn" type="button" id="mb-ca">Casos para practicar</button>`);$("mb-ca").onclick=()=>{CA=null;caLista()}}}})(mbOpen);
+document.head.insertAdjacentHTML("beforeend",`<style>
+.ca-res{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin:10px 0}
+.ca-res div{border:1px solid var(--line);border-radius:10px;padding:10px;background:var(--surface);text-align:center}
+.ca-res b{display:block;font-family:var(--f-data);font-size:1.25rem}.ca-res small{color:var(--muted);font-size:.75rem;line-height:1.2;display:block}
+.ca-it{display:flex;justify-content:space-between;align-items:center;gap:10px;width:100%;text-align:left;padding:12px 14px;margin:0 0 8px;border-radius:10px;border:1.5px solid var(--line);background:var(--surface);color:var(--ink);font:inherit}
+.ca-it b{display:block}.ca-it small{color:var(--muted)}
+.ca-chip{flex:none;font-family:var(--f-data);font-size:.75rem;padding:2px 8px;border-radius:999px;border:1px solid var(--line);color:var(--muted);white-space:nowrap}
+.ca-chip.ok{background:var(--accent-soft);color:var(--accent);border-color:var(--accent)}.ca-chip.bad{background:var(--warn-bg);color:var(--warn);border-color:var(--warn-line)}
+.ca-caso{border-color:var(--line);background:var(--surface)}
+.ca-ops{display:flex;flex-direction:column;gap:8px}
+.ca-op{text-align:left;padding:12px 14px;border-radius:10px;border:1.5px solid var(--line);background:var(--surface);color:var(--ink);font:inherit;font-size:1rem;line-height:1.35}
+.ca-op:disabled{opacity:.6}.ca-op.ok{opacity:1;border-color:var(--accent);background:var(--accent-soft);color:var(--ink);font-weight:700}.ca-op.ok::before{content:"✓ ";color:var(--accent)}
+.ca-op.bad{opacity:1;border-color:var(--miss-line);background:var(--miss-bg);color:var(--miss)}
+.ca-fb{margin:12px 0}.ca-fb h3{margin:0 0 6px}.ca-fb.ok{border-color:var(--accent);background:var(--accent-soft)}.ca-fb.bad{border-color:var(--warn-line);background:var(--warn-bg)}
+.ca-prev{display:flex;flex-direction:column;gap:2px;font-size:.88rem;padding:8px 12px;margin:8px 0 0;border-left:3px solid var(--line)}
+.ca-prev.ok{border-color:var(--accent)}.ca-prev.bad{border-color:var(--warn)}.ca-prev span{color:var(--muted)}
+</style>`);
 
 /* ---------- arranque ---------- */
 /* los borradores guardados con la versión anterior de los módulos se reubican una sola vez */
