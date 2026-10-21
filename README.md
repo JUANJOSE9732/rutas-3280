@@ -7,3 +7,5 @@ Guía de bolsillo de las rutas de la Resolución 3280 de 2018 (ruta materno peri
 - Sin conexión arma la nota con la plantilla; los datos quedan solo en el celular.
 
 No reemplaza el criterio clínico ni los protocolos de la institución.
+
+- v179: Botiquín del puesto con el inventario de la solicitud del 27/9/2026: semáforo de vencimiento, posología, efectos secundarios, contraindicaciones, interacciones, embarazo y lactancia, opciones y calculadora por peso. Cada ficha de morbilidad muestra qué hay en el botiquín, qué no usar y qué falta pedir; se agregaron 11 morbilidades frecuentes (infección urinaria, parásitos, garganta y oído, asma, flujo vaginal, alergia, dolor, heridas, hipertensión, diabetes, gastritis).

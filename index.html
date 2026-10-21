@@ -1971,7 +1971,7 @@ function wireMiDia(){const cb=$("md-cal");if(cb)cb.onclick=calOpen;
 function mdShow(t){const s=$("md-st");s.innerHTML="";const a=document.createElement("textarea");a.value=t;a.rows=7;a.readOnly=true;s.append("No se pudo copiar solo. Mantén presionado el texto y cópialo:",a);a.focus();a.select()}
 
 /* ---------- PANEL ---------- */
-const VERSION_APP="2026-10-18 v178";
+const VERSION_APP="2026-10-20 v179";
 function home(){
   stopRec();if(S.get(AT_KEY))atReiniciar();st.view="home";
   const rm=["precon","prenatal","parto","rn","ive"],rp=["pinf","inf","adol","juv","adul","vej"];
@@ -7817,6 +7817,892 @@ function sxSet(name){const L=SISTEMAS[name]||[];let sx="";try{sx=(pac()||{})["GE
    g:["Al inicio de la pubertad es normal que una mama crezca antes que la otra o que el botón duela un poco.","Una masa dura, que crece o con secreción por el pezón: medicina."]}});
  tor.x=["Sibilancias","Estertores","Soplo","Pecho hundido o en quilla"];
 })();
+/* ===== v179: Botiquín del puesto, combinado con Morbilidad =====
+   Inventario: solicitud a almacén de la ESE Hospital San Antonio del 27/9/2026 (sede Yurupari, Vaupés Medio).
+   Cada ficha: para qué, posología, efectos secundarios, contraindicaciones, interacciones, embarazo y lactancia,
+   opciones si no hay, y su fuente. El semáforo de vencimiento se calcula contra la fecha de hoy.
+   Campos: id, n nombre, c concentración, p presentación, sol, ent, lote, v "AAAA-MM", io nota del inventario,
+   g grupo, u para qué, pa adultos, pn niños, ef, ci, it, em, op, f fuente, ord orden médica,
+   ges "no"|"evitar", minA edad mínima en años, kg calculadora por peso. */
+Object.assign(MBF,{
+ fmo:"OMS, Formulario modelo de la OMS 2008 (WHO Model Formulary 2008)",
+ aware:"OMS, Libro de antibióticos AWaRe (The WHO AWaRe Antibiotic Book, 2022)",
+ gina:"GINA, Global Strategy for Asthma Management and Prevention (2024)",
+ its:"OMS, Guidelines for the management of symptomatic sexually transmitted infections (2021)",
+ hta2:"Minsalud, GPC de hipertensión arterial primaria, GPC n.º 18 (2013)",
+ dm2:"Minsalud, GPC para el diagnóstico, tratamiento y seguimiento de la diabetes mellitus tipo 2 en mayores de 18 años, GPC n.º 51 (2016)",
+ r3280:"Minsalud, Resolución 3280 de 2018, lineamientos de las rutas de promoción y mantenimiento y materno perinatal",
+ sth:"OMS, Guideline: preventive chemotherapy to control soil-transmitted helminth infections in at-risk population groups (2017)",
+ vita:"OMS, Guideline: vitamin A supplementation in infants and children 6–59 months of age (2011)",
+ etq:"Etiqueta o inserto del producto entregado (registro INVIMA): confirma concentración y dosis en el empaque"});
+const BQ_FECHA="27/9/2026";
+const BQ=[
+/* ---------- Analgésicos, antipiréticos y antiinflamatorios ---------- */
+{id:"acet_s",n:"Acetaminofén suspensión",c:"150 mg/5 ml (30 mg/ml)",p:"Suspensión",sol:120,ent:60,lote:"A1303",v:"2029-06",g:"Dolor y fiebre",
+ u:"Fiebre y dolor leve a moderado. Es el analgésico de elección en dengue, gestantes y niños.",
+ pn:"10 a 15 mg/kg cada 6 horas; máximo 60 mg/kg al día y 5 dosis al día. En dengue, 10 mg/kg cada 6 horas.",
+ ef:"Bien tolerado a dosis correctas. La sobredosis daña el hígado aunque al principio no dé síntomas.",
+ ci:"Insuficiencia hepática grave. Alergia al acetaminofén.",
+ it:"Uso diario prolongado con warfarina sube el INR. Alcohol: más riesgo hepático.",
+ em:"Seguro en embarazo y lactancia.",op:"Tabletas de 500 mg partidas en niños grandes. No reemplazar por ibuprofeno ni aspirina si hay sospecha de dengue.",f:["den","48–49"],
+ kg:[{t:"Dosis",mg:[10,15],cada:"cada 6 horas",max:1000,mgml:30}]},
+{id:"acet_t",n:"Acetaminofén tabletas",c:"500 mg",p:"Tableta",sol:3000,ent:1500,lote:"601102A",v:"2029-06",g:"Dolor y fiebre",
+ u:"Fiebre y dolor leve a moderado. Primera opción en dengue y en gestantes.",
+ pa:"500 mg a 1 g cada 6 a 8 horas; máximo 4 g al día (3 g si toma alcohol, pesa menos de 50 kg o tiene enfermedad del hígado). En dengue, 500 mg cada 6 horas.",
+ pn:"Mayores de 6 años: 10 a 15 mg/kg por dosis; media tableta (250 mg) si pesa entre 17 y 25 kg.",
+ ef:"Raros a dosis correctas. Hepatotoxicidad en sobredosis.",ci:"Insuficiencia hepática grave.",
+ it:"Warfarina (sube el INR con uso diario). Alcohol.",em:"Seguro en embarazo y lactancia.",
+ op:"Dipirona solo en mayores de 15 años y por corto tiempo. Evitar AINE si hay fiebre en zona de dengue.",f:["den","48–49"]},
+{id:"asa",n:"Ácido acetilsalicílico",c:"100 mg",p:"Tableta",sol:90,ent:90,lote:"156793",v:"2028-03",g:"Corazón y circulación",
+ u:"Antiagregante: prevención secundaria cardiovascular (ya tuvo infarto o trombosis cerebral) y prevención de preeclampsia en gestantes de alto riesgo. No es analgésico a esta dosis.",
+ pa:"Prevención cardiovascular: 100 mg al día con comida, por orden médica. Gestante de alto riesgo de preeclampsia: aspirina a dosis baja desde la semana 12 hasta el parto, según el control prenatal y la Res. 3280.",
+ pn:"No usar en menores de 16 años (síndrome de Reye), salvo indicación de especialista.",
+ ef:"Gastritis, sangrado digestivo, moretones, broncoespasmo en asmáticos sensibles.",
+ ci:"Fiebre sin diagnóstico en Vaupés (posible dengue), sangrado activo, úlcera, alergia a AINE, menores de 16 años.",
+ it:"Otros AINE (diclofenaco, ibuprofeno): más sangrado y le quitan efecto. Clopidogrel y anticoagulantes: sangrado. Sertralina: sangrado. Metotrexato.",
+ em:"Dosis baja indicada en gestantes de alto riesgo de preeclampsia. Evitar dosis altas en el tercer trimestre.",
+ op:"En gestantes, la indicación la da el control prenatal.",f:["hta","página por verificar"],ord:1,minA:16},
+{id:"diclo_a",n:"Diclofenaco sódico ampolla",c:"75 mg/3 ml",p:"Ampolla",sol:20,ent:10,lote:"A260718",v:"2028-07",g:"Dolor y fiebre",
+ u:"Dolor agudo moderado (cólico renal, dolor musculoesquelético, trauma) en adultos.",
+ pa:"75 mg IM profunda en el glúteo, máximo 150 mg al día y por 2 días; luego seguir por vía oral.",
+ pn:"No se recomienda la ampolla en niños.",
+ ef:"Dolor e induración en el sitio, gastritis y sangrado digestivo, falla renal, subida de la presión, reacciones alérgicas.",
+ ci:"Sospecha de dengue o fiebre sin diagnóstico, sangrado, úlcera, insuficiencia renal o cardiaca, deshidratación, asma desencadenada por AINE, embarazo desde la semana 20.",
+ it:"Enalapril, losartán e hidroclorotiazida: riesgo de falla renal y menos efecto antihipertensivo. ASA, otros AINE, clopidogrel: sangrado. Prednisolona: úlcera. Metotrexato, litio.",
+ em:"Evitar en embarazo, sobre todo desde la semana 20. Compatible con la lactancia en dosis cortas.",
+ op:"Acetaminofén; dipirona en adultos; tramadol por orden médica si el dolor es intenso.",f:["fmo","página por verificar"],minA:12,ges:"no"},
+{id:"dipi",n:"Dipirona (metamizol) ampolla",c:"1 g/2 ml",p:"Ampolla",sol:20,ent:10,lote:"A260200",v:"2029-02",g:"Dolor y fiebre",
+ u:"Fiebre alta o dolor que no cede con acetaminofén, en adultos.",
+ pa:"1 g IM profunda o IV muy lenta (no menos de 3 a 5 minutos, mejor diluida), cada 6 a 8 horas; máximo 4 g al día. En dengue la guía lo permite solo en mayores de 15 años, 500 mg cada 6 horas por máximo 72 horas.",
+ pn:"Por orden médica. No en menores de 3 meses o de 5 kg.",
+ ef:"Hipotensión si se pone IV rápido, reacciones alérgicas, agranulocitosis (rara pero grave: fiebre con dolor de garganta y llagas en la boca días después).",
+ ci:"Alergia a pirazolonas, antecedente de agranulocitosis, porfiria, déficit de G6PD, tercer trimestre del embarazo, lactantes menores de 3 meses.",
+ it:"Metotrexato (más toxicidad en la sangre). Ciclosporina (baja sus niveles). Clorpromazina (hipotermia).",
+ em:"Evitar en el primer y tercer trimestre. Evitar en la lactancia o esperar 48 horas para amamantar.",
+ op:"Acetaminofén. En dengue evita las inyecciones IM si puedes (hematomas).",f:["den","48–49"],minA:15},
+{id:"trama",n:"Tramadol clorhidrato ampolla",c:"100 mg/ml (10 %), según el acta",p:"Ampolla",sol:5,ent:5,lote:"A250893",v:"2027-11",g:"Dolor y fiebre",
+ io:"Confirma la concentración en la ampolla: el tramadol inyectable suele venir de 100 mg/2 ml; 100 mg/ml suele ser la presentación en gotas.",
+ u:"Dolor moderado a intenso que no cede con acetaminofén o AINE.",
+ pa:"50 a 100 mg IM o IV lenta (2 a 3 minutos) cada 6 a 8 horas; máximo 400 mg al día. Por orden médica.",
+ pn:"No en menores de 12 años.",
+ ef:"Náusea y vómito, mareo, somnolencia, estreñimiento, sudoración. Convulsiones y depresión respiratoria a dosis altas.",
+ ci:"Menores de 12 años, epilepsia no controlada, intoxicación por alcohol o sedantes, insuficiencia respiratoria.",
+ it:"Sertralina y otros antidepresivos: síndrome serotoninérgico y convulsiones (combinación peligrosa). Midazolam, alcohol, difenhidramina, dihidrocodeína: sedación y depresión respiratoria. Metoclopramida: baja el umbral de convulsión.",
+ em:"Evitar en embarazo y lactancia salvo orden médica.",
+ op:"Acetaminofén más diclofenaco en adultos sin contraindicación.",f:["fmo","página por verificar"],ord:1,minA:12,ges:"evitar"},
+{id:"metoca",n:"Metocarbamol",c:"750 mg",p:"Tableta",sol:300,ent:100,lote:"114030",v:"2029-03",g:"Dolor y fiebre",
+ u:"Espasmo muscular agudo (lumbago, tortícolis), siempre junto con analgésico y por pocos días.",
+ pa:"1.500 mg (2 tabletas) cada 8 horas por 2 a 3 días, luego 750 mg cada 8 horas; máximo 7 a 10 días.",
+ pn:"No se recomienda en menores de 16 años.",
+ ef:"Somnolencia, mareo, visión borrosa, orina oscura (sin importancia).",
+ ci:"Miastenia gravis, epilepsia, insuficiencia renal o hepática.",
+ it:"Alcohol, difenhidramina, clorfeniramina, tramadol, midazolam: más sedación.",
+ em:"Evitar en embarazo y lactancia.",op:"Calor local, estiramiento y acetaminofén.",f:["fmo","página por verificar"],minA:16,ges:"evitar"},
+{id:"hiosc_a",n:"Hioscina N-butil bromuro ampolla",c:"20 mg/ml",p:"Ampolla",sol:20,ent:10,lote:"1593873",v:"2029-05",g:"Digestivo",
+ u:"Cólico abdominal, renal o biliar (espasmo).",
+ pa:"20 mg IM o IV lenta; se puede repetir; máximo 100 mg al día.",pn:"Por orden médica.",
+ ef:"Boca seca, taquicardia, retención urinaria, visión borrosa.",
+ ci:"Glaucoma de ángulo estrecho, crecimiento de próstata con retención, taquiarritmia, íleo u obstrucción intestinal, miastenia. Dolor abdominal sin diagnóstico (puede ocultar un abdomen agudo).",
+ it:"Difenhidramina, clorfeniramina, dimenhidrinato: más efecto anticolinérgico. Metoclopramida: se anulan.",
+ em:"Usar solo si es necesario.",op:"Si el dolor es renal: diclofenaco IM.",f:["fmo","página por verificar"],ord:1},
+/* ---------- Antibióticos ---------- */
+{id:"amox_s",n:"Amoxicilina suspensión",c:"250 mg/5 ml (50 mg/ml)",p:"Suspensión",sol:20,ent:10,lote:"3354195",v:"2027-09",g:"Antibióticos",
+ u:"Neumonía en niños, otitis media, faringoamigdalitis estreptocócica, desnutrición aguda severa.",
+ pn:"Neumonía y otitis: 90 mg/kg al día en 2 tomas (cada 12 horas), 5 días. Faringitis: 50 mg/kg una vez al día (máximo 1 g) por 10 días. Desnutrición aguda: 90 mg/kg al día cada 12 horas por 7 días.",
+ ef:"Diarrea, brote en la piel, candidiasis del pañal. Raro: anafilaxia.",
+ ci:"Alergia a penicilinas. Mononucleosis (brote).",
+ it:"Metotrexato. Warfarina (puede subir el INR). Una vez reconstituida dura 7 a 14 días: mira la etiqueta.",
+ em:"Segura en embarazo y lactancia.",
+ op:"Alergia a la penicilina: azitromicina. Cápsulas de 500 mg abiertas en niños grandes.",f:["neu","46"],
+ kg:[{t:"Neumonía u otitis (90 mg/kg/día)",mg:[45,45],cada:"cada 12 horas",max:1500,mgml:50},{t:"Faringitis (50 mg/kg/día)",mg:[50,50],cada:"una vez al día",max:1000,mgml:50}]},
+{id:"amox_c",n:"Amoxicilina cápsulas",c:"500 mg",p:"Cápsula",sol:550,ent:400,lote:"3337270",v:"2027-10",g:"Antibióticos",
+ u:"Neumonía adquirida en comunidad leve, faringitis estreptocócica, otitis, sinusitis bacteriana.",
+ pa:"Faringitis: 500 mg cada 12 horas por 10 días. Neumonía leve: 1 g cada 8 horas por 5 días. Otitis o sinusitis: 500 mg a 1 g cada 8 horas por 5 días.",
+ pn:"Ver la suspensión; la cápsula se puede abrir y mezclar con comida en niños grandes.",
+ ef:"Diarrea, náusea, brote, anafilaxia rara.",ci:"Alergia a penicilinas.",
+ it:"Metotrexato, warfarina.",em:"Segura en embarazo y lactancia.",
+ op:"Alergia: azitromicina. Penicilina benzatínica para la faringitis si no se asegura el tratamiento de 10 días.",f:["aware","página por verificar"]},
+{id:"ampi_s",n:"Ampicilina suspensión",c:"250 mg/5 ml (50 mg/ml)",p:"Suspensión",sol:10,ent:10,lote:"C5565802",v:"2028-06",io:"Lote escrito a mano: confírmalo en el frasco.",g:"Antibióticos",
+ u:"Infecciones sensibles cuando no hay amoxicilina (respiratorias, urinarias). La amoxicilina se absorbe mejor y se da menos veces.",
+ pn:"50 a 100 mg/kg al día dividido cada 6 horas, con el estómago vacío.",
+ ef:"Diarrea, brote (más que con amoxicilina).",ci:"Alergia a penicilinas.",it:"Alopurinol (brote). Metotrexato.",
+ em:"Segura.",op:"Amoxicilina, que se da cada 12 horas.",f:["fmo","página por verificar"],
+ kg:[{t:"Dosis",mg:[12.5,25],cada:"cada 6 horas",max:500,mgml:50}]},
+{id:"ampi_t",n:"Ampicilina tabletas",c:"500 mg",p:"Tableta",sol:400,ent:200,lote:"3331733",v:"2027-06",g:"Antibióticos",
+ u:"Infecciones sensibles cuando no hay amoxicilina.",pa:"500 mg cada 6 horas, en ayunas (1 hora antes de comer).",
+ ef:"Diarrea, brote.",ci:"Alergia a penicilinas.",it:"Alopurinol, metotrexato.",em:"Segura.",
+ op:"Amoxicilina (se da cada 8 a 12 horas).",f:["fmo","página por verificar"]},
+{id:"ampsul",n:"Ampicilina + sulbactam ampolla",c:"1 g + 0,5 g (1,5 g)",p:"Ampolla",sol:10,ent:5,lote:"253082020",v:"2028-08",g:"Antibióticos",
+ u:"Infecciones moderadas a graves (neumonía que no mejora, celulitis extensa, mordeduras infectadas, infección pélvica) mientras se remite.",
+ pa:"1,5 a 3 g IV lenta o IM cada 6 horas. Por orden médica.",pn:"150 a 300 mg/kg al día (de ampicilina) dividido cada 6 horas, por orden médica.",
+ ef:"Dolor en el sitio, diarrea, brote, flebitis.",ci:"Alergia a penicilinas.",it:"Alopurinol, metotrexato.",em:"Segura.",
+ op:"Gentamicina más ampicilina según la orden médica.",f:["fmo","página por verificar"],ord:1},
+{id:"azit_t",n:"Azitromicina tabletas",c:"500 mg",p:"Tableta",sol:60,ent:60,lote:"A0272",v:"2027-11",io:"Marca corregida a mano en el acta (Laproff).",g:"Antibióticos",
+ u:"Alergia a la penicilina (faringitis, neumonía atípica), clamidia y cervicitis, diarrea por cólera o disentería en adultos.",
+ pa:"500 mg al día por 3 días. Clamidia: 1 g (2 tabletas) dosis única. Faringitis en alérgicos: 500 mg el día 1 y 250 mg los días 2 a 5.",
+ ef:"Náusea, diarrea, dolor abdominal. Alarga el QT.",
+ ci:"Alergia a macrólidos, enfermedad hepática grave, QT largo conocido.",
+ it:"Otros medicamentos que alargan el QT (ciprofloxacino, fluconazol, metoclopramida, sertralina a dosis altas). Antiácidos con aluminio: separar 2 horas. Metilergometrina: no combinar.",
+ em:"Se puede usar en embarazo y lactancia.",op:"Doxiciclina en la clamidia de no gestantes.",f:["its","página por verificar"]},
+{id:"azit_s",n:"Azitromicina suspensión",c:"200 mg/5 ml (40 mg/ml)",p:"Suspensión",sol:10,ent:10,lote:"F024Q4A",v:"2027-10",io:"Lote escrito a mano: confírmalo.",g:"Antibióticos",
+ u:"Niños alérgicos a la penicilina: faringitis, otitis, neumonía. Tos ferina.",
+ pn:"10 mg/kg una vez al día por 3 días (máximo 500 mg). Faringitis: 12 mg/kg al día por 5 días. Tos ferina: 10 mg/kg el día 1 y 5 mg/kg los días 2 a 5.",
+ ef:"Vómito, diarrea, dolor abdominal.",ci:"Alergia a macrólidos.",it:"Antiácidos (separar 2 horas). Medicamentos que alargan el QT.",
+ em:"Segura.",op:"Amoxicilina si no es alérgico.",f:["aware","página por verificar"],
+ kg:[{t:"Dosis habitual (3 días)",mg:[10,10],cada:"una vez al día",max:500,mgml:40},{t:"Faringitis (5 días)",mg:[12,12],cada:"una vez al día",max:500,mgml:40}]},
+{id:"cefa_c",n:"Cefalexina cápsulas",c:"500 mg",p:"Cápsula",sol:300,ent:108,lote:"00970226",v:"2029-02",g:"Antibióticos",
+ u:"Infecciones de piel (impétigo extenso, celulitis leve, heridas infectadas) e infección urinaria, incluida la gestante.",
+ pa:"500 mg cada 6 horas por 5 a 7 días (piel) o 7 días (infección urinaria en gestante).",
+ pn:"25 a 50 mg/kg al día cada 6 a 8 horas; la cápsula se puede abrir. La suspensión no fue entregada.",
+ ef:"Diarrea, náusea, brote.",ci:"Anafilaxia previa a penicilina o cefalosporina.",it:"Metformina (sube un poco sus niveles). Probenecid.",
+ em:"Segura en embarazo y lactancia.",op:"Dicloxacilina en piel. Nitrofurantoína en cistitis.",f:["aware","página por verificar"]},
+{id:"cipro",n:"Ciprofloxacino",c:"500 mg",p:"Tableta",sol:100,ent:50,lote:"268501",v:"2028-06",g:"Antibióticos",
+ u:"Pielonefritis leve y prostatitis en adultos no gestantes, disentería (diarrea con sangre) en adultos.",
+ pa:"Pielonefritis: 500 mg cada 12 horas por 7 días. Disentería: 500 mg cada 12 horas por 3 días. Cistitis: no es primera opción.",
+ pn:"No en menores de 18 años salvo orden médica.",
+ ef:"Náusea, diarrea, mareo, dolor o ruptura de tendones, QT largo, convulsiones, fotosensibilidad.",
+ ci:"Embarazo, lactancia, menores de 18 años, miastenia, antecedente de tendinitis por quinolonas, epilepsia.",
+ it:"Calcio, hierro, zinc, sucralfato, antiácidos y lácteos: tomarlo 2 horas antes o 6 horas después. Prednisolona: más ruptura de tendón. Otros medicamentos que alargan el QT. Warfarina.",
+ em:"Contraindicado en embarazo y lactancia.",op:"Gestante: cefalexina o nitrofurantoína. Niño con disentería: telemedicina.",f:["aware","página por verificar"],minA:18,ges:"no"},
+{id:"clinda_t",n:"Clindamicina tabletas",c:"300 mg",p:"Tableta",sol:120,ent:32,lote:"173174",v:"2028-04",g:"Antibióticos",
+ u:"Infecciones de piel en alérgicos a la penicilina, abscesos dentales; con quinina en la malaria por P. falciparum de la gestante en primer trimestre.",
+ pa:"300 a 450 mg cada 6 a 8 horas. Malaria en gestante: dosis según la guía de malaria y la orden médica.",
+ pn:"8 a 25 mg/kg al día cada 6 a 8 horas, por orden médica.",
+ ef:"Diarrea; colitis grave (diarrea con sangre o fiebre: suspender y consultar).",ci:"Alergia a clindamicina, antecedente de colitis.",
+ it:"Relajantes musculares de anestesia. Azitromicina (antagonismo).",em:"Se puede usar en embarazo.",
+ op:"Cefalexina o dicloxacilina si no hay alergia.",f:["mal","16–17"]},
+{id:"clinda_a",n:"Clindamicina ampolla",c:"600 mg/4 ml",p:"Ampolla",sol:10,ent:5,lote:"",v:"",io:"Sin lote ni vencimiento en el acta: tómalos de la ampolla.",g:"Antibióticos",
+ u:"Infección grave de piel o tejidos blandos, infección pélvica o aspiración, mientras se remite.",
+ pa:"600 mg IV diluida en 50 a 100 ml, en al menos 20 a 30 minutos, cada 8 horas. Nunca en bolo IV. Por orden médica.",
+ pn:"Por orden médica.",ef:"Colitis, flebitis, hipotensión o paro si se pasa rápido.",ci:"Alergia, colitis previa.",
+ it:"Relajantes musculares.",em:"Se puede usar.",op:"Ampicilina + sulbactam.",f:["fmo","página por verificar"],ord:1},
+{id:"diclox_c",n:"Dicloxacilina cápsulas",c:"500 mg",p:"Cápsula",sol:300,ent:100,lote:"29026",v:"2028-07",g:"Antibióticos",
+ u:"Infecciones por estafilococo en piel: impétigo extenso, forúnculos, celulitis leve, heridas infectadas, mastitis.",
+ pa:"500 mg cada 6 horas por 5 a 7 días, 1 hora antes de comer.",pn:"Ver la suspensión.",
+ ef:"Náusea, diarrea, brote.",ci:"Alergia a penicilinas.",it:"Warfarina (baja el efecto). Metotrexato.",
+ em:"Segura.",op:"Cefalexina. Alérgicos: clindamicina.",f:["aware","página por verificar"]},
+{id:"diclox_s",n:"Dicloxacilina suspensión",c:"250 mg/5 ml (50 mg/ml)",p:"Suspensión",sol:10,ent:10,lote:"3364008",v:"2028-05",g:"Antibióticos",
+ u:"Impétigo extenso, forúnculos y celulitis leve en niños.",pn:"25 a 50 mg/kg al día dividido cada 6 horas por 5 a 7 días, antes de las comidas.",
+ ef:"Diarrea, vómito, brote.",ci:"Alergia a penicilinas.",it:"Warfarina.",em:"Segura.",op:"Cefalexina (cápsula abierta).",f:["aware","página por verificar"],
+ kg:[{t:"Dosis",mg:[6.25,12.5],cada:"cada 6 horas",max:500,mgml:50}]},
+{id:"doxi",n:"Doxiciclina",c:"100 mg",p:"Tableta",sol:100,ent:100,lote:"148778",v:"2029-01",g:"Antibióticos",
+ u:"Leptospirosis, rickettsiosis, clamidia, sífilis en no gestantes alérgicos a la penicilina, cólera, acné inflamatorio.",
+ pa:"100 mg cada 12 horas. Leptospirosis: 7 días. Clamidia: 7 días. Sífilis temprana en alérgicos no gestantes: 14 días (tardía, 28 días). Tomar con un vaso grande de agua, de pie, y no acostarse en 30 minutos.",
+ pn:"No en menores de 8 años (salvo rickettsiosis grave por orden médica).",
+ ef:"Esofagitis (si se toma acostado), náusea, fotosensibilidad (quemaduras de sol), manchas en dientes de niños.",
+ ci:"Embarazo, lactancia, menores de 8 años.",
+ it:"Calcio, hierro, zinc, sucralfato, antiácidos y lácteos: separar 2 a 3 horas. Warfarina (sube el INR).",
+ em:"Contraindicada en embarazo y lactancia.",op:"Gestante con sífilis: penicilina benzatínica (desensibilizar si es alérgica). Clamidia en gestante: azitromicina.",f:["its","página por verificar"],minA:8,ges:"no"},
+{id:"genta",n:"Gentamicina ampolla",c:"160 mg/2 ml (80 mg/ml)",p:"Ampolla",sol:10,ent:5,lote:"1586298",v:"2028-02",g:"Antibióticos",
+ u:"Primera dosis antes de remitir en pielonefritis, sepsis o infección neonatal grave, junto con ampicilina, por orden médica.",
+ pa:"5 a 7 mg/kg una vez al día IM o IV lenta. Por orden médica.",pn:"Lactantes y niños: 5 a 7,5 mg/kg una vez al día, por orden médica.",
+ ef:"Daño renal y del oído (sordera, mareo), sobre todo si se repite o hay deshidratación.",
+ ci:"Miastenia, insuficiencia renal sin ajuste, embarazo (daño del oído del bebé) salvo que no haya otra opción.",
+ it:"Otros nefrotóxicos y diclofenaco: más daño renal. Furosemida: más daño del oído. Relajantes musculares.",
+ em:"Evitar en embarazo salvo urgencia. Compatible con la lactancia.",op:"Ampicilina + sulbactam.",f:["fmo","página por verificar"],ord:1,ges:"evitar",
+ kg:[{t:"Dosis única diaria (5 mg/kg)",mg:[5,5],cada:"una vez al día",max:560,mgml:80,u:"ml de la ampolla"}]},
+{id:"metro_s",n:"Metronidazol suspensión",c:"250 mg/5 ml (50 mg/ml)",p:"Suspensión",sol:10,ent:10,lote:"24080",v:"2027-05",g:"Antiparasitarios",
+ u:"Giardiasis y amebiasis en niños.",
+ pn:"Giardiasis: 15 mg/kg al día dividido cada 8 horas por 5 a 7 días. Amebiasis intestinal: 30 a 50 mg/kg al día cada 8 horas por 7 a 10 días.",
+ ef:"Sabor metálico, náusea, vómito, orina oscura.",ci:"Alergia a nitroimidazoles.",it:"Warfarina. Fenobarbital.",
+ em:"Ver tabletas.",op:"Tinidazol dosis única en giardiasis (vence 11/2026: úsalo primero).",f:["fmo","página por verificar"],
+ kg:[{t:"Giardiasis",mg:[5,5],cada:"cada 8 horas",max:250,mgml:50},{t:"Amebiasis",mg:[10,15],cada:"cada 8 horas",max:750,mgml:50}]},
+{id:"metro_t",n:"Metronidazol tabletas",c:"500 mg",p:"Tableta",sol:200,ent:200,lote:"6030370",v:"2028-04",g:"Antiparasitarios",
+ u:"Vaginosis bacteriana, tricomoniasis, amebiasis, giardiasis.",
+ pa:"Vaginosis o tricomoniasis: 500 mg cada 12 horas por 7 días (tratar a la pareja en tricomoniasis). Amebiasis intestinal: 500 a 750 mg cada 8 horas por 7 a 10 días. Giardiasis: 500 mg cada 8 horas por 5 días.",
+ ef:"Sabor metálico, náusea, orina oscura, cefalea. Hormigueo en manos y pies con tratamientos largos.",
+ ci:"Alcohol durante el tratamiento y 3 días después (vómito intenso). Alergia.",
+ it:"Alcohol (efecto antabús). Warfarina (sube el INR). Litio.",
+ em:"Se puede usar en el embarazo con el esquema de 7 días; evitar la dosis única de 2 g. En lactancia, si se da dosis única, esperar 12 a 24 horas para amamantar.",
+ op:"Tinidazol 2 g dosis única (vence 11/2026).",f:["its","página por verificar"]},
+{id:"tini",n:"Tinidazol",c:"500 mg",p:"Tableta",sol:80,ent:80,lote:"C101157",v:"2026-11",io:"Vence en noviembre de 2026: úsalo antes que el metronidazol cuando la indicación lo permita.",g:"Antiparasitarios",
+ u:"Giardiasis, amebiasis intestinal, tricomoniasis y vaginosis bacteriana. Ventaja: dosis única.",
+ pa:"Giardiasis, tricomoniasis o vaginosis: 2 g (4 tabletas) dosis única, con comida. Amebiasis: 2 g al día por 3 días.",
+ pn:"Mayores de 3 años: giardiasis 50 mg/kg dosis única (máximo 2 g); amebiasis 50 mg/kg al día por 3 días. La tableta se puede triturar con comida.",
+ ef:"Sabor metálico, náusea, mareo.",ci:"Alcohol (y 3 días después), primer trimestre del embarazo, lactancia (suspender 72 horas).",
+ it:"Alcohol, warfarina, litio.",em:"No en el primer trimestre. En lactancia, suspender 72 horas.",
+ op:"Metronidazol.",f:["fmo","página por verificar"],minA:3,ges:"evitar",
+ kg:[{t:"Giardiasis (dosis única)",mg:[50,50],cada:"una sola vez",max:2000,mgu:500,un:"tableta"}]},
+{id:"nitro",n:"Nitrofurantoína",c:"100 mg",p:"Tableta",sol:150,ent:80,lote:"693011A",v:"2027-11",g:"Antibióticos",
+ u:"Cistitis (infección urinaria baja) en mujeres, incluida la gestante antes del final del embarazo.",
+ pa:"Macrocristales o liberación modificada: 100 mg cada 12 horas por 5 días. Si es nitrofurantoína corriente: 50 a 100 mg cada 6 horas. Revisa el empaque. Con comida.",
+ pn:"5 a 7 mg/kg al día dividido cada 6 horas, por orden médica.",
+ ef:"Náusea, orina oscura. Raro: reacción pulmonar o hepática.",
+ ci:"Insuficiencia renal, déficit de G6PD, menores de 1 mes, gestante a término (desde la semana 38) por hemólisis del bebé.",
+ it:"Antiácidos con magnesio (bajan la absorción).",em:"Útil en el embarazo, salvo al final. Compatible con la lactancia si el bebé no tiene déficit de G6PD.",
+ op:"Cefalexina en gestantes. Trimetoprim-sulfametoxazol fuera del embarazo.",f:["aware","página por verificar"]},
+{id:"peni",n:"Penicilina G benzatínica",c:"2.400.000 UI",p:"Ampolla",sol:10,ent:3,lote:"263012005",v:"2026-02",io:"El acta dice vence 02/2026 (ya vencida). Confirma la fecha en el frasco; si es otra, corrígela en «Corregir inventario».",g:"Antibióticos",
+ u:"Sífilis (gestante y pareja), faringoamigdalitis estreptocócica, prevención de fiebre reumática.",
+ pa:"Sífilis temprana: 2.400.000 UI IM dosis única (1.200.000 en cada glúteo). Tardía o de duración desconocida: 2.400.000 UI semanal por 3 semanas. Faringitis: 1.200.000 UI IM dosis única (27 kg o más).",
+ pn:"Faringitis: 600.000 UI IM dosis única si pesa menos de 27 kg; 1.200.000 UI si pesa 27 kg o más.",
+ ef:"Dolor en el sitio, reacción de Jarisch-Herxheimer en sífilis (fiebre y malestar las primeras horas), anafilaxia rara.",
+ ci:"Alergia confirmada a penicilina (en la gestante: desensibilización). Nunca IV.",
+ it:"Doxiciclina y otros bacteriostáticos pueden bajar su efecto.",em:"De elección en la gestante con sífilis.",
+ op:"No gestante alérgica: doxiciclina. Gestante alérgica: desensibilización, no hay sustituto.",f:["sif","46"]},
+{id:"tmp_t",n:"Trimetoprim + sulfametoxazol tabletas",c:"160/800 mg",p:"Tableta",sol:200,ent:100,lote:"F02451A",v:"2027-10",g:"Antibióticos",
+ u:"Cistitis en no gestantes, infecciones de piel por estafilococo, profilaxis en VIH.",
+ pa:"Cistitis: 1 tableta cada 12 horas por 3 días (7 días en hombres). Piel: 1 a 2 tabletas cada 12 horas por 5 a 7 días.",pn:"Ver la suspensión.",
+ ef:"Brote (raro pero grave: Stevens-Johnson), náusea, potasio alto, anemia.",
+ ci:"Alergia a sulfas, déficit de G6PD, insuficiencia renal o hepática grave, primer trimestre y final del embarazo, menores de 6 semanas.",
+ it:"Warfarina (sangrado), metotrexato, enalapril y losartán (potasio alto), fenitoína, glibenclamida (hipoglicemia).",
+ em:"Evitar en el primer trimestre (antifolato) y en el último mes (ictericia del recién nacido).",
+ op:"Nitrofurantoína; cefalexina en gestantes.",f:["aware","página por verificar"],ges:"evitar"},
+{id:"tmp_s",n:"Trimetoprim + sulfametoxazol suspensión",c:"40/200 mg en 5 ml (8 mg/ml de trimetoprim)",p:"Suspensión",sol:10,ent:10,lote:"F020468",v:"2027-02",g:"Antibióticos",
+ u:"Infección urinaria en niños sin fiebre alta, piel.",pn:"4 mg/kg de trimetoprim cada 12 horas (8 mg/kg al día) por 3 a 5 días; con fiebre, por orden médica.",
+ ef:"Brote, vómito.",ci:"Menores de 6 semanas, déficit de G6PD, alergia a sulfas.",it:"Ver tabletas.",em:"No aplica.",
+ op:"Cefalexina (cápsula abierta) o amoxicilina según la orden médica.",f:["aware","página por verificar"],
+ kg:[{t:"Dosis (trimetoprim)",mg:[4,4],cada:"cada 12 horas",max:160,mgml:8}]},
+/* ---------- Antiparasitarios y piel ---------- */
+{id:"pirantel",n:"Pamoato de pirantel",c:"250 mg",p:"Tableta",sol:100,ent:120,lote:"",v:"",io:"Entregaron 120 (pidieron 100). Sin lote ni vencimiento en el acta.",g:"Antiparasitarios",
+ u:"Áscaris y oxiuros.",pa:"11 mg/kg dosis única (máximo 1 g). Oxiuros: repetir a las 2 semanas y tratar a toda la familia.",
+ pn:"Mayores de 6 meses: 11 mg/kg dosis única. La tableta se puede triturar.",
+ ef:"Náusea, cólico, diarrea leves.",ci:"Alergia. Primer trimestre del embarazo.",it:"Piperazina (se anulan).",
+ em:"Evitar en el primer trimestre.",op:"Albendazol (no entregado: pedirlo).",f:["fmo","página por verificar"],ges:"evitar",
+ kg:[{t:"Dosis única",mg:[11,11],cada:"una sola vez",max:1000,mgu:250,un:"tableta"}]},
+{id:"iver",n:"Ivermectina gotas",c:"0,6 % (6 mg/ml)",p:"Gotas x 5 ml",sol:30,ent:10,lote:"14281225",v:"2027-12",g:"Antiparasitarios",
+ u:"Estrongiloides, escabiosis costrosa o en brotes, pediculosis que no cede, larva migrans.",
+ pa:"200 microgramos/kg vía oral en ayunas, dosis única. Escabiosis: repetir a los 7 a 14 días. La etiqueta usual indica 1 gota por kg: confírmalo en el frasco.",
+ pn:"Solo si pesa 15 kg o más.",ef:"Mareo, náusea, picor transitorio.",
+ ci:"Menores de 15 kg, embarazo, lactancia en la primera semana, enfermedad del sistema nervioso central.",
+ it:"Warfarina (puede subir el INR).",em:"No en el embarazo.",op:"Crotamitón o permetrina tópica en escabiosis.",f:["fmo","página por verificar"],ges:"no",
+ kg:[{t:"Dosis única (200 mcg/kg)",mg:[0.2,0.2],cada:"una sola vez",max:24,mggota:0.2,un:"gota",min:15}]},
+{id:"crota",n:"Crotamitón loción",c:"10 %",p:"Loción",sol:10,ent:10,lote:"25191",v:"2027-09",g:"Piel",
+ u:"Escabiosis (sarna) y picor.",
+ pa:"Después del baño, aplicar en todo el cuerpo desde el cuello hasta los pies, sin olvidar pliegues, uñas y genitales. Repetir a las 24 horas y bañarse 48 horas después de la última aplicación. Tratar a todos los convivientes a la vez y lavar ropa, sábanas y hamacas en agua caliente o guardarlas en bolsa 3 días.",
+ pn:"Igual; en lactantes incluir la cabeza evitando ojos y boca.",ef:"Irritación, dermatitis de contacto.",
+ ci:"Piel muy irritada o en carne viva, mucosas, ojos.",it:"Ninguna relevante.",em:"Pocos datos: usar si se necesita.",
+ op:"Ivermectina oral si hay brote o si pesa 15 kg o más.",f:["fmo","página por verificar"]},
+{id:"keto_c",n:"Ketoconazol crema",c:"2 %",p:"Crema tópica",sol:10,ent:5,lote:"K03026",v:"2028-07",g:"Piel",
+ u:"Tiñas del cuerpo, ingle y pies, pitiriasis versicolor, dermatitis seborreica, candidiasis de la piel.",
+ pa:"1 a 2 veces al día por 2 a 4 semanas, y 1 semana más después de que mejore.",pn:"Igual.",
+ ef:"Ardor o picor local.",ci:"Alergia.",it:"Tópico: sin interacciones relevantes.",em:"Se puede usar.",
+ op:"Clotrimazol crema.",f:["fmo","página por verificar"]},
+{id:"keto_ch",n:"Ketoconazol champú",c:"2 %",p:"Champú",sol:5,ent:2,lote:"25199",v:"2027-11",g:"Piel",
+ u:"Pitiriasis versicolor (manchas claras en el tronco) y caspa o dermatitis seborreica.",
+ pa:"Pitiriasis versicolor: aplicar en la piel afectada, dejar 5 minutos y enjuagar, una vez al día por 5 días. Caspa: 2 veces por semana por 2 a 4 semanas.",
+ ef:"Irritación.",ci:"Alergia.",it:"Ninguna relevante.",em:"Se puede usar.",op:"Ketoconazol crema.",f:["fmo","página por verificar"]},
+{id:"clotri",n:"Clotrimazol crema",c:"1 % (tubo de 40 g)",p:"Crema tópica",sol:20,ent:8,lote:"622086",v:"",io:"El año de vencimiento quedó cortado en la foto (08/202?): confírmalo en el tubo.",g:"Piel",
+ u:"Tiñas, candidiasis de la piel y del pañal.",pa:"2 a 3 veces al día por 2 a 4 semanas.",pn:"Igual; en el pañal, capa fina con cada cambio.",
+ ef:"Ardor local.",ci:"Alergia.",it:"Ninguna relevante.",em:"Se puede usar.",op:"Ketoconazol crema.",f:["fmo","página por verificar"]},
+{id:"sulfad",n:"Sulfadiazina de plata",c:"1 %",p:"Crema tópica",sol:10,ent:5,lote:"6007314",v:"2029-04",io:"El acta dice «tabletas»: es crema tópica.",g:"Piel",
+ u:"Quemaduras de segundo grado y heridas con riesgo de infección.",
+ pa:"Lavar con solución salina, aplicar una capa de 3 a 5 mm con guante estéril 1 a 2 veces al día y cubrir.",pn:"No en menores de 2 meses.",
+ ef:"Ardor, coloración gris, baja de glóbulos blancos si es extensa.",
+ ci:"Alergia a sulfas, recién nacidos y menores de 2 meses, gestantes a término, déficit de G6PD.",
+ it:"Desbridantes enzimáticos (los inactiva).",em:"Evitar al final del embarazo y al amamantar a prematuros o recién nacidos.",
+ op:"Gasa vaselinada y curación limpia.",f:["fmo","página por verificar"]},
+{id:"lido",n:"Lidocaína 2 % sin epinefrina",c:"20 mg/ml, frasco de 50 ml",p:"Solución inyectable",sol:3,ent:3,lote:"C25F405",v:"2029-02",g:"Procedimientos",
+ u:"Anestesia local para suturas, inserción o retiro de implante, drenaje de abscesos.",
+ pa:"Infiltrar lo necesario; máximo 4,5 mg/kg (0,22 ml/kg al 2 %), sin pasar de 300 mg (15 ml). Aspirar antes de inyectar para no entrar a una vena.",
+ pn:"Máximo 4,5 mg/kg.",ef:"Toxicidad si pasa a la sangre o se excede: hormigueo en la boca, sabor metálico, mareo, convulsiones, arritmia.",
+ ci:"Alergia a anestésicos amida, bloqueo cardiaco, infección en el sitio.",it:"Betabloqueadores y antiarrítmicos.",
+ em:"Se puede usar.",op:"Hielo local en procedimientos muy cortos.",f:["fmo","página por verificar"],
+ kg:[{t:"Dosis máxima total",mg:[4.5,4.5],cada:"en total",max:300,mgml:20}]},
+/* ---------- Respiratorio y alergia ---------- */
+{id:"salb_i",n:"Salbutamol inhalador",c:"100 mcg/dosis",p:"Inhalador",sol:15,ent:5,lote:"061525",v:"2028-07",g:"Respiratorio",
+ u:"Crisis de asma y sibilancias recurrentes; EPOC. No sirve en la bronquiolitis.",
+ pa:"Crisis: 4 a 10 inhalaciones con inhalocámara cada 20 minutos en la primera hora; luego cada 1 a 4 horas según la respuesta.",
+ pn:"5 años o menos: 2 inhalaciones con inhalocámara y máscara cada 20 minutos en la primera hora. 6 a 11 años: 4 a 10 inhalaciones.",
+ ef:"Temblor, taquicardia, palpitaciones, potasio bajo.",ci:"Alergia.",
+ it:"Propranolol y otros betabloqueadores no selectivos (anulan el efecto). Hidroclorotiazida y prednisolona (bajan el potasio).",
+ em:"Seguro.",op:"Ipratropio añadido en la crisis moderada o grave. Inhalocámara casera con una botella plástica de 500 ml.",f:["gina","página por verificar"]},
+{id:"salb_j",n:"Salbutamol jarabe",c:"2 mg/5 ml (0,4 mg/ml)",p:"Suspensión",sol:10,ent:2,lote:"A0081",v:"2027-10",g:"Respiratorio",
+ u:"Sibilancias cuando no hay forma de usar el inhalador. El inhalador con inhalocámara funciona mejor y da menos efectos.",
+ pn:"2 a 6 años: 1 a 2 mg cada 8 horas. 6 a 12 años: 2 mg cada 8 horas. Adultos: 2 a 4 mg cada 8 horas.",
+ ef:"Temblor, taquicardia, nerviosismo.",ci:"Bronquiolitis (no sirve).",it:"Betabloqueadores.",em:"Seguro.",
+ op:"Inhalador de salbutamol con inhalocámara.",f:["gina","página por verificar"],
+ kg:[{t:"Dosis",mg:[0.1,0.15],cada:"cada 8 horas",max:4,mgml:0.4}]},
+{id:"iprat",n:"Bromuro de ipratropio inhalador",c:"20 mcg/dosis",p:"Inhalador",sol:5,ent:5,lote:"011626",v:"2029-02",g:"Respiratorio",
+ u:"Añadido al salbutamol en la crisis de asma moderada o grave; EPOC.",
+ pa:"Crisis: 4 a 8 inhalaciones cada 20 minutos hasta 3 veces, junto con salbutamol. EPOC: 2 a 4 inhalaciones cada 6 a 8 horas.",
+ pn:"Crisis: 2 a 4 inhalaciones con inhalocámara junto al salbutamol, por orden médica.",
+ ef:"Boca seca, tos. Si cae en los ojos puede subir la presión del ojo.",ci:"Alergia a la atropina.",it:"Otros anticolinérgicos (hioscina, difenhidramina).",
+ em:"Se puede usar.",op:"Salbutamol solo.",f:["gina","página por verificar"]},
+{id:"beclo",n:"Beclometasona inhalador",c:"250 mcg/dosis (el acta dice «250 mg»)",p:"Inhalador",sol:5,ent:5,lote:"",v:"",io:"Sin lote ni vencimiento en el acta. Confirma los microgramos por dosis.",g:"Respiratorio",
+ u:"Control del asma persistente (no es para la crisis).",
+ pa:"Según la orden médica, usualmente 1 a 2 inhalaciones cada 12 horas con inhalocámara. Enjuagar la boca después.",pn:"Por orden médica.",
+ ef:"Candidiasis en la boca, ronquera.",ci:"No sirve para la crisis.",it:"Ninguna relevante.",em:"Se puede usar.",
+ op:"Ketotifeno no reemplaza al corticoide inhalado.",f:["gina","página por verificar"],ord:1},
+{id:"pred",n:"Prednisolona",c:"5 mg",p:"Tableta",sol:30,ent:30,lote:"601156A",v:"2028-05",io:"Mes de vencimiento poco legible: confírmalo.",g:"Respiratorio",
+ u:"Crisis de asma, alergias graves sin anafilaxia, crup moderado si no hay dexametasona.",
+ pa:"Asma: 40 a 50 mg al día por 5 a 7 días, en la mañana con comida.",pn:"Asma: 1 a 2 mg/kg al día (máximo 40 mg) por 3 a 5 días.",
+ ef:"Hiperglicemia, insomnio, gastritis, subida de la presión, cambios de ánimo.",
+ ci:"Infección no tratada (micosis sistémica), varicela activa. En el Vaupés, si va a recibir más de unos días, pensar en estrongiloides (puede diseminarse): ivermectina antes, por orden médica.",
+ it:"Diclofenaco y ASA (úlcera), metformina (sube la glucosa), hidroclorotiazida y salbutamol (bajan el potasio), ciprofloxacino (tendones).",
+ em:"Se puede usar en cursos cortos.",op:"Dexametasona oral o IM a dosis equivalente por orden médica.",f:["gina","página por verificar"],
+ kg:[{t:"Asma (1 a 2 mg/kg/día)",mg:[1,2],cada:"una vez al día",max:40,mgu:5,un:"tableta"}]},
+{id:"dexa",n:"Dexametasona ampolla",c:"8 mg/2 ml (4 mg/ml)",p:"Ampolla",sol:10,ent:10,lote:"1590293",v:"2028-04",g:"Respiratorio",
+ u:"Crup (laringotraqueítis), maduración pulmonar fetal en amenaza de parto pretérmino, edema por alergia o trauma.",
+ pa:"Maduración pulmonar (24 a 34 semanas): 6 mg IM cada 12 horas, 4 dosis, por orden médica.",
+ pn:"Crup: 0,15 a 0,6 mg/kg dosis única IM o vía oral (la ampolla se puede tomar), máximo 16 mg.",
+ ef:"Hiperglicemia, agitación, gastritis.",ci:"Infección micótica sistémica.",it:"Como prednisolona.",
+ em:"Indicada para la maduración pulmonar por orden médica.",op:"Prednisolona 1 mg/kg en el crup.",f:["fmo","página por verificar"],
+ kg:[{t:"Crup (dosis única)",mg:[0.15,0.6],cada:"una sola vez",max:16,mgml:4,u:"ml de la ampolla"}]},
+{id:"hidrocor",n:"Hidrocortisona ampolla",c:"100 mg",p:"Ampolla",sol:10,ent:5,lote:"26060286",v:"2029-05",g:"Respiratorio",
+ u:"Crisis de asma grave que no tolera la vía oral, coadyuvante en anafilaxia (nunca en lugar de la adrenalina), insuficiencia suprarrenal.",
+ pa:"100 a 200 mg IV o IM; repetir cada 6 horas según la orden médica.",pn:"4 mg/kg IV o IM (máximo 100 mg), por orden médica.",
+ ef:"Hiperglicemia, agitación.",ci:"No retrasa ni reemplaza la adrenalina.",it:"Como prednisolona.",em:"Se puede usar.",
+ op:"Dexametasona.",f:["wao",""],ord:1},
+{id:"lora_s",n:"Loratadina jarabe",c:"1 mg/ml",p:"Suspensión",sol:20,ent:10,lote:"A0861",v:"2028-04",io:"Cantidad entregada poco legible.",g:"Alergia",
+ u:"Rinitis alérgica, urticaria, picor por picaduras. No da sueño.",
+ pn:"2 a 12 años con 30 kg o menos: 5 mg (5 ml) una vez al día. Más de 30 kg: 10 mg (10 ml).",
+ ef:"Cefalea, boca seca.",ci:"Menores de 2 años.",it:"Pocas.",em:"Se puede usar.",op:"Clorfeniramina.",f:["fmo","página por verificar"],minA:2},
+{id:"lora_t",n:"Loratadina tabletas",c:"10 mg",p:"Tableta",sol:200,ent:30,lote:"",v:"",io:"Sin lote ni vencimiento en el acta.",g:"Alergia",
+ u:"Rinitis alérgica, urticaria, picaduras.",pa:"10 mg una vez al día.",pn:"Más de 30 kg: 10 mg; 30 kg o menos: media tableta.",
+ ef:"Cefalea, boca seca.",ci:"Alergia.",it:"Pocas.",em:"Se puede usar.",op:"Clorfeniramina.",f:["fmo","página por verificar"]},
+{id:"clorf_s",n:"Clorfeniramina jarabe",c:"2 mg/5 ml (0,4 mg/ml)",p:"Jarabe x 120 ml",sol:10,ent:10,lote:"028BE9",v:"2027-08",io:"El ítem 39 (la misma clorfeniramina) quedó como repetido.",g:"Alergia",
+ u:"Urticaria, picor, rinitis alérgica; da sueño.",
+ pn:"2 a 5 años: 1 mg (2,5 ml) cada 4 a 6 horas, máximo 6 mg al día. 6 a 11 años: 2 mg (5 ml) cada 4 a 6 horas, máximo 12 mg al día.",
+ ef:"Somnolencia, boca seca; en niños pequeños puede dar excitación.",ci:"Menores de 2 años, glaucoma, retención urinaria.",
+ it:"Alcohol, tramadol, midazolam, dihidrocodeína: más sedación.",em:"Se puede usar; puede dar sueño al bebé que lacta.",
+ op:"Loratadina (no da sueño).",f:["fmo","página por verificar"],minA:2},
+{id:"clorf_t",n:"Clorfeniramina tabletas",c:"4 mg",p:"Tableta",sol:50,ent:50,lote:"F110073",v:"2027-11",g:"Alergia",
+ u:"Urticaria, picor, rinitis; coadyuvante tras la adrenalina en anafilaxia.",pa:"4 mg cada 4 a 6 horas; máximo 24 mg al día.",
+ pn:"6 a 11 años: 2 mg (media tableta) cada 4 a 6 horas.",ef:"Somnolencia, boca seca.",ci:"Glaucoma, retención urinaria.",
+ it:"Alcohol y sedantes.",em:"Se puede usar.",op:"Loratadina.",f:["fmo","página por verificar"]},
+{id:"difen_s",n:"Difenhidramina jarabe",c:"12,5 mg/5 ml (2,5 mg/ml)",p:"Suspensión",sol:15,ent:10,lote:"99654",v:"2027-08",g:"Alergia",
+ u:"Urticaria y picor; reacción distónica por metoclopramida.",
+ pn:"2 a 5 años: 6,25 mg (2,5 ml) cada 4 a 6 horas, máximo 37,5 mg al día. 6 a 11 años: 12,5 a 25 mg (5 a 10 ml) cada 4 a 6 horas, máximo 150 mg al día. Por peso: 1 mg/kg por dosis.",
+ ef:"Somnolencia marcada, excitación paradójica en niños.",ci:"Menores de 2 años.",it:"Sedantes, alcohol, hioscina.",em:"Se puede usar en dosis ocasionales.",
+ op:"Loratadina o clorfeniramina.",f:["fmo","página por verificar"],minA:2,
+ kg:[{t:"Dosis",mg:[1,1],cada:"cada 6 horas",max:25,mgml:2.5}]},
+{id:"difen_c",n:"Difenhidramina cápsulas",c:"50 mg",p:"Cápsula",sol:50,ent:50,lote:"25091",v:"2027-04",io:"Corregido a mano: son cápsulas.",g:"Alergia",
+ u:"Urticaria y picor intenso en la noche, coadyuvante en anafilaxia, reacción distónica por metoclopramida.",
+ pa:"25 a 50 mg cada 6 a 8 horas; máximo 300 mg al día.",ef:"Somnolencia, boca seca, retención urinaria, confusión en adultos mayores.",
+ ci:"Glaucoma, retención urinaria; evitar en adultos mayores.",it:"Alcohol, tramadol, midazolam, metocarbamol.",em:"Dosis ocasionales.",
+ op:"Loratadina.",f:["fmo","página por verificar"]},
+{id:"keto_t",n:"Ketotifeno jarabe",c:"1 mg/5 ml",p:"Suspensión",sol:5,ent:5,lote:"A0324",v:"2027-11",g:"Alergia",
+ u:"Prevención en alergia y rinitis de niños; no trata la crisis y su efecto tarda semanas.",
+ pn:"Mayores de 3 años: 1 mg (5 ml) cada 12 horas. 6 meses a 3 años: 0,05 mg/kg cada 12 horas.",
+ ef:"Somnolencia, aumento del apetito.",ci:"Crisis de asma (no sirve).",it:"Sedantes. Metformina y otros antidiabéticos orales.",
+ em:"Evitar.",op:"Loratadina.",f:["fmo","página por verificar"],ord:1},
+{id:"dihidro",n:"Dihidrocodeína jarabe",c:"2,42 mg/ml (según el acta)",p:"Suspensión",sol:15,ent:3,lote:"6A417",v:"2028-04",g:"Respiratorio",
+ u:"Tos seca que no deja dormir, en adultos, cuando se descartó neumonía y tuberculosis.",
+ pa:"Según la etiqueta; por corto tiempo.",pn:"No en menores de 12 años.",
+ ef:"Somnolencia, estreñimiento, náusea, depresión respiratoria.",
+ ci:"Menores de 12 años, crisis de asma, insuficiencia respiratoria, tos con expectoración, lactancia, tos de más de 15 días sin estudio de tuberculosis.",
+ it:"Tramadol, midazolam, difenhidramina, clorfeniramina, alcohol: depresión respiratoria.",em:"Evitar en embarazo y lactancia.",
+ op:"Miel y líquidos tibios en mayores de 1 año.",f:["neu","49–55"],ord:1,minA:12,ges:"evitar"},
+/* ---------- Digestivo ---------- */
+{id:"sro",n:"Sales de rehidratación oral",c:"Baja osmolaridad (sobre de 20,5 g para 1 litro)",p:"Sobre",sol:300,ent:60,lote:"169D126",v:"2028-02",g:"Digestivo",
+ u:"Prevenir y tratar la deshidratación por diarrea o vómito; hidratación en dengue.",
+ pa:"1 sobre en 1 litro de agua hervida y fría; se usa en 24 horas. Adultos con diarrea: tanto como quiera, al menos 200 a 400 ml después de cada deposición. Dengue: hasta 3 litros al día.",
+ pn:"Sin deshidratación: 50 a 100 ml (menores de 2 años) o 100 a 200 ml (2 años o más) después de cada deposición. Algún grado: 50 a 100 ml/kg en 2 a 4 horas, a cucharadas o sorbos, revisando cada hora.",
+ ef:"Vómito si se da muy rápido (esperar 10 minutos y seguir más lento).",ci:"Choque (primero IV), íleo, no puede tragar (usar sonda).",it:"Ninguna.",
+ em:"Segura.",op:"Suero casero solo si no hay sobres.",f:["eda","26–27"],
+ kg:[{t:"Algún grado de deshidratación (en 4 horas)",mg:[50,100],cada:"en 2 a 4 horas",max:null,mgml:1,u:"ml",tot:1}]},
+{id:"zinc",n:"Sulfato de zinc jarabe",c:"Frasco de 120 ml (concentración en la etiqueta)",p:"Suspensión",sol:20,ent:20,lote:"601497A",v:"2028-07",g:"Digestivo",
+ u:"Diarrea aguda en menores de 5 años: acorta la diarrea y previene nuevos episodios.",
+ pn:"Menores de 6 meses: 10 mg de zinc al día. 6 meses o más: 20 mg al día. Por 10 a 14 días, aunque la diarrea pare. Calcula los ml con la etiqueta.",
+ ef:"Vómito (darlo después de comer).",ci:"Ninguna relevante.",it:"Ciprofloxacino y doxiciclina (separar 2 horas). Hierro (separar).",em:"No aplica.",
+ op:"No tiene reemplazo en el botiquín.",f:["eda","32"]},
+{id:"lope",n:"Loperamida",c:"2 mg",p:"Tableta",sol:100,ent:90,lote:"E040486 y E050677",v:"2028-05",io:"Dos lotes: 48 tabletas del lote E040486 (05/2028) y 42 del E050677 (06/2028), anotado a mano.",g:"Digestivo",
+ u:"Diarrea acuosa en adultos sin fiebre ni sangre, para controlar síntomas.",
+ pa:"4 mg al inicio y 2 mg después de cada deposición suelta; máximo 16 mg al día y por 2 días.",pn:"No en niños: la guía de diarrea no recomienda antidiarreicos en menores de 5 años, y está contraindicada en menores de 2.",
+ ef:"Estreñimiento, distensión, íleo; arritmia en sobredosis.",ci:"Niños, diarrea con sangre o fiebre alta, colitis, sospecha de cólera grave.",
+ it:"Sertralina y otros medicamentos que alargan el QT a dosis altas.",em:"Evitar.",op:"Rehidratación oral.",f:["eda","33–34"],minA:12,ges:"evitar"},
+{id:"metoclo",n:"Metoclopramida",c:"10 mg",p:"Tableta",sol:5,ent:50,lote:"A0623",v:"2029-02",io:"Entregaron 50 (pidieron 5).",g:"Digestivo",
+ u:"Náusea y vómito en adultos.",pa:"10 mg hasta 3 veces al día (máximo 30 mg al día) por máximo 5 días, 30 minutos antes de comer.",
+ pn:"No en niños: la guía de diarrea la excluye y da reacciones extrapiramidales.",
+ ef:"Somnolencia, inquietud, reacción distónica (cuello torcido, ojos hacia arriba, lengua afuera): tratar con difenhidramina.",
+ ci:"Obstrucción o sangrado intestinal, epilepsia, Parkinson, menores de 18 años salvo orden médica.",
+ it:"Tramadol y sertralina (convulsiones, síndrome serotoninérgico), sedantes, hioscina (se anulan).",em:"Se puede usar en el embarazo por orden médica.",
+ op:"Dimenhidrinato en adultos.",f:["eda","33–34"],minA:18},
+{id:"dimen",n:"Dimenhidrinato",c:"50 mg",p:"Tableta",sol:20,ent:20,lote:"6050209",v:"2028-05",g:"Digestivo",
+ u:"Mareo del viaje en lancha o carro, vértigo, náusea en adultos.",pa:"50 a 100 mg cada 4 a 6 horas; máximo 400 mg al día. Para viaje, 30 a 60 minutos antes.",
+ pn:"6 a 12 años: 25 a 50 mg cada 6 a 8 horas, máximo 150 mg al día. No en menores de 2 años ni en la diarrea de niños.",
+ ef:"Somnolencia, boca seca.",ci:"Glaucoma, retención urinaria.",it:"Alcohol y sedantes.",em:"Se puede usar ocasionalmente.",
+ op:"Metoclopramida en adultos.",f:["fmo","página por verificar"],minA:2},
+{id:"esome",n:"Esomeprazol",c:"40 mg",p:"Tableta",sol:200,ent:210,lote:"2606001506",v:"2028-06",io:"Entregaron 210 (pidieron 200).",g:"Digestivo",
+ u:"Gastritis, úlcera, reflujo, protección del estómago con AINE o corticoide prolongado.",
+ pa:"20 a 40 mg una vez al día en ayunas, 30 minutos antes del desayuno, por 4 a 8 semanas.",pn:"Por orden médica.",
+ ef:"Cefalea, diarrea. Uso prolongado: magnesio y vitamina B12 bajos, fracturas.",ci:"Alergia.",
+ it:"Clopidogrel (le quita efecto). Hierro (baja su absorción). Metotrexato.",em:"Se puede usar.",op:"Sucralfato.",f:["fmo","página por verificar"]},
+{id:"sucral",n:"Sucralfato",c:"1 g",p:"Tableta",sol:40,ent:40,lote:"208825",v:"2027-11",g:"Digestivo",
+ u:"Úlcera y gastritis, protección de la mucosa.",pa:"1 g cada 6 horas (1 hora antes de comidas y al acostarse) por 4 a 8 semanas.",
+ ef:"Estreñimiento.",ci:"Insuficiencia renal grave.",
+ it:"Separar 2 horas de ciprofloxacino, doxiciclina, levotiroxina, warfarina y fenitoína (les baja la absorción).",em:"Se puede usar.",
+ op:"Esomeprazol.",f:["fmo","página por verificar"]},
+{id:"bisaco",n:"Bisacodilo",c:"5 mg",p:"Tableta",sol:20,ent:20,lote:"",v:"",io:"Sin lote ni vencimiento en el acta.",g:"Digestivo",
+ u:"Estreñimiento ocasional.",pa:"5 a 10 mg en la noche. No partir ni masticar; no tomar con leche ni antiácidos.",pn:"Mayores de 10 años: 5 a 10 mg; menores, por orden médica.",
+ ef:"Cólico, diarrea.",ci:"Dolor abdominal sin diagnóstico, obstrucción intestinal, deshidratación.",it:"Antiácidos y leche (deshacen la cubierta).",
+ em:"Uso corto si la dieta no funciona.",op:"Agua, fibra y fruta.",f:["fmo","página por verificar"],minA:10},
+/* ---------- Corazón, metabolismo ---------- */
+{id:"amlo",n:"Amlodipino",c:"5 mg",p:"Tableta",sol:180,ent:150,lote:"601245A",v:"2028-07",g:"Corazón y circulación",
+ u:"Hipertensión arterial (continuar lo formulado).",pa:"5 mg una vez al día; máximo 10 mg.",
+ ef:"Hinchazón de tobillos, cefalea, rubor, palpitaciones.",ci:"Choque, estenosis aórtica grave.",it:"Otros antihipertensivos (hipotensión). Simvastatina (limitar dosis).",
+ em:"Preferir los recomendados por medicina en el embarazo.",op:"Losartán, enalapril, hidroclorotiazida.",f:["hta2","página por verificar"],ord:1},
+{id:"enala",n:"Enalapril",c:"20 mg",p:"Tableta",sol:400,ent:330,lote:"616196",v:"2028-06",io:"Las cantidades se leen 400 pedidas y 330 entregadas.",g:"Corazón y circulación",
+ u:"Hipertensión arterial, insuficiencia cardiaca, protección del riñón en diabéticos.",pa:"5 a 40 mg al día en 1 o 2 tomas, según la orden médica.",
+ ef:"Tos seca persistente, mareo, potasio alto, angioedema (hinchazón de labios o lengua: urgencia).",
+ ci:"Embarazo (daña al feto), antecedente de angioedema, estenosis renal bilateral, combinado con losartán.",
+ it:"Losartán (no combinar). Diclofenaco (daño renal). Trimetoprim-sulfametoxazol (potasio alto). Litio.",
+ em:"Contraindicado en el embarazo: si queda embarazada, telemedicina para cambiarlo. Compatible con la lactancia.",
+ op:"Losartán si da tos. Amlodipino.",f:["hta2","página por verificar"],ord:1,ges:"no"},
+{id:"losar",n:"Losartán potásico",c:"50 mg",p:"Tableta",sol:600,ent:450,lote:"600573A",v:"2028-03",g:"Corazón y circulación",
+ u:"Hipertensión arterial; alternativa al enalapril cuando da tos.",pa:"50 mg una vez al día; máximo 100 mg.",
+ ef:"Mareo, potasio alto, falla renal si hay deshidratación.",ci:"Embarazo, combinado con enalapril.",
+ it:"Enalapril (no combinar), diclofenaco, trimetoprim-sulfametoxazol (potasio), litio.",em:"Contraindicado en el embarazo.",
+ op:"Amlodipino, hidroclorotiazida.",f:["hta2","página por verificar"],ord:1,ges:"no"},
+{id:"hctz",n:"Hidroclorotiazida",c:"25 mg",p:"Tableta",sol:200,ent:150,lote:"600591A",v:"2028-04",g:"Corazón y circulación",
+ u:"Hipertensión arterial.",pa:"12,5 a 25 mg en la mañana.",
+ ef:"Potasio y sodio bajos, ácido úrico alto (gota), glucosa alta, orinar más.",ci:"Gota, potasio bajo, anuria, alergia a sulfas.",
+ it:"Diclofenaco (menos efecto), prednisolona y salbutamol (potasio bajo), litio.",em:"Evitar en el embarazo salvo orden médica.",
+ op:"Amlodipino.",f:["hta2","página por verificar"],ord:1,ges:"evitar"},
+{id:"nife",n:"Nifedipino",c:"30 mg",p:"Cápsula",sol:10,ent:15,lote:"2606001374",v:"2029-06",io:"Entregaron 15 (pidieron 10). Confirma si es de liberación prolongada: esa presentación no sirve para bajar rápido la presión.",g:"Corazón y circulación",
+ u:"Hipertensión crónica (liberación prolongada). En la crisis hipertensiva del embarazo la guía usa nifedipino de liberación inmediata, por orden médica.",
+ pa:"Liberación prolongada: 30 a 60 mg una vez al día; no partir ni masticar.",
+ ef:"Cefalea, rubor, taquicardia, hinchazón de tobillos, hipotensión.",ci:"Choque, infarto reciente. No usar liberación prolongada para la crisis.",
+ it:"Sulfato de magnesio (hipotensión, debilidad muscular: vigilar). Otros antihipertensivos.",em:"Se usa en el embarazo por orden médica.",
+ op:"Labetalol IV en la crisis del embarazo, por orden médica.",f:["hta","23"],ord:1},
+{id:"label",n:"Labetalol ampolla",c:"5 mg/5 ml según el acta",p:"Ampolla",sol:5,ent:2,lote:"",v:"",io:"Sin lote ni vencimiento. Confirma la concentración: la presentación usual es 5 mg/ml (100 mg en 20 ml); de eso dependen los ml.",g:"Corazón y circulación",
+ u:"Crisis hipertensiva del embarazo (160/110 o más).",pa:"20 mg IV lenta en 2 minutos; si no baja, dosis crecientes cada 10 minutos según la orden médica y la guía.",
+ ef:"Hipotensión, bradicardia, broncoespasmo.",ci:"Asma, bradicardia, bloqueo cardiaco, insuficiencia cardiaca descompensada.",
+ it:"Salbutamol (se anulan). Nifedipino (hipotensión).",em:"Indicado en el embarazo por orden médica.",
+ op:"Nifedipino oral de liberación inmediata.",f:["hta","23"],ord:1},
+{id:"metf",n:"Metformina",c:"850 mg",p:"Tableta",sol:200,ent:195,lote:"F01378C",v:"2028-07",g:"Corazón y circulación",
+ u:"Diabetes tipo 2 (continuar lo formulado).",pa:"Iniciar con media o 1 tableta al día con la comida y subir; máximo 2.550 mg al día (3 tabletas), por orden médica.",
+ ef:"Diarrea, náusea, sabor metálico; vitamina B12 baja; acidosis láctica (rara).",
+ ci:"Insuficiencia renal grave, deshidratación, sepsis, choque, insuficiencia respiratoria, alcoholismo. Suspender mientras dure una diarrea o vómito intenso.",
+ it:"Alcohol. Prednisolona (sube la glucosa). Cefalexina (sube un poco sus niveles).",em:"Puede usarse en el embarazo por orden médica.",
+ op:"Telemedicina para ajuste.",f:["dm2","página por verificar"],ord:1},
+{id:"gemfi",n:"Gemfibrozilo",c:"600 mg",p:"Tableta",sol:120,ent:120,lote:"F02706A",v:"2027-11",g:"Corazón y circulación",
+ u:"Triglicéridos altos.",pa:"600 mg cada 12 horas, 30 minutos antes del desayuno y la cena.",
+ ef:"Dolor abdominal, dolor muscular, cálculos en la vesícula.",ci:"Insuficiencia renal o hepática grave, enfermedad de la vesícula, combinado con estatinas (rabdomiólisis).",
+ it:"Estatinas (no combinar), warfarina (sangrado), glibenclamida (hipoglicemia).",em:"Evitar.",op:"Dieta y ejercicio.",f:["fmo","página por verificar"],ord:1,ges:"evitar"},
+/* ---------- Sangre, vitaminas y minerales ---------- */
+{id:"fe_t",n:"Sulfato ferroso tabletas",c:"300 mg (60 mg de hierro elemental)",p:"Tableta",sol:400,ent:250,lote:"F110564",v:"2027-12",g:"Vitaminas y minerales",
+ u:"Suplemento en la gestación (Res. 3280) y tratamiento de la anemia por falta de hierro.",
+ pa:"Gestante: 1 tableta al día (60 mg de hierro elemental), salvo hemoglobina mayor de 14 g/dl. Anemia: 1 tableta 1 a 2 veces al día por 3 meses, con jugo de fruta y lejos del calcio.",
+ pn:"Ver la suspensión.",ef:"Heces negras (normal), estreñimiento, dolor de estómago. Muy tóxico si un niño se toma varias: guardarlo fuera de su alcance.",
+ ci:"Hemocromatosis, anemia que no es por falta de hierro.",
+ it:"Carbonato de calcio, sucralfato, esomeprazol y antiácidos: bajan la absorción (separar 2 horas). Ciprofloxacino, doxiciclina y zinc: separar 2 horas.",
+ em:"Indicado en la gestación.",op:"Hierro en suspensión.",f:["r3280","269"]},
+{id:"fe_s",n:"Sulfato ferroso suspensión",c:"Según el acta «0,4 %»: confirma los mg de hierro elemental por ml",p:"Suspensión",sol:70,ent:35,lote:"",v:"",io:"Sin lote ni vencimiento en el acta.",g:"Vitaminas y minerales",
+ u:"Prevención y tratamiento de la anemia por falta de hierro en niños.",pn:"Tratamiento: 3 mg/kg al día de hierro elemental por 3 meses; prevención según la Res. 3280. Calcula los ml con la etiqueta.",
+ ef:"Heces negras, estreñimiento, manchas en los dientes (cepillar).",ci:"Desnutrición aguda severa en la fase inicial (no dar hierro aparte: la fórmula terapéutica ya lo trae).",
+ it:"Calcio y antiácidos: separar.",em:"No aplica.",op:"Tableta triturada en niños grandes.",f:["dnt","página por verificar"]},
+{id:"calcio",n:"Carbonato de calcio",c:"1.500 mg (600 mg de calcio elemental)",p:"Tableta",sol:300,ent:250,lote:"",v:"",io:"Concentración corregida a mano de 600 a 1.500 mg. Sin lote ni vencimiento en el acta.",g:"Vitaminas y minerales",
+ u:"Gestantes desde la semana 14 (Res. 3280: calcio 1.200 mg al día) para prevenir la preeclampsia.",
+ pa:"Res. 3280: 1.200 mg al día desde la semana 14. Cada tableta trae 600 mg de calcio elemental: confirma si la orden está en calcio elemental (2 tabletas) o en carbonato. Separado 2 horas del hierro.",
+ ef:"Estreñimiento, gases.",ci:"Calcio alto, cálculos renales de calcio.",
+ it:"Hierro, ciprofloxacino, doxiciclina, levotiroxina: separar 2 horas.",em:"Indicado en la gestación.",op:"Alimentos ricos en calcio.",f:["r3280","269"]},
+{id:"vita",n:"Vitamina A",c:"50.000 UI",p:"Cápsula",sol:200,ent:100,lote:"250900/702",v:"2027-09",io:"Lote escrito a mano: confírmalo.",g:"Vitaminas y minerales",
+ u:"Suplementación de niños de 6 a 59 meses en zonas con deficiencia; sarampión; ojo seco por falta de vitamina A.",
+ pn:"6 a 11 meses: 100.000 UI (2 cápsulas) una vez. 12 a 59 meses: 200.000 UI (4 cápsulas) cada 6 meses. Se corta la cápsula y se exprime en la boca.",
+ ef:"Dolor de cabeza, vómito, fontanela abombada si la dosis es alta (transitorio).",ci:"Dosis repetida antes de 1 mes. Gestantes (dosis altas dañan al feto).",
+ it:"Otros suplementos con vitamina A.",em:"No dar dosis altas en el embarazo.",op:"Alimentos ricos en vitamina A.",f:["vita","página por verificar"],ges:"no"},
+{id:"tranex_t",n:"Ácido tranexámico tabletas",c:"500 mg",p:"Tableta",sol:50,ent:30,lote:"5T385",v:"2027-10",g:"Sangrado",
+ u:"Sangrado menstrual abundante.",pa:"1 g (2 tabletas) cada 8 horas solo los días de sangrado, por máximo 5 días.",
+ ef:"Náusea, diarrea.",ci:"Trombosis actual o pasada, uso de anticonceptivos combinados con estrógeno.",
+ it:"Anticonceptivos combinados (trombosis).",em:"Por orden médica.",op:"Telemedicina si el sangrado es muy abundante o con anemia.",f:["fmo","página por verificar"],ord:1},
+{id:"tranex_a",n:"Ácido tranexámico ampolla",c:"500 mg/5 ml",p:"Ampolla",sol:10,ent:8,lote:"40312",v:"2027-07",g:"Sangrado",
+ u:"Hemorragia posparto y trauma con sangrado importante.",
+ pa:"1 g (2 ampollas) IV lenta en 10 minutos. En la hemorragia posparto, según la guía colombiana, si la oxitocina y la segunda línea no detuvieron el sangrado. En trauma, dentro de las 3 primeras horas.",
+ ef:"Náusea, hipotensión si se pasa rápido.",ci:"Trombosis activa.",it:"Anticonceptivos combinados.",em:"Indicado en la hemorragia posparto.",
+ op:"Masaje uterino y compresión bimanual mientras tanto.",f:["hpp","15–17"]},
+/* ---------- Urgencias y líquidos ---------- */
+{id:"adren",n:"Adrenalina",c:"1 mg/ml (1:1000)",p:"Ampolla",sol:2,ent:2,lote:"E110433E2",v:"2026-11",io:"Vence en noviembre de 2026 (confirmado). Pide el reemplazo ya: sin adrenalina no se puede aplicar penicilina ni antiveneno con seguridad.",g:"Urgencias",
+ u:"Anafilaxia. Debe estar a mano al aplicar penicilina benzatínica, antiveneno o vacunas.",
+ pa:"Anafilaxia: 0,01 mg/kg IM en la cara anterolateral del muslo (0,01 ml/kg), máximo 0,5 mg (0,5 ml). Repetir a los 5 a 15 minutos si no mejora.",
+ pn:"0,01 mg/kg IM, máximo 0,3 mg (0,3 ml).",
+ ef:"Palidez, temblor, palpitaciones, ansiedad, subida de la presión.",ci:"En la anafilaxia no hay contraindicación absoluta.",
+ it:"Betabloqueadores (menos respuesta; puede necesitar más dosis). Antidepresivos tricíclicos.",em:"Se usa igual en la gestante con anafilaxia.",
+ op:"No tiene reemplazo. Antihistamínicos y corticoides no la sustituyen.",f:["wao",""],
+ kg:[{t:"Anafilaxia IM",mg:[0.01,0.01],cada:"repetir a los 5 a 15 minutos si no mejora",max:0.5,mgml:1,maxN:0.3}]},
+{id:"mgso4",n:"Sulfato de magnesio",c:"20 % (2 g en 10 ml)",p:"Ampolla",sol:10,ent:5,lote:"50162",v:"2028-10",g:"Urgencias",
+ u:"Preeclampsia severa y eclampsia.",
+ pa:"Carga: 4 g IV (2 ampollas = 20 ml) diluidos, en 10 a 15 minutos. Mantenimiento: 1 g por hora por 24 horas. Si convulsiona de nuevo: 2 a 4 g IV en 5 minutos. Por orden médica. Con 5 ampollas (10 g) alcanza para la carga y unas 6 horas de mantenimiento.",
+ ef:"Calor, rubor, náusea. Toxicidad: reflejo rotuliano ausente, respiración menor de 12 por minuto, orina menor de 30 ml por hora: suspender.",
+ ci:"Miastenia, insuficiencia renal grave (ajustar).",it:"Nifedipino (hipotensión, debilidad muscular). Gentamicina y relajantes musculares.",
+ em:"Indicado en el embarazo.",op:"El antídoto (gluconato de calcio 1 g IV) no está en el botiquín: pídelo.",f:["hta","23"],ord:1},
+{id:"ssn100",n:"Cloruro de sodio 0,9 % x 100 ml",c:"0,9 %",p:"Bolsa x 100 ml",sol:10,ent:10,lote:"",v:"",io:"Sin lote ni vencimiento en el acta: tómalos de la bolsa.",g:"Líquidos",
+ u:"Diluir medicamentos IV (clindamicina, ampicilina) y lavar heridas.",pa:"Según el medicamento.",ef:"Ninguno relevante.",ci:"Ninguna.",it:"Ninguna.",em:"Segura.",op:"Bolsa de 250 ml.",f:["fmo","página por verificar"]},
+{id:"ssn250",n:"Cloruro de sodio 0,9 % x 250 ml",c:"0,9 %",p:"Bolsa x 250 ml",sol:10,ent:10,lote:"",v:"",io:"Sin lote ni vencimiento en el acta.",g:"Líquidos",
+ u:"Bolos en niños, diluir medicamentos.",pn:"Choque: 10 a 20 ml/kg en bolo, reevaluando; en desnutrición severa, solo si hay choque y más lento (15 ml/kg en 1 hora).",
+ ef:"Sobrecarga de líquidos.",ci:"Insuficiencia cardiaca, edema pulmonar.",it:"Ninguna.",em:"Segura.",op:"Lactato de Ringer.",f:["bec",""],
+ kg:[{t:"Bolo en choque",mg:[10,20],cada:"en bolo, reevaluando",max:null,mgml:1,u:"ml",tot:1}]},
+{id:"ssn500",n:"Cloruro de sodio 0,9 % x 500 ml",c:"0,9 %",p:"Bolsa x 500 ml",sol:10,ent:10,lote:"",v:"",io:"Sin lote ni vencimiento en el acta.",g:"Líquidos",
+ u:"Choque, deshidratación grave, hemorragia, mantener vena mientras se remite.",
+ pa:"Choque: bolos de 500 ml reevaluando (en hemorragia posparto, tibios). Dengue con signos de alarma: según la guía y la orden médica.",
+ ef:"Sobrecarga de líquidos, acidosis con grandes volúmenes.",ci:"Insuficiencia cardiaca, edema pulmonar.",it:"Ninguna.",em:"Segura.",op:"Lactato de Ringer.",f:["hpp","12"]},
+{id:"ringer",n:"Lactato de Ringer (Hartmann)",c:"500 ml",p:"Solución inyectable",sol:10,ent:5,lote:"",v:"",io:"Sin lote ni vencimiento en el acta.",g:"Líquidos",
+ u:"Deshidratación grave por diarrea, choque, hemorragia.",
+ pa:"Deshidratación grave: 100 ml/kg (30 ml/kg en 30 minutos y 70 ml/kg en 2 horas y media).",
+ pn:"Deshidratación grave: 100 ml/kg; 30 ml/kg en 1 hora y 70 ml/kg en 5 horas si es menor de 12 meses; 30 ml/kg en 30 minutos y 70 ml/kg en 2 horas y media si es mayor.",
+ ef:"Sobrecarga de líquidos.",ci:"Insuficiencia cardiaca. Desnutrición severa sin choque (no bolos).",it:"Ceftriaxona (no mezclar en la misma vía con calcio).",em:"Segura.",
+ op:"Cloruro de sodio 0,9 %.",f:["eda","28–29"],
+ kg:[{t:"Deshidratación grave: total",mg:[100,100],cada:"en total (ver cómo repartir)",max:null,mgml:1,u:"ml",tot:1},{t:"Primera fase",mg:[30,30],cada:"en 30 a 60 minutos",max:null,mgml:1,u:"ml",tot:1}]},
+{id:"dad5",n:"Dextrosa al 5 % x 500 ml",c:"5 %",p:"Bolsa x 500 ml",sol:5,ent:5,lote:"",v:"",io:"Sin lote ni vencimiento en el acta.",g:"Líquidos",
+ u:"Líquidos de mantenimiento y vehículo de medicamentos.",
+ pa:"Según la orden médica. No sirve para corregir rápido una hipoglicemia grave: para eso se usa dextrosa al 10 % (2 a 5 ml/kg en niños), que no está en el botiquín.",
+ ef:"Hiperglicemia, hiponatremia en niños si se usa sola.",ci:"No usar sola para rehidratar ni para reanimar.",it:"Ninguna.",em:"Segura.",
+ op:"Hipoglicemia con el paciente despierto: azúcar o panela por boca.",f:["bec",""]},
+/* ---------- Salud mental y neurología ---------- */
+{id:"valp_c",n:"Ácido valproico cápsulas",c:"250 mg",p:"Cápsula",sol:2000,ent:300,lote:"2606000074",v:"2028-06",io:"Lote escrito a mano: confírmalo.",g:"Neurología y salud mental",
+ u:"Epilepsia y trastorno bipolar ya formulados. No se inicia en el puesto.",
+ pa:"Continuar la dosis formulada; no suspender de golpe (puede convulsionar).",
+ ef:"Náusea, temblor, aumento de peso, caída del pelo, somnolencia; daño hepático y pancreatitis (vómito, dolor abdominal, ictericia: urgencia).",
+ ci:"Embarazo y mujeres que pueden quedar embarazadas sin planificación (malformaciones graves), enfermedad hepática.",
+ it:"ASA (más efecto libre), carbapenémicos (bajan sus niveles), lamotrigina.",em:"Contraindicado en el embarazo: si queda embarazada, telemedicina el mismo día, sin suspenderlo por su cuenta. Compatible con la lactancia.",
+ op:"Asegura planificación familiar en mujeres que lo toman.",f:["fmo","página por verificar"],ord:1,ges:"no"},
+{id:"valp_s",n:"Ácido valproico jarabe",c:"250 mg/5 ml (5 g/100 ml)",p:"Suspensión",sol:3,ent:3,lote:"L2504001597",v:"2027-07",g:"Neurología y salud mental",
+ u:"Epilepsia en niños ya formulada.",pn:"Continuar la dosis formulada.",ef:"Ver cápsulas.",ci:"Enfermedad hepática.",it:"ASA.",em:"Ver cápsulas.",
+ op:"Telemedicina si se acaba.",f:["fmo","página por verificar"],ord:1},
+{id:"sertra",n:"Sertralina",c:"50 mg",p:"Tableta",sol:300,ent:30,lote:"F02929A",v:"2027-12",io:"En el renglón figura 0 entregadas (lote 601330A, 06/2028); se agregaron a mano 30 tabletas del lote F02929A (12/2027).",g:"Neurología y salud mental",
+ u:"Depresión y ansiedad ya formuladas.",pa:"Continuar la dosis formulada (usual 50 a 200 mg al día). No suspender de golpe.",
+ ef:"Náusea, insomnio, nerviosismo, disfunción sexual. En menores de 25 años, vigilar ideas de muerte al inicio.",
+ ci:"Uso de IMAO, pimozida.",
+ it:"Tramadol (síndrome serotoninérgico y convulsiones: evitar). Metoclopramida. ASA, diclofenaco, clopidogrel (sangrado). Medicamentos que alargan el QT.",
+ em:"Se puede continuar en embarazo y lactancia por orden médica.",op:"Telemedicina y psicología.",f:["fmo","página por verificar"],ord:1},
+/* ---------- Planificación ---------- */
+{id:"implante",n:"Implante subdérmico",c:"Unidad",p:"Unidad",sol:50,ent:10,lote:"",v:"",io:"Sin lote ni vencimiento en el acta: tómalos de cada empaque (los necesitas para el soporte).",g:"Planificación",
+ u:"Anticoncepción de larga duración.",pa:"Inserción según la técnica del fabricante y la nota de inserción de la app, con lidocaína 2 %.",
+ ef:"Cambios en el sangrado menstrual, cefalea, sensibilidad en las mamas, cambios de peso.",ci:"Cáncer de mama actual (criterio 4 de la OMS). Sangrado vaginal sin estudiar.",
+ it:"Rifampicina (tuberculosis), carbamazepina, fenitoína, efavirenz: bajan su eficacia; usar otro método o condón.",em:"Se puede poner en la lactancia.",
+ op:"Medroxiprogesterona (no entregada).",f:["r3280","página por verificar"]},
+/* ---------- No entregados en esta solicitud ---------- */
+...[
+ ["acasc","Ácido ascórbico 500 mg","Tableta",400,"Suplemento de vitamina C."],
+ ["folico","Ácido fólico 5 mg","Tableta",120,"Preconcepcional y gestantes hasta la semana 12 (Res. 3280: 0,4 mg; 4 mg en alto riesgo de defectos del tubo neural). Pídelo: es parte de la ruta materna."],
+ ["fusid","Ácido fusídico crema 2 %","Crema tópica",20,"Impétigo localizado."],
+ ["albe_s","Albendazol suspensión 100 mg/5 ml","Suspensión",100,"Desparasitación de niños (Res. 3280): 12 a 23 meses 200 mg; 2 años o más 400 mg, dosis única. Pídelo: es de la ruta."],
+ ["albe_t","Albendazol 200 mg","Tableta",500,"Desparasitación: 400 mg (2 tabletas) dosis única desde los 2 años; 200 mg de 12 a 23 meses. Gestantes después del primer trimestre. Pídelo."],
+ ["alum","Hidróxido de aluminio 6 %","Frasco x 100 ml",20,"Acidez y gastritis."],
+ ["atorva","Atorvastatina 20 mg","Tableta",150,"Colesterol alto y riesgo cardiovascular."],
+ ["betam","Betametasona crema","Crema tópica",20,"Dermatitis y eccemas."],
+ ["capto","Captopril 50 mg","Tableta",120,"Hipertensión arterial."],
+ ["cmc","Carboximetilcelulosa gotas","Solución oftálmica",20,"Ojo seco."],
+ ["cefa_s","Cefalexina suspensión 250 mg/5 ml","Suspensión",5,"Infecciones de piel y urinarias en niños."],
+ ["ceftri","Ceftriaxona 1 g","Ampolla",5,"Dosis antes de remitir en infecciones graves y cervicitis. Pídela."],
+ ["champu","Champú antipiojos","Sobre",100,"Pediculosis."],
+ ["clari","Claritromicina 500 mg","Tableta",30,"Alternativa en alérgicos a la penicilina."],
+ ["clopi","Clopidogrel 75 mg","Tableta",10,"Antiagregante formulado por medicina."],
+ ["clot_ov","Clotrimazol óvulo 100 mg","Óvulo vaginal",50,"Candidiasis vaginal, incluida la gestante (7 días). Pídelo."],
+ ["colist","Colistina + hidrocortisona + neomicina","Solución oftálmica",5,"Conjuntivitis y otitis externa."],
+ ["diclo_t","Diclofenaco 50 mg","Tableta",200,"Dolor en adultos sin contraindicación."],
+ ["hcort_c","Hidrocortisona crema 1 %","Crema tópica",15,"Dermatitis leve."],
+ ["hiosc_t","Hioscina 10 mg","Tableta",200,"Cólico."],
+ ["ibu","Ibuprofeno 400 mg","Tableta",500,"Dolor y fiebre sin sospecha de dengue."],
+ ["medroxi","Medroxiprogesterona 150 mg/3 ml","Ampolla",50,"Anticonceptivo trimestral. Pídelo."],
+ ["metiler","Metilergometrina 0,2 mg/ml","Ampolla",5,"Segunda línea en hemorragia posparto (cadena de frío). Contraindicada en hipertensión."],
+ ["midaz","Midazolam 15 mg/3 ml","Ampolla",5,"Convulsión que dura más de 5 minutos. Control especial: lo suministra farmacia."],
+ ["napro_s","Naproxeno suspensión 150 mg/5 ml","Suspensión",15,"Dolor en niños sin sospecha de dengue."],
+ ["napro_t","Naproxeno 250 mg","Tableta",300,"Dolor en adultos."],
+ ["omep","Omeprazol 20 mg","Cápsula",200,"Gastritis (hay esomeprazol)."],
+ ["pira_s","Pamoato de pirantel suspensión","Suspensión",10,"Áscaris y oxiuros en niños."],
+ ["sf30","Suero fisiológico 30 ml","Frasco x 30 ml",5,"Lavado nasal y ocular."]
+].map(([id,n,p,sol,u])=>({id,n,c:"",p,sol,ent:0,lote:"",v:"",g:"No entregados en esta solicitud",u,ne:1}))
+];
+
+/* ---------- Morbilidades que faltaban para cubrir el resto del botiquín ---------- */
+MB.push(
+ {id:"itu",g:"Comunes",t:"Infección urinaria",no:"No es de notificación individual",
+  ss:[["Cistitis: ardor al orinar, orinar muchas veces y poquito, urgencia, dolor bajo el ombligo. Pielonefritis: además fiebre, escalofrío, dolor en la espalda baja, vómito.","aware",""],
+      ["Niños pequeños: fiebre sin otra causa, vómito, irritabilidad, no gana peso.","aware",""]],
+  dx:[["Tira de orina si hay (nitritos y leucocitos). En gestantes, urocultivo según el control prenatal.","aware",""],
+      ["Si hay flujo vaginal, piensa en infección vaginal o de transmisión sexual. Toda fiebre en Vaupés: gota gruesa.","mal","15"]],
+  tx:[["Cistitis en mujer no gestante: nitrofurantoína 100 mg cada 12 horas por 5 días, o trimetoprim-sulfametoxazol 160/800 mg cada 12 horas por 3 días.","aware",""],
+      ["Gestante: cefalexina 500 mg cada 6 horas por 7 días o nitrofurantoína (no desde la semana 38), por orden médica, con urocultivo de control.","aware",""],
+      ["Hombres: 7 días. Pielonefritis en adulto no gestante y sin signos de alarma: ciprofloxacino 500 mg cada 12 horas por 7 días, por orden médica.","aware",""],
+      ["Acetaminofén para el dolor y abundantes líquidos.","",""]],
+  es:[["Pielonefritis o gestante con fiebre: telemedicina; primera dosis de gentamicina IM (5 mg/kg) antes de remitir si medicina la ordena.","aware",""]],
+  al:[["Fiebre con dolor lumbar y vómito, gestante con fiebre o contracciones, menor de 2 años con fiebre, signos de sepsis.","aware",""]]},
+ {id:"parasitos",g:"Comunes",t:"Parasitosis intestinal",no:"No es de notificación individual",
+  ss:[["Dolor abdominal, diarrea grasosa y gases (giardia), picor en el ano en la noche (oxiuros), lombrices en heces o vómito (áscaris), diarrea con moco y sangre (ameba), anemia y desnutrición.","sth",""]],
+  dx:[["Coprológico si hay laboratorio; si no, tratar según el cuadro. Medir peso, talla y buscar palidez.","sth",""]],
+  tx:[["Desparasitación preventiva (Res. 3280): albendazol 400 mg dosis única desde los 2 años; 200 mg de 12 a 23 meses.","sth",""],
+      ["Áscaris u oxiuros: pamoato de pirantel 11 mg/kg dosis única (máximo 1 g); en oxiuros repetir a las 2 semanas y tratar a toda la familia.","fmo",""],
+      ["Giardia: tinidazol 50 mg/kg dosis única (adultos 2 g), o metronidazol 15 mg/kg al día en 3 tomas por 5 a 7 días (adultos 500 mg cada 8 horas por 5 días).","fmo",""],
+      ["Ameba intestinal: metronidazol 30 a 50 mg/kg al día en 3 tomas por 7 a 10 días (adultos 500 a 750 mg cada 8 horas), o tinidazol 50 mg/kg al día por 3 días (adultos 2 g al día).","fmo",""],
+      ["Estrongiloides: ivermectina 200 microgramos/kg dosis única, desde 15 kg y no en gestantes.","fmo",""]],
+  es:[["Lavado de manos, uñas cortas, agua hervida, letrina, calzado.","sth",""]],
+  al:[["Vómito con distensión y sin deposiciones (obstrucción por áscaris), disentería con compromiso general, desnutrición aguda.","sth",""]]},
+ {id:"garganta",g:"Comunes",t:"Faringoamigdalitis y otitis media",no:"No es de notificación individual",
+  ss:[["Faringitis bacteriana probable: fiebre, amígdalas con pus, ganglios del cuello dolorosos, sin tos, en mayores de 3 años. Con tos, mocos o ronquera, casi siempre es viral.","aware",""],
+      ["Otitis media: dolor de oído, fiebre, tímpano rojo y abombado o supuración.","aware",""]],
+  dx:[["Contar los criterios: fiebre, pus en amígdalas, ganglios dolorosos, ausencia de tos. Otoscopia si hay otoscopio.","aware",""]],
+  tx:[["Viral: no antibiótico; acetaminofén y líquidos.","aware",""],
+      ["Faringitis bacteriana: amoxicilina por 10 días (niños 50 mg/kg una vez al día, máximo 1 g; adultos 500 mg cada 12 horas), o penicilina benzatínica IM dosis única: 600.000 UI si pesa menos de 27 kg y 1.200.000 UI si pesa 27 kg o más.","aware",""],
+      ["Alérgicos a la penicilina: azitromicina 12 mg/kg al día por 5 días (adultos 500 mg el día 1 y 250 mg los días 2 a 5).","aware",""],
+      ["Otitis media: amoxicilina 80 a 90 mg/kg al día en 2 tomas por 5 días (10 días en menores de 2 años o graves).","aware",""]],
+  es:[["Control en 48 a 72 horas si no mejora.","aware",""]],
+  al:[["No puede tragar la saliva, babea, voz apagada, no abre la boca (absceso), rigidez de nuca, hinchazón y dolor detrás de la oreja (mastoiditis).","aware",""]]},
+ {id:"asma",g:"Comunes",t:"Crisis de asma o sibilancias (mayores de 2 años)",no:"No es de notificación individual",
+  ss:[["Tos, silbido en el pecho, dificultad para respirar o pecho apretado, que van y vienen, peores en la noche o con el ejercicio o el humo.","gina",""],
+      ["Menor de 2 años con primer episodio de sibilancias tras un resfriado: es bronquiolitis (otra ficha).","neu","27"]],
+  dx:[["Frecuencia respiratoria, tiraje, saturación, si puede hablar frases completas, estado de conciencia.","gina",""]],
+  tx:[["Salbutamol con inhalocámara cada 20 minutos en la primera hora: adultos y niños de 6 a 11 años 4 a 10 inhalaciones; 5 años o menos, 2 inhalaciones.","gina",""],
+      ["Crisis moderada o grave: añadir ipratropio y prednisolona (niños 1 a 2 mg/kg al día, máximo 40 mg, por 3 a 5 días; adultos 40 a 50 mg al día por 5 a 7 días).","gina",""],
+      ["Oxígeno si hay, para saturación de 94 a 98 % en niños y 93 a 96 % en adultos.","gina",""],
+      ["Control a largo plazo con beclometasona inhalada, por orden médica.","gina",""]],
+  es:[["Reevaluar cada 20 minutos en la primera hora; si mejora, salbutamol cada 3 a 4 horas y control en 24 a 48 horas.","gina",""]],
+  al:[["No puede hablar, somnoliento o confundido, cianosis, saturación menor de 92 %, tórax silencioso, no mejora tras la primera hora.","gina",""]]},
+ {id:"vaginal",g:"Comunes",t:"Flujo vaginal",no:"Sífilis y VIH, si se confirman: SIVIGILA",
+  ss:[["Vaginosis: flujo gris con olor a pescado. Tricomoniasis: flujo amarillo verdoso, espumoso, con picor. Candidiasis: flujo blanco grumoso con picor y ardor.","its",""]],
+  dx:[["Preguntar por la pareja y riesgo de infección de transmisión sexual; examen con espéculo si hay. Ofrecer pruebas rápidas de VIH y sífilis.","its",""]],
+  tx:[["Vaginosis o tricomoniasis: metronidazol 500 mg cada 12 horas por 7 días; o tinidazol 2 g dosis única (no en el primer trimestre). En tricomoniasis, tratar a la pareja.","its",""],
+      ["Candidiasis: fluconazol 150 mg dosis única en no gestantes; en gestantes, clotrimazol vaginal por 7 días.","its",""],
+      ["Flujo con pus del cuello del útero o dolor pélvico: telemedicina (ceftriaxona y azitromicina o doxiciclina según la orden).","its",""]],
+  es:[["Condón hasta terminar el tratamiento de los dos.","its",""]],
+  al:[["Dolor pélvico con fiebre, gestante con flujo y contracciones o salida de líquido, sospecha de violencia sexual (activar la ruta).","its",""]]},
+ {id:"alergia",g:"Comunes",t:"Urticaria, rinitis y picaduras (sin anafilaxia)",no:"Si fue por medicamento: farmacovigilancia",
+  ss:[["Ronchas con picor, estornudos y moco claro, hinchazón local por picadura, sin dificultad para respirar ni mareo.","wao",""]],
+  dx:[["Descartar anafilaxia: piel más respiración, presión baja o síntomas digestivos intensos. Si la hay, usar la ficha de anafilaxia.","wao",""]],
+  tx:[["Loratadina 10 mg al día (niños de 2 a 12 años con 30 kg o menos, 5 mg). Clorfeniramina o difenhidramina en la noche si el picor no deja dormir.","fmo",""],
+      ["Urticaria extensa: prednisolona por 3 a 5 días por orden médica.","fmo",""]],
+  es:[["Retirar la causa (medicamento, alimento) y anotarla como alergia en la historia.","",""]],
+  al:[["Hinchazón de labios o lengua, voz ronca, dificultad para respirar, mareo o desmayo: adrenalina.","wao",""]]},
+ {id:"dolor",g:"Comunes",t:"Dolor, fiebre y espasmo muscular",no:"No es de notificación individual",
+  ss:[["Dolor de cabeza, muscular, de espalda, por trauma, cólico o fiebre sin signos de peligro.","",""]],
+  dx:[["En Vaupés, toda fiebre lleva gota gruesa. Antes de un AINE, descartar dengue, sangrado, úlcera, enfermedad renal y embarazo avanzado.","den","48–49"]],
+  tx:[["Primera opción: acetaminofén 500 mg a 1 g cada 6 a 8 horas (niños 10 a 15 mg/kg).","den","48–49"],
+      ["Dolor moderado en adultos sin contraindicación: diclofenaco 75 mg IM, máximo 2 días; o dipirona 1 g IM o IV lenta.","fmo",""],
+      ["Espasmo muscular: añadir metocarbamol por 2 a 3 días. Cólico: hioscina N-butil bromuro 20 mg IM.","fmo",""],
+      ["Dolor intenso: tramadol 50 a 100 mg por orden médica; nunca con sertralina.","fmo",""]],
+  es:[["Reevaluar el dolor; si no cede, buscar la causa antes de repetir.","",""]],
+  al:[["Dolor abdominal con abdomen duro o vómito persistente, dolor en el pecho, cefalea súbita e intensa o con déficit neurológico, dolor con fiebre y rigidez de nuca.","bec",""]]},
+ {id:"herida",g:"Comunes",t:"Heridas y quemaduras",no:"Si es por violencia o accidente de trabajo: activar la ruta correspondiente",
+  ss:[["Heridas cortantes, raspaduras, quemaduras por agua caliente, aceite o fogón.","fmo",""]],
+  dx:[["Profundidad, sangrado, cuerpo extraño, función de tendones y nervios. Quemaduras: extensión (la palma de la mano del paciente es 1 %) y profundidad. Estado de vacunación contra el tétanos.","fmo",""]],
+  tx:[["Lavar con abundante solución salina o agua potable. Suturar con lidocaína al 2 % sin pasar de 4,5 mg/kg.","fmo",""],
+      ["Quemadura de segundo grado: enfriar con agua corriente 20 minutos, lavar y cubrir con sulfadiazina de plata (no en menores de 2 meses ni en gestantes a término).","fmo",""],
+      ["Herida infectada: dicloxacilina o cefalexina por 5 a 7 días. Completar la vacuna antitetánica.","aware",""]],
+  es:[["Curación diaria y vigilar signos de infección.","",""]],
+  al:[["Quemadura de más del 10 % en niños o del 15 % en adultos, en cara, manos, genitales o articulaciones, circular o eléctrica; sangrado que no para; herida muy contaminada o mordedura en la cara.","fmo",""]]},
+ {id:"hta",g:"Crónicos",t:"Hipertensión arterial (paciente crónico)",no:"No es de notificación individual",
+  ss:[["Presión de 140/90 o más en dos tomas separadas; casi nunca da síntomas.","hta2",""]],
+  dx:[["Tomar la presión sentado, tras 5 minutos de reposo, con el brazalete adecuado. Gestante con presión de 140/90 o más: ficha del trastorno hipertensivo del embarazo.","hta2",""]],
+  tx:[["Continuar lo formulado: losartán 50 mg, enalapril, amlodipino 5 a 10 mg o hidroclorotiazida 12,5 a 25 mg. Nunca enalapril con losartán.","hta2",""],
+      ["Si queda embarazada: losartán y enalapril están contraindicados; telemedicina para cambiarlos.","hta2",""],
+      ["Dieta con poca sal, actividad física, no fumar.","hta2",""]],
+  es:[["Control mensual mientras no esté controlada.","hta2",""]],
+  al:[["Presión de 180/110 o más con dolor de pecho, falta de aire, debilidad de un lado del cuerpo, confusión o visión borrosa.","hta2",""]]},
+ {id:"dm",g:"Crónicos",t:"Diabetes tipo 2 (paciente crónico)",no:"No es de notificación individual",
+  ss:[["Sed, orinar mucho, pérdida de peso, heridas que no sanan.","dm2",""]],
+  dx:[["Glucometría; revisar los pies en cada control.","dm2",""]],
+  tx:[["Continuar metformina con las comidas según la orden médica. Suspenderla mientras dure una diarrea o vómito intenso o deshidratación.","dm2",""],
+      ["Hipoglicemia con el paciente despierto: 15 g de azúcar (3 cucharaditas en agua) y repetir glucometría a los 15 minutos. Si no despierta: dextrosa al 10 % IV, que no está en el botiquín.","dm2",""]],
+  es:[["Control mensual, dieta, actividad física, cuidado de los pies.","dm2",""]],
+  al:[["Glucometría menor de 70 que no sube o mayor de 250 con vómito o somnolencia, pie con herida infectada o negra.","dm2",""]]},
+ {id:"gastritis",g:"Comunes",t:"Gastritis, reflujo, náusea y vómito",no:"No es de notificación individual",
+  ss:[["Ardor o dolor en la boca del estómago, llenura, agrieras; náusea o mareo del viaje.","fmo",""]],
+  dx:[["Preguntar por AINE, alcohol y ayuno. Gestante con dolor en la boca del estómago: tomar la presión (preeclampsia).","hta","4"]],
+  tx:[["Esomeprazol 20 a 40 mg en ayunas por 4 a 8 semanas; o sucralfato 1 g cada 6 horas.","fmo",""],
+      ["Náusea en adultos: metoclopramida 10 mg (máximo 5 días) o dimenhidrinato 50 mg. En niños con diarrea no se usan.","eda","33–34"]],
+  es:[["Comidas pequeñas y frecuentes; evitar AINE, alcohol, café y ají.","",""]],
+  al:[["Vómito con sangre o en cuncho de café, heces negras, pérdida de peso, dificultad para tragar, mayor de 55 años con síntomas nuevos.","fmo",""]]}
+);
+VN.morb.qs[0].o=MB.map(x=>x.t.toUpperCase()).concat(["OTRA"]);
+(function(){const add=(s,arr)=>{const x=SX.find(z=>z.id===s);if(x)x.pi.push(...arr)};
+ add("fiebre",[["garganta","Fiebre con dolor de garganta o de oído.","aware",""],["itu","Fiebre con ardor al orinar o dolor en la espalda baja.","aware",""]]);
+ add("resp",[["asma","Mayor de 2 años con sibilancias que se repiten.","gina",""]]);
+ add("diarrea",[["parasitos","Diarrea que dura semanas, con gases o lombrices.","sth",""],["gastritis","Náusea o vómito en adulto sin diarrea.","fmo",""]]);
+ add("piel",[["alergia","Ronchas con picor sin dificultad para respirar.","wao",""],["herida","Herida o quemadura.","fmo",""]]);
+ add("sangrado",[["vaginal","Flujo o sangrado vaginal fuera del embarazo.","its",""]]);
+ add("mordedura",[["alergia","Picadura con hinchazón local, sin síntomas generales.","wao",""]]);})();
+
+/* ---------- Qué hay en el botiquín para cada morbilidad ---------- */
+const MB_BQ={
+ grave:{m:[["ssn500","Bolos de 500 ml si hay choque, reevaluando."],["ringer","Alternativa al cloruro de sodio."],["adren","Si el cuadro es anafilaxia."]],
+  falta:"Dextrosa al 10 % para la hipoglicemia grave, oxígeno si no hay en el puesto."},
+ anafilaxia:{m:[["adren","Primera y más importante: 0,01 mg/kg IM en el muslo, máximo 0,5 mg (0,3 mg en niños)."],["ssn500","Si hay hipotensión: bolos de cristaloides."],["salb_i","Si queda broncoespasmo después de la adrenalina."],["difen_c","Coadyuvante para el picor, después de la adrenalina."],["clorf_t","Alternativa a la difenhidramina."],["hidrocor","Coadyuvante, nunca en lugar de la adrenalina."]],
+  falta:"Solo hay 2 ampollas de adrenalina y vencen en noviembre de 2026: pide más.",op:"Sin adrenalina no apliques penicilina benzatínica ni antiveneno."},
+ convulsion:{m:[["mgso4","Si es gestante desde la semana 20 o puérpera (eclampsia)."],["acet_s","Si la causa es fiebre, una vez pasa la convulsión."],["acet_t","Igual, en mayores."]],
+  falta:"Midazolam (lo suministra farmacia, control especial) y dextrosa al 10 % para la hipoglicemia.",op:"Convulsión de más de 5 minutos sin benzodiacepina: telemedicina y remisión urgente."},
+ hpp:{m:[["tranex_a","1 g IV en 10 minutos si la oxitocina y la segunda línea no detuvieron el sangrado."],["ringer","Cristaloides tibios en bolos de 500 ml."],["ssn500","Alternativa al lactato de Ringer."]],
+  falta:"La oxitocina no está en la solicitud del 27/9 y la metilergometrina no se entregó: pídelas ya, son la primera y segunda línea. Tampoco hay misoprostol."},
+ preeclampsia:{m:[["mgso4","Carga 4 g IV y 1 g por hora; 5 ampollas alcanzan para la carga y unas 6 horas."],["label","Crisis de 160/110 o más, por orden médica."],["nife","Solo si es de liberación inmediata; la de liberación prolongada no sirve para la crisis."],["calcio","Prevención en el control prenatal desde la semana 14."],["asa","Prevención en gestantes de alto riesgo, según el control prenatal."]],
+  falta:"Gluconato de calcio (antídoto del sulfato de magnesio)."},
+ malaria:{m:[["acet_t","Fiebre y dolor."],["acet_s","Fiebre en niños."],["clinda_t","Junto con quinina en la gestante de primer trimestre con P. falciparum."],["sro","Hidratación si tolera la vía oral."]],
+  falta:"Los antimaláricos (cloroquina, primaquina, arteméter-lumefantrina, artesunato, quinina) llegan por el programa de enfermedades transmitidas por vectores, no por esta solicitud.",op:"No dar AINE si no se ha descartado dengue."},
+ dengue:{m:[["acet_t","500 mg cada 6 horas, máximo 4 g al día."],["acet_s","10 mg/kg cada 6 horas."],["sro","Hidratación oral, hasta 3 litros al día en adultos."],["ringer","Con signos de alarma, por orden médica."],["ssn500","Con signos de alarma, por orden médica."],["dipi","Solo mayores de 15 años, por máximo 72 horas; evitar IM si puedes."]],
+  no:["diclo_a","asa","dexa","pred","hidrocor"],op:"No usar diclofenaco, ibuprofeno, naproxeno, aspirina ni corticoides."},
+ eda:{m:[["sro","Plan A y B según la deshidratación."],["zinc","10 a 14 días a todo menor de 5 años con diarrea."],["ringer","Plan C (deshidratación grave)."],["metro_s","Solo si se confirma giardia o ameba."],["tini","Giardiasis en mayores de 3 años (vence 11/2026)."]],
+  no:["lope","metoclo","dimen"],falta:"Ondansetrón y ácido nalidíxico no están en el botiquín.",op:"No antidiarreicos ni metoclopramida en niños."},
+ ira:{m:[["amox_s","Neumonía: 90 mg/kg al día cada 12 horas por 5 días."],["amox_c","Neumonía en niños grandes y adultos."],["azit_s","Solo si es alérgico a la penicilina."],["acet_s","Fiebre."]],
+  no:["salb_i","salb_j","dihidro","pred","dexa"],falta:"Amoxicilina-clavulanato (si hay signos de peligro en las primeras 72 horas) no está.",op:"En la bronquiolitis no se usan salbutamol, corticoides ni jarabes."},
+ dnt:{m:[["amox_s","90 mg/kg al día cada 12 horas por 7 días."],["vita","Según el lineamiento y la orden médica."],["sro","Solo si hay deshidratación, con cuidado."]],
+  no:["fe_s"],falta:"Albendazol y fórmula terapéutica lista para consumir (FTLC) no están en esta solicitud.",op:"No dar hierro aparte si recibe FTLC."},
+ ofidico:{m:[["adren","A mano antes del antiveneno."],["ssn500","Líquidos IV."],["ringer","Alternativa."],["acet_t","Dolor."]],
+  no:["diclo_a","dipi","asa"],falta:"El antiveneno se gestiona con el hospital.",op:"Sin AINE ni inyecciones IM si la sangre no coagula."},
+ rabia:{m:[["ssn500","Lavado abundante de la herida junto con agua y jabón."],["lido","Solo si medicina indica sutura."]],
+  falta:"Vacuna y suero antirrábico se gestionan por telemedicina. Amoxicilina-clavulanato para mordeduras de alto riesgo no está."},
+ leish:{m:[["ssn100","Curación limpia de la úlcera."]],falta:"Miltefosina y antimoniales llegan por el programa."},
+ tb:{m:[["implante","Si planifica: la rifampicina le baja la eficacia (usar condón)."]],no:["dihidro","pred"],
+  falta:"Los medicamentos antituberculosos llegan por el programa.",op:"No dar jarabes para la tos ni corticoides sin estudio."},
+ sifilis:{m:[["peni","2.400.000 UI IM; revisa antes el vencimiento del lote."],["adren","A mano durante y 30 minutos después de aplicarla."],["doxi","Pareja no gestante alérgica a la penicilina."]],
+  falta:"Solo hay 3 ampollas de penicilina y el acta dice vencimiento 02/2026: confírmalo."},
+ piel:{m:[["crota","Escabiosis: toda la familia a la vez."],["iver","Escabiosis en brotes, desde 15 kg y no en gestantes."],["diclox_c","Impétigo extenso o forúnculos."],["diclox_s","Impétigo extenso en niños."],["cefa_c","Alternativa a la dicloxacilina."],["keto_c","Tiñas y pitiriasis versicolor."],["clotri","Tiñas y candidiasis de la piel."],["keto_ch","Pitiriasis versicolor y caspa."],["lora_t","Picor."],["clorf_s","Picor en la noche en niños."]],
+  falta:"Ácido fusídico (impétigo localizado) y permetrina no están."},
+ itu:{m:[["nitro","Cistitis, también en la gestante antes de la semana 38."],["tmp_t","Cistitis en no gestantes."],["tmp_s","Niños, por orden médica."],["cefa_c","Gestantes."],["cipro","Pielonefritis en adulto no gestante."],["genta","Primera dosis antes de remitir."],["acet_t","Dolor."]]},
+ parasitos:{m:[["pirantel","Áscaris y oxiuros."],["tini","Giardia y ameba (vence 11/2026: úsalo primero)."],["metro_t","Giardia y ameba en adultos."],["metro_s","Giardia y ameba en niños."],["iver","Estrongiloides."],["fe_s","Si hay anemia."],["fe_t","Si hay anemia en adultos."]],
+  falta:"Albendazol (desparasitación de la Res. 3280) no se entregó: pídelo."},
+ garganta:{m:[["amox_c","Faringitis o otitis en adultos y niños grandes."],["amox_s","Faringitis u otitis en niños."],["peni","Faringitis: dosis única IM (revisa el vencimiento)."],["azit_s","Alérgicos a la penicilina."],["azit_t","Alérgicos a la penicilina, adultos."],["acet_s","Fiebre y dolor."]]},
+ asma:{m:[["salb_i","Primera línea con inhalocámara."],["iprat","Crisis moderada o grave."],["pred","Toda crisis moderada o grave."],["hidrocor","Si no tolera la vía oral."],["beclo","Control a largo plazo."],["salb_j","Solo si no hay forma de usar el inhalador."]]},
+ vaginal:{m:[["metro_t","Vaginosis y tricomoniasis, también en el embarazo."],["tini","Dosis única; no en el primer trimestre."],["fluco","Candidiasis en no gestantes."],["azit_t","Clamidia (1 g dosis única), por orden médica."],["doxi","Clamidia en no gestantes."]],
+  falta:"Clotrimazol óvulo (candidiasis en gestantes) y ceftriaxona no se entregaron."},
+ alergia:{m:[["lora_t","Primera opción, no da sueño."],["lora_s","Niños de 2 años o más."],["clorf_t","Si el picor no deja dormir."],["clorf_s","Niños de 2 años o más."],["difen_c","Picor intenso en la noche."],["pred","Urticaria extensa, por orden médica."],["adren","Si aparecen signos de anafilaxia."]]},
+ dolor:{m:[["acet_t","Primera opción."],["acet_s","Niños."],["diclo_a","Adultos sin dengue ni otras contraindicaciones."],["dipi","Adultos; dengue solo en mayores de 15 años."],["metoca","Espasmo muscular."],["hiosc_a","Cólico."],["trama","Dolor intenso, por orden médica."]],
+  falta:"Ibuprofeno y naproxeno no se entregaron."},
+ herida:{m:[["ssn500","Lavado."],["lido","Anestesia local para suturar."],["sulfad","Quemaduras de segundo grado."],["diclox_c","Herida infectada."],["cefa_c","Herida infectada."],["acet_t","Dolor."]]},
+ hta:{m:[["losar","50 mg al día."],["enala","5 a 40 mg al día; nunca con losartán."],["amlo","5 a 10 mg al día."],["hctz","12,5 a 25 mg en la mañana."],["asa","Prevención secundaria, por orden médica."],["gemfi","Si tiene triglicéridos altos."]],
+  falta:"Atorvastatina y captopril no se entregaron."},
+ dm:{m:[["metf","Con las comidas, según la orden médica."],["enala","Si medicina lo formula para proteger el riñón."]],falta:"Dextrosa al 10 % para la hipoglicemia grave."},
+ gastritis:{m:[["esome","En ayunas por 4 a 8 semanas."],["sucral","Alternativa o complemento."],["metoclo","Náusea en adultos, máximo 5 días."],["dimen","Mareo del viaje o náusea."]],
+  falta:"Hidróxido de aluminio no se entregó."}};
+/* fluconazol */
+BQ.splice(BQ.findIndex(x=>x.id==="keto_c"),0,{id:"fluco",n:"Fluconazol",c:"200 mg",p:"Cápsula",sol:50,ent:50,lote:"205426",v:"2028-03",g:"Piel",
+ u:"Candidiasis vaginal, oral o esofágica; tiñas extensas que no mejoran con crema.",
+ pa:"Candidiasis vaginal: 150 mg dosis única (aquí la cápsula es de 200 mg: úsala como dosis única por orden médica). Candidiasis oral: 200 mg el día 1 y luego 100 mg al día por 7 a 14 días.",
+ pn:"Por orden médica.",ef:"Náusea, dolor abdominal, alteración del hígado, QT largo.",ci:"Embarazo (preferir tratamiento vaginal), alergia a azoles.",
+ it:"Warfarina (sangrado), glibenclamida (hipoglicemia), medicamentos que alargan el QT (azitromicina, metoclopramida), estatinas.",
+ em:"Evitar en el embarazo. Dosis única compatible con la lactancia.",op:"Clotrimazol óvulo (no entregado) o crema.",f:["its","página por verificar"],ges:"evitar"});
+BQ.splice(BQ.findIndex(x=>x.id==="ampsul")+1,0,{id:"aciclo",n:"Aciclovir",c:"800 mg",p:"Tableta",sol:105,ent:60,lote:"205525",v:"2028-05",g:"Antibióticos",
+ u:"Herpes zóster (culebrilla) y varicela en adultos o con riesgo; herpes genital.",
+ pa:"Herpes zóster: 800 mg 5 veces al día por 7 días, idealmente en las primeras 72 horas. Varicela en adultos: 800 mg 5 veces al día por 5 a 7 días. Herpes genital primer episodio: 400 mg (media tableta) cada 8 horas por 7 a 10 días.",
+ pn:"Varicela en niños sanos no lo necesita de rutina; por orden médica, 20 mg/kg (máximo 800 mg) 4 veces al día por 5 días.",
+ ef:"Náusea, cefalea, diarrea; daño renal si está deshidratado (tomar mucha agua).",ci:"Alergia. Ajustar en insuficiencia renal.",
+ it:"Otros nefrotóxicos (gentamicina, diclofenaco).",em:"Se puede usar si está indicado.",op:"Curación local y acetaminofén.",f:["fmo","página por verificar"]});
+BQ.splice(BQ.findIndex(x=>x.id==="keto_c"),0,{id:"nista",n:"Nistatina suspensión",c:"100.000 UI/ml",p:"Suspensión",sol:5,ent:3,lote:"135D04",v:"2029-01",g:"Piel",
+ u:"Candidiasis oral (algodoncillo) en lactantes y adultos; candidiasis del pezón en la madre que lacta.",
+ pn:"Lactantes: 1 ml en cada lado de la boca (2 ml) 4 veces al día después de comer, hasta 48 horas después de que desaparezcan las placas.",
+ pa:"4 a 6 ml 4 veces al día; mantener en la boca antes de tragar.",ef:"Náusea, diarrea leve.",ci:"Alergia.",it:"Ninguna relevante (no se absorbe).",
+ em:"Segura. Tratar también el pezón de la madre si lacta.",op:"Fluconazol por orden médica.",f:["fmo","página por verificar"]});
+(function(){const A=(k,arr)=>MB_BQ[k].m.push(...arr);
+ A("grave",[["ssn250","Bolos de 10 a 20 ml/kg en niños con choque."],["ampsul","Infección grave antes de remitir, por orden médica."],["clinda_a","Infección grave de piel o pélvica, por orden médica."],["dad5","Mantener la vena; no corrige una hipoglicemia grave."]]);
+ A("ira",[["ampi_s","Solo si no hay amoxicilina."],["ampi_t","Solo si no hay amoxicilina, en mayores."]]);
+ A("asma",[["dexa","Crup (tos de perro y estridor): 0,15 a 0,6 mg/kg dosis única."]]);
+ A("preeclampsia",[["dexa","Maduración pulmonar si el parto se adelanta entre las semanas 24 y 34, por orden médica."]]);
+ A("alergia",[["difen_s","Picor en niños de 2 años o más."],["keto_t","Prevención en niños alérgicos, por orden médica (tarda semanas)."]]);
+ A("garganta",[["dihidro","Tos seca molesta en adultos, descartadas neumonía y tuberculosis; por orden médica."]]);
+ MB_BQ.eda.no=MB_BQ.eda.no.filter(z=>z!=="lope");A("eda",[["lope","Solo adultos con diarrea acuosa sin fiebre ni sangre; nunca en niños."]]);
+ A("gastritis",[["bisaco","Estreñimiento ocasional, sin dolor abdominal."]]);
+ A("vaginal",[["tranex_t","Sangrado menstrual abundante, por orden médica."]]);
+ A("herida",[["ampsul","Mordedura o herida muy infectada, antes de remitir, por orden médica."],["clinda_a","Infección grave de piel en alérgicos, por orden médica."]]);
+ A("dm",[["dad5","Mantener la vena; para la hipoglicemia grave se necesita dextrosa al 10 %."]]);
+ A("convulsion",[["valp_c","Si ya es epiléptico: revisar si dejó de tomarlo. No se inicia en el puesto."],["valp_s","Niño epiléptico que ya lo toma: revisar la dosis y la adherencia."]]);
+ A("dolor",[["sertra","Si el paciente la toma, no darle tramadol (síndrome serotoninérgico)."]]);})();
+MB_BQ.piel.m.push(["nista","Candidiasis oral (algodoncillo)."],["aciclo","Herpes zóster en adultos, en las primeras 72 horas."]);
+MB.find(x=>x.id==="piel").ss.push(["Herpes zóster: ampollas en banda en un solo lado del cuerpo, con dolor quemante. Candidiasis oral: placas blancas que no se quitan al raspar.","fmo",""]);
+
+/* ---------- Inventario: correcciones guardadas en el celular, semáforo y avisos ---------- */
+const BQ_KEY="dn2_bq_inv",BQ_SEM={venc:"Vencido",rojo:"Vence en 3 meses o menos",amar:"Vence en 6 meses o menos",verde:"Vigente",sinf:"Sin lote o vencimiento",sin:"No entregado"};
+function bqEd(){try{return JSON.parse(S.get(BQ_KEY)||"{}")||{}}catch(e){return{}}}
+function bqGet(id){const b=BQ.find(x=>x.id===id);if(!b)return null;const e=bqEd()[id];return e?Object.assign({},b,e,{_ed:1}):b}
+function bqFin(v){if(!/^\d{4}-\d{2}$/.test(v||""))return null;const[a,m]=v.split("-").map(Number);return new Date(Date.UTC(a,m,0))}
+function bqEstado(m){if(m.ne||!(+m.ent))return{k:"sin",d:null};const f=bqFin(m.v);if(!f)return{k:"sinf",d:null};
+  const d=Math.round((f-pD(hoy()))/86400000);return{k:d<0?"venc":d<=90?"rojo":d<=180?"amar":"verde",d}}
+function bqMes(v){const f=bqFin(v);return f?String(f.getUTCMonth()+1).padStart(2,"0")+"/"+f.getUTCFullYear():"sin fecha"}
+function bqChip(m){const e=bqEstado(m);const t=e.k==="sin"?"No entregado":e.k==="sinf"?"Sin vencimiento":(e.k==="venc"?"Vencido ":"Vence ")+bqMes(m.v)+(e.k==="rojo"||e.k==="amar"?` · ${e.d} días`:"");
+  return `<span class="bq-chip bq-${e.k}">${esc(t)}</span>`}
+const BQ_UNI=[[/^tableta/i,"tabletas"],[/^c[aá]psula/i,"cápsulas"],[/^ampolla/i,"ampollas"],[/^sobre/i,"sobres"],[/^bolsa/i,"bolsas"],[/^inhalador/i,"inhaladores"],[/^crema/i,"tubos"],[/^unidad/i,"unidades"],[/^óvulo/i,"óvulos"]];
+function bqCant(m){if(m.ne||!(+m.ent))return"no entregado";const u=(BQ_UNI.find(([r])=>r.test(m.p))||[0,"frascos"])[1];return `${m.ent} ${u}`}
+function bqAvisos(m,c){const o=[],f=c&&c.sx==="F";if(!c)return o;
+  if(f&&c.es==="ges"&&m.ges==="no")o.push("Gestante: contraindicado. "+(m.em||""));else if(f&&c.es==="ges"&&m.ges==="evitar")o.push("Gestante: evitar salvo orden médica. "+(m.em||""));
+  if(f&&c.es==="pos"&&m.em&&/lactancia|amamantar/i.test(m.em))o.push("Puérpera que lacta: "+m.em);
+  if(c.a!=null&&m.minA&&c.a<m.minA)o.push(`Tiene ${c.m<24?c.m+" meses":Math.floor(c.a)+" años"}: no se recomienda en menores de ${m.minA} años.`);
+  return o}
+function bqUsos(id){return Object.keys(MB_BQ).filter(k=>(MB_BQ[k].m||[]).some(z=>z[0]===id)).map(k=>MB.find(x=>x.id===k)).filter(Boolean)}
+function bqNum(x){return x.toLocaleString("es-CO",{maximumFractionDigits:x<1?2:1})}
+function bqCalc(m,i,kg,c){const e=m.kg[i];if(!kg||!(kg>0))return"";if(e.min&&kg<e.min)return`<b>No usar:</b> pesa menos de ${e.min} kg.`;
+  let mx=e.max;if(e.maxN&&c&&c.a!=null&&c.a<12)mx=e.maxN;let lo=e.mg[0]*kg,hi=e.mg[1]*kg,tope=false;if(mx!=null){if(hi>mx){hi=mx;tope=true}if(lo>mx)lo=mx}
+  const r=(a,b,u)=>a===b||Math.abs(a-b)<1e-9?`${bqNum(a)} ${u}`:`${bqNum(a)} a ${bqNum(b)} ${u}`;
+  let s=e.tot?r(lo,hi,e.u||"ml"):r(lo,hi,"mg");
+  if(!e.tot&&e.mgml)s+=" = "+r(lo/e.mgml,hi/e.mgml,e.u||"ml");
+  if(e.mgu){const t=x=>Math.round(x/e.mgu*2)/2;s+=` ≈ ${r(t(lo),t(hi),e.un+"(s)")}`}
+  if(e.mggota)s+=` ≈ ${r(Math.round(lo/e.mggota),Math.round(hi/e.mggota),"gotas")}`;
+  return `<b>${s}</b> ${esc(e.cada)}${tope?" (se aplicó el máximo por dosis)":""}`}
+function bqFicha(m,c){if(m.ne)return `<dl class="mb-dl"><dt>Para qué</dt><dd>${esc(m.u)}</dd><dt>Estado</dt><dd>No se entregó en la solicitud del ${BQ_FECHA} (pedidos: ${m.sol}). Inclúyelo en la próxima proyección si lo necesitas.</dd></dl>`;
+  const av=bqAvisos(m,c),us=bqUsos(m.id),F=m.f||["",""];
+  const row=(h,t,cl)=>t?`<dt${cl?` class="${cl}"`:""}>${h}</dt><dd>${esc(t)}</dd>`:"";
+  return `<dl class="mb-dl">
+   <dt>Inventario</dt><dd>${esc(bqCant(m))} de ${m.sol} pedidos · lote ${esc(m.lote||"sin anotar")} ${bqChip(m)}${m.io?`<small class="qt-c" style="color:var(--warn)">${esc(m.io)}</small>`:""}${m._ed?`<small class="qt-c">Corregido en este celular.</small>`:""}</dd>
+   ${av.length?`<dt class="mb-al">Para esta persona</dt><dd>${mbUL(av.map(t=>[t,"",""])).replace(/<small class="qt-c">[^<]*<\/small>/g,"")}</dd>`:""}
+   ${row("Para qué",m.u)}${row("Posología en adultos",m.pa)}${row("Posología en niños",m.pn)}
+   ${m.kg?`<dt>Calcular por peso</dt><dd><label class="bq-kg">Peso <input type="number" inputmode="decimal" min="0" step="0.1" class="bq-w" data-bq="${m.id}" placeholder="kg"></label>${m.kg.map((e,i)=>`<div class="bq-res"><span class="note-src">${esc(e.t)}:</span> <span data-bqr="${m.id}:${i}">escribe el peso</span></div>`).join("")}</dd>`:""}
+   ${row("Efectos secundarios",m.ef)}${row("Contraindicaciones",m.ci,"mb-al")}${row("Interacciones",m.it)}${row("Embarazo y lactancia",m.em)}${row("Opciones si no hay o no sirve",m.op)}
+   ${m.ord?`<dt>Quién lo indica</dt><dd>Por orden médica (telemedicina) o protocolo de la ESE.</dd>`:""}
+   ${us.length?`<dt>Se usa en</dt><dd><div class="btns">${us.map(x=>`<button class="btn bq-mini" type="button" data-mbgo="${x.id}">${esc(x.t)}</button>`).join("")}</div></dd>`:""}
+   <dt>Fuente</dt><dd><small class="qt-c" style="margin:0">${esc(mbCita(F[0],F[1]==="página por verificar"?"":F[1]))}</small></dd>
+   <dt>Corregir inventario</dt><dd><div class="bq-fix"><label>Cantidad<input type="number" min="0" data-fx="ent" value="${esc(m.ent)}"></label><label>Lote<input data-fx="lote" value="${esc(m.lote)}"></label><label>Vence<input type="month" data-fx="v" value="${esc(m.v)}"></label></div>
+    <div class="btns" style="margin-top:6px"><button class="btn bq-mini" type="button" data-fxsave="${m.id}">Guardar corrección</button>${m._ed?`<button class="btn bq-mini" type="button" data-fxdel="${m.id}">Volver a lo del acta</button>`:""}</div></dd></dl>`}
+function bqResumen(){const n={venc:0,rojo:0,amar:0,verde:0,sinf:0,sin:0};BQ.forEach(b=>n[bqEstado(bqGet(b.id)).k]++);return n}
+let BQ_PESO="";
+function bqWireFichas(root,c,volver){root.querySelectorAll(".bq-w").forEach(inp=>{const m=bqGet(inp.dataset.bq);const pinta=()=>{BQ_PESO=inp.value;const kg=parseFloat(String(inp.value).replace(",","."));m.kg.forEach((e,i)=>{const t=root.querySelector(`[data-bqr="${m.id}:${i}"]`);if(t)t.innerHTML=bqCalc(m,i,kg,c)||"escribe el peso"})};
+   if(BQ_PESO&&!inp.value)inp.value=BQ_PESO;inp.oninput=pinta;pinta()});
+  root.querySelectorAll("[data-fxsave]").forEach(b=>b.onclick=()=>{const id=b.dataset.fxsave,box=b.closest("dd"),E=bqEd(),g=k=>box.querySelector(`[data-fx="${k}"]`).value.trim();
+   E[id]={ent:g("ent")===""?0:+g("ent"),lote:g("lote"),v:g("v")};S.set(BQ_KEY,JSON.stringify(E));volver(id)});
+  root.querySelectorAll("[data-fxdel]").forEach(b=>b.onclick=()=>{const E=bqEd();delete E[b.dataset.fxdel];S.set(BQ_KEY,JSON.stringify(E));volver(b.dataset.fxdel)});
+  root.querySelectorAll("[data-mbgo]").forEach(b=>b.onclick=()=>mbOpen(b.dataset.mbgo))}
+function bqOpen(foco,filtro){stopRec();st.view="bq";const C=ctxPer();filtro=filtro||"todos";const n=bqResumen();
+  const F=[["todos","Todos"],["alerta",`Vencidos o por vencer (${n.venc+n.rojo+n.amar})`],["sinf",`Sin lote o vencimiento (${n.sinf})`],["sin",`No entregados (${n.sin})`]];
+  $("app").innerHTML=`<div class="top"><button class="back" type="button" id="bq-back">← ${st.bqDe?"Morbilidad":"Inicio"}</button><span class="tag pc">Botiquín</span></div>
+  <header><h1>Botiquín del puesto</h1><p class="sub">Medicamentos entregados en la solicitud a almacén del ${BQ_FECHA} (sede Yurupari). Cada ficha trae posología, efectos secundarios, contraindicaciones, interacciones, embarazo y lactancia, opciones y en qué morbilidades se usa. El semáforo se calcula con la fecha de hoy.</p></header>
+  ${ctxCaja(C,"Las fichas avisan si el medicamento no conviene por edad, embarazo o lactancia.")}
+  <div class="bq-sem">${["venc","rojo","amar","verde","sinf","sin"].map(k=>`<span class="bq-chip bq-${k}">${n[k]} · ${esc(BQ_SEM[k])}</span>`).join("")}</div>
+  ${n.venc+n.rojo?`<div class="box miss"><h3>Revisar ya</h3><ul>${BQ.map(b=>bqGet(b.id)).filter(m=>["venc","rojo"].includes(bqEstado(m).k)).map(m=>`<li><b>${esc(m.n)}</b> (${esc(bqCant(m))}): ${bqEstado(m).k==="venc"?"vencido según el acta":"vence en "+bqEstado(m).d+" días"}. ${esc(m.io||"")}</li>`).join("")}</ul></div>`:""}
+  <div class="btns" id="bq-f">${F.map(([k,t])=>`<button class="btn bq-mini${k===filtro?" primary":""}" type="button" data-bqf="${k}">${esc(t)}</button>`).join("")}</div>
+  <input id="bq-q" placeholder="Buscar: amoxicilina, fiebre, gestante, tos…" autocomplete="off">
+  <div id="bq-list"></div>
+  <p class="foot">Posologías de referencia de las guías citadas y del Formulario modelo de la OMS. Los medicamentos se administran por orden médica (telemedicina) o protocolo de la ESE, y siempre se confirman con la etiqueta del producto. Las correcciones de cantidad, lote y vencimiento quedan solo en este celular.</p>`;
+  const pinta=()=>{const q=plano($("bq-q").value);
+    const L=BQ.map(b=>bqGet(b.id)).filter(m=>{const k=bqEstado(m).k;if(filtro==="alerta"&&!["venc","rojo","amar"].includes(k))return false;if(filtro==="sinf"&&k!=="sinf")return false;if(filtro==="sin"&&k!=="sin")return false;
+      return !q||plano([m.n,m.c,m.g,m.u,m.pa,m.pn,...bqUsos(m.id).map(x=>x.t)].join(" ")).includes(q)});
+    const gs=[...new Set(L.map(m=>m.g))];
+    $("bq-list").innerHTML=gs.map(g=>`<p class="lab" style="margin:12px 0 6px">${esc(g)}</p>${L.filter(m=>m.g===g).map(m=>{const av=bqAvisos(m,C).length;return `<details class="sec mb" data-bqd="${m.id}"><summary><span>${esc(m.n)}${m.c?` <small style="color:var(--muted);font-weight:400">${esc(m.c)}</small>`:""}${av?' <small style="color:var(--miss)">· ojo con esta persona</small>':""}</span>${bqChip(m)}</summary>${bqFicha(m,C)}</details>`}).join("")}`).join("")||`<p class="note-src">No encontré ese medicamento.</p>`;
+    bqWireFichas($("bq-list"),C,id=>bqOpen(id,filtro))};
+  $("bq-q").oninput=pinta;pinta();
+  document.querySelectorAll("[data-bqf]").forEach(b=>b.onclick=()=>bqOpen(null,b.dataset.bqf));
+  $("bq-back").onclick=()=>{const d=st.bqDe;st.bqDe=null;d?mbOpen(d):(home(),window.scrollTo(0,0))};window.scrollTo(0,0);
+  if(foco){const d=document.querySelector(`details[data-bqd="${foco}"]`);if(d){d.open=true;d.scrollIntoView({block:"start"})}}}
+/* sección «Del botiquín» dentro de cada ficha de morbilidad */
+function mbBQ(id,c){const x=MB_BQ[id];if(!x)return"";
+  const li=([mid,rol])=>{const m=bqGet(mid);if(!m)return"";const av=bqAvisos(m,c);
+    return `<li><b>${esc(m.n)}</b>${m.c?` <span class="note-src">${esc(m.c)}</span>`:""} ${bqChip(m)} <span class="note-src">· ${esc(bqCant(m))}</span><br>${esc(rol)}${av.map(t=>`<small class="qt-c" style="color:var(--miss)">${esc(t)}</small>`).join("")}<button type="button" class="btn bq-mini" data-bqgo="${m.id}" style="margin-top:4px;display:block">Ficha: dosis, efectos, interacciones</button></li>`};
+  return `<dt style="color:var(--accent)">Del botiquín del puesto</dt><dd><ul class="mb-ul">${(x.m||[]).map(li).join("")}</ul>
+   ${x.no&&x.no.length?`<p class="note-src" style="margin:6px 0 0"><b style="color:var(--miss)">No usar en esta condición:</b> ${x.no.map(z=>{const m=bqGet(z);return m?esc(m.n):""}).filter(Boolean).join(", ")}.</p>`:""}
+   ${x.op?`<p class="note-src" style="margin:6px 0 0"><b>Ojo:</b> ${esc(x.op)}</p>`:""}
+   ${x.falta?`<p class="note-src" style="margin:6px 0 0"><b style="color:var(--warn)">No está en el botiquín:</b> ${esc(x.falta)}</p>`:""}</dd>`}
+function mbOpen(foco){stopRec();st.view="mb";
+  const grupos=[...new Set(MB.map(x=>x.g))];
+  $("app").innerHTML=`<div class="top"><button class="back" type="button" id="mb-back">← Inicio</button><span class="tag pc">Morbilidad</span></div>
+  <header><h1>Morbilidad frecuente</h1><p class="sub">Zona rural del Vaupés. Para cada condición: signos y síntomas, diagnóstico en el puesto, tratamiento, lo que hay en el botiquín del puesto, qué hacer mientras llega la remisión y signos de alarma. Cada recomendación dice de qué guía sale.</p></header>
+  ${ctxCaja(ctxPer(),"Las fichas que aplican a esta persona salen primero y cada una muestra lo que cambia para ella, también en los medicamentos.")}
+  ${(()=>{const c=ctxPer(),pr=mbPrior(c);return pr.length?`<div class="box"><h3>Para esta persona, revisa primero</h3><div class="btns">${pr.map(id=>{const x=MB.find(z=>z.id===id);return x?`<button class="btn" type="button" data-mbgo="${id}">${esc(x.t)}</button>`:""}).join("")}</div></div>`:""})()}
+  <div class="btns"><button class="btn primary" type="button" id="mb-sx">¿No sé qué tiene? Empezar por el síntoma</button><button class="btn" type="button" id="mb-bq">Botiquín del puesto</button></div>
+  <div class="box warn"><h3>Si la remisión tarda días</h3>${mbUL(MB_ESPERA)}</div>
+  <input id="mb-q" placeholder="Buscar: fiebre, diarrea, serpiente, amoxicilina…" autocomplete="off">
+  <div id="mb-list"></div>
+  <div class="btns"><button class="btn primary" type="button" data-vn="morb">Hacer nota de morbilidad por voz</button></div>
+  <p class="foot">Fuentes: guías de práctica clínica y lineamientos vigentes del Ministerio de Salud, la OPS y la OMS. Las páginas son las del PDF oficial de cada guía; donde dice «página por verificar», la recomendación es de esa guía pero no se pudo confirmar la página. Los medicamentos se administran por orden médica (telemedicina) o protocolo de la ESE. Los códigos SIVIGILA se confirman con epidemiología.</p>`;
+  const C=ctxPer(),PR=mbPrior(C);document.querySelectorAll("[data-mbgo]").forEach(b=>b.onclick=()=>mbOpen(b.dataset.mbgo));
+  const pinta=()=>{const q=plano($("mb-q").value);const L=MB.filter(x=>!q||plano([x.t,x.g,...x.ss.map(i=>i[0]),...((MB_BQ[x.id]||{}).m||[]).map(z=>(bqGet(z[0])||{}).n||"")].join(" ")).includes(q)).sort((a,b)=>(PR.includes(b.id)?1:0)-(PR.includes(a.id)?1:0));
+    $("mb-list").innerHTML=grupos.map(g=>{const xs=L.filter(x=>x.g===g);return xs.length?`<p class="lab" style="margin:10px 0 6px">${esc(g)}</p>${xs.map(x=>`<details class="sec mb" data-mb="${x.id}"><summary>${esc(x.t)}${mbNoAplica(x.id,C)?' <small style="color:var(--muted);font-weight:400">· no aplica a esta persona</small>':""}</summary><dl class="mb-dl">
+      ${mbNoAplica(x.id,C)?`<dt>Ojo</dt><dd>${esc(mbNoAplica(x.id,C))}</dd>`:""}${mbCtx(x.id,C).length?`<dt style="color:var(--accent)">Para esta persona</dt><dd>${mbUL(mbCtx(x.id,C))}</dd>`:""}
+      ${MB_SEC.map(([k,h])=>(x[k]&&x[k].length?`<dt${k==="al"?' class="mb-al"':""}>${h}</dt><dd>${mbUL(x[k])}</dd>`:"")+(k==="tx"?mbBQ(x.id,C):"")).join("")}<dt>Notificación</dt><dd>${esc(x.no)}</dd></dl>
+      <div class="btns" style="padding:0 14px 14px"><button class="btn" type="button" data-vnm="${x.id}">Nota de morbilidad para ${esc(x.t.toLowerCase())}</button></div></details>`).join("")}`:""}).join("")||`<p class="note-src">No encontré esa condición.</p>`;
+    document.querySelectorAll("[data-vnm]").forEach(b=>b.onclick=()=>{const d=vnDraft("morb");d.cond=MB.find(z=>z.id===b.dataset.vnm).t.toUpperCase();S.set("dn2_vn_morb",JSON.stringify(d));vnOpen("morb")});
+    document.querySelectorAll("#mb-list [data-bqgo]").forEach(b=>b.onclick=()=>{st.bqDe=b.closest("details").dataset.mb;bqOpen(b.dataset.bqgo)})};
+  $("mb-q").oninput=pinta;pinta();
+  document.querySelectorAll("#app > .btns [data-vn]").forEach(b=>b.onclick=()=>vnOpen(b.dataset.vn));
+  $("mb-sx").onclick=()=>sxOpen();$("mb-bq").onclick=()=>{st.bqDe=null;bqOpen()};
+  $("mb-back").onclick=()=>{home();window.scrollTo(0,0)};window.scrollTo(0,0);
+  if(foco){const d=document.querySelector(`details[data-mb="${foco}"]`);if(d){d.open=true;d.scrollIntoView({block:"start"})}}}
+function mbHomeHTML(){const n=bqResumen(),al=n.venc+n.rojo;return `<section class="route"><div class="route-head"><h2>Morbilidad</h2><span>Lo más frecuente en la zona rural del Vaupés</span></div><div class="tiles"><button class="tile pc" type="button" id="t-mb"><b>Morbilidad frecuente</b><small>Signos, diagnóstico, tratamiento con lo que hay en el botiquín y qué hacer mientras llega la remisión</small></button><button class="tile pc" type="button" id="t-sx"><b>No sé qué tiene</b><small>Empezar por el síntoma: signos de peligro, enfermedades probables y cuándo remitir</small></button><button class="tile pc" type="button" id="t-bq">${al?'<span class="dot" title="Medicamentos vencidos o por vencer"></span>':""}<b>Botiquín del puesto</b><small>${al?`${al} vencido${al===1?"":"s"} o por vencer en 3 meses · `:""}Posología, efectos, contraindicaciones e interacciones</small></button><button class="tile pc" type="button" data-vn="morb"><b>Nota de morbilidad por voz</b><small>Consulta por enfermedad, pregunta por pregunta</small></button></div></section>`}
+function mbWire(){const b=$("t-mb");if(b)b.onclick=()=>mbOpen();const c=$("t-sx");if(c)c.onclick=()=>sxOpen();const d=$("t-bq");if(d)d.onclick=()=>{st.bqDe=null;bqOpen()}}
+document.head.insertAdjacentHTML("beforeend",`<style>
+.bq-chip{display:inline-block;font-family:var(--f-data);font-size:.72rem;font-weight:500;padding:2px 8px;border-radius:999px;white-space:nowrap;border:1px solid transparent;vertical-align:middle}
+.bq-venc{background:var(--miss);color:var(--surface)}.bq-rojo{background:var(--miss-bg);color:var(--miss);border-color:var(--miss-line)}
+.bq-amar{background:var(--warn-bg);color:var(--warn);border-color:var(--warn-line)}.bq-verde{background:var(--accent-soft);color:var(--accent)}
+.bq-sinf{background:var(--bg);color:var(--muted);border-color:var(--line)}.bq-sin{background:transparent;color:var(--muted);border-color:var(--line);border-style:dashed}
+.bq-sem{display:flex;flex-wrap:wrap;gap:6px}.btn.bq-mini{padding:6px 10px;font-size:.82rem;flex:none}
+details.sec.mb summary .bq-chip{flex:none;align-self:center}
+.bq-kg{display:flex;align-items:center;gap:8px;font-size:.9rem;max-width:200px}.bq-kg input{padding:6px 8px}
+.bq-res{font-size:.92rem;margin-top:4px}
+.bq-fix{display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:8px}.bq-fix label{font-size:.8rem;color:var(--muted);display:flex;flex-direction:column;gap:2px}.bq-fix input{padding:6px 8px;font-size:.92rem}
+</style>`);
+
 /* ---------- arranque ---------- */
 /* los borradores guardados con la versión anterior de los módulos se reubican una sola vez */
 Object.keys(OLD_LAB).forEach(id=>{if(!M[id]||S.get(key(id,"ivlab")))return;let a={};try{a=JSON.parse(S.get(key(id,"iv"))||"{}")||{}}catch(e){}
