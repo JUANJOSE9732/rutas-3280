@@ -1971,7 +1971,7 @@ function wireMiDia(){const cb=$("md-cal");if(cb)cb.onclick=calOpen;
 function mdShow(t){const s=$("md-st");s.innerHTML="";const a=document.createElement("textarea");a.value=t;a.rows=7;a.readOnly=true;s.append("No se pudo copiar solo. Mantén presionado el texto y cópialo:",a);a.focus();a.select()}
 
 /* ---------- PANEL ---------- */
-const VERSION_APP="2026-10-20 v179";
+const VERSION_APP="2026-10-20 v180";
 function home(){
   stopRec();if(S.get(AT_KEY))atReiniciar();st.view="home";
   const rm=["precon","prenatal","parto","rn","ive"],rp=["pinf","inf","adol","juv","adul","vej"];
@@ -2264,10 +2264,12 @@ function paneGuia(){
   $("pane").innerHTML=`
   ${m.alerts.length?`<div class="box warn"><h3>Remitir o actuar si…</h3><ul>${m.alerts.map(a=>`<li>${esc(a)}</li>`).join("")}</ul></div>`:""}
   ${alcHTML(id)}
+  ${rutaBQHTML(id)}
   <p class="note-src">Marca lo que vas haciendo (${done} de ${total}). Lo marcado se pasa a la nota.</p>
   ${m.sections.map((s,i)=>`<details class="sec" ${i<2?"open":""}><summary><span>${esc(s.t)}</span><span class="cnt">${s.items.filter((_,j)=>ck[i+"."+j]).length}/${s.items.length}</span></summary><ul class="items">${s.items.map((it,j)=>{const q=it.startsWith("Q:");const txt=q?it.slice(2):it;return `<li><input type="checkbox" id="c${i}_${j}" data-k="${i}.${j}" ${ck[i+"."+j]?"checked":""}><label for="c${i}_${j}"><span class="${q?"q":""}">${esc(txt)}</span></label></li>`}).join("")}</ul></details>`).join("")}
   <div class="btns"><button class="btn primary" id="goNota">Siguiente: Nota →</button><button class="btn" id="clrChk">Desmarcar todo</button></div>`;
   document.querySelectorAll("[data-k]").forEach(c=>c.onchange=()=>{const o=checks(id);if(c.checked)o[c.dataset.k]=1;else delete o[c.dataset.k];S.set(key(id,"chk"),JSON.stringify(o));const det=c.closest("details");const sec=m.sections[+c.dataset.k.split(".")[0]];det.querySelector(".cnt").textContent=Object.keys(o).filter(k=>k.split(".")[0]===c.dataset.k.split(".")[0]).length+"/"+sec.items.length});
+  rutaBQWire(id);
   $("goNota").onclick=()=>{st.tab="nota";S.set(key(id,"tab"),"nota");renderMod()};
   $("clrChk").onclick=()=>{S.del(key(id,"chk"));paneGuia()};
 }
@@ -8623,7 +8625,8 @@ function bqFicha(m,c){if(m.ne)return `<dl class="mb-dl"><dt>Para qué</dt><dd>${
    ${m.kg?`<dt>Calcular por peso</dt><dd><label class="bq-kg">Peso <input type="number" inputmode="decimal" min="0" step="0.1" class="bq-w" data-bq="${m.id}" placeholder="kg"></label>${m.kg.map((e,i)=>`<div class="bq-res"><span class="note-src">${esc(e.t)}:</span> <span data-bqr="${m.id}:${i}">escribe el peso</span></div>`).join("")}</dd>`:""}
    ${row("Efectos secundarios",m.ef)}${row("Contraindicaciones",m.ci,"mb-al")}${row("Interacciones",m.it)}${row("Embarazo y lactancia",m.em)}${row("Opciones si no hay o no sirve",m.op)}
    ${m.ord?`<dt>Quién lo indica</dt><dd>Por orden médica (telemedicina) o protocolo de la ESE.</dd>`:""}
-   ${us.length?`<dt>Se usa en</dt><dd><div class="btns">${us.map(x=>`<button class="btn bq-mini" type="button" data-mbgo="${x.id}">${esc(x.t)}</button>`).join("")}</div></dd>`:""}
+   ${bqRutas(m.id).length?`<dt>En las rutas</dt><dd><div class="btns">${bqRutas(m.id).map(k=>`<button class="btn bq-mini" type="button" data-modgo="${k}">${esc(M[k].title)}</button>`).join("")}</div></dd>`:""}
+   ${us.length?`<dt>Se usa en la morbilidad</dt><dd><div class="btns">${us.map(x=>`<button class="btn bq-mini" type="button" data-mbgo="${x.id}">${esc(x.t)}</button>`).join("")}</div></dd>`:""}
    <dt>Fuente</dt><dd><small class="qt-c" style="margin:0">${esc(mbCita(F[0],F[1]==="página por verificar"?"":F[1]))}</small></dd>
    <dt>Corregir inventario</dt><dd><div class="bq-fix"><label>Cantidad<input type="number" min="0" data-fx="ent" value="${esc(m.ent)}"></label><label>Lote<input data-fx="lote" value="${esc(m.lote)}"></label><label>Vence<input type="month" data-fx="v" value="${esc(m.v)}"></label></div>
     <div class="btns" style="margin-top:6px"><button class="btn bq-mini" type="button" data-fxsave="${m.id}">Guardar corrección</button>${m._ed?`<button class="btn bq-mini" type="button" data-fxdel="${m.id}">Volver a lo del acta</button>`:""}</div></dd></dl>`}
@@ -8634,10 +8637,11 @@ function bqWireFichas(root,c,volver){root.querySelectorAll(".bq-w").forEach(inp=
   root.querySelectorAll("[data-fxsave]").forEach(b=>b.onclick=()=>{const id=b.dataset.fxsave,box=b.closest("dd"),E=bqEd(),g=k=>box.querySelector(`[data-fx="${k}"]`).value.trim();
    E[id]={ent:g("ent")===""?0:+g("ent"),lote:g("lote"),v:g("v")};S.set(BQ_KEY,JSON.stringify(E));volver(id)});
   root.querySelectorAll("[data-fxdel]").forEach(b=>b.onclick=()=>{const E=bqEd();delete E[b.dataset.fxdel];S.set(BQ_KEY,JSON.stringify(E));volver(b.dataset.fxdel)});
-  root.querySelectorAll("[data-mbgo]").forEach(b=>b.onclick=()=>mbOpen(b.dataset.mbgo))}
+  root.querySelectorAll("[data-mbgo]").forEach(b=>b.onclick=()=>mbOpen(b.dataset.mbgo));
+  root.querySelectorAll("[data-modgo]").forEach(b=>b.onclick=()=>{S.set(key(b.dataset.modgo,"tab"),"guia");st.bqDe=null;openMod(b.dataset.modgo)})}
 function bqOpen(foco,filtro){stopRec();st.view="bq";const C=ctxPer();filtro=filtro||"todos";const n=bqResumen();
   const F=[["todos","Todos"],["alerta",`Vencidos o por vencer (${n.venc+n.rojo+n.amar})`],["sinf",`Sin lote o vencimiento (${n.sinf})`],["sin",`No entregados (${n.sin})`]];
-  $("app").innerHTML=`<div class="top"><button class="back" type="button" id="bq-back">← ${st.bqDe?"Morbilidad":"Inicio"}</button><span class="tag pc">Botiquín</span></div>
+  $("app").innerHTML=`<div class="top"><button class="back" type="button" id="bq-back">← ${st.bqDe?(String(st.bqDe).startsWith("mod:")?esc((M[st.bqDe.slice(4)]||{}).title||"Ruta"):"Morbilidad"):"Inicio"}</button><span class="tag pc">Botiquín</span></div>
   <header><h1>Botiquín del puesto</h1><p class="sub">Medicamentos entregados en la solicitud a almacén del ${BQ_FECHA} (sede Yurupari). Cada ficha trae posología, efectos secundarios, contraindicaciones, interacciones, embarazo y lactancia, opciones y en qué morbilidades se usa. El semáforo se calcula con la fecha de hoy.</p></header>
   ${ctxCaja(C,"Las fichas avisan si el medicamento no conviene por edad, embarazo o lactancia.")}
   <div class="bq-sem">${["venc","rojo","amar","verde","sinf","sin"].map(k=>`<span class="bq-chip bq-${k}">${n[k]} · ${esc(BQ_SEM[k])}</span>`).join("")}</div>
@@ -8654,7 +8658,7 @@ function bqOpen(foco,filtro){stopRec();st.view="bq";const C=ctxPer();filtro=filt
     bqWireFichas($("bq-list"),C,id=>bqOpen(id,filtro))};
   $("bq-q").oninput=pinta;pinta();
   document.querySelectorAll("[data-bqf]").forEach(b=>b.onclick=()=>bqOpen(null,b.dataset.bqf));
-  $("bq-back").onclick=()=>{const d=st.bqDe;st.bqDe=null;d?mbOpen(d):(home(),window.scrollTo(0,0))};window.scrollTo(0,0);
+  $("bq-back").onclick=()=>{const d=st.bqDe;st.bqDe=null;if(d&&String(d).startsWith("mod:"))openMod(d.slice(4));else if(d)mbOpen(d);else{home();window.scrollTo(0,0)}};window.scrollTo(0,0);
   if(foco){const d=document.querySelector(`details[data-bqd="${foco}"]`);if(d){d.open=true;d.scrollIntoView({block:"start"})}}}
 /* sección «Del botiquín» dentro de cada ficha de morbilidad */
 function mbBQ(id,c){const x=MB_BQ[id];if(!x)return"";
@@ -8702,6 +8706,67 @@ details.sec.mb summary .bq-chip{flex:none;align-self:center}
 .bq-res{font-size:.92rem;margin-top:4px}
 .bq-fix{display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:8px}.bq-fix label{font-size:.8rem;color:var(--muted);display:flex;flex-direction:column;gap:2px}.bq-fix input{padding:6px 8px;font-size:.92rem}
 </style>`);
+
+/* ===== v180: el botiquín del puesto dentro de cada ruta de la Res. 3280 =====
+   En la pestaña Guía de cada módulo: qué medicamentos del botiquín aplican en esa ruta y para qué,
+   qué no usar en ese grupo y qué falta pedir. En la gestante, la puérpera y el recién nacido
+   los avisos se ajustan a esa situación aunque no se haya marcado en el inicio. */
+Object.assign(MBF,{abo:"OMS, Directrices sobre la atención para el aborto (2022)",
+ beers:"American Geriatrics Society, Criterios de Beers para el uso de medicamentos en adultos mayores (2023)"});
+const RUTA_BQ={
+ precon:{m:[["fe_t","Si tiene anemia: corregirla antes del embarazo."],["valp_c","Si toma ácido valproico: alto riesgo de malformaciones. Remitir a medicina para cambiarlo antes de buscar el embarazo, con ácido fólico de 4 mg."],["enala","Si toma enalapril: cambiarlo antes de embarazarse, porque está contraindicado en la gestación."],["losar","Igual que el enalapril: cambiarlo antes del embarazo."],["metf","Diabética: buscar buen control de la glucosa antes del embarazo."],["implante","Mientras decide cuándo embarazarse."]],
+  falta:"El ácido fólico (0,4 mg al día; 4 mg en epilepsia o con hijo con defecto del tubo neural) no se entregó. Es la intervención principal de esta ruta: pídelo."},
+ prenatal:{m:[["fe_t","1 tableta al día (60 mg de hierro elemental), salvo hemoglobina mayor de 14 g/dl; con jugo y lejos del calcio."],["calcio","Desde la semana 14: 1.200 mg al día (confirma si la orden es en calcio elemental: 2 tabletas), separado 2 horas del hierro."],["asa","75 a 100 mg cada noche desde la semana 12 hasta el parto, si cumple criterios de riesgo de preeclampsia; la formula medicina."],["peni","Prueba treponémica reactiva: 2.400.000 UI IM en ese momento. Revisa antes el vencimiento del lote."],["adren","A mano durante y 30 minutos después de la penicilina."],["nitro","Bacteriuria o cistitis, salvo desde la semana 38."],["cefa_c","Bacteriuria o cistitis: alternativa segura."],["metro_t","Vaginosis o tricomoniasis con síntomas: esquema de 7 días, no la dosis única."],["acet_t","Dolor o fiebre: es el analgésico seguro en el embarazo."],["clinda_t","Malaria por P. falciparum en el primer trimestre, junto con quinina."],["dexa","Amenaza de parto pretérmino entre las semanas 24 y 34: maduración pulmonar, por orden médica."],["mgso4","Preeclampsia severa o eclampsia."],["label","Crisis de 160/110 o más, por orden médica."]],
+  no:["enala","losar","valp_c","doxi","cipro","iver","vita","diclo_a","fluco","gemfi"],
+  op:"Trimetoprim-sulfametoxazol: evitar en el primer trimestre y en el último mes. Tinidazol: no en el primer trimestre.",
+  falta:"No se entregaron el ácido fólico (hasta la semana 12) ni el albendazol (400 mg dosis única en el 2.º o 3.er trimestre, en zona de riesgo). Tampoco el clotrimazol en óvulos, que se usa para la candidiasis de la gestante."},
+ parto:{m:[["tranex_a","Hemorragia posparto: 1 g IV en 10 minutos, según la guía."],["ringer","Cristaloides tibios en la hemorragia; mantener la vena durante el traslado."],["ssn500","Alternativa al lactato de Ringer."],["mgso4","Preeclampsia severa o eclampsia en el parto o el puerperio."],["lido","Reparar desgarros o episiotomía, sin pasar de 4,5 mg/kg."],["acet_t","Dolor posparto: compatible con la lactancia."],["diclox_c","Mastitis: 500 mg cada 6 horas por 10 a 14 días, sin suspender la lactancia."],["fe_t","Si hubo sangrado importante o tiene anemia."],["implante","Planificación antes del alta: se puede poner durante la lactancia."],["nista","Candidiasis del pezón (y tratar también la boca del bebé)."]],
+  no:["cipro","doxi","tini","metiler"],
+  op:"Metilergometrina: contraindicada si hay hipertensión o preeclampsia.",
+  falta:"La oxitocina (10 UI IM en el manejo activo del alumbramiento) y el misoprostol no están en la solicitud, y la metilergometrina no se entregó. Sin oxitocina no hay manejo activo: pídela ya. La medroxiprogesterona tampoco se entregó."},
+ rn:{m:[["genta","Infección grave del recién nacido: primera dosis antes de remitir, junto con ampicilina, por orden médica."],["nista","Algodoncillo (placas blancas en la boca) en el control."],["clotri","Dermatitis del pañal con candidiasis."],["sro","Solo por orden médica; en el recién nacido la hidratación es con leche materna."]],
+  no:["dimen","metoclo","lope","clorf_s","difen_s","lora_s","keto_t","dihidro","sulfad","tmp_s","nitro","cipro","doxi","iver","salb_j","asa","dipi"],
+  op:"Fiebre o hipotermia en el recién nacido: remisión, no se trata en el puesto.",
+  falta:"No están en esta solicitud la vitamina K (1 mg IM), la povidona yodada para la profilaxis ocular, la clorhexidina para el cordón ni la ampicilina IV sola. Pídelos si vas a atender partos."},
+ ive:{m:[["acet_t","Dolor."],["diclo_a","Dolor del procedimiento, si no hay contraindicación."],["doxi","Profilaxis antibiótica si se hace aspiración, según la orden médica."],["azit_t","Alternativa para la profilaxis, según la orden médica."],["metoclo","Náusea por el misoprostol."],["implante","Se puede poner el mismo día."],["peni","Si la prueba treponémica es reactiva."]],
+  falta:"La mifepristona y el misoprostol no están en el botiquín: la IVE se gestiona con la ESE."},
+ pinf:{m:[["vita","6 a 11 meses: 100.000 UI (2 cápsulas). 12 a 59 meses: 200.000 UI (4 cápsulas) cada 6 meses, según el lineamiento de la ESE."],["fe_s","Anemia (hemoglobina baja o palidez): 3 mg/kg al día de hierro elemental por 3 meses."],["pirantel","Solo para áscaris u oxiuros; no reemplaza el albendazol de la desparasitación."],["acet_s","Fiebre o dolor, también después de las vacunas."],["amox_s","Neumonía u otitis detectadas en la valoración."],["sro","Si consulta con diarrea."],["zinc","Si consulta con diarrea: de 10 a 14 días."],["nista","Algodoncillo."],["clotri","Dermatitis del pañal con candidiasis."]],
+  no:["lope","metoclo","dimen","dihidro","cipro","doxi","asa","salb_j"],
+  falta:"No se entregaron el albendazol (desparasitación dos veces al año desde el año) ni los micronutrientes en polvo."},
+ inf:{m:[["pirantel","Áscaris u oxiuros (tratar a toda la familia)."],["tini","Giardiasis: 50 mg/kg dosis única (vence 11/2026)."],["metro_s","Giardiasis o amebiasis."],["fe_s","Anemia."],["amox_s","Faringitis u otitis."],["azit_s","Alérgicos a la penicilina."],["salb_i","Asma: siempre con inhalocámara."],["crota","Escabiosis (toda la familia)."],["keto_c","Tiñas."],["lora_s","Rinitis o urticaria."],["acet_s","Fiebre o dolor."]],
+  no:["doxi","cipro","dihidro","metoclo","lope","asa"],
+  falta:"El albendazol (desparasitación) y el champú antipiojos no se entregaron."},
+ adol:{m:[["implante","Anticoncepción a demanda, con el consentimiento que corresponda a la edad."],["fe_t","Anemia o sangrado menstrual abundante."],["tranex_t","Sangrado menstrual abundante, por orden médica."],["metro_t","Flujo vaginal: vaginosis o tricomoniasis."],["azit_t","Clamidia, por orden médica."],["peni","Sífilis."],["doxi","Clamidia, o sífilis en no gestantes alérgicas a la penicilina."],["acet_t","Dolor menstrual o fiebre."],["sertra","Si ya la toma: vigilar ideas de muerte, sobre todo al inicio."]],
+  no:["cipro","trama","dihidro"],falta:"La medroxiprogesterona no se entregó."},
+ juv:{m:[["implante","Anticoncepción a demanda."],["metro_t","Flujo vaginal: vaginosis o tricomoniasis."],["azit_t","Clamidia, por orden médica."],["doxi","Clamidia, o sífilis en no gestantes alérgicas a la penicilina."],["peni","Sífilis."],["fe_t","Anemia."],["tranex_t","Sangrado menstrual abundante, por orden médica."],["acet_t","Dolor o fiebre."],["sertra","Si ya la toma: continuar y no darle tramadol."]],
+  op:"En una mujer que puede embarazarse, revisa si toma ácido valproico, enalapril o losartán y asegura la planificación.",falta:"La medroxiprogesterona no se entregó."},
+ adul:{m:[["losar","Hipertensión: 50 mg al día."],["enala","Hipertensión: nunca junto con losartán."],["amlo","Hipertensión."],["hctz","Hipertensión."],["metf","Diabetes tipo 2."],["gemfi","Triglicéridos altos (nunca junto con estatinas)."],["asa","Prevención secundaria cardiovascular, por orden médica."],["esome","Gastritis, o protección del estómago si toma AINE o corticoide."],["implante","Anticoncepción a demanda."],["metro_t","Flujo vaginal."],["acet_t","Dolor: primera opción."]],
+  falta:"La atorvastatina y el captopril no se entregaron."},
+ vej:{m:[["losar","Hipertensión: vigilar mareo y potasio."],["enala","Hipertensión: nunca junto con losartán."],["amlo","Hipertensión: vigilar la hinchazón de los tobillos."],["hctz","Hipertensión: vigilar sodio, potasio y caídas."],["metf","Diabetes: suspender si se deshidrata."],["asa","Prevención secundaria, por orden médica."],["esome","Gastritis; uso prolongado solo si hay indicación."],["acet_t","Dolor: primera opción en el adulto mayor."]],
+  no:["difen_c","clorf_t","dimen","metoca","hiosc_a","diclo_a","dihidro"],
+  op:"En el adulto mayor, los antihistamínicos que dan sueño, los relajantes musculares y la hioscina aumentan las caídas y la confusión, y los AINE dañan el riñón (criterios de Beers).",
+  falta:"La atorvastatina no se entregó."},
+ proc:{m:[["implante","Inserción con lidocaína; anota el lote del empaque en la nota."],["lido","Anestesia local para la inserción o el retiro del implante, sin pasar de 4,5 mg/kg."],["diclox_c","Mastitis en la consejería de lactancia."],["nista","Candidiasis del pezón o de la boca del bebé."]],
+  op:"Si toma rifampicina (tuberculosis), carbamazepina o fenitoína, el implante pierde eficacia: debe usar también condón."}};
+const RUTA_ES={prenatal:"ges",parto:"pos",ive:"ges"};
+function rutaCtx(id){const c=Object.assign({},ctxPer());if(RUTA_ES[id]){c.sx="F";c.es=RUTA_ES[id]}if(id==="rn"&&(c.m==null||c.m>1)){c.m=0;c.a=0}return c}
+function bqListaHTML(x,c){const li=([mid,rol])=>{const m=bqGet(mid);if(!m)return"";const av=bqAvisos(m,c);
+    return `<li><b>${esc(m.n)}</b>${m.c?` <span class="note-src">${esc(m.c)}</span>`:""} ${bqChip(m)} <span class="note-src">· ${esc(bqCant(m))}</span><br>${esc(rol)}${av.map(t=>`<small class="qt-c" style="color:var(--miss)">${esc(t)}</small>`).join("")}<button type="button" class="btn bq-mini" data-bqgo="${m.id}" style="margin-top:4px;display:block">Ficha: dosis, efectos, interacciones</button></li>`};
+  return `<ul class="mb-ul">${(x.m||[]).map(li).join("")}</ul>
+   ${x.no&&x.no.length?`<p class="note-src" style="margin:6px 0 0"><b style="color:var(--miss)">No usar en este grupo:</b> ${x.no.map(z=>{const m=bqGet(z);return m?esc(m.n):""}).filter(Boolean).join(", ")}.</p>`:""}
+   ${x.op?`<p class="note-src" style="margin:6px 0 0"><b>Ojo:</b> ${esc(x.op)}</p>`:""}
+   ${x.falta?`<p class="note-src" style="margin:6px 0 0"><b style="color:var(--warn)">No está en el botiquín:</b> ${esc(x.falta)}</p>`:""}`}
+function rutaBQHTML(id){const x=RUTA_BQ[id];if(!x)return"";const c=rutaCtx(id),al=(x.m||[]).filter(([z])=>{const m=bqGet(z);return m&&["venc","rojo"].includes(bqEstado(m).k)}).length;
+  return `<details class="sec" id="ruta-bq"><summary><span>Del botiquín para esta ruta</span><span class="cnt">${(x.m||[]).length} medicamentos${al?` · ${al} por revisar`:""}</span></summary><div style="padding:10px 14px 14px">
+   <p class="note-src" style="margin:0 0 6px">Inventario de la solicitud del ${BQ_FECHA}. Por orden médica (telemedicina) o protocolo de la ESE; confirma siempre la dosis con la etiqueta.</p>${bqListaHTML(x,c)}
+   <div class="btns" style="margin-top:8px"><button class="btn bq-mini" type="button" id="ruta-bq-todo">Ver todo el botiquín</button></div></div></details>`}
+function rutaBQWire(id){const box=$("ruta-bq");if(!box)return;
+  box.querySelectorAll("[data-bqgo]").forEach(b=>b.onclick=()=>{st.bqDe="mod:"+id;S.set(key(id,"tab"),"guia");bqOpen(b.dataset.bqgo)});
+  const t=$("ruta-bq-todo");if(t)t.onclick=()=>{st.bqDe="mod:"+id;S.set(key(id,"tab"),"guia");bqOpen()}}
+/* las fichas de morbilidad usan la misma lista */
+function mbBQ(id,c){const x=MB_BQ[id];if(!x)return"";return `<dt style="color:var(--accent)">Del botiquín del puesto</dt><dd>${bqListaHTML(x,c).replace("No usar en este grupo:","No usar en esta condición:")}</dd>`}
+/* en la ficha del botiquín: en qué rutas se usa */
+function bqRutas(id){return Object.keys(RUTA_BQ).filter(k=>M[k]&&(RUTA_BQ[k].m||[]).some(z=>z[0]===id))}
 
 /* ---------- arranque ---------- */
 /* los borradores guardados con la versión anterior de los módulos se reubican una sola vez */
