@@ -1971,7 +1971,7 @@ function wireMiDia(){const cb=$("md-cal");if(cb)cb.onclick=calOpen;
 function mdShow(t){const s=$("md-st");s.innerHTML="";const a=document.createElement("textarea");a.value=t;a.rows=7;a.readOnly=true;s.append("No se pudo copiar solo. Mantén presionado el texto y cópialo:",a);a.focus();a.select()}
 
 /* ---------- PANEL ---------- */
-const VERSION_APP="2026-10-21 v182";
+const VERSION_APP="2026-10-22 v183";
 function home(){
   stopRec();if(S.get(AT_KEY))atReiniciar();st.view="home";
   const rm=["precon","prenatal","parto","rn","ive"],rp=["pinf","inf","adol","juv","adul","vej"];
@@ -8687,7 +8687,7 @@ function mbOpen(foco){stopRec();st.view="mb";
   <header><h1>Morbilidad frecuente</h1><p class="sub">Zona rural del Vaupés. Para cada condición: signos y síntomas, diagnóstico en el puesto, tratamiento, lo que hay en el botiquín del puesto, qué hacer mientras llega la remisión y signos de alarma. Cada recomendación dice de qué guía sale.</p></header>
   ${ctxCaja(ctxPer(),"Las fichas que aplican a esta persona salen primero y cada una muestra lo que cambia para ella, también en los medicamentos.")}
   ${(()=>{const c=ctxPer(),pr=mbPrior(c);return pr.length?`<div class="box"><h3>Para esta persona, revisa primero</h3><div class="btns">${pr.map(id=>{const x=MB.find(z=>z.id===id);return x?`<button class="btn" type="button" data-mbgo="${id}">${esc(x.t)}</button>`:""}).join("")}</div></div>`:""})()}
-  <div class="btns"><button class="btn primary" type="button" id="mb-sx">¿No sé qué tiene? Empezar por el síntoma</button><button class="btn" type="button" id="mb-bq">Botiquín del puesto</button></div>
+  <div class="btns"><button class="btn primary" type="button" id="mb-sx">¿No sé qué tiene? Empezar por el síntoma</button><button class="btn" type="button" id="mb-bq">Botiquín del puesto</button><button class="btn" type="button" id="mb-pz">Pruebas en el puesto</button></div>
   <div class="box warn"><h3>Si la remisión tarda días</h3>${mbUL(MB_ESPERA)}</div>
   <input id="mb-q" placeholder="Buscar: fiebre, diarrea, serpiente, amoxicilina…" autocomplete="off">
   <div id="mb-list"></div>
@@ -8703,7 +8703,7 @@ function mbOpen(foco){stopRec();st.view="mb";
     document.querySelectorAll("#mb-list [data-bqgo]").forEach(b=>b.onclick=()=>{st.bqDe=b.closest("details").dataset.mb;bqOpen(b.dataset.bqgo)})};
   $("mb-q").oninput=pinta;pinta();
   document.querySelectorAll("#app > .btns [data-vn]").forEach(b=>b.onclick=()=>vnOpen(b.dataset.vn));
-  $("mb-sx").onclick=()=>sxOpen();$("mb-bq").onclick=()=>{st.bqDe=null;bqOpen()};
+  $("mb-sx").onclick=()=>sxOpen();$("mb-bq").onclick=()=>{st.bqDe=null;bqOpen()};$("mb-pz").onclick=()=>{st.pzDe="mb";pzOpen()};
   $("mb-back").onclick=()=>{home();window.scrollTo(0,0)};window.scrollTo(0,0);
   if(foco){const d=document.querySelector(`details[data-mb="${foco}"]`);if(d){d.open=true;d.scrollIntoView({block:"start"})}}}
 function mbHomeHTML(){const n=bqResumen(),al=n.venc+n.rojo;return `<section class="route"><div class="route-head"><h2>Morbilidad</h2><span>Lo más frecuente en la zona rural del Vaupés</span></div><div class="tiles"><button class="tile pc" type="button" id="t-mb"><b>Morbilidad frecuente</b><small>Signos, diagnóstico, tratamiento con lo que hay en el botiquín y qué hacer mientras llega la remisión</small></button><button class="tile pc" type="button" id="t-sx"><b>No sé qué tiene</b><small>Empezar por el síntoma: signos de peligro, enfermedades probables y cuándo remitir</small></button><button class="tile pc" type="button" id="t-bq">${al?'<span class="dot" title="Medicamentos vencidos o por vencer"></span>':""}<b>Botiquín del puesto</b><small>${al?`${al} vencido${al===1?"":"s"} o por vencer en 3 meses · `:""}Posología, efectos, contraindicaciones e interacciones</small></button><button class="tile pc" type="button" data-vn="morb"><b>Nota de morbilidad por voz</b><small>Consulta por enfermedad, pregunta por pregunta</small></button></div></section>`}
@@ -8772,10 +8772,10 @@ function bqListaHTML(x,c){const li=([mid,rol])=>{const m=bqGet(mid);if(!m)return
 function rutaBQHTML(id){const x=RUTA_BQ[id];if(!x)return"";const c=rutaCtx(id),al=(x.m||[]).filter(([z])=>{const m=bqGet(z);return m&&["venc","rojo"].includes(bqEstado(m).k)}).length;
   return `<details class="sec" id="ruta-bq"><summary><span>Del botiquín para esta ruta</span><span class="cnt">${(x.m||[]).length} medicamentos${al?` · ${al} por revisar`:""}</span></summary><div style="padding:10px 14px 14px">
    <p class="note-src" style="margin:0 0 6px">Inventario de la solicitud del ${BQ_FECHA}. Por orden médica (telemedicina) o protocolo de la ESE; confirma siempre la dosis con la etiqueta.</p>${bqListaHTML(x,c)}
-   <div class="btns" style="margin-top:8px"><button class="btn bq-mini" type="button" id="ruta-bq-todo">Ver todo el botiquín</button></div></div></details>`}
+   <div class="btns" style="margin-top:8px"><button class="btn bq-mini" type="button" id="ruta-bq-todo">Ver todo el botiquín</button><button class="btn bq-mini" type="button" id="ruta-pz">Pruebas en el puesto</button></div></div></details>`}
 function rutaBQWire(id){const box=$("ruta-bq");if(!box)return;
   box.querySelectorAll("[data-bqgo]").forEach(b=>b.onclick=()=>{st.bqDe="mod:"+id;S.set(key(id,"tab"),"guia");bqOpen(b.dataset.bqgo)});
-  const t=$("ruta-bq-todo");if(t)t.onclick=()=>{st.bqDe="mod:"+id;S.set(key(id,"tab"),"guia");bqOpen()}}
+  const t=$("ruta-bq-todo");if(t)t.onclick=()=>{st.bqDe="mod:"+id;S.set(key(id,"tab"),"guia");bqOpen()};const z=$("ruta-pz");if(z)z.onclick=()=>{st.pzDe="mod:"+id;pzOpen()}}
 /* las fichas de morbilidad usan la misma lista */
 function mbBQ(id,c){const x=MB_BQ[id];if(!x)return"";return `<dt style="color:var(--accent)">Del botiquín del puesto</dt><dd>${bqListaHTML(x,c).replace("No usar en este grupo:","No usar en esta condición:")}</dd>`}
 /* en la ficha del botiquín: en qué rutas se usa */
@@ -9027,8 +9027,8 @@ function caFinHTML(c){const n=c.q.length,ok=CA.ok;
 /* abrir la ficha de morbilidad y volver al caso donde iba */
 function caFicha(c,enCurso){const vuelta=enCurso?CA.i:null,guard=CA;mbOpen(c.mb);const b=$("mb-back");if(b){b.textContent="← Volver al caso";b.onclick=()=>{CA=guard;if(vuelta!=null&&CA)caOpen(c.id,CA.resp[vuelta]!=null?vuelta+1:vuelta);else caOpen(c.id,c.q.length)}}}
 /* mosaico en la sección Morbilidad del inicio y botón dentro de Morbilidad frecuente */
-function mbHomeHTML(){const n=bqResumen(),al=n.venc+n.rojo,R=caResumen();return `<section class="route"><div class="route-head"><h2>Morbilidad</h2><span>Lo más frecuente en la zona rural del Vaupés</span></div><div class="tiles"><button class="tile pc" type="button" id="t-mb"><b>Morbilidad frecuente</b><small>Signos, diagnóstico, tratamiento con lo que hay en el botiquín y qué hacer mientras llega la remisión</small></button><button class="tile pc" type="button" id="t-sx"><b>No sé qué tiene</b><small>Empezar por el síntoma: signos de peligro, enfermedades probables y cuándo remitir</small></button><button class="tile pc" type="button" id="t-bq">${al?'<span class="dot" title="Medicamentos vencidos o por vencer"></span>':""}<b>Botiquín del puesto</b><small>${al?`${al} vencido${al===1?"":"s"} o por vencer en 3 meses · `:""}Posología, efectos, contraindicaciones e interacciones</small></button><button class="tile pc" type="button" id="t-ca"><b>Casos para practicar</b><small>${CASOS.length} casos de opción múltiple${R.hechos?` · ${R.hechos} hechos`:""}, con la explicación y la guía de cada respuesta</small></button><button class="tile pc" type="button" data-vn="morb"><b>Nota de morbilidad por voz</b><small>Consulta por enfermedad, pregunta por pregunta</small></button></div></section>`}
-function mbWire(){const b=$("t-mb");if(b)b.onclick=()=>mbOpen();const c=$("t-sx");if(c)c.onclick=()=>sxOpen();const d=$("t-bq");if(d)d.onclick=()=>{st.bqDe=null;bqOpen()};const e=$("t-ca");if(e)e.onclick=()=>{CA=null;caLista()}}
+function mbHomeHTML(){const n=bqResumen(),al=n.venc+n.rojo,R=caResumen();return `<section class="route"><div class="route-head"><h2>Morbilidad</h2><span>Lo más frecuente en la zona rural del Vaupés</span></div><div class="tiles"><button class="tile pc" type="button" id="t-mb"><b>Morbilidad frecuente</b><small>Signos, diagnóstico, tratamiento con lo que hay en el botiquín y qué hacer mientras llega la remisión</small></button><button class="tile pc" type="button" id="t-sx"><b>No sé qué tiene</b><small>Empezar por el síntoma: signos de peligro, enfermedades probables y cuándo remitir</small></button><button class="tile pc" type="button" id="t-bq">${al?'<span class="dot" title="Medicamentos vencidos o por vencer"></span>':""}<b>Botiquín del puesto</b><small>${al?`${al} vencido${al===1?"":"s"} o por vencer en 3 meses · `:""}Posología, efectos, contraindicaciones e interacciones</small></button><button class="tile pc" type="button" id="t-pz"><b>Pruebas en el puesto</b><small>Hemoglobina portátil y tira de orina: qué significa, qué hacer y el texto para la nota</small></button><button class="tile pc" type="button" id="t-ca"><b>Casos para practicar</b><small>${CASOS.length} casos de opción múltiple${R.hechos?` · ${R.hechos} hechos`:""}, con la explicación y la guía de cada respuesta</small></button><button class="tile pc" type="button" data-vn="morb"><b>Nota de morbilidad por voz</b><small>Consulta por enfermedad, pregunta por pregunta</small></button></div></section>`}
+function mbWire(){const b=$("t-mb");if(b)b.onclick=()=>mbOpen();const c=$("t-sx");if(c)c.onclick=()=>sxOpen();const d=$("t-bq");if(d)d.onclick=()=>{st.bqDe=null;bqOpen()};const e=$("t-ca");if(e)e.onclick=()=>{CA=null;caLista()};const f=$("t-pz");if(f)f.onclick=()=>{st.pzDe=null;pzOpen()}}
 mbOpen=(function(orig){return function(foco){orig(foco);const s=$("mb-bq");if(s&&!$("mb-ca")){s.insertAdjacentHTML("afterend",`<button class="btn" type="button" id="mb-ca">Casos para practicar</button>`);$("mb-ca").onclick=()=>{CA=null;caLista()}}}})(mbOpen);
 document.head.insertAdjacentHTML("beforeend",`<style>
 .ca-res{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin:10px 0}
@@ -9046,6 +9046,121 @@ document.head.insertAdjacentHTML("beforeend",`<style>
 .ca-fb{margin:12px 0}.ca-fb h3{margin:0 0 6px}.ca-fb.ok{border-color:var(--accent);background:var(--accent-soft)}.ca-fb.bad{border-color:var(--warn-line);background:var(--warn-bg)}
 .ca-prev{display:flex;flex-direction:column;gap:2px;font-size:.88rem;padding:8px 12px;margin:8px 0 0;border-left:3px solid var(--line)}
 .ca-prev.ok{border-color:var(--accent)}.ca-prev.bad{border-color:var(--warn)}.ca-prev span{color:var(--muted)}
+</style>`);
+
+/* ===== v183: Pruebas en el puesto — hemoglobina portátil y tira de orina =====
+   Escribes el resultado y la app dice qué significa para esa persona (gestante, niño o adulto),
+   qué hacer con lo que hay en el puesto y qué va en la remisión. Arma el texto para la nota. */
+Object.assign(MBF,{
+ omshb:"OMS, Concentraciones de hemoglobina para diagnosticar la anemia y evaluar su gravedad (WHO/NMH/NHD/MNM/11.1, 2011)",
+ uro:"Simerville JA, Maxted WC, Pahira JJ. Urinalysis: a comprehensive review. Am Fam Physician 2005;71(6):1153-62"});
+/* grupos OMS 2011: [corte de anemia, leve desde, moderada desde, severa por debajo de] */
+const PZ_G={
+ n6:{t:"Niño de 6 a 59 meses",c:11,l:10,m:7},
+ n5:{t:"Niño de 5 a 11 años",c:11.5,l:11,m:8},
+ a12:{t:"Adolescente de 12 a 14 años",c:12,l:11,m:8},
+ mu:{t:"Mujer no gestante de 15 años o más",c:12,l:11,m:8},
+ ges:{t:"Gestante",c:11,l:10,m:7},
+ ho:{t:"Hombre de 15 años o más",c:13,l:11,m:8},
+ lac:{t:"Menor de 6 meses",c:null}};
+function pzGrupoAuto(c){if(c.sx==="F"&&(c.es==="ges"))return"ges";if(c.m!=null&&c.m<6)return"lac";if(c.m!=null&&c.m<60)return"n6";if(c.a!=null&&c.a<12)return"n5";if(c.a!=null&&c.a<15)return"a12";if(c.sx==="M")return"ho";if(c.sx==="F")return"mu";return""}
+const PZ_TIRA=[
+ {k:"leu",t:"Leucocitos",o:["NEGATIVO","TRAZAS","+","++","+++"]},
+ {k:"nit",t:"Nitritos",o:["NEGATIVO","POSITIVO"]},
+ {k:"pro",t:"Proteínas",o:["NEGATIVO","TRAZAS","+ (30 mg/dl)","++ (100 mg/dl)","+++ (300 mg/dl)","++++"]},
+ {k:"glu",t:"Glucosa",o:["NEGATIVO","TRAZAS","+","++","+++","++++"]},
+ {k:"cet",t:"Cetonas",o:["NEGATIVO","TRAZAS","+","++","+++"]},
+ {k:"san",t:"Sangre",o:["NEGATIVO","TRAZAS","+","++","+++"]},
+ {k:"bil",t:"Bilirrubina",o:["NEGATIVO","+","++","+++"]},
+ {k:"ubg",t:"Urobilinógeno",o:["NORMAL","AUMENTADO"]},
+ {k:"den",t:"Densidad",o:["1.000","1.005","1.010","1.015","1.020","1.025","1.030"]},
+ {k:"ph",t:"pH",o:["5","6","6.5","7","7.5","8","9"]}];
+const PZ_KEY="dn2_pz";
+function pzGet(){try{return JSON.parse(S.get(PZ_KEY)||"{}")||{}}catch(e){return{}}}
+function pzSet(o){S.set(PZ_KEY,JSON.stringify(o))}
+const pzPos=v=>v&&!/^NEGATIVO|^NORMAL/.test(v);
+const pzN=v=>String(v).replace(".",",");
+function pzHb(d){const R={cls:"",txt:"",acc:[],nota:""};const hb=parseFloat(String(d.hb||"").replace(",","."));const G=PZ_G[d.g];if(!(hb>0))return R;
+  if(hb<3||hb>25){R.cls="high";R.txt="Valor fuera del rango de lectura: repite la prueba con otra gota y otra tira.";R.acc.push(["Revisa el código del lote de tiras y que el dedo esté seco.","uro",""]);return R}
+  R.nota=`HEMOGLOBINA CAPILAR CON HEMOGLOBINOMETRO PORTATIL: ${pzN(hb)} G/DL`;
+  if(!G||G.c==null){R.txt="En menores de 6 meses la OMS no fija corte de anemia para tamizaje: interpreta con medicina por telemedicina.";R.cls="mid";R.nota+=". SE CONSULTA POR TELEMEDICINA.";return R}
+  let g;if(hb>=G.c)g="sin";else if(hb>=G.l)g="leve";else if(hb>=G.m)g="mod";else g="sev";
+  const nom={sin:"Sin anemia",leve:"Anemia leve",mod:"Anemia moderada",sev:"Anemia severa"}[g];R.cls=g==="sin"?"low":g==="sev"?"high":"mid";
+  R.txt=`${nom} para ${G.t.toLowerCase()} (anemia si es menor de ${pzN(G.c)} g/dl).`;R.acc.push([`Puntos de corte: anemia por debajo de ${pzN(G.c)}; leve de ${pzN(G.l)} a ${pzN(Math.round((G.c-0.1)*10)/10)}; moderada de ${pzN(G.m)} a ${pzN(Math.round((G.l-0.1)*10)/10)}; severa por debajo de ${pzN(G.m)} g/dl.`,"omshb",""]);
+  R.nota+=`, ${nom.toUpperCase()} SEGUN PUNTOS DE CORTE DE LA OMS`;
+  if(d.g==="ges"){if(hb>14){R.acc.push(["Hemoglobina mayor de 14 g/dl: según la 3280 no requiere hierro de rutina. Revisa si está deshidratada.","r3280","269"]);R.nota+=". NO REQUIERE SUPLEMENTO DE HIERRO DE RUTINA (HB MAYOR DE 14 G/DL)"}
+    else if(g==="sin"){R.acc.push(["Sulfato ferroso 300 mg (60 mg de hierro elemental) una tableta al día, como a toda gestante.","r3280","269"]);R.nota+=". SE FORMULA SULFATO FERROSO 300 MG VIA ORAL AL DIA"}
+    else{R.acc.push(["Anemia en la gestante: inicia hierro, escribe el hallazgo y el hemograma en la remisión y consulta por telemedicina la dosis de tratamiento.","r3280","269"]);R.nota+=". SE INICIA SULFATO FERROSO, SE CONSULTA POR TELEMEDICINA Y SE INCLUYE HEMOGRAMA EN LA REMISION"}}
+  else if(g!=="sin"){
+   if(["n6","n5"].includes(d.g))R.acc.push(["Niño con anemia: hierro elemental 3 mg/kg al día por 3 meses (sulfato ferroso suspensión, calcula los ml con la etiqueta), desparasitación según la edad y control de hemoglobina.","dnt",""]);
+   else R.acc.push(["Anemia: sulfato ferroso 300 mg una tableta 1 a 2 veces al día por 3 meses, con jugo de fruta y lejos del calcio; busca la causa (sangrado, parásitos, malaria) y anótalo para medicina.","fmo",""]);
+   R.nota+=". SE INICIA SUPLEMENTO DE HIERRO Y SE EDUCA EN ALIMENTACION RICA EN HIERRO"}
+  if(g==="sev"||d.sint){R.acc.push(["Anemia severa o con síntomas (falta de aire, desmayo, taquicardia): telemedicina el mismo día y remisión.","omshb",""]);R.nota+=". SE CONSULTA POR TELEMEDICINA Y SE GESTIONA REMISION"}
+  if(d.fie&&g!=="sin"){R.acc.push(["Anemia con fiebre en Vaupés: gota gruesa antes de tratar (la malaria destruye glóbulos rojos).","mal","15"]);R.nota+=". POR FIEBRE SE REALIZA GOTA GRUESA"}
+  R.nota+=".";return R}
+function pzTira(d){const T=d.tira||{},R={acc:[],nota:"",cls:"low",txt:""};if(!PZ_TIRA.some(p=>T[p.k]))return R;
+  const ges=d.g==="ges",sem=+d.sem||null,v=k=>T[k]||"",al=(t,f,p,c)=>{R.acc.push([t,f,p]);if(c==="high")R.cls="high";else if(c==="mid"&&R.cls!=="high")R.cls="mid"};
+  const itu=(pzPos(v("leu"))&&v("leu")!=="TRAZAS")||v("nit")==="POSITIVO";
+  if(v("nit")==="POSITIVO"||(itu&&d.suri)){
+    if(d.flum)al("Nitritos o leucocitos positivos con fiebre o dolor en la espalda baja: posible pielonefritis. Telemedicina y remisión; en la gestante, urgente.","aware","","high");
+    else if(ges)al("Gestante con "+(d.suri?"síntomas urinarios":"nitritos positivos sin síntomas (bacteriuria probable)")+": tratar por orden médica con cefalexina 500 mg cada 6 horas por 7 días o nitrofurantoína (no desde la semana 38), y urocultivo de control en la remisión.","aware","","mid");
+    else if(d.suri)al("Cistitis probable: nitrofurantoína 100 mg cada 12 horas por 5 días o trimetoprim-sulfametoxazol 160/800 mg cada 12 horas por 3 días (7 días en hombres). Ver la ficha de infección urinaria.","aware","","mid");
+    else al("Nitritos positivos sin síntomas en no gestante: por lo general no se trata; repite la tira con buena técnica y consulta si aparecen síntomas.","uro","","mid")}
+  else if(pzPos(v("leu"))&&!d.suri)al("Leucocitos sin nitritos ni síntomas: puede ser contaminación por flujo vaginal. Repite con chorro medio tras lavar con agua"+(ges?"; en la gestante, el urocultivo va en la remisión.":"."),"uro","","mid");
+  if(pzPos(v("pro"))&&v("pro")!=="TRAZAS"){
+    if(ges&&sem&&sem>=20&&d.hta)al("Gestante desde la semana 20 con tensión de 140/90 o más y proteinuria: sospecha de preeclampsia. Se lleva a servicio hospitalario de inmediato (Res. 3280); ficha de trastorno hipertensivo.","r3280","271","high");
+    else if(ges)al("Proteinuria en la gestante: toma la tensión en dos ocasiones, pregunta por cefalea, visión borrosa o dolor en la boca del estómago, y repite la tira en el siguiente control. Si aparece hipertensión desde la semana 20: remisión inmediata.","hta","4","mid");
+    else al("Proteinuria: repite la tira en otra muestra (el ejercicio, la fiebre y el flujo la elevan). Si persiste, o es hipertenso o diabético, va a medicina.","uro","","mid")}
+  if(pzPos(v("glu"))){al(ges?"Glucosa en la orina de la gestante: puede ser normal en el embarazo y no diagnostica diabetes gestacional. Haz glucometría y deja la PTOG de 75 g (semanas 24 a 28) en la remisión.":"Glucosa en la orina: haz glucometría. Si está alta, sospecha de diabetes: va a medicina.",ges?"r3280":"dm2",ges?"271":"","mid")}
+  if(pzPos(v("cet"))){al("Cetonas: ayuno, vómito o deshidratación. Hidratación oral con SRO y alimentación"+(pzPos(v("glu"))?". Con glucosa también positiva en un diabético: glucometría y telemedicina urgente (cetoacidosis).":"; en la gestante con vómito persistente, telemedicina."),"uro","",pzPos(v("glu"))?"high":"mid")}
+  if(pzPos(v("san"))&&v("san")!=="TRAZAS"){al("Sangre en la orina: descarta menstruación o sangrado vaginal y repite. Con síntomas urinarios acompaña a la infección; con dolor tipo cólico en el costado, piensa en cálculo. Si persiste sin causa, va a medicina."+(ges?" Si la gestante tiene sangrado vaginal, es signo de alarma.":""),"uro","","mid")}
+  if(pzPos(v("bil"))){al("Bilirrubina en la orina: daño del hígado o de las vías biliares. Mira si tiene ojos amarillos; haz gota gruesa y HBsAg, y remite.","mal","54","high")}
+  if(v("ubg")==="AUMENTADO"){al("Urobilinógeno aumentado: destrucción de glóbulos rojos o daño del hígado. Con fiebre en Vaupés, gota gruesa.","mal","15","mid")}
+  const den=parseFloat(v("den"));if(den>=1.03)al("Densidad de 1.030: orina concentrada, probable deshidratación. Hidratación.","uro","","mid");else if(den&&den<=1.005)al("Densidad muy baja: orina diluida; la tira puede dar falsos negativos. Repite con la primera orina de la mañana.","uro","");
+  if(!R.acc.length){R.txt="Tira dentro de lo normal."+(ges?" En la gestante, el urocultivo sigue en la remisión: la tira no descarta la bacteriuria asintomática.":"");if(ges)R.acc.push(["La 3280 pide urocultivo con antibiograma en el ingreso prenatal.","r3280","268"])}
+  else R.txt=R.cls==="high"?"Hay hallazgos de alarma.":"Hay hallazgos para actuar.";
+  R.nota="UROANALISIS CON TIRA REACTIVA: "+PZ_TIRA.filter(p=>T[p.k]).map(p=>`${p.t.toUpperCase()} ${T[p.k]}`).join(", ")+".";
+  return R}
+function pzOpen(){stopRec();st.view="pz";const C=ctxPer();const d=Object.assign({g:pzGrupoAuto(C),tira:{}},pzGet());if(!d.g)d.g=pzGrupoAuto(C)||"mu";
+  const de=st.pzDe;
+  $("app").innerHTML=`<div class="top"><button class="back" type="button" id="pz-back">← ${de&&String(de).startsWith("mod:")?esc((M[de.slice(4)]||{}).title||"Ruta"):de?"Morbilidad":"Inicio"}</button><span class="tag pc">Pruebas en el puesto</span></div>
+  <header><h1>Pruebas en el puesto</h1><p class="sub">Escribe el resultado de la hemoglobina portátil y de la tira de orina. La app te dice qué significa para esta persona, qué hacer con lo que hay en el puesto y qué va en la remisión, y arma el texto para la nota.</p></header>
+  ${ctxCaja(C,"El grupo se eligió según sus datos; cámbialo si no corresponde.")}
+  <label class="bfl">¿A quién se le hizo la prueba?<select id="pz-g">${Object.entries(PZ_G).map(([k,x])=>`<option value="${k}"${k===d.g?" selected":""}>${esc(x.t)}</option>`).join("")}</select></label>
+  <div id="pz-ges" class="frow"><label>Semanas de gestación<input id="pz-sem" type="number" inputmode="numeric" min="4" max="42" value="${esc(d.sem||"")}" placeholder="24"></label><label class="sx-ck" style="align-self:end"><input type="checkbox" id="pz-hta"${d.hta?" checked":""}> Tensión de 140/90 o más</label></div>
+  <section class="tool"><h3>Hemoglobina (aparato portátil)</h3>
+   <div class="frow"><label>Hemoglobina en g/dl<input id="pz-hb" type="number" inputmode="decimal" step="0.1" min="0" value="${esc(d.hb||"")}" placeholder="11,2"></label></div>
+   <label class="sx-ck"><input type="checkbox" id="pz-sint"${d.sint?" checked":""}> Síntomas de anemia: falta de aire, desmayo, taquicardia</label>
+   <label class="sx-ck"><input type="checkbox" id="pz-fie"${d.fie?" checked":""}> Tiene fiebre o la tuvo en los últimos días</label>
+   <div id="pz-hb-r"></div>
+   <details class="sec" style="margin-top:8px"><summary><span>Cómo tomarla bien</span></summary><ul class="mb-ul" style="padding:10px 14px 12px 32px">
+    <li>Codifica el aparato con el chip o código del lote de tiras.</li><li>Limpia el dedo con alcohol y déjalo secar del todo.</li><li>Limpia la primera gota y usa la segunda; no exprimas el dedo.</li><li>Cubre la zona de lectura de la tira con una sola gota.</li><li>Guarda las tiras cerradas, frescas y fuera del sol; no uses tiras vencidas.</li></ul></details></section>
+  <section class="tool"><h3>Tira de orina (10 parámetros)</h3>
+   <label class="sx-ck"><input type="checkbox" id="pz-suri"${d.suri?" checked":""}> Síntomas urinarios: ardor, orina frecuente, urgencia</label>
+   <label class="sx-ck"><input type="checkbox" id="pz-flum"${d.flum?" checked":""}> Fiebre, escalofrío o dolor en la espalda baja</label>
+   <div class="pz-grid">${PZ_TIRA.map(p=>`<label>${esc(p.t)}<select data-pzt="${p.k}"><option value="">—</option>${p.o.map(o=>`<option${(d.tira||{})[p.k]===o?" selected":""}>${esc(o)}</option>`).join("")}</select></label>`).join("")}</div>
+   <div class="btns" style="margin-top:6px"><button class="btn bq-mini" type="button" id="pz-norm">Todo negativo</button></div>
+   <div id="pz-ti-r"></div>
+   <details class="sec" style="margin-top:8px"><summary><span>Cómo tomarla bien</span></summary><ul class="mb-ul" style="padding:10px 14px 12px 32px">
+    <li>Orina del chorro medio, tras lavar los genitales con agua; mejor la primera de la mañana.</li><li>Lee de inmediato, cada parámetro en el tiempo que dice el frasco, con buena luz.</li><li>No toques las almohadillas; cierra el frasco enseguida.</li><li>Menstruación o flujo abundante alteran sangre, leucocitos y proteínas.</li><li>La tira no reemplaza el urocultivo en la gestante.</li></ul></details></section>
+  <section class="tool"><h3>Texto para la nota</h3><textarea id="pz-nota" rows="5" readonly></textarea>
+   <div class="btns"><button class="btn primary" type="button" id="pz-copy">Copiar para la nota</button><button class="btn" type="button" id="pz-clr">Nueva persona</button></div><p class="note-src" id="pz-st"></p></section>
+  <p class="foot">Puntos de corte de anemia de la OMS (2011); en Vaupés no se corrige por altura. La interpretación de la tira es de orientación: los medicamentos se dan por orden médica (telemedicina) o protocolo de la ESE, y el urocultivo, el hemograma y la PTOG van en la remisión.</p>`;
+  const lee=()=>{const o={g:$("pz-g").value,sem:$("pz-sem").value,hta:$("pz-hta").checked,hb:$("pz-hb").value,sint:$("pz-sint").checked,fie:$("pz-fie").checked,suri:$("pz-suri").checked,flum:$("pz-flum").checked,tira:{}};
+    document.querySelectorAll("[data-pzt]").forEach(s=>{if(s.value)o.tira[s.dataset.pzt]=s.value});return o};
+  const caja=(R)=>R.txt?`<div class="pz-r pz-${R.cls}"><b>${esc(R.txt)}</b>${R.acc.length?mbUL(R.acc):""}</div>`:"";
+  const pinta=()=>{const o=lee();pzSet(o);$("pz-ges").hidden=o.g!=="ges";const H=pzHb(o),T=pzTira(o);
+    $("pz-hb-r").innerHTML=caja(H);$("pz-ti-r").innerHTML=caja(T);$("pz-nota").value=[H.nota,T.nota].filter(Boolean).join("\n")};
+  document.querySelectorAll("#app input,#app select").forEach(e=>{e.oninput=pinta;e.onchange=pinta});
+  $("pz-norm").onclick=()=>{document.querySelectorAll("[data-pzt]").forEach(s=>{const k=s.dataset.pzt;s.value=k==="den"?"1.015":k==="ph"?"6":k==="ubg"?"NORMAL":"NEGATIVO"});pinta()};
+  $("pz-copy").onclick=()=>{const t=$("pz-nota").value;if(!t)return;const ok=()=>{$("pz-st").textContent="Copiado. Pégalo en la nota."};try{navigator.clipboard.writeText(t).then(ok,()=>{$("pz-nota").select();$("pz-st").textContent="Selecciona y copia el texto."})}catch(e){$("pz-nota").select()}};
+  $("pz-clr").onclick=()=>{S.del(PZ_KEY);pzOpen()};
+  $("pz-back").onclick=()=>{st.pzDe=null;if(de&&String(de).startsWith("mod:")){S.set(key(de.slice(4),"tab"),"guia");openMod(de.slice(4))}else if(de)mbOpen();else{home();window.scrollTo(0,0)}};
+  pinta();window.scrollTo(0,0)}
+document.head.insertAdjacentHTML("beforeend",`<style>
+.pz-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:8px;margin-top:6px}.pz-grid label{font-size:.85rem;color:var(--muted);display:flex;flex-direction:column;gap:2px}.pz-grid select{padding:6px 8px;font-size:.92rem}
+.pz-r{border-radius:10px;padding:10px 12px;margin-top:8px;border:1px solid var(--line)}.pz-low{background:var(--accent-soft)}.pz-mid{background:var(--warn-bg);border-color:var(--warn-line)}.pz-high{background:var(--miss-bg);border-color:var(--miss-line)}
+#pz-nota{width:100%;font-family:var(--f-data);font-size:.85rem}
 </style>`);
 
 /* ---------- arranque ---------- */
