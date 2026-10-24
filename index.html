@@ -1410,7 +1410,7 @@ function vnFinal(){if(idMinFalta().length){vnIdForm();return}const _e=vnElig(VNS
   $("vn-pane").innerHTML=`${av?`<div class="box miss"><h3>Revisa el paciente</h3><p style="margin:0">${esc(av)}</p></div>`:""}${falt.length?`<div class="box miss"><h3>Faltan datos</h3><ul>${falt.map(q=>`<li><button class="lnk" type="button" data-vgo="${q.k}">${esc(q.q)}</button></li>`).join("")}</ul></div>`:""}
   ${_r.length?`<div class="box miss"><h3>Revisa la coherencia antes de copiar</h3><ul>${_r.map(x=>`<li>${esc(x)}</li>`).join("")}</ul></div>`:""}
   <div class="box warn"><h3>Revisa antes de copiar</h3><p style="margin:0">Las respuestas que no dictaste quedaron con el valor normal de la plantilla. Lee la nota completa y corrige lo que no aplique.</p></div>
-  <textarea id="vn-nota" style="min-height:420px;font-size:.92rem">${esc(txt)}</textarea>
+  <textarea id="vn-nota" style="min-height:420px;font-size:.92rem">${esc(txt)}</textarea>${fmtVNHTML(VNS.id,VNS.v,txt)}
   <div class="btns"><button class="btn primary" type="button" id="vn-copy">Copiar nota</button><button class="btn" type="button" id="vn-save">Guardar y registrar en la base</button></div>
   <div class="btns"><button class="btn" type="button" id="vn-back2">← Volver a las preguntas</button>${sample?`<button class="btn" type="button" id="vn-ai">Pulir redacción con Claude</button>`:""}<button class="btn" type="button" id="vn-new">Terminar y limpiar</button></div>
   <p class="status" id="vn-st" aria-live="polite"></p>${vnSigHTML()}`;
@@ -1971,7 +1971,7 @@ function wireMiDia(){const cb=$("md-cal");if(cb)cb.onclick=calOpen;
 function mdShow(t){const s=$("md-st");s.innerHTML="";const a=document.createElement("textarea");a.value=t;a.rows=7;a.readOnly=true;s.append("No se pudo copiar solo. Mantén presionado el texto y cópialo:",a);a.focus();a.select()}
 
 /* ---------- PANEL ---------- */
-const VERSION_APP="2026-10-22 v183";
+const VERSION_APP="2026-10-24 v184";
 function home(){
   stopRec();if(S.get(AT_KEY))atReiniciar();st.view="home";
   const rm=["precon","prenatal","parto","rn","ive"],rp=["pinf","inf","adol","juv","adul","vej"];
@@ -2264,12 +2264,12 @@ function paneGuia(){
   $("pane").innerHTML=`
   ${m.alerts.length?`<div class="box warn"><h3>Remitir o actuar si…</h3><ul>${m.alerts.map(a=>`<li>${esc(a)}</li>`).join("")}</ul></div>`:""}
   ${alcHTML(id)}
-  ${rutaBQHTML(id)}
+  ${rutaBQHTML(id)}${fmtRutaHTML(id)}
   <p class="note-src">Marca lo que vas haciendo (${done} de ${total}). Lo marcado se pasa a la nota.</p>
   ${m.sections.map((s,i)=>`<details class="sec" ${i<2?"open":""}><summary><span>${esc(s.t)}</span><span class="cnt">${s.items.filter((_,j)=>ck[i+"."+j]).length}/${s.items.length}</span></summary><ul class="items">${s.items.map((it,j)=>{const q=it.startsWith("Q:");const txt=q?it.slice(2):it;return `<li><input type="checkbox" id="c${i}_${j}" data-k="${i}.${j}" ${ck[i+"."+j]?"checked":""}><label for="c${i}_${j}"><span class="${q?"q":""}">${esc(txt)}</span></label></li>`}).join("")}</ul></details>`).join("")}
   <div class="btns"><button class="btn primary" id="goNota">Siguiente: Nota →</button><button class="btn" id="clrChk">Desmarcar todo</button></div>`;
   document.querySelectorAll("[data-k]").forEach(c=>c.onchange=()=>{const o=checks(id);if(c.checked)o[c.dataset.k]=1;else delete o[c.dataset.k];S.set(key(id,"chk"),JSON.stringify(o));const det=c.closest("details");const sec=m.sections[+c.dataset.k.split(".")[0]];det.querySelector(".cnt").textContent=Object.keys(o).filter(k=>k.split(".")[0]===c.dataset.k.split(".")[0]).length+"/"+sec.items.length});
-  rutaBQWire(id);
+  rutaBQWire(id);fmtRutaWire(id);
   $("goNota").onclick=()=>{st.tab="nota";S.set(key(id,"tab"),"nota");renderMod()};
   $("clrChk").onclick=()=>{S.del(key(id,"chk"));paneGuia()};
 }
@@ -9162,6 +9162,184 @@ document.head.insertAdjacentHTML("beforeend",`<style>
 .pz-r{border-radius:10px;padding:10px 12px;margin-top:8px;border:1px solid var(--line)}.pz-low{background:var(--accent-soft)}.pz-mid{background:var(--warn-bg);border-color:var(--warn-line)}.pz-high{background:var(--miss-bg);border-color:var(--miss-line)}
 #pz-nota{width:100%;font-family:var(--f-data);font-size:.85rem}
 </style>`);
+
+/* ===== v184: Formatos y soportes — qué formato llenar en cada caso =====
+   Lista de chequeo de formatos entregados para sedes rurales (Vaupés Medio), con el número de la
+   lista, el código SIVIGILA cuando es ficha, cuándo se usa y la cantidad recibida (editable en el
+   celular). Cada nota por voz, cada módulo de ruta y cada ficha de morbilidad muestran los formatos
+   que corresponden. Los códigos SIVIGILA se confirman con epidemiología. */
+const FMT=[
+ /* A. SIVIGILA */
+ {id:"f100",num:1,g:"Fichas SIVIGILA",n:"Ficha 100 · Accidente ofídico",c:4,u:"Toda mordedura de serpiente, aunque no haya envenenamiento."},
+ {id:"f300",num:2,g:"Fichas SIVIGILA",n:"Ficha 300 · Agresión por animal potencialmente transmisor de rabia (APTR)",c:0,u:"Mordedura, arañazo o lamedura de perro, gato, murciélago, mono u otro mamífero."},
+ {id:"f340",num:3,g:"Fichas SIVIGILA",n:"Ficha 340 · Hepatitis B",c:5,u:"Caso probable o confirmado; gestante con HBsAg positivo."},
+ {id:"f356",num:4,g:"Fichas SIVIGILA",n:"Ficha 356 · Intento de suicidio",c:5,u:"Todo intento de suicidio."},
+ {id:"f365",num:5,g:"Fichas SIVIGILA",n:"Ficha 365 · Intoxicaciones",c:2,u:"Intoxicación por químicos, plaguicidas, medicamentos, plantas, metanol u otras sustancias."},
+ {id:"f465",num:6,g:"Fichas SIVIGILA",n:"Ficha 465 · Malaria",c:20,u:"Todo caso confirmado por gota gruesa o prueba rápida."},
+ {id:"f550",num:7,g:"Fichas SIVIGILA",n:"Ficha 550 · Mortalidad materna",c:5,u:"Muerte en el embarazo, el parto o el puerperio (hasta un año)."},
+ {id:"f591",num:9,g:"Fichas SIVIGILA",n:"Ficha 591 · Mortalidad en menores de 5 años",c:5,u:"Muerte de un menor de 5 años por IRA, EDA o desnutrición."},
+ {id:"f875",num:10,g:"Fichas SIVIGILA",n:"Ficha 875 · Violencia de género, intrafamiliar y sexual",c:10,u:"Toda sospecha de violencia física, psicológica, sexual o negligencia; embarazo en menor de 14 años."},
+ {id:"f998",num:11,g:"Fichas SIVIGILA",n:"998 · Morbilidad por EDA (colectiva)",c:15,u:"Cada consulta por diarrea, para el reporte colectivo semanal."},
+ {id:"f995",num:12,g:"Fichas SIVIGILA",n:"995 · Morbilidad por IRA (colectiva)",c:15,u:"Cada consulta por infección respiratoria aguda, para el reporte colectivo semanal."},
+ /* B. Mortalidad y nacimiento */
+ {id:"avperi",num:8,g:"Mortalidad y nacimiento",n:"Autopsia verbal · mortalidad perinatal y neonatal tardía",c:5,u:"Muerte fetal desde las 22 semanas o del recién nacido hasta los 28 días, ocurrida en la comunidad."},
+ {id:"avmat",num:14,g:"Mortalidad y nacimiento",n:"Autopsia verbal · muertes maternas",c:2,u:"Muerte materna ocurrida en la comunidad."},
+ {id:"avgen",num:15,g:"Mortalidad y nacimiento",n:"Autopsia verbal · general",c:2,u:"Otras muertes ocurridas en la comunidad sin atención médica (incluye menores de 5 años después del primer mes)."},
+ {id:"cnv",num:30,g:"Mortalidad y nacimiento",n:"Certificado de nacido vivo",c:10,u:"Todo nacimiento atendido o conocido en la comunidad."},
+ {id:"cdef",num:31,g:"Mortalidad y nacimiento",n:"Certificado de defunción",c:10,u:"Toda muerte (incluida la fetal) que deba certificarse en la comunidad, según la directriz de la ESE."},
+ /* C. Atención clínica */
+ {id:"hc",num:17,g:"Atención clínica",n:"Historia clínica",c:20,u:"Toda atención en la que no se registre directamente en Prosoft."},
+ {id:"rem",num:33,g:"Atención clínica",n:"Formato de remisión o referencia",c:50,u:"Toda remisión: urgente, prioritaria, al albergue o para exámenes."},
+ {id:"disrem",num:13,g:"Atención clínica",n:"Disentimiento de remisión",c:20,u:"Cuando la persona no acepta la remisión."},
+ {id:"disproc",num:22,g:"Atención clínica",n:"Disentimiento de procedimientos",c:50,u:"Cuando la persona rechaza un procedimiento, una prueba o una vacuna."},
+ {id:"ci",num:34,g:"Atención clínica",n:"Consentimiento informado",c:50,u:"Procedimientos: DIU, inyectable, sutura, retiro de implante, toma de citología y otros."},
+ {id:"civih",num:36,g:"Atención clínica",n:"Consentimiento informado para VIH",c:50,u:"Antes de toda prueba rápida de VIH, con asesoría pre y postest."},
+ {id:"ciimp",num:41,g:"Atención clínica",n:"Consentimiento para inserción de implante subdérmico",c:30,u:"Toda inserción de implante."},
+ {id:"cito",num:42,g:"Atención clínica",n:"Detección temprana de cáncer de cuello uterino (citología)",c:30,u:"Toda toma de citología."},
+ {id:"recet",num:35,g:"Atención clínica",n:"Recetario de medicamentos",c:100,u:"Todo medicamento, micronutriente o desparasitante que se entregue."},
+ {id:"capt",num:32,g:"Atención clínica",n:"Captación de sintomáticos respiratorios, de piel y del sistema nervioso periférico",c:25,u:"Tos de más de 15 días; lesiones de piel sospechosas de lepra o leishmaniasis; pérdida de sensibilidad."},
+ {id:"rdmal",num:37,g:"Atención clínica",n:"Registro diario de diagnóstico de malaria",c:5,u:"Cada prueba de malaria que hagas (gota gruesa o prueba rápida), positiva o negativa."},
+ {id:"rimal",num:38,g:"Atención clínica",n:"Registro diario de insumos de malaria",c:5,u:"Pruebas y antimaláricos usados cada día."},
+ /* D. Gestantes y niñez */
+ {id:"segges",num:25,g:"Gestantes y niñez",n:"Seguimiento de gestantes",c:10,u:"Cada control de la gestante."},
+ {id:"carges",num:26,g:"Gestantes y niñez",n:"Caracterización de gestantes",c:25,u:"En el ingreso de toda gestante (o cuando se capta)."},
+ {id:"car5",num:39,g:"Gestantes y niñez",n:"Caracterización de menores de 5 años",c:0,u:"Captación y seguimiento de menores de 5 años."},
+ /* E. Comunidad */
+ {id:"actas",num:27,g:"Comunidad",n:"Actas de reunión comunitaria y lista de asistencia",c:25,u:"Reuniones comunitarias y sesiones de educación grupal."},
+ {id:"concert",num:28,g:"Comunidad",n:"Actas de concertación",c:25,u:"Concertación con el líder o la comunidad (horarios, jornadas)."},
+ {id:"busq",num:29,g:"Comunidad",n:"Búsqueda activa familiar",c:0,u:"Visitas casa a casa: menores de 5, gestantes, inasistentes, sintomáticos."},
+ {id:"encuesta",num:16,g:"Comunidad",n:"Encuestas de satisfacción",c:30,u:"A usuarios atendidos, según la meta del mes."},
+ /* F. Administrativos */
+ {id:"perm",num:18,g:"Administrativos y mensuales",n:"Certificado de permanencia",c:20,u:"Mensual, firmado por el líder."},
+ {id:"calep",num:19,g:"Administrativos y mensuales",n:"Calendario epidemiológico 2026",c:2,u:"Para la notificación semanal."},
+ {id:"invrf",num:20,g:"Administrativos y mensuales",n:"Inventario de recursos físicos",c:2,u:"Inventario del puesto."},
+ {id:"listrep",num:21,g:"Administrativos y mensuales",n:"Lista de verificación para reporte mensual de la oficina de zona rural",c:0,u:"Antes de entregar el informe mensual."},
+ {id:"kardex",num:23,g:"Administrativos y mensuales",n:"Kardex de medicamentos",c:0,u:"Entradas y salidas de cada medicamento."},
+ {id:"pedido",num:24,g:"Administrativos y mensuales",n:"Reporte de pedido de medicamentos",c:0,u:"Pedido de medicamentos e insumos."},
+ {id:"sobre",num:40,g:"Administrativos y mensuales",n:"Sobre de manila",c:20,u:"Para enviar los soportes."}];
+/* fichas SIVIGILA que no vinieron en la lista: se avisa para pedirlas o confirmar cómo se notifican */
+const FMT_FALTA={sif:"Ficha 750 · Sífilis gestacional",den:"Ficha 210 · Dengue",dnt:"Ficha 113 · Desnutrición aguda en menores de 5 años",vih:"Ficha 850 · VIH/sida",tb:"Ficha 813 · Tuberculosis",lei:"Ficha 420 · Leishmaniasis cutánea",lep:"Ficha 450 · Lepra",mme:"Ficha 549 · Morbilidad materna extrema"};
+const FMT_KEY="dn2_fmt_stock";
+function fmtStock(){try{return JSON.parse(S.get(FMT_KEY)||"{}")||{}}catch(e){return{}}}
+function fmtCant(id){const s=fmtStock();const f=FMT.find(x=>x.id===id);return s[id]!=null?+s[id]:(f?f.c:0)}
+/* reglas: [id del formato, cuándo] — si "cuándo" está vacío, siempre */
+const FMT_RUTA={
+ precon:[["hc",""],["recet","Ácido fólico y otros micronutrientes"],["civih","Si haces prueba rápida de VIH"],["rem","Si necesita valoración médica o especializada"],["f875","Si hay violencia"]],
+ prenatal:[["hc",""],["carges","En el ingreso al PAMI"],["segges","En cada control"],["civih","Antes de la prueba rápida de VIH"],["rdmal","Por cada prueba de malaria (positiva o negativa)"],["recet","Micronutrientes y medicamentos"],["rem","Remisión al albergue y orden de exámenes"],["disrem","Si no acepta el albergue"],["f465","Gota gruesa o prueba rápida positiva"],["f340","HBsAg positivo"],["f875","Pregunta de violencia positiva o gestante menor de 14 años"],["cito","Si tomas citología"],["~sif","Prueba de sífilis reactiva"],["~vih","Segunda prueba de VIH reactiva"],["~mme","Complicación grave (morbilidad materna extrema)"]],
+ parto:[["hc",""],["cnv","Todo nacido vivo"],["rem","Remisión de la madre o del bebé"],["disrem","Si no acepta la remisión"],["ci","Procedimientos (sutura de desgarro, implante, DIU)"],["ciimp","Si se pone implante antes del alta"],["recet","Medicamentos y micronutrientes"],["f550","Muerte materna"],["avmat","Muerte materna en la comunidad"],["avperi","Muerte fetal o neonatal"],["cdef","Cualquier muerte"],["~mme","Complicación grave (morbilidad materna extrema)"]],
+ rn:[["hc",""],["cnv","Si nació en la comunidad y no tiene certificado"],["car5","Captación del menor (sin existencias: pedir)"],["rem","Signos de peligro o infección"],["disrem","Si la familia no acepta la remisión"],["avperi","Muerte neonatal en la comunidad"],["cdef","Muerte"]],
+ ive:[["hc",""],["ci","Consentimiento de la mujer"],["rem","Remisión prioritaria (máximo 5 días)"],["f875","Violencia sexual o menor de 14 años"],["ciimp","Si elige implante"],["recet","Método o medicamentos"]],
+ pinf:[["hc",""],["car5","Caracterización del menor (sin existencias: pedir)"],["recet","Micronutrientes y desparasitación"],["rem","Alteraciones del desarrollo, nutricionales o signos de peligro"],["disrem","Si la familia no acepta la remisión"],["f875","Signos de maltrato o negligencia"],["~dnt","Desnutrición aguda"],["f591","Muerte de un menor de 5 años"],["avgen","Muerte en la comunidad"],["cdef","Muerte"]],
+ inf:[["hc",""],["recet","Medicamentos"],["rem","Alteraciones encontradas"],["f875","Signos de maltrato"],["capt","Tos de más de 15 días o lesiones de piel"]],
+ adol:[["hc",""],["civih","Prueba rápida de VIH"],["ciimp","Inserción de implante"],["ci","Otros procedimientos (DIU, inyectable)"],["recet","Medicamentos y método"],["rem","Alteraciones encontradas"],["f875","Violencia o embarazo en menor de 14 años"],["f356","Intento de suicidio"],["capt","Tos de más de 15 días o lesiones de piel"]],
+ juv:[["hc",""],["civih","Prueba rápida de VIH"],["cito","Citología (desde los 25 años)"],["ciimp","Inserción de implante"],["ci","Otros procedimientos"],["recet","Medicamentos y método"],["rem","Alteraciones encontradas"],["f875","Violencia"],["f356","Intento de suicidio"],["capt","Tos de más de 15 días o lesiones de piel"]],
+ adul:[["hc",""],["civih","Prueba rápida de VIH"],["cito","Citología o ADN-VPH"],["ciimp","Inserción de implante"],["ci","Otros procedimientos"],["recet","Medicamentos"],["rem","Valoración por medicina o tamizajes"],["f875","Violencia"],["f356","Intento de suicidio"],["capt","Tos de más de 15 días o lesiones de piel"]],
+ vej:[["hc",""],["recet","Medicamentos"],["rem","Valoración por medicina o tamizajes"],["capt","Tos de más de 15 días o lesiones de piel"],["f875","Maltrato o abandono"]],
+ proc:[["hc",""],["ciimp","Inserción de implante"],["ci","Retiro de implante, DIU u otros"],["civih","Prueba rápida de VIH"],["cito","Citología"],["disproc","Si rechaza el procedimiento"]]};
+const FMT_MB={
+ grave:[["hc",""],["rem","Remisión urgente"],["disrem","Si no acepta"],["cdef","Si fallece"],["avgen","Si fallece en la comunidad"]],
+ anafilaxia:[["hc",""],["rem","Remisión tras estabilizar"],["disrem","Si no acepta"]],
+ convulsion:[["hc",""],["rem","Remisión urgente"],["f465","Si es malaria"]],
+ hpp:[["hc",""],["rem","Remisión inmediata"],["~mme","Morbilidad materna extrema"],["f550","Si fallece"],["avmat","Si fallece en la comunidad"],["cdef","Si fallece"]],
+ preeclampsia:[["hc",""],["rem","Remisión inmediata"],["disrem","Si no acepta"],["~mme","Preeclampsia severa o eclampsia (morbilidad materna extrema)"]],
+ malaria:[["f465","Todo caso confirmado"],["rdmal","Cada prueba de malaria"],["rimal","Pruebas y antimaláricos usados"],["recet","Tratamiento"],["hc",""],["rem","Gestante, menor de 5 años o malaria complicada"]],
+ dengue:[["hc",""],["~den","Caso probable de dengue"],["rem","Signos de alarma, gestante o dengue grave"],["disrem","Si no acepta"]],
+ eda:[["f998","Toda consulta por diarrea (colectiva semanal)"],["hc",""],["recet","SRO, zinc y medicamentos"],["rem","Deshidratación grave o signos de peligro"],["f591","Muerte de un menor de 5 años"]],
+ ira:[["f995","Toda consulta por IRA (colectiva semanal)"],["hc",""],["recet","Medicamentos"],["rem","Neumonía grave o saturación baja"],["f591","Muerte de un menor de 5 años"]],
+ dnt:[["~dnt","Todo caso de desnutrición aguda"],["hc",""],["car5","Captación del menor (sin existencias: pedir)"],["rem","Desnutrición severa o con complicaciones"],["recet","Medicamentos y fórmula"]],
+ ofidico:[["f100","Toda mordedura de serpiente"],["rem","Remisión inmediata"],["disrem","Si no acepta"],["hc",""]],
+ rabia:[["f300","Toda agresión por animal (sin existencias: pedir)"],["rem","Profilaxis antirrábica"],["hc",""]],
+ leish:[["capt","Lesión de piel sospechosa"],["~lei","Caso de leishmaniasis"],["hc",""],["rem","Confirmación y tratamiento"]],
+ tb:[["capt","Sintomático respiratorio (tos de más de 15 días)"],["~tb","Caso confirmado"],["hc",""],["rem","Baciloscopia o prueba molecular"]],
+ sifilis:[["~sif","Sífilis gestacional"],["civih","Pruebas rápidas con asesoría"],["segges","Seguimiento de la gestante"],["recet","Penicilina"],["hc",""]],
+ piel:[["hc",""],["recet","Tratamiento"],["capt","Lesiones sospechosas de lepra o leishmaniasis"]],
+ itu:[["hc",""],["recet","Tratamiento"],["rem","Pielonefritis o gestante con fiebre"]],
+ parasitos:[["hc",""],["recet","Antiparasitarios"]],
+ garganta:[["hc",""],["recet","Tratamiento"],["rem","Signos de alarma"]],
+ asma:[["hc",""],["recet","Tratamiento"],["rem","Crisis que no mejora"]],
+ vaginal:[["hc",""],["recet","Tratamiento"],["civih","Pruebas rápidas de VIH"],["f875","Si hay violencia sexual"]],
+ alergia:[["hc",""],["recet","Tratamiento"]],
+ dolor:[["hc",""],["recet","Analgésicos"]],
+ herida:[["hc",""],["ci","Sutura u otro procedimiento"],["recet","Medicamentos"],["f875","Si la lesión es por violencia"],["rem","Herida grave o quemadura extensa"]],
+ hta:[["hc",""],["recet","Medicamentos"],["rem","Control por medicina"]],
+ dm:[["hc",""],["recet","Medicamentos"],["rem","Control por medicina"]],
+ gastritis:[["hc",""],["recet","Medicamentos"]]};
+/* situaciones que no son una atención de la app */
+const FMT_SIT=[
+ {t:"Nacimiento en la comunidad",r:[["cnv",""],["hc","Atención del parto y del recién nacido"],["rem","Si hay complicaciones"]]},
+ {t:"Muerte materna",r:[["f550",""],["avmat","Si ocurrió en la comunidad"],["cdef",""]]},
+ {t:"Muerte fetal o neonatal (hasta 28 días)",r:[["avperi",""],["cdef",""]]},
+ {t:"Muerte de un menor de 5 años por IRA, EDA o desnutrición",r:[["f591",""],["avgen","Si ocurrió en la comunidad"],["cdef",""]]},
+ {t:"Otra muerte en la comunidad",r:[["avgen",""],["cdef",""]]},
+ {t:"Intento de suicidio",r:[["f356",""],["hc",""],["rem","Remisión a salud mental"]]},
+ {t:"Intoxicación",r:[["f365",""],["hc",""],["rem","Según la gravedad"]]},
+ {t:"Sospecha de violencia",r:[["f875",""],["hc",""],["rem","Ruta de atención a víctimas"]]},
+ {t:"Mordedura o agresión por animal",r:[["f300","Perro, gato, murciélago u otro mamífero"],["f100","Serpiente"],["rem",""]]},
+ {t:"Persona que rechaza un procedimiento o una vacuna",r:[["disproc",""]]},
+ {t:"Persona que no acepta la remisión",r:[["disrem",""]]},
+ {t:"Reunión comunitaria o educación grupal",r:[["actas",""]]},
+ {t:"Concertación con el líder o la comunidad",r:[["concert",""]]},
+ {t:"Búsqueda activa casa a casa",r:[["busq","Sin existencias: pedir"]]},
+ {t:"Cierre del mes y cuenta de cobro",r:[["perm",""],["listrep","Sin existencias: pedir"],["kardex","Sin existencias: pedir"],["pedido","Sin existencias: pedir"],["encuesta",""],["sobre",""]]}];
+/* nota por voz: plantilla + texto de la nota */
+const FMT_VN={ccu:[["cito",""],["ci","Toma de la muestra"]],repcito:[["rem","Si el resultado es anormal"]],pf1:[["ci","Método que lo requiera (inyectable, DIU)"],["recet","Método entregado"]],pfc:[["recet","Método entregado"]],pfemb:[["carges","Si es positiva: ingreso al PAMI"]],
+ impl:[["ciimp",""]],rimpl:[["ci",""]],diu:[["ci",""]],rdiu:[["ci",""]],mama:[["rem","Si hay hallazgos"]],av:[["rem","Si hay alteración"]],vih:[["civih",""]],
+ precon:[["recet","Ácido fólico"]],cyd:[["car5","Sin existencias: pedir"],["recet","Micronutrientes y desparasitación"]],tbc:[["capt",""]],
+ prenat:[["segges",""],["carges","Si es el ingreso"],["civih","Pruebas rápidas de VIH"],["rdmal","Prueba de malaria"],["recet","Micronutrientes"]],
+ partoc:[["cnv",""]],rnctl:[["cnv","Si no tiene certificado"]],ivea:[["ci",""],["rem","Si decide interrumpir"]],
+ edu:[["actas","Si fue grupal: lista de asistencia"]],rem:[["rem",""]],micro:[["recet",""]]};
+function fmtReglasVN(id,v,txt){const R=[["hc","Si no registras directo en Prosoft"]].concat(FMT_VN[id]||[]);const T=String(txt||"").toUpperCase();
+  if(id==="morb"){const m=MB.find(x=>x.t.toUpperCase()===String((v||{}).cond||"").toUpperCase());if(m&&FMT_MB[m.id])R.push(...FMT_MB[m.id])}
+  if(/SE GESTIONA REMISION|REMISION URGENTE|SE REMITE|SE ORDENA REMISION|REMISION A|ALBERGUE/.test(T)&&!/NO REQUIERE REMISION|REMISION: NO REQUIERE/.test(T))R.push(["rem","La nota dice que se remite"]);
+  if(/NO ACEPTA|RECHAZA|SE NIEGA|DISENTIMIENTO/.test(T))R.push(["disrem","Si no aceptó la remisión"],["disproc","Si rechazó un procedimiento"]);
+  if(/SE FORMULA|SE ENTREGA|SE SUMINISTRA|SE INICIA|SE ADMINISTRA|SE APLICA/.test(T))R.push(["recet","Medicamentos o insumos entregados"]);
+  if(/\bVIH\b/.test(T))R.push(["civih","Prueba rápida de VIH"]);
+  if(/GOTA GRUESA POSITIVA|P\. ?VIVAX|P\. ?FALCIPARUM|MALARIA POSITIV|PDR POSITIV/.test(T))R.push(["f465","Malaria confirmada"],["rdmal",""]);
+  else if(/GOTA GRUESA|PRUEBA RAPIDA DE MALARIA|PDR/.test(T))R.push(["rdmal","Prueba de malaria"]);
+  if(/VIOLENCIA|MALTRATO|ABUSO/.test(T)&&!/NIEGA (VIOLENCIA|MALTRATO)/.test(T))R.push(["f875","Si hay sospecha de violencia"]);
+  if(/TOS (DE|CON) MAS DE 15|SINTOMATICO RESPIRATORIO/.test(T))R.push(["capt","Sintomático respiratorio"]);
+  return R}
+function fmtUnir(R){const out=[],ix={};R.forEach(([id,cu])=>{if(ix[id]!=null){const o=out[ix[id]];if(cu&&!o[1])o[1]=cu;else if(cu&&o[1]&&!o[1].includes(cu))o[1]+=" · "+cu;return}ix[id]=out.length;out.push([id,cu||""])});return out}
+function fmtLista(R,titulo){const L=fmtUnir(R);if(!L.length)return"";
+  return `<div class="fmt-box"><p class="lab" style="margin:0 0 6px">${esc(titulo||"Formatos que debes llenar")}</p><ul class="fmt-ul">${L.map(([id,cu])=>{
+    if(id[0]==="~"){const n=FMT_FALTA[id.slice(1)];return n?`<li class="fmt-falta"><span>${esc(n)}</span><small>${esc(cu)}. No está en tu lista de formatos: pídela o confirma con epidemiología cómo se notifica.</small></li>`:""}
+    const f=FMT.find(x=>x.id===id);if(!f)return"";const q=fmtCant(id);
+    return `<li><label class="sx-ck"><input type="checkbox"> <span><b>${esc(f.n)}</b>${cu?` <span class="note-src">· ${esc(cu)}</span>`:""}${q<=0?` <span class="bq-chip bq-rojo">Sin existencias: pedir</span>`:q<=3?` <span class="bq-chip bq-amar">Quedan ${q}</span>`:""}</span></label></li>`}).join("")}</ul></div>`}
+function fmtVNHTML(id,v,txt){return fmtLista(fmtReglasVN(id,v,txt),"Formatos que debes llenar con esta atención")}
+function fmtRutaHTML(id){const R=FMT_RUTA[id];if(!R)return"";return `<details class="sec" id="ruta-fmt"><summary><span>Formatos para esta ruta</span><span class="cnt">${fmtUnir(R).length}</span></summary><div style="padding:10px 14px 14px">${fmtLista(R,"Marca los que ya llenaste")}<div class="btns" style="margin-top:8px"><button class="btn bq-mini" type="button" id="ruta-fmt-todo">Ver todos los formatos</button></div></div></details>`}
+function fmtRutaWire(id){const b=$("ruta-fmt-todo");if(b)b.onclick=()=>{st.fmtDe="mod:"+id;S.set(key(id,"tab"),"guia");fmtOpen()}}
+function fmtUsos(id){const o=[];Object.entries(FMT_RUTA).forEach(([k,R])=>{if(M[k]&&R.some(r=>r[0]===id))o.push(M[k].title)});Object.entries(FMT_MB).forEach(([k,R])=>{const m=MB.find(x=>x.id===k);if(m&&R.some(r=>r[0]===id))o.push(m.t)});FMT_SIT.forEach(s=>{if(s.r.some(r=>r[0]===id))o.push(s.t)});return[...new Set(o)]}
+function fmtOpen(){stopRec();st.view="fmt";const de=st.fmtDe;const grupos=[...new Set(FMT.map(f=>f.g))];
+  const sin=FMT.filter(f=>fmtCant(f.id)<=0),poco=FMT.filter(f=>{const q=fmtCant(f.id);return q>0&&q<=3});
+  $("app").innerHTML=`<div class="top"><button class="back" type="button" id="fmt-back">← ${de&&String(de).startsWith("mod:")?esc((M[de.slice(4)]||{}).title||"Ruta"):"Inicio"}</button><span class="tag pc">Formatos</span></div>
+  <header><h1>Formatos y soportes</h1><p class="sub">Lista de formatos entregados para las sedes rurales de Vaupés Medio: cuándo se usa cada uno y cuántos te quedan. Cada nota por voz, cada ruta y cada ficha de morbilidad te muestran los que corresponden. Todos van llenos a mano, firmados y escaneados para la cuenta de cobro.</p></header>
+  ${sin.length?`<div class="box miss"><h3>Sin existencias: pide reposición</h3><ul>${sin.map(f=>`<li>${esc(f.n)}</li>`).join("")}</ul></div>`:""}
+  ${poco.length?`<div class="box warn"><h3>Te quedan pocos</h3><ul>${poco.map(f=>`<li>${esc(f.n)}: quedan ${fmtCant(f.id)}</li>`).join("")}</ul></div>`:""}
+  <section class="tool"><h3>¿Qué pasó? Formatos por situación</h3><select id="fmt-sit"><option value="">Escoge la situación…</option>${FMT_SIT.map((s,i)=>`<option value="${i}">${esc(s.t)}</option>`).join("")}</select><div id="fmt-sit-r"></div></section>
+  <input id="fmt-q" placeholder="Buscar: malaria, implante, muerte, VIH…" autocomplete="off">
+  <div id="fmt-list"></div>
+  <p class="foot">Lista de chequeo de formatos recibida en la zona Vaupés Medio (la cantidad es la de la entrega; corrígela cuando cuentes). Los códigos SIVIGILA se confirman con epidemiología. Las fichas que no vinieron en la lista aparecen como "pídela" en cada caso.</p>`;
+  const pinta=()=>{const q=plano($("fmt-q").value);
+    $("fmt-list").innerHTML=grupos.map(g=>{const xs=FMT.filter(f=>f.g===g&&(!q||plano([f.n,f.u,...fmtUsos(f.id)].join(" ")).includes(q)));return xs.length?`<p class="lab" style="margin:12px 0 6px">${esc(g)}</p>${xs.map(f=>{const c=fmtCant(f.id),us=fmtUsos(f.id);
+      return `<details class="sec"><summary><span>${esc(f.n)} <small style="color:var(--muted);font-weight:400">· n.º ${f.num} de la lista</small></span><span class="bq-chip ${c<=0?"bq-rojo":c<=3?"bq-amar":"bq-verde"}">${c<=0?"Sin existencias":`Quedan ${c}`}</span></summary><dl class="mb-dl"><dt>Cuándo se usa</dt><dd>${esc(f.u)}</dd>${us.length?`<dt>En la app aparece en</dt><dd>${esc(us.join(" · "))}</dd>`:""}
+       <dt>Me quedan</dt><dd><div class="frow" style="align-items:center"><input type="number" min="0" inputmode="numeric" data-fst="${f.id}" value="${c}" style="max-width:110px"><button class="btn bq-mini" type="button" data-fuse="${f.id}">Usé uno</button></div></dd></dl></details>`}).join("")}`:""}).join("")||`<p class="note-src">No encontré ese formato.</p>`;
+    document.querySelectorAll("[data-fst]").forEach(i=>i.onchange=()=>{const s=fmtStock();s[i.dataset.fst]=Math.max(0,+i.value||0);S.set(FMT_KEY,JSON.stringify(s))});
+    document.querySelectorAll("[data-fuse]").forEach(b=>b.onclick=()=>{const id=b.dataset.fuse,s=fmtStock();s[id]=Math.max(0,fmtCant(id)-1);S.set(FMT_KEY,JSON.stringify(s));const d=b.closest("details");pinta();const n=[...document.querySelectorAll("#fmt-list details")].find(x=>x.querySelector(`[data-fuse="${id}"]`));if(n)n.open=true})};
+  $("fmt-q").oninput=pinta;pinta();
+  $("fmt-sit").onchange=()=>{const s=FMT_SIT[+$("fmt-sit").value];$("fmt-sit-r").innerHTML=s?fmtLista(s.r,"Formatos para: "+s.t):""};
+  $("fmt-back").onclick=()=>{st.fmtDe=null;if(de&&String(de).startsWith("mod:")){S.set(key(de.slice(4),"tab"),"guia");openMod(de.slice(4))}else{home();window.scrollTo(0,0)}};window.scrollTo(0,0)}
+/* fichas de morbilidad: botiquín + formatos */
+function mbBQ(id,c){const x=MB_BQ[id];const f=FMT_MB[id];
+  return (x?`<dt style="color:var(--accent)">Del botiquín del puesto</dt><dd>${bqListaHTML(x,c).replace("No usar en este grupo:","No usar en esta condición:")}</dd>`:"")+(f?`<dt>Formatos</dt><dd>${fmtLista(f,"")}</dd>`:"")}
+document.head.insertAdjacentHTML("beforeend",`<style>
+.fmt-box{border:1px solid var(--line);border-radius:10px;padding:10px 12px;background:var(--surface);margin:10px 0}
+.fmt-ul{list-style:none;margin:0;padding:0}.fmt-ul li{margin:0}.fmt-ul .sx-ck{padding:4px 0}
+.fmt-falta{display:flex;flex-direction:column;gap:2px;padding:6px 0;border-top:1px dashed var(--line)}.fmt-falta span{font-weight:700;color:var(--warn)}.fmt-falta small{color:var(--muted)}
+</style>`);
+/* botón en Mi día */
+function fmtHome(){const c=$("md-cal");if(!c||$("md-fmt"))return;const n=FMT.filter(f=>fmtCant(f.id)<=0).length;
+  c.insertAdjacentHTML("afterend",`<button type="button" class="btn" id="md-fmt">Formatos${n?` · ${n} sin existencias`:""}</button>`);$("md-fmt").onclick=()=>{st.fmtDe=null;fmtOpen()}}
+home=(function(o){return function(){const r=o.apply(this,arguments);try{fmtHome()}catch(e){}return r}})(home);
 
 /* ---------- arranque ---------- */
 /* los borradores guardados con la versión anterior de los módulos se reubican una sola vez */
