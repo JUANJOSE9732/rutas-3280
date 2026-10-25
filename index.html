@@ -1973,7 +1973,7 @@ function wireMiDia(){const cb=$("md-cal");if(cb)cb.onclick=calOpen;
 function mdShow(t){const s=$("md-st");s.innerHTML="";const a=document.createElement("textarea");a.value=t;a.rows=7;a.readOnly=true;s.append("No se pudo copiar solo. Mantén presionado el texto y cópialo:",a);a.focus();a.select()}
 
 /* ---------- PANEL ---------- */
-const VERSION_APP="2026-10-25 v193";
+const VERSION_APP="2026-10-25 v194";
 function home(){
   stopRec();if(S.get(AT_KEY))atReiniciar();st.view="home";
   const rm=["precon","prenatal","parto","rn","ive"],rp=["pinf","inf","adol","juv","adul","vej"];
@@ -10490,11 +10490,20 @@ document.head.insertAdjacentHTML("beforeend",`<style>
 .rr-it small{color:var(--muted)}
 </style>`);
 
+/* ===== v194: pacientes que Claude ordena en el chat llegan a la app con un enlace =====
+   Claude responde con un enlace …/rutas-3280/#rr=<texto en base64url>. Al tocarlo, la app abre el Registro
+   rápido con los pacientes ya leídos para revisar y guardar (nada se guarda sin tu confirmación). */
+function rrB64dec(s){s=s.replace(/-/g,"+").replace(/_/g,"/");while(s.length%4)s+="=";const bin=atob(s),u=new Uint8Array(bin.length);for(let i=0;i<bin.length;i++)u[i]=bin.charCodeAt(i);return new TextDecoder().decode(u)}
+function rrDesdeEnlace(){let t=null;const h=location.hash||"";
+  if(h.startsWith("#rr=")){try{t=rrB64dec(decodeURIComponent(h.slice(4)))}catch(e){t=null}try{history.replaceState(null,"",location.pathname+location.search)}catch(e){}
+    if(t){S.set("dn2_rr_txt",t);S.set("dn2_rr_link",String(Date.now()))}}
+  const fl=+(S.get("dn2_rr_link")||0);if(!fl)return;if(Date.now()-fl>15*60*1000){S.del("dn2_rr_link");return}
+  S.del("dn2_rr_link");rrOpen();const b=$("rr-leer");if(b){b.click();const s=$("rr-st");if(s)s.textContent="Llegaron desde el chat de Claude: "+s.textContent}}
 /* ---------- arranque ---------- */
 /* los borradores guardados con la versión anterior de los módulos se reubican una sola vez */
 Object.keys(OLD_LAB).forEach(id=>{if(!M[id]||S.get(key(id,"ivlab")))return;let a={};try{a=JSON.parse(S.get(key(id,"iv"))||"{}")||{}}catch(e){}
   S.set(key(id,"ivlab"),JSON.stringify(Object.keys(a).length?OLD_LAB[id]:ivFor(id).map(z=>z.l)));ivAns(id)});
-home();sync(false);
+home();sync(false);try{rrDesdeEnlace()}catch(e){}
 (async()=>{try{sample=window.claude?await window.claude.use("sample"):null}catch(e){sample=null}
   if(sample&&st.view==="mod"&&st.tab==="nota"){const g=$("go"),h=$("offHint");if(g)g.textContent="Organizar nota";if(h)h.hidden=true}})();
 </script>
