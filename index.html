@@ -1973,7 +1973,7 @@ function wireMiDia(){const cb=$("md-cal");if(cb)cb.onclick=calOpen;
 function mdShow(t){const s=$("md-st");s.innerHTML="";const a=document.createElement("textarea");a.value=t;a.rows=7;a.readOnly=true;s.append("No se pudo copiar solo. Mantén presionado el texto y cópialo:",a);a.focus();a.select()}
 
 /* ---------- PANEL ---------- */
-const VERSION_APP="2026-10-25 v210";
+const VERSION_APP="2026-10-25 v211";
 function home(){
   stopRec();if(S.get(AT_KEY))atReiniciar();st.view="home";
   const rm=["precon","prenatal","parto","rn","ive"],rp=["pinf","inf","adol","juv","adul","vej"];
@@ -2480,7 +2480,7 @@ function anLocal(id){const m=M[id],f=S.get(key(id,"fecha"))||hoy(),txt=[ivCompos
   ivAlerts(id).forEach(a=>{if(/violencia/i.test(a))ruta("Ruta de atención integral a víctimas de violencias","Violencia referida en la entrevista","Atención en salud, notificación obligatoria (SIVIGILA) y activación de protección","hoy","Lo que nos contó es importante y no es su culpa. Aquí la vamos a apoyar y a orientar.");
     else if(/mental/i.test(a))ruta("Ruta de salud mental","Tamizaje positivo en la entrevista","Valoración por psicología o medicina; plan de apoyo","pronto","Lo que siente también es parte de su salud; vamos a buscarle apoyo.")});
   if(/(no (lo |la |los )?toma|no adher|no .{0,20}todos los dias|irregular)/.test(x)&&/(losartan|enalapril|metformina|medicament|tratamiento|tableta|pasta)/.test(x))ruta("Adherencia al tratamiento","No toma el medicamento todos los días","Educación en adherencia; revisar barreras (acceso, efectos, horarios)","pronto","El medicamento funciona solo si se toma todos los días, aunque se sienta bien.");
-  if(/(fuma|tabaco|cigarr)/.test(x)&&!/(niega|no) (tabaco|fuma)/.test(x))ruta("Consejería para dejar de fumar","Consumo de tabaco","Intervención breve para cesación","programado","Dejar de fumar es lo mejor que puede hacer por su salud.");
+  if(/(fuma|tabaco|cigarr)/.test(x)&&!/(niega|no) (tabaco|fuma)/.test(x)&&!/tabaco[^\n:]*: (niega|no )/.test(x))ruta("Consejería para dejar de fumar","Consumo de tabaco","Intervención breve para cesación","programado","Dejar de fumar es lo mejor que puede hacer por su salud.");
   if(/vacun[^\n]{0,60}(pendiente|incomplet|falta|no tiene|remit)|(influenza|td|vph|fiebre amarilla)[^\n]{0,20}pendiente/.test(x))ruta("Vacunación (PAI)","Esquema pendiente","Aplicar o remitir a vacunación","pronto","Le falta una vacuna; se la podemos poner o la remitimos.");
   if(/odontolog/.test(x))ruta("Salud bucal","Remisión registrada en la entrevista","Cita con odontología","programado","Lo remitimos a odontología para revisar sus dientes.");
   if(id==="precon"&&/refiere antecedente de (hipertension|diabetes|epilepsia|enfermedad de tiroides|enfermedad [^\n]{0,12}\(corazon o rinon\)|lupus)/.test(x))ruta("Valoración por medicina antes del embarazo","Enfermedad crónica en los antecedentes","Consulta preconcepcional de riesgo: control de la enfermedad y ajuste de medicamentos antes de buscar el embarazo","pronto","Por su enfermedad, es importante que el médico la revise antes de quedar embarazada para ajustar sus medicamentos.");
@@ -10540,6 +10540,7 @@ obsNota=(function(o){return function(f){f=f||hoy();let md=o.apply(this,arguments
    y se puede descargar la bitácora completa («App Rutas 3280 - Bitácora.md») para el vault.
    Al publicar una versión nueva se agrega aquí su línea (la más nueva primero). */
 const APP_CAMBIOS=[
+ [211,"2026-10-25","Evaluación final al terminar las preguntas: signos de alarma y conducta urgente, lo que no es coherente (documento vs. edad, edad vs. ruta, sexo, signos vitales imposibles, tamizajes fuera de edad), lo que faltó, pendientes, lo que está bien y recomendaciones; revisa exámenes, micronutrientes y desparasitación de la gestante y del menor de 5 años según la Res. 3280. Botón Ir a cada punto y Copiar evaluación."],
  [210,"2026-10-25","Pregunta de exámenes del control prenatal integrada: separa lo que se hace en el puesto con resultado inmediato (se registra ahí mismo), lo que se remite (va en la orden de remisión), lo pendiente de resultado, lo que viene más adelante y lo que pasó su ventana; la respuesta se escribe sola sin repetir."],
  [209,"2026-10-25","Cuándo fue el último tamizaje de cuello uterino: lista (hace menos de 1 año a más de 5 años, no recuerda) o mes y año exactos; si no está al día, la conducta dice qué toca por edad (citología 1-3-3, ADN-VPH 1-5-5, Res. 3280 p. 171)."],
  [208,"2026-10-25","Valoración de contracciones con listas (semanas, cuántas y en cuánto tiempo, duración, ritmo, dolor, si ceden, sangrado, líquido, movimientos, FCF) que clasifica en urgente, prioritaria o programada (amenaza de parto pretérmino, actividad aumentada, Braxton Hicks, trabajo de parto, pródromos, taquisistolia) y arma el texto para la nota."],
@@ -10899,6 +10900,150 @@ function exsPanel(box,ta,save){const P=pac();if(!P["NOMBRE COMPLETO"]&&!P["DOCUM
   pinta();if(EXS_PREF.test(ta.value.split("\n")[0]||"")||!ta.value.trim()){}return true}
 ivExtras=(function(o){return function(id,x,ta,save){o.apply(this,arguments);try{if(id==="prenatal"&&x.sugEx){const box=$("exs");if(box&&exsPanel(box,ta,save))box.hidden=false}}catch(e){console.warn(e)}}})(ivExtras);
 document.head.insertAdjacentHTML("beforeend",`<style>.exs-it{border-top:1px solid var(--line);padding:6px 0;display:flex;flex-direction:column;gap:2px}</style>`);
+/* ---------- v211: Evaluador final de la atención (después de todas las preguntas) ---------- */
+const EVF_RANGO={pinf:[0,5,"7 días a 5 años"],inf:[6,11,"6 a 11 años"],adol:[12,17,"12 a 17 años"],juv:[18,28,"18 a 28 años"],adul:[29,59,"29 a 59 años"],vej:[60,130,"60 años y más"]};
+const EVF_TAM=[
+ {re:/^Cuello uterino/,ok:(y,s)=>s==="F"&&y>=25&&y<=65,t:"Tamizaje de cuello uterino (mujeres de 25 a 65 años; Res. 3280, p. 171)"},
+ {re:/^Mama/,ok:(y,s)=>s==="F"&&y>=40&&y<=69,t:"Tamizaje de mama (examen clínico desde los 40, mamografía de 50 a 69; Res. 3280, p. 172)"},
+ {re:/^Colon/,ok:(y)=>y>=50&&y<=75,t:"Sangre oculta en heces (50 a 75 años, cada 2 años; Res. 3280, p. 66)"},
+ {re:/^Próstata/,ok:(y,s)=>s==="M"&&y>=50&&y<=75,t:"Tamizaje de próstata (hombres de 50 a 75 años, cada 5 años; Res. 3280, p. 65)"},
+ {re:/^Tamizaje de anemia una vez entre los 14 y 17/,ok:(y,s)=>s==="F"&&y>=14&&y<=17,t:"Tamizaje de anemia (mujeres de 14 a 17 años)"},
+ {re:/^Tamizaje de anemia \(hemoglobina y hematocrito\) una vez entre los 10/,ok:(y,s)=>s==="F"&&y>=10&&y<=13,t:"Tamizaje de anemia (niñas de 10 a 13 años)"},
+ {re:/^Hepatitis C una vez desde los 50/,ok:(y)=>y>=50,t:"Hepatitis C una vez desde los 50 años"}];
+const EVF_NO=/^(no aplica|no corresponde|no se realiza|no realizado|n\/a)/i;
+function evFinal(id){
+  const P=pac(),m=M[id],f=S.get(key(id,"fecha"))||hoy(),q=ivFor(id),a=ivAns(id),R={alarma:[],mal:[],falta:[],pend:[],ok:[],rec:[]},seen=new Set();
+  const add=(g,t,ir)=>{const k=g+"|"+plano(t);if(seen.has(k))return;seen.add(k);R[g].push({t,ir})};
+  const A=re=>{const k=q.findIndex(z=>re.test(z.l));return k<0?null:{k,v:(a[k]||"").trim(),ap:ivAplica(id,k)}};
+  const e=edadDe(P["FECHA NACIMIENTO"],f),yD=P.__edad!=null&&P.__edad!==""?+P.__edad:null,y=e?e.y:yD,sx=P["GENERO"]||(m.route==="rm"?"F":"");
+  const edTxt=e?pacEdad(f):(yD!=null?yD+" años (dicha)":"");
+  /* 1. Identificación */
+  const nom=String(P["NOMBRE COMPLETO"]||"").trim();
+  if(!nom)add("falta","Nombre completo de la persona","id");else if(nom.split(/\s+/).length<3)add("pend","Nombre «"+nom+"»: verifica que estén los nombres y los dos apellidos como en el documento","id");
+  const T=String(P["TIPO"]||"").toUpperCase(),doc=String(P["DOCUMENTO ID."]||"").trim(),dg=doc.replace(/\D/g,"");
+  let docOk=!!doc;
+  if(!doc){add("falta","Número de documento","id");docOk=false}
+  else{if(!T){add("falta","Tipo de documento (RC, TI, CC…)","id");docOk=false}
+    if(["CC","TI","RC"].includes(T)&&/[^\d]/.test(doc.replace(/[.\s]/g,""))){add("mal","El documento «"+doc+"» tiene letras o signos: en "+T+" son solo números","id");docOk=false}
+    else if(T==="CC"&&(dg.length<5||dg.length>10)){add("mal","La cédula tiene "+dg.length+" dígitos: las cédulas tienen entre 5 y 10. Revísala con el documento","id");docOk=false}
+    else if((T==="TI"||T==="RC")&&dg.length&&(dg.length<8||dg.length>11)){add("mal",(T==="TI"?"La tarjeta de identidad":"El registro civil")+" tiene "+dg.length+" dígitos: el NUIP tiene 10 u 11. Revísalo","id");docOk=false}
+    if(y!=null){
+      if(T==="CC"&&y<18){add("mal","Cédula con "+y+" años: los menores de 18 usan tarjeta de identidad (7 a 17) o registro civil (0 a 6)","id");docOk=false}
+      if(T==="TI"&&(y<7||y>=18)){add("mal","Tarjeta de identidad con "+y+" años: la TI es de 7 a 17 años"+(y>=18?"; a los 18 cambia a cédula":"; antes de 7 es registro civil"),"id");docOk=false}
+      if(T==="RC"&&y>=7){add("mal","Registro civil con "+y+" años: desde los 7 años se usa tarjeta de identidad"+(y>=18?" y desde los 18 cédula":""),"id");docOk=false}}}
+  if(docOk&&y!=null)add("ok","Documento "+T+" coherente con la edad");
+  if(!P["FECHA NACIMIENTO"]){if(yD!=null)add("pend","Solo está la edad dicha ("+yD+" años): completa la fecha de nacimiento","id");else add("falta","Fecha de nacimiento: sin ella no se sabe qué le toca por edad","id")}
+  else if(!e)add("mal","La fecha de nacimiento es posterior a la fecha de la atención","id");
+  else{if(e.y>110)add("mal","Edad de "+e.y+" años: revisa la fecha de nacimiento","id");
+    if(yD!=null&&Math.abs(yD-e.y)>=1)add("mal","La edad dicha ("+yD+" años) no coincide con la fecha de nacimiento ("+e.y+" años)","id")}
+  if(!sx)add("falta","Sexo","id");
+  else if(["prenatal","precon","parto","ive"].includes(id)&&sx==="M")add("mal","Sexo masculino en "+m.title+": revisa el sexo o la ruta","id");
+  if(!P.__com)add("falta","Comunidad donde vive","id");
+  try{const dp=idPend(id,P);if(dp.length)add("pend","Datos pendientes: "+dp.join(", "),"id")}catch(err){}
+  if(y!=null){
+    if(EVF_RANGO[id]){const [lo,hi,txt]=EVF_RANGO[id];let fuera=y<lo||y>hi;if(id==="pinf"&&e&&e.d<7)fuera=true;
+      if(fuera){const r=rutasPara(y,sx).filter(z=>EVF_RANGO[z]).map(z=>M[z].title)[0];add("mal","Con "+edTxt+" no le corresponde "+m.title+" ("+txt+")"+(r?": le toca "+r:""))}
+      else add("ok","Edad ("+edTxt+") acorde con la ruta "+m.title)}
+    if(["prenatal","precon","parto"].includes(id)){
+      if(y<10||y>54)add("mal","Edad de "+y+" años poco probable para "+m.title+": revisa la fecha de nacimiento","id");
+      else if(y<14)add("alarma","Gestación o actividad sexual en menor de 14 años: es violencia sexual por ley. Ficha SIVIGILA 875, ruta de violencias y denuncia el mismo día");
+      else if(y===18&&id==="prenatal")add("rec","Gestante adolescente: acompañamiento por salud mental y trabajo social durante toda la gestación (Res. 3280, p. 269)");
+      else if(y>=35&&id==="prenatal")add("rec","Gestante de 35 años o más: riesgo por edad; tenlo en cuenta en Herrera y Hurtado y en la remisión")}}
+  /* 2. Preguntas */
+  const sin=[],blk=[],noap=[];
+  q.forEach((z,k)=>{if(!ivAplica(id,k))return;const v=(a[k]||"").trim();if(!v)sin.push(k);else if(/_{3,}/.test(v))blk.push(k)});
+  sin.forEach(k=>add("falta","Sin responder: "+q[k].l,"q"+k));
+  blk.forEach(k=>add("falta","Quedaron espacios ___ sin llenar en: "+q[k].l,"q"+k));
+  if(!sin.length&&!blk.length)add("ok","Todas las preguntas que aplican están respondidas, sin espacios en blanco");
+  /* 3. Tamizajes por edad y sexo */
+  if(y!=null&&sx)EVF_TAM.forEach(r=>{const x=A(r.re);if(!x||!x.v)return;const toca=r.ok(y,sx),no=EVF_NO.test(x.v);
+    if(toca&&no)add("mal","Marcado «no aplica» pero le toca por edad y sexo: "+r.t,"q"+x.k);
+    else if(!toca&&!no)add("mal","Registrado pero no le corresponde por edad o sexo ("+edTxt+", "+(sx==="F"?"mujer":"hombre")+"): "+r.t,"q"+x.k)});
+  /* 4. Signos vitales */
+  const txt=[ivCompose(id),S.get(key(id,"dict"))||""].join("\n");let v={};try{v=extraerLocal(id,txt,f)}catch(err){}
+  const vit=[];let vOk=true;
+  if(v["T. A"]){const [ps,pd]=v["T. A"].split("/").map(Number);if(ps<=pd||ps<50||ps>260||pd<20||pd>160){add("mal","TA "+v["T. A"]+" no es posible: revisa (la sistólica va primero y es mayor)","vit");vOk=false}else vit.push("TA "+v["T. A"])}
+  if(v["TEM"]){const t=+v["TEM"];if(t<33||t>43){add("mal","Temperatura "+v["TEM"]+" °C fuera de lo posible: revisa","vit");vOk=false}else{vit.push("T "+v["TEM"]+" °C");if(t<36)add("rec","Temperatura de "+v["TEM"]+" °C (baja): abrigar y repetir la toma"+(y!=null&&y<5?"; en menores de 5 años la hipotermia es signo de peligro (AIEPI)":""))}}
+  if(v["F.C"]){const c=+v["F.C"];if(c<30||c>230){add("mal","FC "+c+" fuera de lo posible: revisa","vit");vOk=false}else vit.push("FC "+c)}
+  if(v["SPO2"]){const s2=+v["SPO2"];if(s2>100||s2<50){add("mal","Saturación "+s2+" % no es posible: revisa","vit");vOk=false}else vit.push("SpO2 "+s2+" %")}
+  if(vit.length&&vOk)add("ok","Signos vitales registrados: "+vit.join(", "));
+  /* 5. Alarmas, conducta y rutas */
+  let an=null;try{an=anLocal(id)}catch(err){}
+  const taMala=!vOk&&v["T. A"]?"TA "+v["T. A"]:"";
+  if(an){an.rutas.filter(r=>!taMala||!(r.porque||"").includes(taMala)).forEach(r=>add(r.cuando==="hoy"?"alarma":"rec",r.ruta+": "+r.accion.replace(/\.$/,"")+(r.porque?" ("+r.porque.replace(/\.$/,"")+")":"")));
+    an.pendientes.forEach(p=>add("pend",p))}
+  q.forEach((z,k)=>{const val=(a[k]||"").trim();if(!val)return;(CDT[id]||[]).filter(r=>cdtMatch(r,val)).forEach(r=>{const c=r.c&&r.c[0];
+    add(!/^Sin /.test(r.t)&&/alarma|sangrado|preeclampsia|hipertens|violencia|urgente|desnutrici|peligro|amenaza|contracc/i.test(r.t)?"alarma":"rec",r.t+": "+r.p[0]+(c?" (Res. 3280, p. "+c.pg+")":""))})});
+  if(!R.alarma.length)try{ivAlerts(id).forEach(t=>add("alarma",t))}catch(err){}
+  if(!R.alarma.length){const s=A(/^Signos de alarma/);if(!s||s.v)add("ok","Sin signos de alarma en lo registrado")}
+  /* 6. Exámenes y micronutrientes de la gestante */
+  if(id==="prenatal"){let G=null;try{if(nom||doc)G=gexCalc(P)}catch(err){}
+    const W=G?G.W:semPren(),Ws=W==null?"":(typeof gexSem==="function"?gexSem(W):Math.floor(W));
+    if(W==null)add("falta","Edad gestacional (FUM o ecografía): sin ella no se sabe qué exámenes ni micronutrientes le tocan","q"+(A(/^Edad gestacional/)||{k:0}).k);
+    else if(W>42)add("mal","Edad gestacional de "+Ws+" semanas: revisa la FUM o la ecografía");
+    else if(W<3)add("mal","Edad gestacional de "+Ws+" semanas: revisa la FUM");
+    if(G){const by=g=>G.R.filter(z=>z.g===g).map(z=>z.x.n);
+      if(by("hoy").length)add("falta","Pruebas del puesto que tocan hoy y no tienen resultado registrado: "+by("hoy").join("; "),"ex");
+      if(by("rem").length)add("falta","Exámenes que faltan en la orden de remisión: "+by("rem").join("; "),"ex");
+      if(by("pend").length)add("pend","Remitidos, pendientes de resultado: "+by("pend").join("; "));
+      if(by("pas").length)add("mal","Se pasó la ventana sin hacerse: "+by("pas").join("; ")+" (en Exámenes y plan está qué pedir en su lugar)","ex");
+      G.R.filter(z=>z.g==="luego").slice(0,4).forEach(z=>add("rec","Próximo examen: "+z.x.n+(z.ini&&z.fin?" del "+gexDM(z.ini)+" al "+gexDM(z.fin):"")));
+      if(!by("hoy").length&&!by("rem").length&&!by("pas").length&&W!=null)add("ok","Exámenes al día para "+Ws+" semanas")}
+    if(W!=null){const mi=A(/^Micronutrientes$/),md=prenA("Medicamentos en este embarazo"),t2=plano((mi?mi.v:"")+" "+md);
+      const tf=/folico/.test(t2),tc=/calcio/.test(t2),th=/hierro|ferros/.test(t2),fal=[];
+      if(W<13&&!tf)fal.push("ácido fólico 0,4 mg/día hasta la semana 12 (4 mg si alto riesgo de defectos del tubo neural)");
+      if(W>=14&&!tc)fal.push("calcio 1.200 mg/día desde la semana 14");
+      if(!th)fal.push("hierro de rutina (no si la Hb es mayor de 14 g/dL)");
+      if(!mi||!mi.v)add("falta","Micronutrientes para "+Ws+" semanas (Res. 3280, p. 269): "+fal.join("; "),mi?"q"+mi.k:"");
+      else if(fal.length)add("falta","Micronutrientes incompletos para "+Ws+" semanas (Res. 3280, p. 269): falta "+fal.join("; "),"q"+mi.k);
+      else add("ok","Micronutrientes acordes a las "+Ws+" semanas (ácido fólico, calcio y hierro según la semana)");
+      if(mi&&mi.v&&W>=14&&/formul|entreg|inicia|se da/.test(plano(mi.v))&&/folico/.test(plano(mi.v))&&!/suspend/.test(plano(mi.v)))add("mal","Ácido fólico en semana "+Ws+": la Res. 3280 lo da hasta la semana 12 (p. 269); revisa si se sigue formulando","q"+mi.k);
+      if(mi&&mi.v&&W<14&&/calcio/.test(plano(mi.v))&&!/desde la (semana )?14|a partir/.test(plano(mi.v)))add("mal","Calcio antes de la semana 14: la Res. 3280 lo inicia desde la 14 (p. 269)","q"+mi.k);
+      const dp=A(/^Desparasitación$/),dv=dp?plano(dp.v):"";
+      if(W>=14&&!/albendazol|desparasit|recibio|se da|entreg/.test(dv)||W>=14&&/^no /.test(dv))add("pend","Desparasitación: albendazol 400 mg dosis única, una vez en el embarazo, en el 2.º o 3.er trimestre (zona de alto riesgo, Res. 3280, p. 270)",dp?"q"+dp.k:"");
+      else if(W<14&&/albendazol/.test(dv)&&!/(no|pendiente|despues|a partir)/.test(dv))add("mal","Albendazol en el primer trimestre: la Res. 3280 lo da en el 2.º o 3.er trimestre (p. 270)",dp?"q"+dp.k:"")}}
+  /* 7. Micronutrientes y desparasitación en primera infancia */
+  if(id==="pinf"&&e){const tm=e.tm,L=q.map((z,k)=>({k,l:z.l,v:(a[k]||"").trim()})).filter(z=>/micronutr|desparasit|medicamentos y micronutrientes/i.test(z.l)),t2=plano(L.map(z=>z.v).join(" ")),k0=(L[0]||{}).k;
+    const si=re=>re.test(t2)&&!new RegExp("no (se )?(da|entrega|recibe|aplica)[^.]{0,30}"+re.source).test(t2);
+    if(tm>=6&&tm<=23){if(!si(/micronutrientes en polvo|polvo|chispitas/))add("falta","Micronutrientes en polvo (fortificación casera) de 6 a 23 meses, un ciclo cada 6 meses (Res. 3280, p. 113)","q"+k0);else add("ok","Micronutrientes en polvo acordes a la edad")}
+    if(tm>=24&&tm<=59){const fal=[];if(!si(/vitamina a/))fal.push("vitamina A 200.000 UI dosis única 2 veces al año");if(!si(/hierro|ferros|polimaltosa/))fal.push("hierro 3 mg/kg/día 2 veces al año"+(v["PESO"]?" (con "+v["PESO"]+" kg: "+Math.round(3*v["PESO"])+" mg/día de hierro elemental)":""));
+      if(fal.length)add("falta","Suplementación de 24 a 59 meses (Res. 3280, p. 113): "+fal.join("; "),"q"+k0);else add("ok","Vitamina A y hierro acordes a la edad")}
+    if(tm>=12&&tm<=59){const dosis=tm<24?"200":"400";if(!si(/albendazol|desparasit/))add("falta","Desparasitación: albendazol "+dosis+" mg dosis única, 2 veces al año (Res. 3280, p. 113)","q"+k0);
+      else if(/albendazol/.test(t2)&&new RegExp((tm<24?"400":"200")+" ?mg").test(t2))add("mal","Dosis de albendazol: con "+edTxt+" es "+dosis+" mg (Res. 3280, p. 113)","q"+k0);
+      else add("ok","Desparasitación acorde a la edad")}
+    if(tm<6&&si(/micronutrientes en polvo|vitamina a|albendazol/))add("mal","Antes de los 6 meses no van micronutrientes en polvo, vitamina A ni albendazol: lactancia materna exclusiva (Res. 3280, p. 108 y 113)","q"+k0);
+    if(tm<24&&tm>=6&&/vitamina a/.test(t2)&&!/no .{0,20}vitamina a/.test(t2))add("pend","Vitamina A antes de los 24 meses: la Res. 3280 la indica de 24 a 59 meses (p. 113); revisa el lineamiento vigente del PAI/programa","q"+k0)}
+  if(id==="precon"){const af=A(/^Ácido fólico$/);if(af&&af.v&&!/folico|0[.,]4|4 ?mg/.test(plano(af.v))&&!EVF_NO.test(af.v))add("falta","Ácido fólico preconcepcional: 0,4 mg/día (4 mg si alto riesgo) (Res. 3280, p. 247)","q"+af.k)}
+  /* 8. Vacunas y próximo control */
+  q.forEach((z,k)=>{if(!/vacun/i.test(z.l))return;const val=plano(a[k]||"");if(/pendiente|incomplet|falta|no tiene|no ha recibido|sin carne/.test(val))add("pend","Vacunación: "+z.l+" — "+(a[k]||"").trim().replace(/\.$/,""),"q"+k)});
+  const px=A(/^Próximo control$/);if(px&&px.v)add("ok","Próximo control: "+px.v.replace(/\.$/,""));
+  /* 9. Recomendaciones finales */
+  if(R.alarma.length)R.rec.unshift({t:"Primero lo urgente: resuelve hoy lo que está en «Signos de alarma y conducta urgente» (telemedicina urgente o remisión) y déjalo registrado en el soporte de telemedicina o remisión."});
+  if(R.mal.length)R.rec.push({t:"Corrige lo que no es coherente antes de guardar o enviar a la base: lo que se va a Prosoft, al 4505 y a la cuenta debe cuadrar."});
+  if(R.falta.length)R.rec.push({t:"Completa lo que falta tocando «Ir»; si no se pudo hacer hoy, déjalo escrito como pendiente con el motivo."});
+  if(an&&an.alarma&&an.alarma.length)R.rec.push({t:"Explica y deja por escrito los signos de alarma para consultar de inmediato: "+an.alarma.slice(0,5).join("; ")+"."});
+  if(px&&!px.v)R.rec.push({t:"Agenda la fecha del próximo control antes de que se vaya."});
+  return R}
+const EVF_GR=[["alarma","Signos de alarma y conducta urgente","miss"],["mal","No es coherente: corregir","miss"],["falta","Faltó","warn"],["pend","Pendientes","warn"],["ok","Está bien","ok"],["rec","Recomendaciones finales",""]];
+function evTexto(id,R){R=R||evFinal(id);const P=pac();return ["EVALUACIÓN FINAL DE LA ATENCIÓN — "+M[id].title+(P["NOMBRE COMPLETO"]?" — "+P["NOMBRE COMPLETO"]:"")].concat(EVF_GR.filter(([g])=>R[g].length).map(([g,t])=>t.toUpperCase()+":\n"+R[g].map(z=>"- "+z.t).join("\n"))).join("\n\n")}
+function evHTML(id){let R;try{R=evFinal(id)}catch(err){console.warn(err);return""}
+  const n=k=>R[k].length,col={miss:"var(--miss)",warn:"#b7791f",ok:"var(--accent)","":"var(--ink,#222)"};
+  const res=n("alarma")?"Hay signos de alarma: resuélvelos primero.":n("mal")?"Hay datos que no cuadran: corrígelos.":n("falta")?"Faltan algunos registros.":"Atención completa y coherente.";
+  return `<section class="tool" id="evf"><h3>Evaluación final de la atención</h3>
+   <p class="note-src" style="margin:0">Revisa todo junto: identificación, edad y documento, preguntas, signos vitales, exámenes, micronutrientes, signos de alarma y rutas. Tú decides.</p>
+   <div class="box ${n("alarma")||n("mal")?"miss":n("falta")?"warn":""}" style="margin:6px 0"><p style="margin:0"><b>${esc(res)}</b></p><p class="note-src" style="margin:4px 0 0">${[["alarma","alarma"],["mal","sin coherencia"],["falta","faltan"],["pend","pendientes"],["ok","bien"]].map(([k,l])=>n(k)+" "+l).join(" · ")}</p></div>
+   ${EVF_GR.filter(([g])=>n(g)).map(([g,t,c])=>`<details class="sec" ${g==="ok"?"":"open"}><summary><span style="color:${col[c]};font-weight:700">${esc(t)}</span><span class="cnt">${n(g)}</span></summary><ul class="mb-ul" style="padding:0 14px 10px 30px;margin:0">${R[g].map(z=>`<li style="margin:5px 0">${esc(z.t)}${z.ir?` <button type="button" class="btn bq-mini" data-evir="${esc(z.ir)}" style="padding:2px 10px;font-size:.78rem">Ir</button>`:""}</li>`).join("")}</ul></details>`).join("")}
+   <div class="btns"><button type="button" class="btn" id="evf-cp" style="flex:none">Copiar evaluación</button><button type="button" class="btn" id="evf-re" style="flex:none">Volver a evaluar</button></div><p class="status" id="evf-st"></p></section>`}
+function evWire(id){const box=$("evf");if(!box)return;
+  box.querySelectorAll("[data-evir]").forEach(b=>b.onclick=()=>{const t=b.dataset.evir;
+    if(t==="id"){st.tab="id";S.set(key(id,"tab"),"id");renderMod();return}
+    if(t==="ex"){const k=ivFor(id).findIndex(z=>z.sugEx);if(k>=0){S.set(key(id,"ivi"),String(k));paneEntr();return}st.tab="guia";S.set(key(id,"tab"),"guia");renderMod();return}
+    if(t==="vit"){const k=ivFor(id).findIndex(z=>/signos vitales/i.test(z.l));if(k>=0){S.set(key(id,"ivi"),String(k));paneEntr()}return}
+    if(/^q\d+$/.test(t)){S.set(key(id,"ivi"),t.slice(1));paneEntr();window.scrollTo(0,0)}});
+  $("evf-cp").onclick=()=>{const s=$("evf-st");try{navigator.clipboard.writeText(evTexto(id)).then(()=>s.textContent="Copiada.",()=>s.textContent="No se pudo copiar.")}catch(err){s.textContent="No se pudo copiar."}};
+  $("evf-re").onclick=()=>{box.outerHTML=evHTML(id);evWire(id)}}
+paneEntr=(function(o){return function(){o.apply(this,arguments);try{const id=st.mod,q=ivFor(id),i=+(S.get(key(id,"ivi"))||0);if(i<q.length)return;
+  const t=document.querySelector("#pane > .tool");if(!t||$("evf"))return;t.insertAdjacentHTML("afterend",evHTML(id));evWire(id)}catch(err){console.warn(err)}}})(paneEntr);
 /* ---------- arranque ---------- */
 /* los borradores guardados con la versión anterior de los módulos se reubican una sola vez */
 Object.keys(OLD_LAB).forEach(id=>{if(!M[id]||S.get(key(id,"ivlab")))return;let a={};try{a=JSON.parse(S.get(key(id,"iv"))||"{}")||{}}catch(e){}
