@@ -1971,7 +1971,7 @@ function wireMiDia(){const cb=$("md-cal");if(cb)cb.onclick=calOpen;
 function mdShow(t){const s=$("md-st");s.innerHTML="";const a=document.createElement("textarea");a.value=t;a.rows=7;a.readOnly=true;s.append("No se pudo copiar solo. Mantén presionado el texto y cópialo:",a);a.focus();a.select()}
 
 /* ---------- PANEL ---------- */
-const VERSION_APP="2026-10-25 v188";
+const VERSION_APP="2026-10-25 v189";
 function home(){
   stopRec();if(S.get(AT_KEY))atReiniciar();st.view="home";
   const rm=["precon","prenatal","parto","rn","ive"],rp=["pinf","inf","adol","juv","adul","vej"];
@@ -4710,7 +4710,7 @@ function hcSecciones(id){const m=M[id],P=pac(),f=S.get(key(id,"fecha"))||hoy(),o
 function crc32(u){let c,t=crc32.t;if(!t){t=crc32.t=[];for(let n=0;n<256;n++){c=n;for(let k=0;k<8;k++)c=c&1?0xEDB88320^(c>>>1):c>>>1;t[n]=c>>>0}}c=0xFFFFFFFF;for(let i=0;i<u.length;i++)c=t[(c^u[i])&255]^(c>>>8);return(c^0xFFFFFFFF)>>>0}
 function zipStore(files){const te=new TextEncoder(),parts=[],cen=[];let off=0;
   const w16=(v)=>[v&255,(v>>8)&255],w32=(v)=>[v&255,(v>>8)&255,(v>>16)&255,(v>>>24)&255];
-  for(const[f,txt]of files){const n=te.encode(f),d=te.encode(txt),c=crc32(d);
+  for(const[f,txt]of files){const n=te.encode(f),d=txt instanceof Uint8Array?txt:te.encode(txt),c=crc32(d);
     const h=new Uint8Array([0x50,0x4b,3,4,...w16(20),0,0,0,0,0,0,0x21,0,...w32(c),...w32(d.length),...w32(d.length),...w16(n.length),0,0]);
     parts.push(h,n,d);
     cen.push(new Uint8Array([0x50,0x4b,1,2,...w16(20),...w16(20),0,0,0,0,0,0,0x21,0,...w32(c),...w32(d.length),...w32(d.length),...w16(n.length),0,0,0,0,0,0,0,0,0,0,0,0,...w32(off)]),n);
@@ -10031,6 +10031,110 @@ OBL_APP["04"]+=" Obligaciones: registro diario sin conexión y envío semanal de
 wireMiDia=(function(o){return function(){o.apply(this,arguments);document.querySelectorAll("[data-mdt]").forEach(c=>{const t=c.dataset.mdt;
   const id=/^SIVIGILA de la /.test(t)?"s_siv":/^Enviar por internet las notas de Prosoft/.test(t)?"s_pro":null;if(!id)return;
   if(obChk("s",obIso(id))[id]&&!c.checked)c.checked=true;c.addEventListener("change",()=>obSetChk("s",id,c.checked,obIso(id)))})}})(wireMiDia);
+
+/* ===== v189: Cuenta de cobro — soportes, evidencias (fotos) y control de medicamentos =====
+   - Por cada uno de los 18 soportes: qué prueba se necesita, qué ya registró la app en el periodo (atenciones, comunidades,
+     educaciones, telemedicinas, remisiones, semanas SIVIGILA, envíos de Prosoft) y las fotos de evidencia guardadas en el
+     celular (se reducen de tamaño y quedan sin internet). Relación de actividades lista para el informe del día de entrega.
+   - Medicamentos vencidos y que vencen en 3 meses o menos: aviso en Mi día y en Obligaciones, reporte e inventario en Excel
+     para el formato de devolución y el inventario firmado (soportes 06 y 07). */
+const EVI_REQ={
+ "01":"Acta de concertación de cada comunidad con firma del líder y lista de asistencia; foto del acta y de la reunión.",
+ "02":"Certificado de permanencia de cada comunidad, firmado por el líder con nombre, cédula y fechas.",
+ "03":"Historias o registro diario de atenciones y consentimientos firmados o con huella (escaneados).",
+ "04":"Listado de atenciones de Prosoft del periodo (pantallazo o reporte) y constancia de los envíos semanales.",
+ "05":"Encuestas de satisfacción, caracterización y seguimiento de gestantes, búsqueda de menores de 5 y bases.",
+ "06":"Proyección y pedido de insumos, recetarios y formatos de dispensación; reporte de próximos a vencer.",
+ "07":"Inventario del puesto en Excel firmado y formato de devolución de vencidos.",
+ "08":"Registro de temperatura de la nevera (mañana y tarde) y novedades de cadena de frío; foto del registro.",
+ "09":"Registro de interconsultas y telemedicina (médico, hora, conducta).",
+ "10":"Formatos de referencia y disentimientos, o constancia de que no hubo remisiones.",
+ "11":"Actas de reunión y listas de asistencia de educación; foto de la actividad.",
+ "12":"Fichas SIVIGILA, reporte semanal de cada semana del periodo (o negativa) y colectivas 995 y 998.",
+ "13":"Certificados de nacido vivo y de defunción, o constancia de que no se presentaron.",
+ "14":"Actas y listas de la reunión con auxiliares y promotores.",
+ "15":"Acta de contingencia (sin transporte, conexión o insumo), o constancia de que no se presentó.",
+ "16":"Listas y actas de actividades PIC; fotos.",
+ "17":"Informe mensual de actividades firmado, certificado de supervisión y lista de verificación.",
+ "18":"Evidencia de la actividad adicional, o constancia de que no se realizó."};
+/* fotos: IndexedDB (no cabe en localStorage) */
+const EVI_DB="rutas3280_evid";
+function eviDB(){return new Promise((ok,no)=>{try{const r=indexedDB.open(EVI_DB,1);r.onupgradeneeded=()=>{const s=r.result.createObjectStore("f",{keyPath:"id"});s.createIndex("per","per")};r.onsuccess=()=>ok(r.result);r.onerror=()=>no(r.error)}catch(e){no(e)}})}
+async function eviTx(modo,fn){const db=await eviDB();return new Promise((ok,no)=>{const tx=db.transaction("f",modo),s=tx.objectStore("f");let out;Promise.resolve(fn(s)).then(v=>out=v);tx.oncomplete=()=>ok(out);tx.onerror=()=>no(tx.error)})}
+function eviReq(r){return new Promise((ok,no)=>{r.onsuccess=()=>ok(r.result);r.onerror=()=>no(r.error)})}
+async function eviLista(per){try{return await eviTx("readonly",s=>eviReq(s.index("per").getAll(per)))}catch(e){return[]}}
+async function eviPut(o){return eviTx("readwrite",s=>eviReq(s.put(o)))}
+async function eviDel(id){return eviTx("readwrite",s=>eviReq(s.delete(id)))}
+function eviReducir(file){return new Promise(ok=>{if(!/^image\//.test(file.type||"")){ok(file);return}const u=URL.createObjectURL(file),im=new Image();
+  im.onload=()=>{const k=Math.min(1,1600/Math.max(im.width,im.height)),c=document.createElement("canvas");c.width=Math.round(im.width*k);c.height=Math.round(im.height*k);c.getContext("2d").drawImage(im,0,0,c.width,c.height);URL.revokeObjectURL(u);c.toBlob(b=>ok(b||file),"image/jpeg",0.75)};
+  im.onerror=()=>{URL.revokeObjectURL(u);ok(file)};im.src=u})}
+/* medicamentos vencidos y próximos a vencer */
+function medVence(){return BQ.map(b=>bqGet(b.id)).map(m=>({m,e:bqEstado(m)})).filter(x=>x.e.k==="venc"||x.e.k==="rojo").sort((a,b)=>a.e.d-b.e.d)}
+function medXlsx(){const fila=m=>{const e=bqEstado(m);return[m.n,m.c||"",m.p||"",m.lote||"",bqMes(m.v),e.d==null?"":e.d,m.ne?0:(+m.ent||0),BQ_SEM[e.k]]};
+  const H=["MEDICAMENTO","CONCENTRACION","PRESENTACION","LOTE","VENCE","DIAS PARA VENCER","CANTIDAD","ESTADO"];
+  return xlsxDe([{nombre:"PROXIMOS A VENCER",filas:[H].concat(medVence().map(x=>fila(x.m)))},{nombre:"INVENTARIO",filas:[H].concat(BQ.map(b=>fila(bqGet(b.id))))}])}
+async function medDescargar(){return guardarArchivo("Medicamentos_vencimientos_e_inventario_"+hoy()+".xlsx",medXlsx())}
+/* lo que la app ya sabe de cada soporte en el periodo */
+function sopAuto(){const e=mdPeriodo(),a=e[1],b=e[0],R=registrosTodos().filter(r=>{const f=((r.datos&&r.datos.FECHA_REGISTRO)||"").slice(0,10);return f>=a&&f<=b});
+  const V=comVis().filter(v=>v.ini&&v.ini<=b&&(comFin(v)||hoy())>=a),E=V.flatMap(v=>(v.edus||[]).filter(x=>x.fecha>=a&&x.fecha<=b));
+  const T=tmLog().filter(x=>x.fecha>=a&&x.fecha<=b);
+  const sem=[];for(let d=seDe(a).ini;d<=b;){const s=seDe(d);if(s.fin>=a&&s.fin<=b&&s.fin<=hoy())sem.push(s);const n=new Date(s.ini+"T00:00:00Z");n.setUTCDate(n.getUTCDate()+7);d=n.toISOString().slice(0,10)}
+  const sv=sem.filter(s=>{const n=new Date(s.fin+"T00:00:00Z");n.setUTCDate(n.getUTCDate()+1);return obChk("s",s.ini).s_siv}).length,pr=sem.filter(s=>obChk("s",s.ini).s_pro).length;
+  let nev=0;for(let d=a;d<=b&&d<=hoy();){if(obChk("d",d).d_nev)nev++;const n=new Date(d+"T00:00:00Z");n.setUTCDate(n.getUTCDate()+1);d=n.toISOString().slice(0,10)}
+  const mv=medVence(),O={};
+  O["01"]=`${V.filter(v=>v.conc&&v.conc.ok).length} de ${V.length} comunidades con acta de concertación`;
+  O["02"]=`${V.filter(v=>v.perm&&v.perm.ok).length} de ${V.length} comunidades con certificado de permanencia`;
+  O["03"]=`${R.length} atenciones registradas en la app`;O["04"]=`${pr} de ${sem.length} semanas con envío de Prosoft marcado`;
+  O["06"]=mv.length?`${mv.length} medicamentos vencidos o que vencen en 3 meses o menos para reportar`:"Sin medicamentos por vencer en 3 meses";
+  O["07"]=`Inventario del botiquín: ${BQ.length} ítems (Excel en esta pantalla)`;O["08"]=`${nev} días con temperatura de la nevera marcada`;
+  O["09"]=`${T.filter(x=>x.med||x.cond).length} telemedicinas en el registro`;O["10"]=`${T.filter(x=>x.rem==="si").length} remisiones y ${T.filter(x=>x.rem==="no").length} disentimientos`;
+  O["11"]=`${E.length} educaciones con ${E.reduce((s,x)=>s+(+x.asist||0),0)} asistentes`;O["12"]=`${sv} de ${sem.length} semanas epidemiológicas notificadas`;
+  return O}
+async function sopOpen(){stopRec();st.view="sop";const e=mdPeriodo(),per=e[0],sk=mdGet("dn2_sop_"+per),auto=sopAuto(),F=await eviLista(per),mv=medVence();
+  const nF=n=>F.filter(f=>f.sop===n).length;
+  $("app").innerHTML=`<div class="top"><button class="back" type="button" id="sop-back">← Inicio</button><span class="tag pc">Cuenta de cobro</span></div>
+  <header><h1>Soportes y evidencias</h1><p class="sub">Entrega del <b>${esc(e[2])}</b> (periodo ${esc(e[1])} a ${esc(e[0])}, faltan ${mdDias()} días). Por cada soporte: qué prueba necesitas, qué ya registró la app y tus fotos de evidencia. La marca de «listo» es la misma de Mi día.</p></header>
+  <section class="tool"><h3>Medicamentos e inventario (soportes 06 y 07)</h3>
+   ${mv.length?`<div class="box ${mv.some(x=>x.e.k==="venc")?"miss":"warn"}"><ul>${mv.map(x=>`<li><b>${esc(x.m.n)}</b> ${esc(x.m.c||"")} · lote ${esc(x.m.lote||"—")} · ${x.e.k==="venc"?"VENCIDO":"vence"} ${esc(bqMes(x.m.v))}${x.e.k==="rojo"?` (${x.e.d} días)`:""} · ${esc(bqCant(x.m))}</li>`).join("")}</ul><p class="note-src" style="margin:6px 0 0">Vencidos: devuélvelos con el formato de devolución. Los que vencen en 3 meses: repórtalos en la entrega y úsalos primero.</p></div>`:`<p class="note-src">No hay medicamentos vencidos ni que venzan en los próximos 3 meses.</p>`}
+   <div class="btns"><button class="btn primary" type="button" id="sop-xls">Descargar reporte e inventario (Excel)</button><button class="btn" type="button" id="sop-bq">Abrir botiquín</button></div></section>
+  ${MD_SOP.map((s,i)=>{const n=s.slice(0,2),k=nF(n);return `<details class="sec"><summary><span>${sk[n]?"✓ ":""}${esc(s)}</span><span class="cnt">${k?k+" foto"+(k>1?"s":""):""}</span></summary><div style="padding:8px 14px 12px">
+   <dl class="mb-dl"><dt>Prueba que necesitas</dt><dd>${esc(EVI_REQ[n]||"")}</dd>${auto[n]?`<dt>Lo que ya registró la app</dt><dd>${esc(auto[n])}</dd>`:""}</dl>
+   <div class="evi-g" id="evi-g-${n}">${F.filter(f=>f.sop===n).map(f=>`<figure data-evf="${f.id}"><img alt="${esc(f.nota||"Evidencia")}" data-evimg="${f.id}"><figcaption>${esc(f.fecha)}${f.nota?" · "+esc(f.nota):""} <button class="btn bq-mini" type="button" data-evdel="${f.id}">Quitar</button></figcaption></figure>`).join("")}</div>
+   <label class="bfl">Nota de la evidencia (comunidad, actividad)<input id="evi-n-${n}" autocomplete="off"></label>
+   <div class="btns"><label class="btn" style="cursor:pointer">Agregar foto o archivo<input type="file" accept="image/*,application/pdf" multiple data-evadd="${n}" hidden></label>${k?`<button class="btn" type="button" data-evdl="${n}">Descargar ZIP (${k})</button>`:""}
+   <label class="sx-ck"><input type="checkbox" data-sopok="${n}"${sk[n]?" checked":""}> <span>Soporte listo (escaneado y firmado)</span></label></div></div></details>`}).join("")}
+  <section class="tool"><h3>Relación de actividades para el informe</h3><textarea id="sop-rel" rows="10" readonly style="width:100%;font-family:var(--f-data);font-size:.8rem"></textarea>
+   <div class="btns"><button class="btn" type="button" id="sop-cp">Copiar relación</button>${F.length?`<button class="btn" type="button" id="sop-zip">Descargar todas las evidencias (ZIP)</button>`:""}<button class="btn" type="button" id="sop-ob">Calendario de obligaciones</button></div><p class="status" id="sop-st" aria-live="polite"></p></section>
+  <p class="foot">Las fotos quedan solo en este celular: descárgalas y guárdalas en la carpeta del mes. Borrar los datos del navegador también las borra.</p>`;
+  const rel=()=>{const sk2=mdGet("dn2_sop_"+per);return [`RELACION DE ACTIVIDADES Y SOPORTES — CONTRATO 1785 — ENTREGA DEL ${e[2].toUpperCase()} (PERIODO ${e[1]} A ${e[0]})`].concat(MD_SOP.map(s=>{const n=s.slice(0,2);return `${s.toUpperCase()}: ${sk2[n]?"LISTO":"PENDIENTE"}${auto[n]?" · "+auto[n]:""}${nF(n)?" · "+nF(n)+" evidencia(s) fotográfica(s)":""}`})).join("\n")};
+  $("sop-rel").value=rel();
+  F.forEach(f=>{const im=document.querySelector(`[data-evimg="${f.id}"]`);if(!im)return;if(/^image\//.test(f.blob.type||"")){im.src=URL.createObjectURL(f.blob)}else{im.replaceWith(Object.assign(document.createElement("span"),{textContent:"📄 "+(f.nom||"archivo")}))}});
+  document.querySelectorAll("[data-evadd]").forEach(inp=>inp.onchange=async()=>{const n=inp.dataset.evadd,nota=$("evi-n-"+n).value.trim();for(const fl of inp.files){const bl=await eviReducir(fl);
+    await eviPut({id:uid(),per,sop:n,fecha:hoy(),nota,nom:fl.name,blob:bl})}const op=n;await sopOpen();const d=$("evi-g-"+op);if(d){d.closest("details").open=true;d.scrollIntoView({block:"center"})}});
+  document.querySelectorAll("[data-evdel]").forEach(b=>b.onclick=async()=>{await eviDel(b.dataset.evdel);b.closest("figure").remove();$("sop-st").textContent="Evidencia quitada."});
+  const zipDe=async(xs,nom)=>{const fs=[];for(let i=0;i<xs.length;i++){const f=xs[i],ext=/pdf/.test(f.blob.type||"")?"pdf":"jpg";
+    fs.push([`SOP${f.sop}/SOP${f.sop}_${(f.nota||"evidencia").replace(/[^\wÁÉÍÓÚÑáéíóúñ-]+/g,"_").slice(0,40)}_${f.fecha}_${i+1}.${ext}`,new Uint8Array(await f.blob.arrayBuffer())])}
+    return guardarArchivo(nom,new Blob([zipStore(fs)],{type:"application/zip"}))};
+  document.querySelectorAll("[data-evdl]").forEach(b=>b.onclick=async()=>{const n=b.dataset.evdl;await zipDe(F.filter(f=>f.sop===n),`Evidencias_SOP${n}_${per}.zip`);$("sop-st").textContent="Descargado el ZIP del soporte "+n+"."});
+  const za=$("sop-zip");if(za)za.onclick=async()=>{await zipDe(F,`Evidencias_cuenta_de_cobro_${per}.zip`);$("sop-st").textContent="Descargado el ZIP con todas las evidencias, por carpeta de soporte."};
+  document.querySelectorAll("[data-sopok]").forEach(c=>c.onchange=()=>{const k="dn2_sop_"+per,o=mdGet(k);if(c.checked)o[c.dataset.sopok]=1;else delete o[c.dataset.sopok];S.set(k,JSON.stringify(o));$("sop-rel").value=rel()});
+  $("sop-xls").onclick=async()=>{const r=await medDescargar();$("sop-st").textContent=r==="ok"?"Excel descargado.":"No se pudo descargar."};
+  $("sop-bq").onclick=()=>bqOpen();$("sop-cp").onclick=()=>{try{navigator.clipboard.writeText($("sop-rel").value).then(()=>$("sop-st").textContent="Relación copiada.")}catch(x){$("sop-rel").select()}};
+  $("sop-ob").onclick=()=>obOpen();$("sop-back").onclick=()=>{home();window.scrollTo(0,0)};window.scrollTo(0,0)}
+document.head.insertAdjacentHTML("beforeend",`<style>.evi-g{display:grid;grid-template-columns:repeat(auto-fill,minmax(96px,1fr));gap:8px;margin:8px 0}.evi-g figure{margin:0}.evi-g img{width:100%;aspect-ratio:1;object-fit:cover;border-radius:8px;border:1px solid var(--line)}.evi-g figcaption{font-size:.72rem;color:var(--muted)}</style>`);
+/* obligaciones: reporte de vencimientos y evidencias */
+OB.push(["m_venc","m","Reporte de medicamentos vencidos y que vencen en 3 meses o menos; devolución de vencidos con su formato","06"],["m_evi","m","Fotos y pruebas de cada soporte guardadas y relación de actividades para el informe","17"]);
+obOpen=(function(o){return function(){o.apply(this,arguments);const h=document.querySelector("#app header");if(!h||$("ob-med"))return;const mv=medVence(),nv=mv.filter(x=>x.e.k==="venc").length;
+  h.insertAdjacentHTML("afterend",`<div class="box ${nv?"miss":mv.length?"warn":""}" id="ob-med"><p style="margin:0"><b>Botiquín:</b> ${nv} vencidos · ${mv.length-nv} vencen en 3 meses o menos.</p><div class="btns"><button class="btn bq-mini" type="button" id="ob-sop">Soportes y evidencias</button>${mv.length?`<button class="btn bq-mini" type="button" id="ob-xls">Reporte en Excel</button>`:""}</div></div>`);
+  $("ob-sop").onclick=()=>sopOpen();const x=$("ob-xls");if(x)x.onclick=()=>medDescargar()}})(obOpen);
+/* Mi día */
+mdTareas=(function(o){return function(){const t=o.apply(this,arguments),mv=medVence(),nv=mv.filter(x=>x.e.k==="venc").length,r=mdDias();
+  if(nv)t.unshift("Separar y devolver "+nv+" medicamento(s) vencido(s) con el formato de devolución (act. 07)");
+  if(r>=3&&r<=10&&mv.length-nv>0)t.push("Reportar "+(mv.length-nv)+" medicamento(s) que vencen en 3 meses o menos y descargar el inventario (act. 06 · 07)");
+  if(r>=1&&r<=7)t.push("Revisar fotos y pruebas de los 18 soportes y copiar la relación de actividades (act. 17)");return t}})(mdTareas);
+fmtHome=(function(o){return function(){o();const ref=$("md-obc")||$("md-com")||$("md-fmt");if(!ref||$("md-sop"))return;const sk=mdGet("dn2_sop_"+mdPeriodo()[0]),n=MD_SOP.filter(x=>sk[x.slice(0,2)]).length;
+  ref.insertAdjacentHTML("afterend",`<button type="button" class="btn" id="md-sop">Soportes y evidencias · ${n} / 18</button>`);$("md-sop").onclick=()=>sopOpen()}})(fmtHome);
+OBL_APP["06"]+=" Soportes: reporte de próximos a vencer en Excel.";OBL_APP["07"]+=" Soportes: inventario en Excel y vencidos para devolución.";OBL_APP["17"]+=" Soportes: fotos de evidencia y relación de actividades.";
 
 /* ---------- arranque ---------- */
 /* los borradores guardados con la versión anterior de los módulos se reubican una sola vez */
