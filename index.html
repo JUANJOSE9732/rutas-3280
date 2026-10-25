@@ -1973,7 +1973,7 @@ function wireMiDia(){const cb=$("md-cal");if(cb)cb.onclick=calOpen;
 function mdShow(t){const s=$("md-st");s.innerHTML="";const a=document.createElement("textarea");a.value=t;a.rows=7;a.readOnly=true;s.append("No se pudo copiar solo. Mantén presionado el texto y cópialo:",a);a.focus();a.select()}
 
 /* ---------- PANEL ---------- */
-const VERSION_APP="2026-10-25 v197";
+const VERSION_APP="2026-10-25 v198";
 function home(){
   stopRec();if(S.get(AT_KEY))atReiniciar();st.view="home";
   const rm=["precon","prenatal","parto","rn","ive"],rp=["pinf","inf","adol","juv","adul","vej"];
@@ -10271,7 +10271,7 @@ function gexEstado(x,W,o,c){const L=(o[x.id]||[]).slice().sort((a,b)=>a.f<b.f?-1
 function gexCalc(P,oo,noMod){P=P||pac();const o=oo||gexGet(P),{w:W,src}=gexW(P,o,noMod),c=gexCtx(P,o,W),R=[];
   GEX.forEach(x=>{const s=gexEstado(x,W,o,c);if(s)R.push(Object.assign({x},s))});
   const hayAntes=Object.keys(o).some(k=>k[0]!=="_"&&(o[k]||[]).some(z=>z.f<hoy()));let tipo="";try{if(!noMod&&pkey(P)===pkey(pac())&&/primera/i.test(prenA("Tipo de consulta")))tipo="ing"}catch(e){}
-  const ing=tipo==="ing"||!hayAntes;
+  const ing=tipo==="ing"||(o._ctl&&o._ctl.tipo?o._ctl.tipo==="ing":!hayAntes);
   let sit="";if(W==null)sit="Sin edad gestacional: llénala en el control (FUM o ecografía) o escríbela abajo. Mientras tanto se pide ecografía para datar.";
   else if(ing)sit=W<10?"Ingreso temprano (antes de la semana 10): es el ideal. Alcanza todas las ventanas.":W<14?"Ingreso en el primer trimestre: aún alcanza la ecografía de 10+6 a 13+6 si sale a tiempo."+(W>=12?" Remítela ya: la ventana cierra pronto.":""):W<26?"Ingreso tardío (después del primer trimestre): haz hoy todo lo del ingreso y revisa las ventanas que ya pasaron.":"Ingreso muy tardío (desde la semana 26): la norma pide hacer en este primer control todo lo de las consultas anteriores (Res. 3280, p. 265).";
   else sit="Control de seguimiento.";
@@ -10289,7 +10289,7 @@ function gexNotaTxt(G){const hoyL=G.R.filter(z=>z.g==="hoy").map(z=>plano(z.x.n)
   return L.join(" ")}
 function gexHTML(P){const G=gexCalc(P);if(!G.P["NOMBRE COMPLETO"]&&!G.P["DOCUMENTO ID."])return `<div class="box"><p style="margin:0">Identifica a la gestante en el inicio para llevar su control de exámenes.</p></div>`;
   const by=k=>G.R.filter(z=>z.g===k);
-  return `<div class="gex" id="gex"><div class="box ${G.W==null||G.ing&&G.W>=14?"warn":""}" style="margin:0 0 8px"><p style="margin:0"><b>${G.W==null?"Sin edad gestacional":gexSem(G.W)+" semanas · "+["","primer","segundo","tercer"][gexTri(G.W)]+" trimestre"}</b>${G.src?` <span class="note-src">(${esc(G.src)})</span>`:""}</p><p style="margin:4px 0 0">${esc(G.sit)}</p>
+  return `<div class="gex" id="gex"><div class="box ${G.W==null||G.ing&&G.W>=14?"warn":""}" style="margin:0 0 8px"><p style="margin:0"><b>${G.W==null?"Sin edad gestacional":gexSem(G.W)+" semanas · "+["","primer","segundo","tercer"][gexTri(G.W)]+" trimestre"}</b>${G.src?` <span class="note-src">(${esc(G.src)})</span>`:""}</p><p style="margin:4px 0 0">${esc(G.sit)}</p>${G.o._ctl&&G.o._ctl.lugar?`<p class="note-src" style="margin:4px 0 0">Hace los controles en: ${esc(G.o._ctl.lugar)}</p>`:""}
    ${G.W==null||!/control prenatal/.test(G.src)?`<div class="frow" style="margin-top:6px"><label>Semanas de gestación hoy<input id="gex-w" type="number" step="0.1" min="4" max="42" inputmode="decimal" value="${G.W!=null?Math.round(G.W*10)/10:""}"></label></div>`:""}</div>
    ${GEX_GR.map(([k,t,cl])=>{const xs=by(k);if(!xs.length)return"";return `<details class="sec"${k==="hoy"||k==="rem"||k==="pas"?" open":""}><summary><span class="gex-t gex-${cl}">${esc(t)}</span><span class="cnt">${xs.length}</span></summary><ul class="gex-ul">${xs.map(z=>`<li><b>${esc(z.x.n)}</b>${z.txt?`<br><span>${esc(z.txt)}</span>`:""}<br><small class="note-src">${esc(z.x.ref)}</small>
      ${k==="ok"?"":`<div class="gex-act">${z.x.res?`<select data-gexr="${z.x.id}"><option value="">Resultado…</option>${z.x.res.map(r=>`<option>${esc(r)}</option>`).join("")}</select>`:`<input data-gexr="${z.x.id}" placeholder="Resultado (opcional)">`}<button class="btn bq-mini" type="button" data-gexh="${z.x.id}">Hecho / con resultado</button>${z.x.d==="r"&&k!=="pend"?`<button class="btn bq-mini" type="button" data-gexe="${z.x.id}">Enviado en la remisión</button>`:""}</div>`}</li>`).join("")}</ul></details>`}).join("")}
@@ -10364,7 +10364,7 @@ document.head.insertAdjacentHTML("beforeend",`<style>
    Cada paciente queda en la lista de atención del día, clasificado y listo para abrir donde va. */
 const RR_KEY="dn2_rr";
 const RR_AT={ruta:"Ruta PyM (curso de vida)",mat:"Materno perinatal",morb:"Morbilidad",ev:"Evento",proc:"Procedimiento"};
-const RR_LAB=["NOMBRE","DOCUMENTO","NACIMIENTO","FECHA DE NACIMIENTO","EDAD","SEXO","GENERO","COMUNIDAD","PUEBLO","EAPB","TELEFONO","ATENCION","DETALLE","NOTA","ALARMA","CORRIJO"];
+const RR_LAB=["NOMBRE","DOCUMENTO","NACIMIENTO","FECHA DE NACIMIENTO","EDAD","SEXO","GENERO","COMUNIDAD","PUEBLO","EAPB","TELEFONO","LUGAR","ATENCION","DETALLE","NOTA","ALARMA","CORRIJO"];
 const RR_MES={ENERO:1,FEBRERO:2,MARZO:3,ABRIL:4,MAYO:5,JUNIO:6,JULIO:7,AGOSTO:8,SEPTIEMBRE:9,SETIEMBRE:9,OCTUBRE:10,NOVIEMBRE:11,DICIEMBRE:12};
 const RR_NUM={CERO:0,UNO:1,UN:1,DOS:2,TRES:3,CUATRO:4,CINCO:5,SEIS:6,SIETE:7,OCHO:8,NUEVE:9};
 const rrU=t=>String(t||"").toUpperCase().normalize("NFD").replace(/[̀-ͯ]/g,"");
@@ -10401,6 +10401,8 @@ function rrCampos(t,b){const lab=new RegExp("\\b("+RR_LAB.join("|")+")\\b[\\s:.,
   e.at=rrAtencion(v.ATENCION||"")||rrAtencion(v.DETALLE||"");e.det=(v.DETALLE||"").trim();
   const sm=e.det.match(/(\d{1,2})\s*(?:\+\s*(\d))?\s*SEMANA/);if(sm)e.sem=+sm[1]+(sm[2]?+sm[2]/7:0);
   const fm=e.det.match(/(?:FUM|ULTIMA (?:REGLA|MENSTRUACION))\s*(.*)/);if(fm)e.fum=rrFecha(fm[1]);
+  {const cx=rrU(t.split(/\bNOTA\b/)[0]);if(/PRIMER(A|O)? (CONTROL|VEZ|CONSULTA)|INGRESO|NUNCA|PRIMERA VEZ/.test(cx))e.ctl="ing";else if(/SEGUIMIENTO|YA VIENE|VIENE EN CONTROL|CONTROLES|YA TIENE CONTROL|SEGUNDO|TERCER|CUARTO|QUINTO/.test(cx))e.ctl="seg";
+   const lg=v.LUGAR||((cx.match(/(?:CONTROLES?|LOS HACE|SE CONTROLA) EN ([A-Z ]+?)(?=[.,]|\s+(?:NOMBRE|DOCUMENTO|NACIMIENTO|EDAD|SEXO|COMUNIDAD|PUEBLO|EAPB|TELEFONO|ATENCION|DETALLE|ALARMA|FIN)\b|$)/)||[])[1]);if(lg)e.lugar=String(lg).trim()}
   if(v.ALARMA)e.alarma=true;if(v.NOTA)e.nota=v.NOTA.trim();
   rrDestino(e);return e}
 /* a dónde va cada paciente */
@@ -10413,8 +10415,15 @@ function rrDestino(e){const a=rrEdadA(e),d=rrU(e.det);e.dest=null;e.destT="";
   else if(e.at==="proc"){const k=rrProc(e.det);e.dest=k?{vn:k}:null}
   e.destT=!e.dest?"":e.dest.mod?(M[e.dest.mod]||{}).title||e.dest.mod:e.dest.vn?"Nota: "+((VN[e.dest.vn]||{}).t||e.dest.vn)+(e.dest.cond?" ("+e.dest.cond.toLowerCase()+")":""):e.dest.ev!=null?"Evento: "+(((typeof EV!=="undefined"?EV:[]).find(x=>x.id===e.dest.ev)||{}).t||"escoger el evento"):"";
   return e}
+function rrGesInfo(e){const {P}=rrPac(e);let o={};try{o=JSON.parse(S.get("dn2_gex::"+pkey(P))||"{}")}catch(x){}const ya=Object.keys(o).some(k=>k[0]!=="_"&&(o[k]||[]).length)||o._eg||o._ctl;
+  let w=null;if(o._eg&&o._eg.w!=null)w=+o._eg.w+gexDias(o._eg.f,hoy())/7;
+  const L=[];L.push(e.ctl==="ing"?"Primer control (ingreso al PAMI)":e.ctl==="seg"?"Ya viene en controles"+(e.lugar?" en "+e.lugar:""):"¿Primer control o seguimiento? Sin dato");
+  if(ya)L.push("Ya está en tus gestantes"+(w!=null?": según el último registro tendría "+gexSem(w)+" semanas":"")+(o._ctl&&o._ctl.lugar?" · controles en "+o._ctl.lugar:""));
+  if(ya&&e.ctl==="ing")L.push("Ojo: dices primer control pero ya tiene registros: revisa");
+  if(w!=null&&e.sem!=null&&Math.abs(w-e.sem)>=2)L.push("Las semanas dictadas ("+gexSem(e.sem)+") no cuadran con el registro ("+gexSem(w)+"): confirma FUM o ecografía");
+  return `<p style="margin:4px 0 0">${esc(L.join(" · "))}</p>`}
 function rrEdadTxt(e){if(e.fn){const x=edadDe(e.fn);if(!x)return"";return x.y?x.y+(x.y===1?" año":" años"):x.m?x.m+(x.m===1?" mes":" meses"):x.d+(x.d===1?" día":" días")}return e.edad!=null?e.edad+(e.edadU==="m"?" meses":e.edadU==="d"?" días":" años"):""}
-function rrFalta(e){const f=[];if(!e.nom)f.push("nombre");if(!e.doc)f.push("documento");else if(!e.tipo)f.push("tipo de documento");if(!e.fn&&e.edad==null)f.push("nacimiento o edad");if(!e.sx)f.push("sexo");if(!e.com)f.push("comunidad");if(!e.at)f.push("atención");else if(!e.dest)f.push("detalle");if(e.at==="mat"&&e.dest&&e.dest.mod==="prenatal"&&e.sem==null&&!e.fum)f.push("semanas o FUM");return f}
+function rrFalta(e){const f=[];if(!e.nom)f.push("nombre");if(!e.doc)f.push("documento");else if(!e.tipo)f.push("tipo de documento");if(!e.fn&&e.edad==null)f.push("nacimiento o edad");if(!e.sx)f.push("sexo");if(!e.com)f.push("comunidad");if(!e.at)f.push("atención");else if(!e.dest)f.push("detalle");if(e.at==="mat"&&e.dest&&e.dest.mod==="prenatal"){if(e.sem==null&&!e.fum)f.push("semanas o FUM");if(!e.ctl)f.push("primer control o seguimiento");else if(e.ctl==="seg"&&!e.lugar)f.push("dónde hace los controles")}return f}
 /* paciente para la app: busca primero en la base para no duplicar */
 function rrPac(e){const ps=pacientes();let k=null;if(e.doc)k=Object.keys(ps).find(z=>z.endsWith(":"+e.doc));if(!k&&e.nom)k=Object.keys(ps).find(z=>z==="N:"+rrU(e.nom));
   const base=k?Object.assign({},ps[k].ident):{};const P=Object.assign(base,{"NOMBRE COMPLETO":e.nom||base["NOMBRE COMPLETO"]||"","TIPO":e.tipo||base["TIPO"]||"","DOCUMENTO ID.":e.doc||base["DOCUMENTO ID."]||"","GENERO":e.sx||base["GENERO"]||""});
@@ -10423,7 +10432,7 @@ function rrPac(e){const ps=pacientes();let k=null;if(e.doc)k=Object.keys(ps).fin
 function rrGuardarBase(e){const {P}=rrPac(e),ps=pacientes(),k=pkey(P);let x=ps[k];if(!x){const n=Object.values(ps).reduce((m,y)=>Math.max(m,y.n||0),0)+1;x=ps[k]={n,creado:hoy(),ident:{},aten:[],pend:[]}}
   const id={};ID_KEYS.concat(["__com","__edad"]).forEach(z=>{if(P[z])id[z]=P[z]});Object.assign(x.ident,id);setPacientes(ps);return P}
 function rrAbrir(e){const P=rrGuardarBase(e);setPac(P);const d=e.dest||{};
-  if(e.at==="mat"&&d.mod==="prenatal"){const o=gexGet(P);if(e.sem!=null){o._egm={f:hoy(),w:e.sem};o._eg={f:hoy(),w:e.sem}}gexSet(o,P);if(e.fum&&!S.get(key("prenatal","eg_fum")))S.set(key("prenatal","eg_fum"),e.fum)}
+  if(e.at==="mat"&&d.mod==="prenatal"){const o=gexGet(P);if(e.sem!=null){o._egm={f:hoy(),w:e.sem};o._eg={f:hoy(),w:e.sem}}if(e.ctl||e.lugar)o._ctl={f:hoy(),tipo:e.ctl||"",lugar:e.lugar||""};gexSet(o,P);if(e.fum&&!S.get(key("prenatal","eg_fum")))S.set(key("prenatal","eg_fum"),e.fum)}
   const L=rrGet(),x=L.find(z=>z.id===e.id);if(x){x.abierto=hoy();rrSet(L)}
   if(e.alarma&&!e._telOk){dirOpen({de:null,motivo:"ALARMA en el registro rápido: "+(e.det||RR_AT[e.at]||"")});return}
   if(d.mod){S.set(key(d.mod,"tab"),"guia");openMod(d.mod);return}
@@ -10462,7 +10471,7 @@ function rrOpen(op){op=op||{};stopRec();st.view="rr";const L=rrGet(),hoyL=L.filt
     return `<div class="rr-card${f.length?" rr-falta":""}"><p style="margin:0 0 6px"><b>${i+1}. ${esc(e.nom||"Sin nombre")}</b> ${existe?`<span class="pill low">Ya está en tu base</span>`:`<span class="pill mid">Nuevo en la base</span>`} ${e.alarma?`<span class="pill high">ALARMA</span>`:""}</p>
      <div class="pgrid">${inp("nom","Nombre",e.nom)}${inp("tipo","Tipo",e.tipo)}${inp("doc","Documento",e.doc)}${inp("fn","Nacimiento",e.fn,"date")}${e.fn?`<label class="bfl"><span>Edad (por la fecha de nacimiento)</span><input value="${esc(rrEdadTxt(e))}" readonly tabindex="-1" style="background:var(--accent-soft)"></label>`:inp("edad","Edad (si no hay fecha)",e.edad!=null?e.edad+(e.edadU==="m"?" meses":e.edadU==="d"?" días":" años"):"")}${inp("sx","Sexo (F o M)",e.sx)}${inp("com","Comunidad",e.com)}
       <label class="bfl"><span>Atención</span><select data-rrf="${i}:at"><option value="">—</option>${Object.entries(RR_AT).map(([k,t])=>`<option value="${k}"${e.at===k?" selected":""}>${esc(t)}</option>`).join("")}</select></label>${inp("det","Detalle",e.det)}</div>
-     <p style="margin:6px 0 0">Va a: <b>${esc(e.destT||"—")}</b>${e.sem!=null?" · "+gexSem(e.sem)+" semanas":""}</p>${f.length?`<p style="margin:4px 0 0;color:var(--miss)">Falta: ${esc(f.join(", "))}</p>`:""}${e.aviso.length?`<p class="note-src" style="margin:4px 0 0">${esc(e.aviso.join(" "))}</p>`:""}${[e.pueblo&&"Pueblo: "+e.pueblo,e.eapb&&"EAPB: "+e.eapb,e.tel&&"Teléfono: "+e.tel].filter(Boolean).length?`<p class="note-src" style="margin:4px 0 0">${esc([e.pueblo&&"Pueblo: "+e.pueblo,e.eapb&&"EAPB: "+e.eapb,e.tel&&"Teléfono: "+e.tel].filter(Boolean).join(" · "))}</p>`:""}${e.nota?`<p class="note-src" style="margin:4px 0 0">Nota: ${esc(e.nota)}</p>`:""}</div>`}).join("");
+     <p style="margin:6px 0 0">Va a: <b>${esc(e.destT||"—")}</b>${e.sem!=null?" · "+gexSem(e.sem)+" semanas":""}</p>${f.length?`<p style="margin:4px 0 0;color:var(--miss)">Falta: ${esc(f.join(", "))}</p>`:""}${e.aviso.length?`<p class="note-src" style="margin:4px 0 0">${esc(e.aviso.join(" "))}</p>`:""}${e.at==="mat"&&e.dest&&e.dest.mod==="prenatal"?rrGesInfo(e):""}${[e.pueblo&&"Pueblo: "+e.pueblo,e.eapb&&"EAPB: "+e.eapb,e.tel&&"Teléfono: "+e.tel].filter(Boolean).length?`<p class="note-src" style="margin:4px 0 0">${esc([e.pueblo&&"Pueblo: "+e.pueblo,e.eapb&&"EAPB: "+e.eapb,e.tel&&"Teléfono: "+e.tel].filter(Boolean).join(" · "))}</p>`:""}${e.nota?`<p class="note-src" style="margin:4px 0 0">Nota: ${esc(e.nota)}</p>`:""}</div>`}).join("");
     document.querySelectorAll("[data-rrf]").forEach(el=>el.onchange=()=>{const[i,k]=el.dataset.rrf.split(":"),e=PEND[+i];let v=el.value.trim();
       if(k==="edad"){const n=(v.match(/\d+/)||[])[0];if(n!=null){e.edad=+n;e.edadU=/mes/i.test(v)?"m":/d[ií]a/i.test(v)?"d":"a"}else delete e.edad}
       else if(k==="sx")e.sx=/^f|mujer/i.test(v)?"F":/^m|hombre/i.test(v)?"M":"";else if(k==="tipo")e.tipo=rrTipo(v)||v.toUpperCase();else if(k==="doc")e.doc=rrDig(v);else e[k]=v;

@@ -15,7 +15,7 @@ const F=await p.evaluate(()=>{const F=[],ok=(c,m)=>{if(!c)F.push(m)};localStorag
  const L=rrParse(T);ok(L.length===6,'pacientes: '+L.length);
  const [a,l,i,pe,r,s]=L;
  ok(a.nom==='MARIA RODRIGUEZ GOMEZ'&&a.tipo==='CC'&&a.doc==='112054321'&&a.fn==='2002-03-14'&&a.sx==='F'&&a.com==='QUERARI','datos 1: '+JSON.stringify(a));
- ok(a.at==='mat'&&a.dest.mod==='prenatal'&&a.sem===18,'materno');ok(/PAREJA 30/.test(a.nota)&&a.edad==null,'la nota no se mezcla con EDAD');ok(!rrFalta(a).length,'completo 1');
+ ok(a.at==='mat'&&a.dest.mod==='prenatal'&&a.sem===18,'materno');ok(/PAREJA 30/.test(a.nota)&&a.edad==null,'la nota no se mezcla con EDAD');ok(rrFalta(a).join()==='primer control o seguimiento','a la gestante solo le falta primer control o seguimiento: '+rrFalta(a));
  ok(l.tipo==='RC'&&l.doc==='10987'&&l.edad===3&&l.sx==='M'&&l.at==='morb'&&l.mb==='eda'&&l.alarma,'morbilidad con alarma: '+JSON.stringify(l));
  ok(i.doc==='556'&&i.fn==='1990-02-01'&&i.dest.vn==='impl','corrijo e implante: '+JSON.stringify(i));
  ok(pe.at==='ev'&&pe.dest.ev==='ofid','evento ofídico');
@@ -37,6 +37,12 @@ const F=await p.evaluate(()=>{const F=[],ok=(c,m)=>{if(!c)F.push(m)};localStorag
  /* no duplica */
  rrParse('PACIENTE NUEVO NOMBRE Maria R DOCUMENTO CC 112054321 SEXO mujer COMUNIDAD Querari ATENCION ruta FIN PACIENTE').forEach(e=>ok(rrPac(e).existe,'reconoce que ya existe'));
  const pq=rrParse('PACIENTE NUEVO NOMBRE Eva Lis DOCUMENTO CC 4 4 SEXO mujer COMUNIDAD Querari PUEBLO cubeo EAPB Mallamas TELEFONO 3 1 0 5 5 5 ATENCION ruta FIN PACIENTE')[0];const PP=rrPac(pq).P;ok(PP['PUEBLO']==='CUBEO'&&PP['EAPB NOMBRE']==='MALLAMAS'&&PP['TELEFONO']==='310555'&&PP['ETNIA']==='INDIGENA','pueblo, eapb y teléfono: '+JSON.stringify(PP));
+ const g1=rrParse('PACIENTE NUEVO NOMBRE Lia Paz DOCUMENTO CC 7 7 1 SEXO mujer EDAD 22 años COMUNIDAD Querari ATENCION materno DETALLE gestante 26 semanas ya viene en controles LUGAR albergue de Mitú FIN PACIENTE')[0];
+ ok(g1.ctl==='seg'&&/ALBERGUE DE MITU/.test(g1.lugar)&&!rrFalta(g1).length,'gestante en seguimiento: '+JSON.stringify([g1.ctl,g1.lugar,rrFalta(g1)]));
+ const g2=rrParse('PACIENTE NUEVO NOMBRE Lia Paz DOCUMENTO CC 7 7 2 SEXO mujer EDAD 22 años COMUNIDAD Querari ATENCION materno DETALLE gestante 8 semanas primer control FIN PACIENTE')[0];ok(g2.ctl==='ing','primer control');
+ const g4=rrParse('PACIENTE NUEVO NOMBRE Lia Paz DOCUMENTO CC 7 7 4 SEXO mujer EDAD 22 años COMUNIDAD Querari ATENCION materno DETALLE gestante 30 semanas, ya viene en controles en el hospital de Mitú. FIN PACIENTE')[0];ok(g4.ctl==='seg'&&/HOSPITAL DE MITU/.test(g4.lugar||''),'lugar dentro del detalle: '+g4.lugar);
+ const g3=rrParse('PACIENTE NUEVO NOMBRE Lia Paz DOCUMENTO CC 7 7 3 SEXO mujer EDAD 22 años COMUNIDAD Querari ATENCION materno DETALLE gestante 12 semanas FIN PACIENTE')[0];ok(rrFalta(g3).includes('primer control o seguimiento'),'pide primer control o seguimiento');
+ rrAbrir(g1);ok(gexCalc().o._ctl.lugar&&!gexCalc().ing,'seguimiento guardado en el control de exámenes');ok(/Hace los controles en/.test(gexHTML()),'lugar en exámenes');
  /* Claude por copiar y pegar */
  ok(/PACIENTE NUEVO/.test(rrPrompt('x'))&&/FIN PACIENTE/.test(rrPrompt('x')),'prompt');
  return F});
