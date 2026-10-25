@@ -1973,7 +1973,7 @@ function wireMiDia(){const cb=$("md-cal");if(cb)cb.onclick=calOpen;
 function mdShow(t){const s=$("md-st");s.innerHTML="";const a=document.createElement("textarea");a.value=t;a.rows=7;a.readOnly=true;s.append("No se pudo copiar solo. Mantén presionado el texto y cópialo:",a);a.focus();a.select()}
 
 /* ---------- PANEL ---------- */
-const VERSION_APP="2026-10-25 v201";
+const VERSION_APP="2026-10-25 v202";
 function home(){
   stopRec();if(S.get(AT_KEY))atReiniciar();st.view="home";
   const rm=["precon","prenatal","parto","rn","ive"],rp=["pinf","inf","adol","juv","adul","vej"];
@@ -2265,10 +2265,9 @@ function paneGuia(){
   const total=m.sections.reduce((a,s)=>a+s.items.length,0),done=Object.keys(ck).length;
   $("pane").innerHTML=`
   ${m.alerts.length?`<div class="box warn"><h3>Remitir o actuar si…</h3><ul>${m.alerts.map(a=>`<li>${esc(a)}</li>`).join("")}</ul></div>`:""}
-  ${alcHTML(id)}
+  <p class="note-src">Marca lo que vas haciendo (${done} de ${total}), en el orden de la consulta: primero la entrevista y el examen, después los exámenes y el plan. Lo marcado se pasa a la nota.</p>
+  ${(()=>{const ix=m.sections.findIndex(s=>/^ex[aá]menes|paracl[ií]nic|laborator/i.test(s.t));return m.sections.map((s,i)=>(i===(ix<0?m.sections.length:ix)?guiaExHTML(id):"")+`<details class="sec" ${i<2?"open":""}><summary><span>${esc(s.t)}</span><span class="cnt">${s.items.filter((_,j)=>ck[i+"."+j]).length}/${s.items.length}</span></summary><ul class="items">${s.items.map((it,j)=>{const q=it.startsWith("Q:");const txt=q?it.slice(2):it;return `<li><input type="checkbox" id="c${i}_${j}" data-k="${i}.${j}" ${ck[i+"."+j]?"checked":""}><label for="c${i}_${j}"><span class="${q?"q":""}">${esc(txt)}</span></label></li>`}).join("")}</ul></details>`).join("")+(ix<0?guiaExHTML(id):"")})()}
   ${rutaBQHTML(id)}${fmtRutaHTML(id)}
-  <p class="note-src">Marca lo que vas haciendo (${done} de ${total}). Lo marcado se pasa a la nota.</p>
-  ${m.sections.map((s,i)=>`<details class="sec" ${i<2?"open":""}><summary><span>${esc(s.t)}</span><span class="cnt">${s.items.filter((_,j)=>ck[i+"."+j]).length}/${s.items.length}</span></summary><ul class="items">${s.items.map((it,j)=>{const q=it.startsWith("Q:");const txt=q?it.slice(2):it;return `<li><input type="checkbox" id="c${i}_${j}" data-k="${i}.${j}" ${ck[i+"."+j]?"checked":""}><label for="c${i}_${j}"><span class="${q?"q":""}">${esc(txt)}</span></label></li>`}).join("")}</ul></details>`).join("")}
   <div class="btns"><button class="btn primary" id="goNota">Siguiente: Nota →</button><button class="btn" id="clrChk">Desmarcar todo</button></div>`;
   document.querySelectorAll("[data-k]").forEach(c=>c.onchange=()=>{const o=checks(id);if(c.checked)o[c.dataset.k]=1;else delete o[c.dataset.k];S.set(key(id,"chk"),JSON.stringify(o));const det=c.closest("details");const sec=m.sections[+c.dataset.k.split(".")[0]];det.querySelector(".cnt").textContent=Object.keys(o).filter(k=>k.split(".")[0]===c.dataset.k.split(".")[0]).length+"/"+sec.items.length});
   rutaBQWire(id);fmtRutaWire(id);
@@ -10342,7 +10341,8 @@ function gexLista(de){stopRec();st.view="gexl";const L=gexTodas().sort((a,b)=>{c
   $("gexl-copy").onclick=()=>{const t=["EXAMENES DE GESTANTES — "+hoy()].concat(L.map(G=>`${G.P["NOMBRE COMPLETO"]||""} (${G.P.__com||""}, ${G.W==null?"sin EG":gexSem(G.W)+" sem"}): hoy ${G.R.filter(z=>z.g==="hoy").map(z=>z.x.id).join(",")||"-"}; remisión ${G.R.filter(z=>z.g==="rem").map(z=>z.x.id).join(",")||"-"}; pendientes ${G.R.filter(z=>z.g==="pend").map(z=>z.x.id).join(",")||"-"}; ventana pasada ${G.R.filter(z=>z.g==="pas").map(z=>z.x.id).join(",")||"-"}`)).join("\n");try{navigator.clipboard.writeText(t)}catch(e){}$("gexl-st").textContent="Resumen copiado."};
   $("gexl-back").onclick=()=>{if(de){S.set(key("prenatal","tab"),"guia");openMod("prenatal")}else{home();window.scrollTo(0,0)}};window.scrollTo(0,0)}
 /* enganches: guía prenatal, pruebas en el puesto, nota prenatal por voz, Mi día */
-fmtRutaHTML=(function(o){return function(id){const h=o(id);if(id!=="prenatal")return h;return `<details class="sec" id="ruta-gex" open><summary><span>Exámenes de esta gestante: hoy, remisión y pendientes</span></summary><div style="padding:10px 14px 14px">${gexHTML()}</div></details>`+h}})(fmtRutaHTML);
+function guiaExHTML(id){const x=alcHTML(id)+gexRutaHTML(id);return String(x).trim()?`<p class="lab" style="margin:14px 0 6px">Exámenes y plan</p>`+x:""}
+function gexRutaHTML(id){return id==="prenatal"?`<details class="sec" id="ruta-gex" open><summary><span>Exámenes de esta gestante: hoy, remisión y pendientes</span></summary><div style="padding:10px 14px 14px">${gexHTML()}</div></details>`:""}
 fmtRutaWire=(function(o){return function(id){o(id);if(id==="prenatal")gexWire("mod:prenatal")}})(fmtRutaWire);
 pzOpen=(function(o){return function(){o.apply(this,arguments);const f=$("pzr-fmt");if(!f||$("pz-gex"))return;
   f.insertAdjacentHTML("afterend",`<div class="btns" id="pz-gexw"><button class="btn" type="button" id="pz-gex">Guardar en los exámenes de la gestante</button></div><p class="status" id="pz-gex-st"></p>`);
@@ -10536,6 +10536,7 @@ obsNota=(function(o){return function(f){f=f||hoy();let md=o.apply(this,arguments
    y se puede descargar la bitácora completa («App Rutas 3280 - Bitácora.md») para el vault.
    Al publicar una versión nueva se agrega aquí su línea (la más nueva primero). */
 const APP_CAMBIOS=[
+ [202,"2026-10-25","Guía de cada ruta en el orden de la consulta: primero la entrevista (anamnesis, antecedentes, psicosocial) y el examen con signos vitales; después «Exámenes y plan» (qué ordenas, exámenes de la gestante); botiquín y formatos al final."],
  [201,"2026-10-25","La nota de Obsidian lleva las mejoras de la app desde la última exportación; botón para descargar la bitácora completa de la app."],
  [200,"2026-10-25","La nota de Obsidian incluye el registro rápido del día y los exámenes de cada gestante."],
  [199,"2026-10-25","Exámenes de la gestante: lo no marcado queda pendiente al cerrar el control y reaparece «Pendiente desde el dd/mm»."],
