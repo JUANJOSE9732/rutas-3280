@@ -1971,7 +1971,7 @@ function wireMiDia(){const cb=$("md-cal");if(cb)cb.onclick=calOpen;
 function mdShow(t){const s=$("md-st");s.innerHTML="";const a=document.createElement("textarea");a.value=t;a.rows=7;a.readOnly=true;s.append("No se pudo copiar solo. Mantén presionado el texto y cópialo:",a);a.focus();a.select()}
 
 /* ---------- PANEL ---------- */
-const VERSION_APP="2026-10-24 v184";
+const VERSION_APP="2026-10-24 v185";
 function home(){
   stopRec();if(S.get(AT_KEY))atReiniciar();st.view="home";
   const rm=["precon","prenatal","parto","rn","ive"],rp=["pinf","inf","adol","juv","adul","vej"];
@@ -9340,6 +9340,115 @@ document.head.insertAdjacentHTML("beforeend",`<style>
 function fmtHome(){const c=$("md-cal");if(!c||$("md-fmt"))return;const n=FMT.filter(f=>fmtCant(f.id)<=0).length;
   c.insertAdjacentHTML("afterend",`<button type="button" class="btn" id="md-fmt">Formatos${n?` · ${n} sin existencias`:""}</button>`);$("md-fmt").onclick=()=>{st.fmtDe=null;fmtOpen()}}
 home=(function(o){return function(){const r=o.apply(this,arguments);try{fmtHome()}catch(e){}return r}})(home);
+
+/* ===== v185: Pruebas rápidas en el puesto — VIH, sífilis, hepatitis B, malaria y embarazo =====
+   Se suman a "Pruebas en el puesto": resultado + lote, interpretación según la persona (gestante o no),
+   qué hacer con lo que hay en el puesto (sin médico: telemedicina y remisión), formatos que tocan
+   y texto para la nota. */
+Object.assign(MBF,{
+ vihg:"Minsalud, GPC basada en la evidencia científica para la atención de la infección por VIH/sida en adolescentes (con 13 años o más) y adultos (2021), algoritmo diagnóstico con pruebas rápidas",
+ etmi:"Minsalud/OPS, Estrategia ETMI Plus: eliminación de la transmisión materno-infantil del VIH, la sífilis, la hepatitis B y la enfermedad de Chagas (lineamiento Colombia)"});
+const PZR=[
+ {k:"vih",t:"VIH (prueba rápida)",o:["NO REACTIVA","REACTIVA","INVALIDA"]},
+ {k:"sif",t:"Sífilis (prueba treponémica rápida)",o:["NO REACTIVA","REACTIVA","INVALIDA"]},
+ {k:"hbs",t:"Hepatitis B (antígeno de superficie, HBsAg)",o:["NO REACTIVA","REACTIVA","INVALIDA"]},
+ {k:"mal",t:"Malaria (prueba rápida, PDR)",o:["NEGATIVA","P. FALCIPARUM","P. VIVAX (NO FALCIPARUM)","MIXTA","INVALIDA"]},
+ {k:"emb",t:"Embarazo (prueba en orina)",o:["NEGATIVA","POSITIVA","INVALIDA"]}];
+const PZR_KEY="dn2_pzr";
+function pzrGet(){try{return JSON.parse(S.get(PZR_KEY)||"{}")||{}}catch(e){return{}}}
+function pzRap(d){const r=d.r||{},l=d.l||{},ges=d.g==="ges",B=[],N=[],F=[["hc",""]];
+  const L=k=>l[k]?`, LOTE ${String(l[k]).toUpperCase()}`:"";const add=(k,cls,txt,acc)=>B.push({k,cls,txt,acc});
+  const peni=bqGet("peni");const peniTxt=peni?` En el botiquín: ${bqCant(peni)}; ${bqChip(peni).replace(/<[^>]+>/g,"").trim().toLowerCase()}.`:"";
+  /* VIH */
+  if(r.vih){F.push(["civih","Antes de la prueba, con asesoría pre y postest"]);let n=`PREVIA ASESORIA PRE TEST Y FIRMA DE CONSENTIMIENTO INFORMADO, SE REALIZA PRUEBA RAPIDA PARA VIH${L("vih")}: ${r.vih}`;
+   if(r.vih==="INVALIDA"){add("vih","mid","VIH: prueba inválida (no apareció la línea de control). Repite con otro dispositivo; no informes resultado.",[["Revisa vencimiento, temperatura de almacenamiento y la cantidad de muestra y de buffer.","vihg",""]]);n+=". SE REPITE LA PRUEBA"}
+   else if(r.vih==="NO REACTIVA"){add("vih","low","VIH: no reactiva.",[["Asesoría postest: si hubo una exposición de riesgo en las últimas 12 semanas (periodo de ventana), repite la prueba; refuerza el uso del condón.","vihg",""],ges?["Gestante: repite la prueba en cada trimestre según la ruta materno perinatal.","r3280",""]:null].filter(Boolean));n+=". SE BRINDA ASESORIA POST TEST"}
+   else{const a=[["Una prueba rápida reactiva no es diagnóstico. Si tienes una segunda prueba rápida de otro fabricante, hazla ya; si las dos son reactivas, la confirmación (carga viral) la hace el hospital. Si no coinciden, es discordante y también se remite.","vihg",""],
+     ["Asesoría postest el mismo día, en privado: explica que el resultado es preliminar, que el VIH tiene tratamiento y que con tratamiento no se transmite. Pregunta por violencia y por su red de apoyo.","vihg",""],
+     ["Telemedicina y remisión prioritaria al programa de VIH; ofrece la prueba a la pareja y a los hijos.","vihg",""]];
+    if(ges)a.push(["Gestante: la remisión es prioritaria para iniciar el tratamiento antirretroviral cuanto antes y evitar que el bebé se infecte. El parto debe ser institucional y la alimentación del bebé la define el programa (en Colombia se entrega fórmula láctea).","etmi",""]);
+    add("vih","high","VIH: prueba reactiva.",a);n+=d.vih2?`. SEGUNDA PRUEBA RAPIDA DE OTRO FABRICANTE: ${d.vih2}`:"";n+=". SE BRINDA ASESORIA POST TEST, SE CONSULTA POR TELEMEDICINA Y SE GESTIONA REMISION PRIORITARIA AL PROGRAMA DE VIH";F.push(["rem","Remisión prioritaria al programa de VIH"],["~vih","Si se confirma"])}
+   N.push(n+".")}
+  /* Sífilis */
+  if(r.sif){let n=`PRUEBA RAPIDA TREPONEMICA PARA SIFILIS${L("sif")}: ${r.sif}`;
+   if(r.sif==="INVALIDA"){add("sif","mid","Sífilis: prueba inválida. Repite con otro dispositivo.",[]);n+=". SE REPITE LA PRUEBA"}
+   else if(r.sif==="NO REACTIVA"){add("sif","low","Sífilis: no reactiva.",[ges?["Gestante: repite la prueba en cada trimestre y en el parto, según la ruta materno perinatal.","r3280",""]:["Si hubo una relación de riesgo reciente, repite en 3 meses.","sif",""]])}
+   else if(d.siftx){add("sif","mid","Sífilis: reactiva con antecedente de sífilis tratada. La prueba treponémica queda positiva de por vida: no te dice si hay infección activa.",[["Decide el VDRL o RPR con diluciones: va en la remisión. Si los títulos subieron 4 veces (dos diluciones) o más frente al anterior, es reinfección y se trata de nuevo.","sif",""],["Pide el soporte del tratamiento anterior (carné, historia). Si no hay soporte, se maneja como sífilis sin tratar.","sif",""]]);n+=". REFIERE ANTECEDENTE DE SIFILIS TRATADA. SE SOLICITA VDRL CON DILUCIONES EN LA REMISION";F.push(["rem","VDRL con diluciones"])}
+   else if(ges){const a=[];
+     if(d.alpen)a.push(["Alergia a la penicilina: no la reemplaces por otro antibiótico. Telemedicina y remisión prioritaria para desensibilización; solo la penicilina protege al bebé.","sif",""]);
+     else a.push(["Sífilis gestacional: aplica penicilina benzatínica 2.400.000 UI IM el mismo día, sin esperar el VDRL. Se completan 3 dosis, una cada semana (sífilis latente de duración desconocida). Sin prueba de sensibilidad; observa 30 minutos con la adrenalina lista."+peniTxt,"sif",""]);
+     a.push(["Pareja: prueba y penicilina benzatínica 2.400.000 UI IM en dosis única, aunque su prueba salga no reactiva; si no se trata, la gestante se reinfecta.","sif",""],["VDRL o RPR con diluciones en la remisión: es la línea de base para el seguimiento.","sif",""],["Ofrece prueba de VIH si no se ha hecho. El recién nacido necesitará VDRL al nacer.","etmi",""]);
+     add("sif","high","Sífilis: reactiva en una gestante sin tratamiento previo documentado.",a);
+     n+=d.alpen?". REFIERE ALERGIA A LA PENICILINA: SE CONSULTA POR TELEMEDICINA Y SE GESTIONA REMISION PRIORITARIA PARA DESENSIBILIZACION":". SE APLICA PENICILINA G BENZATINICA 2.400.000 UI IM PRIMERA DOSIS DE 3 (SEMANAL), SE OBSERVA 30 MINUTOS SIN REACCIONES, SE CITA PARA SEGUNDA DOSIS EN 7 DIAS. SE TRATA A LA PAREJA Y SE SOLICITA VDRL CON DILUCIONES";
+     F.push(["recet","Penicilina benzatínica (gestante y pareja)"],["rem","VDRL con diluciones y valoración"],["~sif","Sífilis gestacional"]);if(!d.alpen)F.push(["ci","Si la ESE lo pide para la aplicación de penicilina"])}
+   else{add("sif","high","Sífilis: reactiva. Falta saber si es activa.",[["VDRL o RPR con diluciones en la remisión y telemedicina: el tratamiento (1 o 3 dosis de penicilina benzatínica) depende del estadio y lo ordena medicina.","sif",""],["Ofrece prueba de VIH, estudia y trata a la pareja.","sif",""]]);n+=". SE CONSULTA POR TELEMEDICINA Y SE SOLICITA VDRL CON DILUCIONES";F.push(["rem","VDRL con diluciones"],["recet","Si medicina ordena penicilina"])}
+   N.push(n+".")}
+  /* Hepatitis B */
+  if(r.hbs){let n=`PRUEBA RAPIDA PARA HEPATITIS B (HBSAG)${L("hbs")}: ${r.hbs}`;
+   if(r.hbs==="INVALIDA"){add("hbs","mid","Hepatitis B: prueba inválida. Repite con otro dispositivo.",[]);n+=". SE REPITE LA PRUEBA"}
+   else if(r.hbs==="NO REACTIVA"){add("hbs","low","Hepatitis B: no reactiva.",[["Revisa el carné: si no tiene esquema completo de vacuna contra hepatitis B, ofrécelo.","etmi",""]])}
+   else{const a=[["Probable hepatitis B: notifica en la ficha 340 y remite para confirmar y valorar (carga viral, función hepática).","etmi",""],["Ofrece prueba y vacuna a la pareja y a quienes viven en la casa; explica que se transmite por sangre, relaciones sexuales y de madre a hijo.","etmi",""]];
+    if(ges)a.unshift(["Gestante: el parto debe ser institucional. El recién nacido necesita vacuna de hepatitis B e inmunoglobulina en las primeras 12 horas de vida; déjalo escrito en la remisión.","etmi",""]);
+    add("hbs","high","Hepatitis B: HBsAg reactivo.",a);n+=". SE NOTIFICA EN FICHA 340, SE CONSULTA POR TELEMEDICINA Y SE GESTIONA REMISION";F.push(["f340","HBsAg reactivo"],["rem","Confirmación y valoración"])}
+   N.push(n+".")}
+  /* Malaria */
+  if(r.mal){F.push(["rdmal","Toda prueba de malaria, positiva o negativa"],["rimal","Prueba usada"]);let n=`PRUEBA RAPIDA PARA MALARIA (PDR)${L("mal")}: ${r.mal}`;
+   const hb=parseFloat(String(d.hb||"").replace(",","."));
+   if(r.mal==="INVALIDA"){add("mal","mid","Malaria: prueba inválida. Repite con otro dispositivo.",[]);n+=". SE REPITE LA PRUEBA"}
+   else if(r.mal==="NEGATIVA"){add("mal","low","Malaria: negativa.",[d.fie?["Si la fiebre sigue, repite la prueba en 24 horas y busca otras causas (dengue, infección urinaria, neumonía).","mal",""]:null,ges&&!d.fie?["Gestante sin fiebre: queda como tamizaje del control.","r3280",""]:null].filter(Boolean))}
+   else{const pf=/FALCIPARUM|MIXTA/.test(r.mal),grave=d.malsig||(hb>0&&hb<7),a=[];
+    if(grave)a.push(["Malaria complicada (signos de peligro o hemoglobina menor de 7): telemedicina y remisión urgente; no esperes a completar el tratamiento oral.","mal",""]);
+    a.push([pf?"P. falciparum o mixta: tratamiento con artemeter-lumefantrina por 3 días más primaquina en dosis única, según la guía y la orden médica.":"P. vivax: cloroquina por 3 días más primaquina por 7 días (0,5 mg/kg/día), según la guía y la orden médica.","mal",""]);
+    a.push(["No uses primaquina en gestantes, menores de 6 meses ni en mujeres que lactan a un bebé menor de 6 meses. Los antimaláricos no están en tu botiquín: los entrega el programa de ETV.","mal",""]);
+    if(ges)a.push(["Gestante con malaria: alto riesgo (anemia, aborto, bajo peso al nacer). Telemedicina y remisión al albergue u hospital; con vivax, después del tratamiento sigue cloroquina semanal hasta el parto en lugar de primaquina.","mal",""]);
+    else if(d.g==="n6"||d.g==="lac")a.push(["Menor de 5 años con malaria: telemedicina y remisión.","mal",""]);
+    a.push(["Supervisa la primera dosis, explica que debe terminar el tratamiento y haz control con gota gruesa: la PDR de falciparum sigue positiva 2 a 4 semanas y no sirve para el control.","mal",""]);
+    add("mal","high",`Malaria positiva: ${r.mal.toLowerCase()}.`,a);
+    n+=`. SE NOTIFICA EN FICHA 465. SE INICIA TRATAMIENTO ANTIMALARICO SUPERVISADO SEGUN GUIA Y ORDEN MEDICA`+(grave||ges||d.g==="n6"||d.g==="lac"?". SE CONSULTA POR TELEMEDICINA Y SE GESTIONA REMISION":"");
+    F.push(["f465","Malaria confirmada"],["recet","Antimaláricos entregados"]);if(grave||ges||d.g==="n6"||d.g==="lac")F.push(["rem","Remisión"],["disrem","Si no acepta"])}
+   N.push(n+".")}
+  /* Embarazo */
+  if(r.emb){let n=`PRUEBA DE EMBARAZO EN ORINA${L("emb")}: ${r.emb}`;
+   if(r.emb==="INVALIDA"){add("emb","mid","Embarazo: prueba inválida. Repite con la primera orina de la mañana.",[]);n+=". SE REPITE LA PRUEBA"}
+   else if(r.emb==="NEGATIVA"){add("emb","low","Embarazo: negativa.",[["Si sigue sin menstruar, repite en 1 a 2 semanas con la primera orina de la mañana. Ofrece asesoría y método de planificación.","r3280",""]])}
+   else{add("emb","high","Embarazo: positiva.",[["Haz hoy el ingreso al PAMI y el primer control: pruebas rápidas (VIH, sífilis, hepatitis B, malaria), hemoglobina, tira de orina, ácido fólico y remisión al albergue.","r3280",""],["Si no desea continuar el embarazo, asesoría y remisión según la Res. 051 de 2023 (IVE).","r3280",""],["Si es menor de 14 años: es violencia sexual por ley. Notifica en la ficha 875 y activa la ruta.","r3280",""]]);
+    n+=". SE BRINDA ASESORIA Y SE REALIZA INGRESO AL CONTROL PRENATAL";F.push(["carges","Ingreso al PAMI"],["segges","Primer control"],["f875","Si es menor de 14 años"])}
+   N.push(n+".")}
+  return{B,nota:N.join("\n"),F}}
+pzOpen=(function(orig){return function(){orig.apply(this,arguments);
+  const d=pzrGet(),r=d.r||{},l=d.l||{};
+  const sub=document.querySelector("#app header .sub");if(sub)sub.textContent="Escribe el resultado de las pruebas rápidas, la hemoglobina portátil y la tira de orina. La app te dice qué significa para esta persona, qué hacer con lo que hay en el puesto, qué va en la remisión y qué formatos llenar, y arma el texto para la nota.";
+  const notaSec=$("pz-nota").closest("section");
+  notaSec.insertAdjacentHTML("beforebegin",`<section class="tool" id="pzr"><h3>Pruebas rápidas</h3>
+   <p class="note-src" style="margin:0 0 6px">Deja en blanco las que no hiciste. El lote es opcional pero va en la nota y en el registro.</p>
+   ${PZR.map(p=>`<div class="pzr-row"><label>${esc(p.t)}<select data-pzr="${p.k}"><option value="">No se hizo</option>${p.o.map(o=>`<option${r[p.k]===o?" selected":""}>${esc(o)}</option>`).join("")}</select></label><label>Lote<input data-pzl="${p.k}" value="${esc(l[p.k]||"")}" autocomplete="off"></label></div>
+     ${p.k==="vih"?`<label class="bfl" id="pzr-vih2w">Segunda prueba rápida de otro fabricante<select id="pzr-vih2"><option value="">No se hizo</option><option${d.vih2==="REACTIVA"?" selected":""}>REACTIVA</option><option${d.vih2==="NO REACTIVA"?" selected":""}>NO REACTIVA</option></select></label>`:""}
+     ${p.k==="sif"?`<div id="pzr-sifw"><label class="sx-ck"><input type="checkbox" id="pzr-siftx"${d.siftx?" checked":""}> Tuvo sífilis antes y tiene soporte del tratamiento</label><label class="sx-ck"><input type="checkbox" id="pzr-alpen"${d.alpen?" checked":""}> Alergia a la penicilina</label></div>`:""}
+     ${p.k==="mal"?`<label class="sx-ck" id="pzr-malw"><input type="checkbox" id="pzr-malsig"${d.malsig?" checked":""}> Signos de malaria complicada: no puede beber, vomita todo, convulsión, somnolencia, dificultad para respirar, ictericia, sangrado u orina oscura o escasa</label>`:""}
+     <div id="pzr-r-${p.k}"></div>`).join("")}
+   <div id="pzr-goprenat" hidden class="btns"><button class="btn primary" type="button" id="pzr-prenat">Ir a la ruta prenatal (ingreso al PAMI)</button></div>
+   <div id="pzr-fmt"></div></section>`);
+  const op=$("pz-g").onchange;
+  const lee=()=>{const o={r:{},l:{},vih2:$("pzr-vih2").value,siftx:$("pzr-siftx").checked,alpen:$("pzr-alpen").checked,malsig:$("pzr-malsig").checked};
+    document.querySelectorAll("[data-pzr]").forEach(s=>{if(s.value)o.r[s.dataset.pzr]=s.value});document.querySelectorAll("[data-pzl]").forEach(i=>{if(i.value.trim())o.l[i.dataset.pzl]=i.value.trim()});return o};
+  const mine=()=>{const o=lee();S.set(PZR_KEY,JSON.stringify(o));const R=pzRap(Object.assign({},o,{g:$("pz-g").value,fie:$("pz-fie").checked,hb:$("pz-hb").value}));
+    $("pzr-vih2w").hidden=o.r.vih!=="REACTIVA";$("pzr-sifw").hidden=o.r.sif!=="REACTIVA";$("pzr-malw").hidden=!o.r.mal||/NEGATIVA|INVALIDA/.test(o.r.mal);
+    PZR.forEach(p=>{const b=R.B.find(x=>x.k===p.k);$("pzr-r-"+p.k).innerHTML=b?`<div class="pz-r pz-${b.cls}"><b>${esc(b.txt)}</b>${b.acc.length?mbUL(b.acc):""}</div>`:""});
+    $("pzr-goprenat").hidden=o.r.emb!=="POSITIVA";
+    const hayHb=!!$("pz-hb").value,hayTi=[...document.querySelectorAll("[data-pzt]")].some(s=>s.value);
+    $("pzr-fmt").innerHTML=Object.keys(o.r).length||hayHb||hayTi?fmtLista(R.F.concat(hayHb?[["recet","Si entregas sulfato ferroso"]]:[]),"Formatos para estas pruebas"):"";
+    if(R.nota){const base=$("pz-nota").value;$("pz-nota").value=[R.nota,base].filter(Boolean).join("\n")}};
+  const todo=()=>{op&&op();mine()};
+  document.querySelectorAll("#app input,#app select").forEach(e=>{e.oninput=todo;e.onchange=todo});
+  const n=$("pz-norm");if(n){const o0=n.onclick;n.onclick=()=>{o0();mine()}}
+  const c=$("pz-clr");if(c){const o1=c.onclick;c.onclick=()=>{S.del(PZR_KEY);o1()}}
+  $("pzr-prenat").onclick=()=>{st.pzDe=null;S.set(key("prenatal","tab"),"guia");openMod("prenatal")};
+  mine()}})(pzOpen);
+mbHomeHTML=(function(o){return function(){return o.apply(this,arguments).replace("Hemoglobina portátil y tira de orina: qué significa, qué hacer y el texto para la nota","Pruebas rápidas (VIH, sífilis, hepatitis B, malaria, embarazo), hemoglobina y tira de orina: qué hacer, formatos y texto para la nota")}})(mbHomeHTML);
+document.head.insertAdjacentHTML("beforeend",`<style>
+.pzr-row{display:grid;grid-template-columns:1fr 110px;gap:8px;margin-top:10px}.pzr-row label{font-size:.85rem;color:var(--muted);display:flex;flex-direction:column;gap:2px}.pzr-row select,.pzr-row input{padding:6px 8px;font-size:.92rem}
+#pzr .bfl{margin-top:6px;font-size:.85rem}
+</style>`);
 
 /* ---------- arranque ---------- */
 /* los borradores guardados con la versión anterior de los módulos se reubican una sola vez */
