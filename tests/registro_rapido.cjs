@@ -27,6 +27,7 @@ const F=await p.evaluate(()=>{const F=[],ok=(c,m)=>{if(!c)F.push(m)};localStorag
  const ed=document.querySelector('[data-rrf="5:com"]');ed.value='Querarí';ed.dispatchEvent(new Event('change'));ok(!/comunidad/.test(document.querySelectorAll('.rr-card')[5].textContent.split('Falta:')[1]||''),'editar en la tarjeta');
  ok(/años/.test(document.querySelectorAll('.rr-card')[0].querySelector('input[readonly]')?.value||''),'edad calculada por la fecha');
  $('rr-ok').click();ok(rrGet().length===6&&Object.keys(pacientes()).length===6,'guardados: '+rrGet().length+' / '+Object.keys(pacientes()).length);
+ ok($('rr-saved')&&document.querySelectorAll('[data-rrgo]').length===6&&!$('rr-inw').open,'tras guardar: caja con Atender ahora y dictado cerrado');
  ok(document.querySelector('.rr-it.rr-al')&&/LUIS/.test(document.querySelector('.rr-it').textContent),'alarma primero');
  /* abrir: gestante → prenatal con semanas */
  const ga=rrGet().find(e=>/MARIA/.test(e.nom));rrAbrir(ga);ok(st.view==='mod'&&st.mod==='prenatal','abre prenatal');ok(Math.round(gexCalc().W)===18,'semanas en exámenes: '+gexCalc().W);

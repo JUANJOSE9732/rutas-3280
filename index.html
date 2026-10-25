@@ -1973,7 +1973,7 @@ function wireMiDia(){const cb=$("md-cal");if(cb)cb.onclick=calOpen;
 function mdShow(t){const s=$("md-st");s.innerHTML="";const a=document.createElement("textarea");a.value=t;a.rows=7;a.readOnly=true;s.append("No se pudo copiar solo. Mantén presionado el texto y cópialo:",a);a.focus();a.select()}
 
 /* ---------- PANEL ---------- */
-const VERSION_APP="2026-10-25 v196";
+const VERSION_APP="2026-10-25 v197";
 function home(){
   stopRec();if(S.get(AT_KEY))atReiniciar();st.view="home";
   const rm=["precon","prenatal","parto","rn","ive"],rp=["pinf","inf","adol","juv","adul","vej"];
@@ -10437,7 +10437,7 @@ Si falta un dato obligatorio (nombre, documento, nacimiento o edad, sexo, comuni
 DICTADO:
 ${t}`}
 async function rrClaude(t){if(sample){const x=await sample.json(`${rrPrompt(t)}\n\nResponde en JSON: {"texto":"<los bloques en el formato pedido>"}`,{cache:false});if(x&&x.texto)return String(x.texto);throw new Error("sin respuesta")}return null}
-function rrOpen(){stopRec();st.view="rr";const L=rrGet(),hoyL=L.filter(e=>e.f===hoy()),borr=S.get("dn2_rr_txt")||"";
+function rrOpen(op){op=op||{};stopRec();st.view="rr";const L=rrGet(),hoyL=L.filter(e=>e.f===hoy()),borr=S.get("dn2_rr_txt")||"";
   const ord=hoyL.slice().sort((a,b)=>(b.alarma?1:0)-(a.alarma?1:0)||(a.hecho?1:0)-(b.hecho?1:0));
   $("app").innerHTML=`<div class="top"><button class="back" type="button" id="rr-back">← Inicio</button><span class="tag pc">Registro rápido</span></div>
   <header><h1>Registro rápido por voz</h1><p class="sub">Dicta cada paciente entre «PACIENTE NUEVO» y «FIN PACIENTE». La app lo ordena, lo busca en tu base, lo clasifica y lo deja en la lista del día, listo para abrir donde va.</p></header>
@@ -10445,10 +10445,11 @@ function rrOpen(){stopRec();st.view="rr";const L=rrGet(),hoyL=L.filter(e=>e.f===
    <ol class="mb-ul"><li><b>PACIENTE NUEVO</b></li><li><b>NOMBRE</b> nombres y apellidos</li><li><b>DOCUMENTO</b> CC, TI, RC o CE y el número dígito por dígito</li><li><b>NACIMIENTO</b> día, mes y año (si no la sabe: <b>EDAD</b> y los años o meses)</li><li><b>SEXO</b> mujer u hombre</li><li><b>COMUNIDAD</b></li><li><b>ATENCIÓN</b> ruta, materno, morbilidad, evento o procedimiento</li><li><b>DETALLE</b> ruta: nada o planificación · materno: gestante y semanas (o FUM), puérpera, recién nacido · morbilidad: el motivo · evento: cuál · procedimiento: cuál</li><li><b>ALARMA</b> si hay signos de alarma (opcional)</li><li><b>NOTA</b> al final, lo que quieras (opcional)</li><li><b>FIN PACIENTE</b></li></ol>
    <p class="note-src">Para corregir di «CORRIJO» y repite la etiqueta con el dato bueno: vale el último. Sin internet, dicta con el micrófono del teclado del celular (Gboard con el español descargado funciona sin conexión).</p>
    <p class="note-src">Ejemplo: «PACIENTE NUEVO. NOMBRE María Rodríguez Gómez. DOCUMENTO CC 1 1 2 0 5 4 3 2 1. NACIMIENTO 14 de marzo de 2002. SEXO mujer. COMUNIDAD Querarí. ATENCIÓN materno. DETALLE gestante 18 semanas. NOTA ingreso. FIN PACIENTE.»</p></div></details>
-  <section class="tool" id="rr-in"><h3>1 · Dicta o pega</h3>${micUI(true)}<textarea id="rr-txt" rows="7" placeholder="PACIENTE NUEVO. NOMBRE … FIN PACIENTE.">${esc(borr)}</textarea>
+  ${op.saved&&op.saved.length?`<div class="box" id="rr-saved" style="border:2px solid var(--accent)"><h3>Guardado en la lista de hoy</h3>${op.saved.map(id=>{const e=L.find(z=>z.id===id);return e?`<p style="margin:6px 0"><b>${esc(e.nom||"Sin nombre")}</b>${rrEdadTxt(e)?" · "+esc(rrEdadTxt(e)):""} · ${esc(e.destT||RR_AT[e.at]||"")}${e.alarma?` <b style="color:var(--miss)">· ALARMA</b>`:""}</p><button class="btn primary" type="button" data-rrgo="${e.id}">${e.alarma?"Atender ahora (primero telemedicina)":"Atender ahora: "+esc(e.destT||"abrir")}</button>`:""}).join("")}</div>`:""}
+  <details class="sec" id="rr-inw"${op.saved||op.link?"":" open"}><summary><span>${op.saved?"Dictar o pegar otro paciente":op.link?"Lo que llegó del chat":"1 · Dicta o pega"}</span></summary><section class="tool" id="rr-in" style="margin:0;border:0">${micUI(true)}<textarea id="rr-txt" rows="7" placeholder="PACIENTE NUEVO. NOMBRE … FIN PACIENTE.">${esc(borr)}</textarea>
    <div class="btns"><button class="btn primary" type="button" id="rr-leer">Leer y ordenar (sin internet)</button><button class="btn" type="button" id="rr-cl">Ordenar con Claude</button><button class="btn" type="button" id="rr-clr">Borrar texto</button></div>
    <div id="rr-clbox" hidden><p class="note-src" id="rr-clmsg"></p><label class="bfl">Pega aquí la respuesta de Claude<textarea id="rr-resp" rows="5"></textarea></label><div class="btns"><button class="btn primary" type="button" id="rr-usar">Usar la respuesta de Claude</button></div></div>
-   <p class="status" id="rr-st" aria-live="polite"></p></section>
+   </section></details><p class="status" id="rr-st" aria-live="polite"></p>
   <section class="tool" id="rr-prev" hidden><h3>2 · Revisa antes de guardar</h3><div id="rr-cards"></div><div class="btns"><button class="btn primary" type="button" id="rr-ok">Guardar en la lista del día</button></div></section>
   <section class="tool"><h3>Lista de atención de hoy <span class="cnt">${hoyL.length||""}</span></h3>${ord.length?`<p class="note-src">${Object.entries(RR_AT).map(([k,t])=>{const n=hoyL.filter(e=>e.at===k).length;return n?`${esc(t)}: ${n}`:""}).filter(Boolean).join(" · ")}${hoyL.filter(e=>e.alarma).length?` · <b style="color:var(--miss)">Con alarma: ${hoyL.filter(e=>e.alarma).length}</b>`:""}</p>`:""}
    ${ord.length?ord.map(e=>`<div class="rr-it${e.hecho?" rr-hecho":""}${e.alarma?" rr-al":""}"><div><b>${esc(e.nom||"Sin nombre")}</b> <small>${esc([e.tipo,e.doc].filter(Boolean).join(" "))}${rrEdadTxt(e)?" · "+esc(rrEdadTxt(e)):""}${e.com?" · "+esc(e.com):""}</small><br><span class="pill ${e.alarma?"high":e.at==="ev"?"mid":"low"}">${esc(RR_AT[e.at]||"Sin clasificar")}</span> ${esc(e.destT||"")}${e.sem!=null?" · "+gexSem(e.sem)+" semanas":""}${e.alarma?` <b style="color:var(--miss)">· ALARMA</b>`:""}${rrFalta(e).length?`<br><small style="color:var(--miss)">Falta: ${esc(rrFalta(e).join(", "))}</small>`:""}</div>
@@ -10474,7 +10475,8 @@ function rrOpen(){stopRec();st.view="rr";const L=rrGet(),hoyL=L.filter(e=>e.f===
     $("rr-clbox").hidden=false;$("rr-clmsg").textContent=(ok?"Copié el dictado con las instrucciones. ":"No pude copiar solo: selecciona y copia el dictado. ")+"Pégalo en el chat de Claude del proyecto SECRETARIA YURUPARI; cuando te responda, copia su respuesta y pégala aquí abajo.";if(!ok){ta.focus();ta.select()}};
   $("rr-usar").onclick=()=>usar($("rr-resp").value);
   $("rr-clr").onclick=()=>{ta.value="";S.del("dn2_rr_txt")};
-  $("rr-ok").onclick=()=>{const L2=rrGet();PEND.forEach(e=>{rrGuardarBase(e);L2.unshift(e)});rrSet(L2);S.del("dn2_rr_txt");PEND=[];rrOpen();$("rr-st").textContent="Guardados en la lista de hoy y en tu base."};
+  $("rr-ok").onclick=()=>{const L2=rrGet(),ids=PEND.map(e=>e.id);PEND.forEach(e=>{rrGuardarBase(e);L2.unshift(e)});rrSet(L2);S.del("dn2_rr_txt");PEND=[];rrOpen({saved:ids})};
+  document.querySelectorAll("[data-rrgo]").forEach(b=>b.onclick=()=>{const e=rrGet().find(z=>z.id===b.dataset.rrgo);if(e)rrAbrir(e)});
   const byId=id=>rrGet().find(z=>z.id===id);
   document.querySelectorAll("[data-rrab]").forEach(b=>b.onclick=()=>{const e=byId(b.dataset.rrab);if(e)rrAbrir(e)});
   document.querySelectorAll("[data-rrab2]").forEach(b=>b.onclick=()=>{const e=byId(b.dataset.rrab2);if(e){e._telOk=1;rrAbrir(e)}});
@@ -10499,7 +10501,7 @@ function rrDesdeEnlace(){let t=null;const h=location.hash||"";
   if(h.startsWith("#rr=")){try{t=rrB64dec(decodeURIComponent(h.slice(4)))}catch(e){t=null}try{history.replaceState(null,"",location.pathname+location.search)}catch(e){}
     if(t){S.set("dn2_rr_txt",t);S.set("dn2_rr_link",String(Date.now()))}}
   const fl=+(S.get("dn2_rr_link")||0);if(!fl)return;if(Date.now()-fl>15*60*1000){S.del("dn2_rr_link");return}
-  S.del("dn2_rr_link");rrOpen();const b=$("rr-leer");if(b){b.click();const s=$("rr-st");if(s)s.textContent="Llegaron desde el chat de Claude: "+s.textContent}}
+  S.del("dn2_rr_link");rrOpen({link:true});const b=$("rr-leer");if(b){b.click();const s=$("rr-st");if(s)s.textContent="Llegaron desde el chat de Claude: "+s.textContent}}
 /* ---------- arranque ---------- */
 /* los borradores guardados con la versión anterior de los módulos se reubican una sola vez */
 Object.keys(OLD_LAB).forEach(id=>{if(!M[id]||S.get(key(id,"ivlab")))return;let a={};try{a=JSON.parse(S.get(key(id,"iv"))||"{}")||{}}catch(e){}

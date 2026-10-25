@@ -9,8 +9,9 @@ const enc=Buffer.from(txt,'utf8').toString('base64').replace(/\+/g,'-').replace(
 const url='file://'+require('path').join(__dirname,'..','index.html');
 await p.goto(url);await p.evaluate(()=>localStorage.clear());
 await p.goto('about:blank');await p.goto(url+'#rr='+enc);await p.waitForTimeout(400);
-const r=await p.evaluate(()=>({v:st.view,n:document.querySelectorAll('.rr-card').length,t:document.querySelector('.rr-card')?.textContent||'',h:location.hash,st:$('rr-st')?.textContent}));
-const F=[];if(r.v!=='rr')F.push('no abrió el registro: '+r.v);if(r.n!==1)F.push('tarjetas '+r.n);if(!/MARIA ÑUÑEZ|MARIA NUNEZ/.test(r.t))F.push('nombre con tildes: '+r.t.slice(0,80));if(r.h)F.push('no limpió el enlace');if(!/Claude/.test(r.st))F.push('aviso');
+const r=await p.evaluate(()=>({v:st.view,n:document.querySelectorAll('.rr-card').length,t:document.querySelector('.rr-card')?.textContent||'',h:location.hash,st:$('rr-st')?.textContent,cerrado:!$('rr-inw').open}));
+const F=[];if(r.v!=='rr')F.push('no abrió el registro: '+r.v);if(r.n!==1)F.push('tarjetas '+r.n);if(!/MARIA ÑUÑEZ|MARIA NUNEZ/.test(r.t))F.push('nombre con tildes: '+r.t.slice(0,80));if(r.h)F.push('no limpió el enlace');if(!/Claude/.test(r.st))F.push('aviso');if(!r.cerrado)F.push('el dictado debe quedar cerrado');
+await p.evaluate(()=>{$('rr-ok').click();document.querySelector('[data-rrgo]').click()});const v1=await p.evaluate(()=>st.view);if(v1!=='mod'&&v1!=='vnota')F.push('Atender ahora debe abrir la atención: '+v1);
 await p.reload();await p.waitForTimeout(300);const v2=await p.evaluate(()=>st.view);if(v2==='rr')F.push('al recargar no debe volver a abrir');
 const all=F.concat(errs);if(all.length){console.log('FALLAS:\n'+all.join('\n'));process.exitCode=1}else console.log('registro_enlace: 0 fallos');
 await b.close()})();
