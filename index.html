@@ -1449,7 +1449,7 @@ function calPlanDia(f){const o=[],dow=calD(f).getDay(),c=calConf();
       o.push({t:P.pm,tipo:pmT[dow],hi:"14:00",hf:"16:00",nota:[P.pmd,P.pmr].filter(Boolean).join(" · ")});
       o.push({t:dow===5?"Cierre: Prosoft, escaneo semanal y reunión de equipo":"Cierre: Prosoft y firmas del día",tipo:"reg",hi:"16:00",hf:"17:00",nota:"Todo registrado en Prosoft, formatos firmados y guardados en su carpeta (act. 04 · 17)."})}
     if(dow===6)o.push({t:"Jornada concertada (si se acordó)",tipo:"com",hi:"07:30",hf:"12:00",nota:P.amd})}
-  MD_ENT.forEach(e=>{const due=e[0],hit=[[0,"Entregar cuenta de cobro + informe + soportes","ent"],[-1,"Imprimir, firmar y unir la cuenta de cobro","adm"],[-2,"Informe de actividades y certificado de supervisión","adm"],[-3,"Escanear lo último y verificar 18 de 18 soportes","adm"],[-5,"Pagar seguridad social y guardar la planilla","adm"],[-6,"Pedir al líder el certificado de permanencia","adm"],[-12,"Proyección y solicitud de medicamentos e insumos","adm"]];
+  MD_ENT.forEach(e=>{if(mdEntregada(e))return;const due=e[0],hit=[[0,"Entregar cuenta de cobro + informe + soportes","ent"],[-1,"Imprimir, firmar y unir la cuenta de cobro","adm"],[-2,"Informe de actividades y certificado de supervisión","adm"],[-3,"Escanear lo último y verificar 18 de 18 soportes","adm"],[-5,"Pagar seguridad social y guardar la planilla","adm"],[-6,"Pedir al líder el certificado de permanencia","adm"],[-12,"Proyección y solicitud de medicamentos e insumos","adm"]];
     hit.forEach(([n,t,tp])=>{if(calAdd(due,n)===f)o.push({t,tipo:tp,nota:"Entrega del "+e[2]+"."})})});
   if(f===CAL_FIN)o.push({t:"Terminación del contrato 1785",tipo:"ent",nota:"Inventario final, devolución de insumos y entrega del punto."});
   return o.map((x,i)=>Object.assign(x,{f,src:"plan",key:"p|"+f+"|"+plano(x.t).replace(/[^a-z0-9]+/g,"-").slice(0,40)}))}
@@ -1916,11 +1916,13 @@ const MD_PLAN={
  5:{am:"Consulta abierta y telemedicina",amd:"No programados, interconsultas, telexperticia, referencias, controles pendientes",mods:[],pm:"Medicamentos, bases y escaneo",pmd:"Kardex e inventario, bases al día, escanear los formatos de la semana",pmr:"act. 05 · 07 · 08 · 17"},
  6:{am:"Jornada concertada",amd:"Solo si se acordó con el líder: salida a comunidad de influencia o recuperar citas perdidas (act. 01 · 02 · 16)",mods:[],pm:"Descanso",pmd:"",pmr:""},
  0:{am:"Descanso",amd:"Si tienes un rato, revisa qué soportes faltan para la entrega",mods:[],pm:"Descanso",pmd:"",pmr:""}};
-const MD_ENT=[["2026-10-30","2026-10-01","30 de octubre"],["2026-11-20","2026-10-31","20 de noviembre"],["2026-12-20","2026-11-21","20 de diciembre"]];
+/* [entrega, inicio del periodo, nombre, entregada]: la de octubre ya se entregó; lo que se haga desde el 24 de octubre va a noviembre */
+const MD_ENT=[["2026-10-30","2026-10-01","30 de octubre","2026-10-24"],["2026-11-20","2026-10-24","20 de noviembre"],["2026-12-20","2026-11-21","20 de diciembre"]];
 const MD_SOP=["01 Acta de concertación y lista de asistencia","02 Certificado de permanencia firmado por el líder","03 Registro diario de atenciones y consentimientos","04 Listado de atenciones de Prosoft","05 Encuestas, caracterización de gestantes, búsqueda de menores de 5, bases","06 Proyección de insumos y formatos de dispensación","07 Inventario en Excel firmado","08 Registro de temperatura y novedades","09 Registro de interconsulta y telemedicina","10 Referencias o constancia de no remisiones","11 Listas de asistencia de educación PAI","12 Fichas SIVIGILA y reporte semanal","13 Nacidos vivos y defunciones, o constancia","14 Seguimiento a auxiliares y promotores","15 Acta de contingencia, o constancia","16 Listas y actas PIC","17 Informe mensual firmado","18 Actividad adicional, o constancia"];
 const MD_DIAS=["domingo","lunes","martes","miércoles","jueves","viernes","sábado"],MD_MES=["enero","febrero","marzo","abril","mayo","junio","julio","agosto","septiembre","octubre","noviembre","diciembre"];
 function mdFecha(iso){const[y,m,d]=iso.split("-").map(Number);return new Date(y,m-1,d)}
-function mdPeriodo(){const h=hoy();return MD_ENT.find(e=>e[0]>=h)||MD_ENT[MD_ENT.length-1]}
+function mdEntregada(e){if(e[3])return true;try{return (JSON.parse(S.get("dn2_entregadas")||"[]")||[]).includes(e[0])}catch(x){return false}}
+function mdPeriodo(){const h=hoy();return MD_ENT.find(e=>e[0]>=h&&!mdEntregada(e))||MD_ENT[MD_ENT.length-1]}
 function mdDias(){const e=mdPeriodo();return Math.round((mdFecha(e[0])-mdFecha(hoy()))/86400000)}
 function mdTareas(){const d=new Date().getDay(),r=mdDias(),t=[];
   if(!calEnCampo())t.push("Avanzar en la lista «Antes de salir» del plan de acción","Confirmar fecha de salida, comunidad y transporte con la ESE");
@@ -1971,7 +1973,7 @@ function wireMiDia(){const cb=$("md-cal");if(cb)cb.onclick=calOpen;
 function mdShow(t){const s=$("md-st");s.innerHTML="";const a=document.createElement("textarea");a.value=t;a.rows=7;a.readOnly=true;s.append("No se pudo copiar solo. Mantén presionado el texto y cópialo:",a);a.focus();a.select()}
 
 /* ---------- PANEL ---------- */
-const VERSION_APP="2026-10-25 v189";
+const VERSION_APP="2026-10-25 v190";
 function home(){
   stopRec();if(S.get(AT_KEY))atReiniciar();st.view="home";
   const rm=["precon","prenatal","parto","rn","ive"],rp=["pinf","inf","adol","juv","adul","vej"];
@@ -10104,7 +10106,7 @@ async function sopOpen(){stopRec();st.view="sop";const e=mdPeriodo(),per=e[0],sk
    <div class="btns"><label class="btn" style="cursor:pointer">Agregar foto o archivo<input type="file" accept="image/*,application/pdf" multiple data-evadd="${n}" hidden></label>${k?`<button class="btn" type="button" data-evdl="${n}">Descargar ZIP (${k})</button>`:""}
    <label class="sx-ck"><input type="checkbox" data-sopok="${n}"${sk[n]?" checked":""}> <span>Soporte listo (escaneado y firmado)</span></label></div></div></details>`}).join("")}
   <section class="tool"><h3>Relación de actividades para el informe</h3><textarea id="sop-rel" rows="10" readonly style="width:100%;font-family:var(--f-data);font-size:.8rem"></textarea>
-   <div class="btns"><button class="btn" type="button" id="sop-cp">Copiar relación</button>${F.length?`<button class="btn" type="button" id="sop-zip">Descargar todas las evidencias (ZIP)</button>`:""}<button class="btn" type="button" id="sop-ob">Calendario de obligaciones</button></div><p class="status" id="sop-st" aria-live="polite"></p></section>
+   <div class="btns"><button class="btn" type="button" id="sop-cp">Copiar relación</button>${F.length?`<button class="btn" type="button" id="sop-zip">Descargar todas las evidencias (ZIP)</button>`:""}<button class="btn" type="button" id="sop-ob">Calendario de obligaciones</button><button class="btn" type="button" id="sop-ent">Ya entregué esta cuenta</button></div><p class="status" id="sop-st" aria-live="polite"></p></section>
   <p class="foot">Las fotos quedan solo en este celular: descárgalas y guárdalas en la carpeta del mes. Borrar los datos del navegador también las borra.</p>`;
   const rel=()=>{const sk2=mdGet("dn2_sop_"+per);return [`RELACION DE ACTIVIDADES Y SOPORTES — CONTRATO 1785 — ENTREGA DEL ${e[2].toUpperCase()} (PERIODO ${e[1]} A ${e[0]})`].concat(MD_SOP.map(s=>{const n=s.slice(0,2);return `${s.toUpperCase()}: ${sk2[n]?"LISTO":"PENDIENTE"}${auto[n]?" · "+auto[n]:""}${nF(n)?" · "+nF(n)+" evidencia(s) fotográfica(s)":""}`})).join("\n")};
   $("sop-rel").value=rel();
@@ -10120,6 +10122,7 @@ async function sopOpen(){stopRec();st.view="sop";const e=mdPeriodo(),per=e[0],sk
   document.querySelectorAll("[data-sopok]").forEach(c=>c.onchange=()=>{const k="dn2_sop_"+per,o=mdGet(k);if(c.checked)o[c.dataset.sopok]=1;else delete o[c.dataset.sopok];S.set(k,JSON.stringify(o));$("sop-rel").value=rel()});
   $("sop-xls").onclick=async()=>{const r=await medDescargar();$("sop-st").textContent=r==="ok"?"Excel descargado.":"No se pudo descargar."};
   $("sop-bq").onclick=()=>bqOpen();$("sop-cp").onclick=()=>{try{navigator.clipboard.writeText($("sop-rel").value).then(()=>$("sop-st").textContent="Relación copiada.")}catch(x){$("sop-rel").select()}};
+  $("sop-ent").onclick=async()=>{if(!confirm("¿Marcar como entregada la cuenta del "+e[2]+"? Lo que hagas desde hoy va a la siguiente entrega."))return;let L=[];try{L=JSON.parse(S.get("dn2_entregadas")||"[]")||[]}catch(x){}if(!L.includes(per))L.push(per);S.set("dn2_entregadas",JSON.stringify(L));await sopOpen();$("sop-st").textContent="Cuenta del "+e[2]+" marcada como entregada."};
   $("sop-ob").onclick=()=>obOpen();$("sop-back").onclick=()=>{home();window.scrollTo(0,0)};window.scrollTo(0,0)}
 document.head.insertAdjacentHTML("beforeend",`<style>.evi-g{display:grid;grid-template-columns:repeat(auto-fill,minmax(96px,1fr));gap:8px;margin:8px 0}.evi-g figure{margin:0}.evi-g img{width:100%;aspect-ratio:1;object-fit:cover;border-radius:8px;border:1px solid var(--line)}.evi-g figcaption{font-size:.72rem;color:var(--muted)}</style>`);
 /* obligaciones: reporte de vencimientos y evidencias */
