@@ -1973,7 +1973,7 @@ function wireMiDia(){const cb=$("md-cal");if(cb)cb.onclick=calOpen;
 function mdShow(t){const s=$("md-st");s.innerHTML="";const a=document.createElement("textarea");a.value=t;a.rows=7;a.readOnly=true;s.append("No se pudo copiar solo. Mantén presionado el texto y cópialo:",a);a.focus();a.select()}
 
 /* ---------- PANEL ---------- */
-const VERSION_APP="2026-10-25 v190";
+const VERSION_APP="2026-10-25 v191";
 function home(){
   stopRec();if(S.get(AT_KEY))atReiniciar();st.view="home";
   const rm=["precon","prenatal","parto","rn","ive"],rp=["pinf","inf","adol","juv","adul","vej"];
@@ -10139,6 +10139,55 @@ fmtHome=(function(o){return function(){o();const ref=$("md-obc")||$("md-com")||$
   ref.insertAdjacentHTML("afterend",`<button type="button" class="btn" id="md-sop">Soportes y evidencias · ${n} / 18</button>`);$("md-sop").onclick=()=>sopOpen()}})(fmtHome);
 OBL_APP["06"]+=" Soportes: reporte de próximos a vencer en Excel.";OBL_APP["07"]+=" Soportes: inventario en Excel y vencidos para devolución.";OBL_APP["17"]+=" Soportes: fotos de evidencia y relación de actividades.";
 
+/* v191: exportar la nota del día a Obsidian (vault privado, carpeta Yurupari/Diario) */
+function obsCel(t){return String(t==null?"":t).replace(/\|/g,"/").replace(/\s*\n\s*/g," ").trim()||"—"}
+function obsFechaReg(r){const d=r.datos||{};return (d["FECHA"]||d.FECHA_REGISTRO||r.fecha||"").slice(0,10)}
+function obsNota(f){f=f||hoy();const s=seDe(f),L=[],nf=x=>{const[,m,d]=x.split("-").map(Number);return d+" de "+MD_MES[m-1]};
+  const R=registrosTodos().filter(r=>obsFechaReg(r)===f).sort((a,b)=>String((a.datos||{}).FECHA_REGISTRO||"").localeCompare(String((b.datos||{}).FECHA_REGISTRO||"")));
+  const T=tmLog().filter(x=>x.fecha===f);
+  const V=comVis().filter(v=>v.ini&&v.ini<=f&&(comFin(v)||"9999")>=f);
+  const coms=[...new Set(V.map(v=>v.com).concat(R.map(r=>r.comunidad)).filter(Boolean).map(x=>String(x).toUpperCase()))];
+  const e=mdPeriodo();
+  L.push("---","tags: [yurupari, diario]","fecha: "+f,"semana_epidemiologica: "+s.n,"periodo_epidemiologico: "+s.per,"comunidad: ["+coms.map(c=>'"'+c.replace(/"/g,"")+'"').join(", ")+"]","atenciones: "+R.length,"telemedicinas: "+T.length,"exportado: "+new Date().toISOString().slice(0,16).replace("T"," "),"origen: app Rutas 3280 "+VERSION_APP,"---");
+  L.push("# Diario "+f,"","> [[00 Inicio Yurupari]] · [[Pendientes]] · [[Obligaciones y calendario]] · "+seTxt(s),"");
+  L.push("## Atenciones del día ("+R.length+")");
+  if(R.length){L.push("| # | Paciente | Documento | Edad | Atención | Comunidad |","|---|---|---|---|---|---|");
+    R.forEach((r,i)=>{const d=r.datos||{};L.push("| "+(i+1)+" | "+[d["NOMBRE COMPLETO"],d["DOCUMENTO ID."],d["EDAD"],d["TIPO DE ATENCION"],r.comunidad].map(obsCel).join(" | ")+" |")})}
+  else L.push("Sin atenciones registradas en la app.");
+  L.push("","## Telemedicina y remisiones ("+T.length+")");
+  if(T.length)T.forEach(x=>L.push("- "+[x.hora,x.pac||"Sin nombre",x.doc,x.com,(TM_NIV[x.niv]||{}).t,x.med?"Dr(a). "+x.med:"",x.mot,x.cond?"Conducta: "+x.cond:"",(DIR_RUTAS[x.ruta]||{}).t,{si:"Remitido",no:"No aceptó (disentimiento)",tc:"Contingencia"}[x.rem]||""].filter(Boolean).map(obsCel).join(" · ")));
+  else L.push("Ninguna.");
+  L.push("","## Comunidades");
+  if(V.length)V.forEach(v=>{const E=(v.edus||[]).filter(x=>x.fecha===f),F=comFalta(v);
+    L.push("### "+(v.com||"(sin nombre)")+(v.zona?" — "+v.zona:""),"- Estancia: "+(v.ini||"?")+" → "+(comFin(v)||"?"),
+      "- [" +((v.conc&&v.conc.ok)?"x":" ")+"] Acta de concertación (01)","- ["+((v.perm&&v.perm.ok)?"x":" ")+"] Certificado de permanencia (02)");
+    E.forEach(x=>L.push("- Educación hoy: "+obsCel((x.temas||[]).join("; "))+" · "+(+x.asist||0)+" asistentes (11)"));
+    if(F.length)L.push("- Falta: "+F.map(z=>z[0]+" "+z[1]).join("; "))});
+  else L.push("Sin visita registrada en la app para este día.");
+  const od=obChk("d",f),os=obChk("s",f);
+  L.push("","## Obligaciones del día");OB.filter(x=>x[1]==="d").forEach(x=>L.push("- ["+(od[x[0]]?"x":" ")+"] "+x[2]+(x[3]?" ("+x[3]+")":"")));
+  L.push("","## Semana epidemiológica "+s.n+" ("+nf(s.ini)+" al "+nf(s.fin)+")");OB.filter(x=>x[1]==="s").forEach(x=>{const k=x[0]==="s_siv"?obChk("s",seAnt(f).ini):os;L.push("- ["+(k[x[0]]?"x":" ")+"] "+x[2]+(x[0]==="s_siv"?" — "+seTxt(seAnt(f)):""))});
+  const mv=medVence();if(mv.length){L.push("","## Botiquín: vencidos o por vencer");mv.forEach(x=>L.push("- "+obsCel(x.m.n)+" · lote "+obsCel(x.m.lote)+" · "+(x.e.k==="venc"?"VENCIDO":"vence")+" "+bqMes(x.m.v)))}
+  let t=[];try{t=mdTareas()}catch(x){}
+  L.push("","## Próxima entrega","Cuenta de cobro del "+e[2]+" (periodo "+e[1]+" a "+e[0]+")."+(t.length?"":""));
+  if(t.length){L.push("","## Tareas que marca la app");t.forEach(x=>L.push("- [ ] "+obsCel(x)))}
+  L.push("","## Notas","-","");return L.join("\n")}
+async function obsDescargar(f){f=f||hoy();return guardarArchivo(f+".md",new Blob([obsNota(f)],{type:"text/markdown"}))}
+function obsOpen(){stopRec();st.view="obs";const f0=hoy();
+  $("app").innerHTML=`<div class="top"><button class="back" type="button" id="obs-back">← Inicio</button><span class="tag pc">Obsidian</span></div>
+  <header><h1>Exportar a Obsidian</h1><p class="sub">Arma la nota del día con pacientes, telemedicinas, comunidades, obligaciones y vencimientos. Guárdala en tu vault privado, carpeta <b>Yurupari/Diario</b>, con el nombre de la fecha.</p></header>
+  <section class="tool"><label class="bfl">Día<input type="date" id="obs-f" value="${f0}" max="${f0}"></label>
+   <textarea id="obs-md" rows="16" readonly style="width:100%;font-family:var(--f-data);font-size:.78rem"></textarea>
+   <div class="btns"><button class="btn primary" type="button" id="obs-dl">Descargar nota (.md)</button><button class="btn" type="button" id="obs-cp">Copiar para pegar en Obsidian</button></div>
+   <p class="status" id="obs-st" aria-live="polite"></p></section>
+  <p class="foot">La nota lleva nombres y documentos de pacientes: guárdala solo en tu vault privado, nunca en el repositorio público de la app.</p>`;
+  const pinta=()=>{$("obs-md").value=obsNota($("obs-f").value||hoy())};pinta();$("obs-f").onchange=pinta;
+  $("obs-dl").onclick=async()=>{const f=$("obs-f").value||hoy(),r=await obsDescargar(f);if(r!=="no"&&r!=="err")S.set("dn2_obs_ult",f);$("obs-st").textContent=r==="no"?"Descarga cancelada.":r==="err"?"No se pudo descargar.":"Descargada "+f+".md. Muévela a Yurupari/Diario."};
+  $("obs-cp").onclick=()=>{try{navigator.clipboard.writeText($("obs-md").value).then(()=>{S.set("dn2_obs_ult",$("obs-f").value||hoy());$("obs-st").textContent="Copiada. En Obsidian crea la nota con la fecha y pega."})}catch(x){$("obs-md").select()}};
+  $("obs-back").onclick=()=>{home();window.scrollTo(0,0)};window.scrollTo(0,0)}
+fmtHome=(function(o){return function(){o();const ref=$("md-sop");if(!ref||$("md-obs"))return;const u=S.get("dn2_obs_ult")||"";
+  ref.insertAdjacentHTML("afterend",`<button type="button" class="btn" id="md-obs">Exportar a Obsidian${u===hoy()?" · ✓ hoy":""}</button>`);$("md-obs").onclick=()=>obsOpen()}})(fmtHome);
+OB.find(x=>x[0]==="d_evi")[2]+="; nota del día exportada a Obsidian";
 /* ---------- arranque ---------- */
 /* los borradores guardados con la versión anterior de los módulos se reubican una sola vez */
 Object.keys(OLD_LAB).forEach(id=>{if(!M[id]||S.get(key(id,"ivlab")))return;let a={};try{a=JSON.parse(S.get(key(id,"iv"))||"{}")||{}}catch(e){}
