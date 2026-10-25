@@ -1973,7 +1973,7 @@ function wireMiDia(){const cb=$("md-cal");if(cb)cb.onclick=calOpen;
 function mdShow(t){const s=$("md-st");s.innerHTML="";const a=document.createElement("textarea");a.value=t;a.rows=7;a.readOnly=true;s.append("No se pudo copiar solo. Mantén presionado el texto y cópialo:",a);a.focus();a.select()}
 
 /* ---------- PANEL ---------- */
-const VERSION_APP="2026-10-25 v192";
+const VERSION_APP="2026-10-25 v193";
 function home(){
   stopRec();if(S.get(AT_KEY))atReiniciar();st.view="home";
   const rm=["precon","prenatal","parto","rn","ive"],rp=["pinf","inf","adol","juv","adul","vej"];
@@ -10353,6 +10353,141 @@ document.head.insertAdjacentHTML("beforeend",`<style>
 .gex-ul{list-style:none;margin:0;padding:6px 14px 10px}.gex-ul li{padding:8px 0;border-top:1px solid var(--line)}.gex-ul li:first-child{border-top:0}
 .gex-act{display:flex;flex-wrap:wrap;gap:6px;margin-top:6px}.gex-act select,.gex-act input{padding:5px 8px;font-size:.88rem;max-width:210px}
 .gex-t.gex-high{color:var(--miss)}.gex-t.gex-mid{color:var(--warn)}.gex-t.gex-low{color:var(--accent)}
+</style>`);
+
+/* ===== v193: Registro rápido por voz — "PACIENTE NUEVO" … "FIN PACIENTE" =====
+   Dictas uno o varios pacientes con etiquetas (NOMBRE, DOCUMENTO, NACIMIENTO o EDAD, SEXO, COMUNIDAD,
+   ATENCIÓN, DETALLE, ALARMA, NOTA). Dos formas de ordenarlo:
+   1) Sin internet: la app lo lee sola (dictado del teclado del celular o micrófono de la app).
+   2) Con internet: "Ordenar con Claude" (dentro de Claude lo hace directo; desde el celular copia el
+      dictado con instrucciones para pegarlo en el chat del proyecto y luego pegas la respuesta).
+   Cada paciente queda en la lista de atención del día, clasificado y listo para abrir donde va. */
+const RR_KEY="dn2_rr";
+const RR_AT={ruta:"Ruta PyM (curso de vida)",mat:"Materno perinatal",morb:"Morbilidad",ev:"Evento",proc:"Procedimiento"};
+const RR_LAB=["NOMBRE","DOCUMENTO","NACIMIENTO","FECHA DE NACIMIENTO","EDAD","SEXO","GENERO","COMUNIDAD","ATENCION","DETALLE","NOTA","ALARMA","CORRIJO"];
+const RR_MES={ENERO:1,FEBRERO:2,MARZO:3,ABRIL:4,MAYO:5,JUNIO:6,JULIO:7,AGOSTO:8,SEPTIEMBRE:9,SETIEMBRE:9,OCTUBRE:10,NOVIEMBRE:11,DICIEMBRE:12};
+const RR_NUM={CERO:0,UNO:1,UN:1,DOS:2,TRES:3,CUATRO:4,CINCO:5,SEIS:6,SIETE:7,OCHO:8,NUEVE:9};
+const rrU=t=>String(t||"").toUpperCase().normalize("NFD").replace(/[̀-ͯ]/g,"");
+function rrGet(){try{return JSON.parse(S.get(RR_KEY)||"[]")}catch(e){return[]}}
+function rrSet(L){S.set(RR_KEY,JSON.stringify(L.slice(0,400)))}
+function rrFecha(t){t=rrU(t).replace(/[.,]/g," ");let m=t.match(/(\d{1,2})\s*[\/\-\s]\s*(\d{1,2})\s*[\/\-\s]\s*(\d{4})/);let d,mo,y;
+  if(m){d=+m[1];mo=+m[2];y=+m[3]}else{m=t.match(/(\d{1,2})\s*(?:DE\s+)?([A-Z]+)\s*(?:DE(?:L)?\s+)?(\d{4})/);if(!m||!RR_MES[m[2]])return"";d=+m[1];mo=RR_MES[m[2]];y=+m[3]}
+  if(!(d>=1&&d<=31&&mo>=1&&mo<=12&&y>1900&&y<=+hoy().slice(0,4)+1))return"";return `${y}-${String(mo).padStart(2,"0")}-${String(d).padStart(2,"0")}`}
+function rrDig(t){let s=rrU(t).replace(/\b(CERO|UNO|UN|DOS|TRES|CUATRO|CINCO|SEIS|SIETE|OCHO|NUEVE)\b/g,w=>RR_NUM[w]);return s.replace(/\D/g,"")}
+function rrTipo(t){t=rrU(t);return /\bT\.?\s?I\b|TARJETA/.test(t)?"TI":/\bR\.?\s?C\b|REGISTRO/.test(t)?"RC":/\bC\.?\s?E\b|EXTRANJER/.test(t)?"CE":/\bPPT\b|PERMISO DE PROTECCION/.test(t)?"PPT":/\bPEP\b/.test(t)?"PEP":/\bM\.?\s?S\b|MENOR SIN/.test(t)?"MS":/\bA\.?\s?S\b|ADULTO SIN/.test(t)?"AS":/\bC\.?\s?C\b|CEDULA/.test(t)?"CC":""}
+function rrMorb(t){const x=rrU(t),R=[[/SERPIENTE|CULEBRA|OFIDIC/,"ofidico"],[/MALARIA|PALUDISMO/,"malaria"],[/DENGUE/,"dengue"],[/DIARREA|VOMIT|EDA\b/,"eda"],[/TOS|GRIPA|RESPIR|IRA\b|NEUMONIA/,"ira"],[/DESNUTRI|BAJO PESO|FLACO/,"dnt"],[/HERIDA|CORTE|QUEMADURA|TRAUMA|GOLPE/,"herida"],[/GARGANTA|AMIGDAL/,"garganta"],[/ORINA|ORINAR|URINARI/,"itu"],[/PARASIT|LOMBRI/,"parasitos"],[/FLUJO|VAGINAL/,"vaginal"],[/ASMA|AHOGO|SILBID/,"asma"],[/PRESION|HIPERTEN/,"hta"],[/DIABET|AZUCAR/,"dm"],[/GASTRITIS|ACIDEZ|ARDOR EN EL ESTOMAGO/,"gastritis"],[/ALERGIA|RONCHA/,"alergia"],[/PIEL|GRANO|HONGO|SARNA|LLAGA|ULCERA/,"piel"],[/CONVULS/,"convulsion"],[/LEISHMAN/,"leish"],[/TUBERCUL/,"tb"],[/SIFILIS/,"sifilis"],[/DOLOR/,"dolor"]];const h=R.find(r=>r[0].test(x));return h?h[1]:""}
+function rrEv(t){const x=rrU(t),R=[[/SERPIENTE|CULEBRA|OFIDIC/,"ofid"],[/MALARIA|PALUDISMO/,"mal"],[/SIFILIS/,"sif"],[/VIH|HEPATITIS/,"vhb"],[/DIARREA|EDA\b/,"eda"],[/\bIRA\b|RESPIRATORIA AGUDA/,"ira"],[/PERRO|GATO|MURCIELAGO|MONO|MORDEDURA|ARANAZO|LAMEDURA/,"aptr"],[/VIOLENCIA|MALTRATO|ABUSO/,"vio"],[/SUICID/,"suic"],[/INTOXIC|VENENO|PLAGUICIDA/,"intox"],[/PARTO|NACIMIENTO|NACIO/,"parto"],[/MUERTE|MURIO|FALLEC/,"muerte"],[/TOS|SINTOMATICO|LEPRA|TUBERCUL/,"sr"],[/REMISION/,"rem"]];const h=R.find(r=>r[0].test(x));return h?h[1]:""}
+function rrProc(t){const x=rrU(t),R=[[/RETIRO DE(L)? IMPLANTE|RETIRAR (EL )?IMPLANTE/,"rimpl"],[/IMPLANTE/,"impl"],[/RETIRO DE(L)? DIU|RETIRAR (EL )?DIU/,"rdiu"],[/\bDIU\b|DISPOSITIVO/,"diu"],[/RESULTADO DE CITOLOGIA|REPORTE DE CITOLOGIA/,"repcito"],[/CITOLOGIA|VPH|PAPILOMA/,"ccu"],[/VIH|PRUEBAS RAPIDAS/,"vih"],[/MAMA|SENO/,"mama"],[/AGUDEZA|VISUAL/,"av"],[/LACTANCIA/,"lact"],[/VACUNA/,"vac"],[/EDUCACION|CHARLA/,"edu"],[/PRIMERA VEZ.*PLANIFIC|PLANIFIC.*PRIMERA VEZ|INICIA PLANIFIC/,"pf1"],[/PLANIFIC|INYECT|ANTICONCEP|PASTILLA|CONDON/,"pfc"]];const h=R.find(r=>r[0].test(x));return h?h[1]:""}
+function rrAtencion(t){t=rrU(t);return /RUTA|PYM|PROMOCION|MANTENIMIENTO|CURSO DE VIDA|VALORACION/.test(t)?"ruta":/MATERN|GESTA|PRENATAL|EMBARAZ|PUERPER|RECIEN NACIDO|PARTO/.test(t)?"mat":/MORBILIDAD|CONSULTA|ENFERM/.test(t)?"morb":/EVENTO/.test(t)?"ev":/PROCEDIMIENTO/.test(t)?"proc":""}
+/* lee un bloque de texto dictado y devuelve los pacientes */
+function rrParse(texto){const T=rrU(texto).replace(/\s+/g," "),out=[];
+  const re=/PACIENTE\s+NUEVO|FIN\s+(?:DE(?:L)?\s+)?PACIENTE/g;let m,cur=null;const marks=[];while((m=re.exec(T)))marks.push({i:m.index,e:m.index+m[0].length,ini:/NUEVO/.test(m[0])});
+  marks.forEach((k,j)=>{if(k.ini){if(cur!=null)out.push({t:T.slice(cur,k.i),sinFin:true});cur=k.e}else if(cur!=null){out.push({t:T.slice(cur,k.i),sinFin:false});cur=null}});
+  if(cur!=null)out.push({t:T.slice(cur),sinFin:true});
+  if(!marks.length&&/NOMBRE/.test(T))out.push({t:T,sinFin:true,sinIni:true});
+  return out.map(b=>rrCampos(b.t,b))}
+function rrCampos(t,b){const lab=new RegExp("\\b("+RR_LAB.join("|")+")\\b[\\s:.,]*","g"),pos=[];let m;
+  while((m=lab.exec(t))){if(m[1]==="NOTA"){pos.push({k:"NOTA",i:m.index,e:m.index+m[0].length,last:true});break}pos.push({k:m[1],i:m.index,e:m.index+m[0].length})}
+  const v={};pos.forEach((p,j)=>{if(p.k==="CORRIJO")return;const fin=p.last?t.length:(pos[j+1]?pos[j+1].i:t.length);const val=t.slice(p.e,fin).replace(/^[\s:.,]+|[\s:.,]+$/g,"");
+    const k={"FECHA DE NACIMIENTO":"NACIMIENTO",GENERO:"SEXO"}[p.k]||p.k;if(k==="ALARMA"){v.ALARMA=true;return}v[k]=val});
+  const e={id:uid(),f:hoy(),raw:t.trim(),aviso:[]};
+  if(b.sinFin)e.aviso.push("No escuché «FIN PACIENTE»: revisa que esté completo.");
+  if(v.NOMBRE)e.nom=v.NOMBRE.replace(/\s+/g," ").trim();
+  if(v.DOCUMENTO){e.tipo=rrTipo(v.DOCUMENTO);e.doc=rrDig(v.DOCUMENTO)}
+  if(v.NACIMIENTO)e.fn=rrFecha(v.NACIMIENTO);
+  if(v.EDAD){const n=(v.EDAD.match(/\d+/)||[])[0]||RR_NUM[(v.EDAD.match(/[A-Z]+/)||[""])[0]];if(n!=null){const u=/MES/.test(v.EDAD)?"m":/DIA/.test(v.EDAD)?"d":"a";e.edad=+n;e.edadU=u}}
+  if(v.SEXO)e.sx=/MUJER|FEMEN|\bF\b/.test(v.SEXO)?"F":/HOMBRE|MASCUL|VARON|\bM\b/.test(v.SEXO)?"M":"";
+  if(v.COMUNIDAD)e.com=v.COMUNIDAD.trim();
+  e.at=rrAtencion(v.ATENCION||"")||rrAtencion(v.DETALLE||"");e.det=(v.DETALLE||"").trim();
+  const sm=e.det.match(/(\d{1,2})\s*(?:\+\s*(\d))?\s*SEMANA/);if(sm)e.sem=+sm[1]+(sm[2]?+sm[2]/7:0);
+  const fm=e.det.match(/(?:FUM|ULTIMA (?:REGLA|MENSTRUACION))\s*(.*)/);if(fm)e.fum=rrFecha(fm[1]);
+  if(v.ALARMA)e.alarma=true;if(v.NOTA)e.nota=v.NOTA.trim();
+  rrDestino(e);return e}
+/* a dónde va cada paciente */
+function rrEdadA(e){if(e.fn){const x=edadDe(e.fn);return x?x.y+x.m/12:null}if(e.edad!=null)return e.edadU==="m"?e.edad/12:e.edadU==="d"?e.edad/365:e.edad;return null}
+function rrDestino(e){const a=rrEdadA(e),d=rrU(e.det);e.dest=null;e.destT="";
+  if(e.at==="ruta"){if(/PLANIFIC/.test(d)){e.dest={vn:/PRIMERA VEZ/.test(d)?"pf1":"pfc"}}else if(/PRECONCEP/.test(d)){e.dest={mod:"precon"}}else{const r=rutasPara(a==null?null:Math.floor(a),e.sx);const cv=r.filter(x=>!["precon","prenatal"].includes(x)).slice(-1)[0];if(cv)e.dest={mod:cv}}}
+  else if(e.at==="mat"){if(/RECIEN NACIDO|NEONAT/.test(d)||(a!=null&&a<0.1))e.dest={mod:"rn"};else if(/PUERPER|POSPARTO|POST PARTO/.test(d))e.dest={vn:"pospar"};else if(/PARTO/.test(d))e.dest={mod:"parto"};else e.dest={mod:"prenatal"}}
+  else if(e.at==="morb"){const k=rrMorb(e.det);e.dest={vn:"morb",cond:k?(MB.find(x=>x.id===k)||{}).t:e.det};e.mb=k}
+  else if(e.at==="ev"){const k=rrEv(e.det);e.dest=k?{ev:k}:{ev:""}}
+  else if(e.at==="proc"){const k=rrProc(e.det);e.dest=k?{vn:k}:null}
+  e.destT=!e.dest?"":e.dest.mod?(M[e.dest.mod]||{}).title||e.dest.mod:e.dest.vn?"Nota: "+((VN[e.dest.vn]||{}).t||e.dest.vn)+(e.dest.cond?" ("+e.dest.cond.toLowerCase()+")":""):e.dest.ev!=null?"Evento: "+(((typeof EV!=="undefined"?EV:[]).find(x=>x.id===e.dest.ev)||{}).t||"escoger el evento"):"";
+  return e}
+function rrFalta(e){const f=[];if(!e.nom)f.push("nombre");if(!e.doc)f.push("documento");else if(!e.tipo)f.push("tipo de documento");if(!e.fn&&e.edad==null)f.push("nacimiento o edad");if(!e.sx)f.push("sexo");if(!e.com)f.push("comunidad");if(!e.at)f.push("atención");else if(!e.dest)f.push("detalle");if(e.at==="mat"&&e.dest&&e.dest.mod==="prenatal"&&e.sem==null&&!e.fum)f.push("semanas o FUM");return f}
+/* paciente para la app: busca primero en la base para no duplicar */
+function rrPac(e){const ps=pacientes();let k=null;if(e.doc)k=Object.keys(ps).find(z=>z.endsWith(":"+e.doc));if(!k&&e.nom)k=Object.keys(ps).find(z=>z==="N:"+rrU(e.nom));
+  const base=k?Object.assign({},ps[k].ident):{};const P=Object.assign(base,{"NOMBRE COMPLETO":e.nom||base["NOMBRE COMPLETO"]||"","TIPO":e.tipo||base["TIPO"]||"","DOCUMENTO ID.":e.doc||base["DOCUMENTO ID."]||"","GENERO":e.sx||base["GENERO"]||""});
+  if(e.fn)P["FECHA NACIMIENTO"]=e.fn;else if(e.edad!=null&&!P["FECHA NACIMIENTO"])P.__edad=String(Math.round(rrEdadA(e)*100)/100);
+  if(e.com)P.__com=e.com;if(e.at==="mat"&&e.dest&&e.dest.mod==="prenatal")P.__est="ges";if(e.dest&&e.dest.vn==="pospar")P.__est="pos";return{P,existe:!!k}}
+function rrGuardarBase(e){const {P}=rrPac(e),ps=pacientes(),k=pkey(P);let x=ps[k];if(!x){const n=Object.values(ps).reduce((m,y)=>Math.max(m,y.n||0),0)+1;x=ps[k]={n,creado:hoy(),ident:{},aten:[],pend:[]}}
+  const id={};ID_KEYS.concat(["__com","__edad"]).forEach(z=>{if(P[z])id[z]=P[z]});Object.assign(x.ident,id);setPacientes(ps);return P}
+function rrAbrir(e){const P=rrGuardarBase(e);setPac(P);const d=e.dest||{};
+  if(e.at==="mat"&&d.mod==="prenatal"){const o=gexGet(P);if(e.sem!=null){o._egm={f:hoy(),w:e.sem};o._eg={f:hoy(),w:e.sem}}gexSet(o,P);if(e.fum&&!S.get(key("prenatal","eg_fum")))S.set(key("prenatal","eg_fum"),e.fum)}
+  const L=rrGet(),x=L.find(z=>z.id===e.id);if(x){x.abierto=hoy();rrSet(L)}
+  if(e.alarma&&!e._telOk){dirOpen({de:null,motivo:"ALARMA en el registro rápido: "+(e.det||RR_AT[e.at]||"")});return}
+  if(d.mod){S.set(key(d.mod,"tab"),"guia");openMod(d.mod);return}
+  if(d.vn){if(d.cond){const v=vnDraft(d.vn);v.cond=String(d.cond).toUpperCase();S.set("dn2_vn_"+d.vn,JSON.stringify(v))}vnOpen(d.vn);return}
+  if(d.ev!=null){evOpen(d.ev||undefined,null);return}
+  rrOpen()}
+/* Claude: directo si la app corre dentro de Claude; si no, copiar y pegar */
+function rrPrompt(t){return `Eres la secretaria de Juan José, enfermero del punto fijo Yurupari (Vaupés). Abajo va un dictado por voz con uno o varios pacientes, cada uno entre "PACIENTE NUEVO" y "FIN PACIENTE". Corrige lo que el reconocimiento de voz entendió mal (nombres propios, números de documento dígito por dígito, fechas, comunidades) sin inventar datos. Devuelve SOLO los pacientes en este formato exacto, uno por bloque, con las etiquetas en mayúsculas y dejando fuera la etiqueta que no se dictó:
+PACIENTE NUEVO. NOMBRE ... DOCUMENTO CC ... NACIMIENTO dd/mm/aaaa (o EDAD n años|meses). SEXO mujer|hombre. COMUNIDAD ... ATENCION ruta|materno|morbilidad|evento|procedimiento. DETALLE ... (gestante n semanas, puérpera, recién nacido, el motivo, el evento o el procedimiento). ALARMA (solo si se dijo). NOTA ... FIN PACIENTE.
+Si falta un dato obligatorio (nombre, documento, nacimiento o edad, sexo, comunidad, atención), escribe al final de ese bloque: FALTA: ...
+DICTADO:
+${t}`}
+async function rrClaude(t){if(sample){const x=await sample.json(`${rrPrompt(t)}\n\nResponde en JSON: {"texto":"<los bloques en el formato pedido>"}`,{cache:false});if(x&&x.texto)return String(x.texto);throw new Error("sin respuesta")}return null}
+function rrOpen(){stopRec();st.view="rr";const L=rrGet(),hoyL=L.filter(e=>e.f===hoy()),borr=S.get("dn2_rr_txt")||"";
+  const ord=hoyL.slice().sort((a,b)=>(b.alarma?1:0)-(a.alarma?1:0)||(a.hecho?1:0)-(b.hecho?1:0));
+  $("app").innerHTML=`<div class="top"><button class="back" type="button" id="rr-back">← Inicio</button><span class="tag pc">Registro rápido</span></div>
+  <header><h1>Registro rápido por voz</h1><p class="sub">Dicta cada paciente entre «PACIENTE NUEVO» y «FIN PACIENTE». La app lo ordena, lo busca en tu base, lo clasifica y lo deja en la lista del día, listo para abrir donde va.</p></header>
+  <details class="sec"><summary><span>Qué dictar y en qué orden</span></summary><div style="padding:8px 14px 12px">
+   <ol class="mb-ul"><li><b>PACIENTE NUEVO</b></li><li><b>NOMBRE</b> nombres y apellidos</li><li><b>DOCUMENTO</b> CC, TI, RC o CE y el número dígito por dígito</li><li><b>NACIMIENTO</b> día, mes y año (si no la sabe: <b>EDAD</b> y los años o meses)</li><li><b>SEXO</b> mujer u hombre</li><li><b>COMUNIDAD</b></li><li><b>ATENCIÓN</b> ruta, materno, morbilidad, evento o procedimiento</li><li><b>DETALLE</b> ruta: nada o planificación · materno: gestante y semanas (o FUM), puérpera, recién nacido · morbilidad: el motivo · evento: cuál · procedimiento: cuál</li><li><b>ALARMA</b> si hay signos de alarma (opcional)</li><li><b>NOTA</b> al final, lo que quieras (opcional)</li><li><b>FIN PACIENTE</b></li></ol>
+   <p class="note-src">Para corregir di «CORRIJO» y repite la etiqueta con el dato bueno: vale el último. Sin internet, dicta con el micrófono del teclado del celular (Gboard con el español descargado funciona sin conexión).</p>
+   <p class="note-src">Ejemplo: «PACIENTE NUEVO. NOMBRE María Rodríguez Gómez. DOCUMENTO CC 1 1 2 0 5 4 3 2 1. NACIMIENTO 14 de marzo de 2002. SEXO mujer. COMUNIDAD Querarí. ATENCIÓN materno. DETALLE gestante 18 semanas. NOTA ingreso. FIN PACIENTE.»</p></div></details>
+  <section class="tool" id="rr-in"><h3>1 · Dicta o pega</h3>${micUI(true)}<textarea id="rr-txt" rows="7" placeholder="PACIENTE NUEVO. NOMBRE … FIN PACIENTE.">${esc(borr)}</textarea>
+   <div class="btns"><button class="btn primary" type="button" id="rr-leer">Leer y ordenar (sin internet)</button><button class="btn" type="button" id="rr-cl">Ordenar con Claude</button><button class="btn" type="button" id="rr-clr">Borrar texto</button></div>
+   <div id="rr-clbox" hidden><p class="note-src" id="rr-clmsg"></p><label class="bfl">Pega aquí la respuesta de Claude<textarea id="rr-resp" rows="5"></textarea></label><div class="btns"><button class="btn primary" type="button" id="rr-usar">Usar la respuesta de Claude</button></div></div>
+   <p class="status" id="rr-st" aria-live="polite"></p></section>
+  <section class="tool" id="rr-prev" hidden><h3>2 · Revisa antes de guardar</h3><div id="rr-cards"></div><div class="btns"><button class="btn primary" type="button" id="rr-ok">Guardar en la lista del día</button></div></section>
+  <section class="tool"><h3>Lista de atención de hoy <span class="cnt">${hoyL.length||""}</span></h3>${ord.length?`<p class="note-src">${Object.entries(RR_AT).map(([k,t])=>{const n=hoyL.filter(e=>e.at===k).length;return n?`${esc(t)}: ${n}`:""}).filter(Boolean).join(" · ")}${hoyL.filter(e=>e.alarma).length?` · <b style="color:var(--miss)">Con alarma: ${hoyL.filter(e=>e.alarma).length}</b>`:""}</p>`:""}
+   ${ord.length?ord.map(e=>`<div class="rr-it${e.hecho?" rr-hecho":""}${e.alarma?" rr-al":""}"><div><b>${esc(e.nom||"Sin nombre")}</b> <small>${esc([e.tipo,e.doc].filter(Boolean).join(" "))}${e.com?" · "+esc(e.com):""}</small><br><span class="pill ${e.alarma?"high":e.at==="ev"?"mid":"low"}">${esc(RR_AT[e.at]||"Sin clasificar")}</span> ${esc(e.destT||"")}${e.sem!=null?" · "+gexSem(e.sem)+" semanas":""}${e.alarma?` <b style="color:var(--miss)">· ALARMA</b>`:""}${rrFalta(e).length?`<br><small style="color:var(--miss)">Falta: ${esc(rrFalta(e).join(", "))}</small>`:""}</div>
+     <div class="btns"><button class="btn bq-mini" type="button" data-rrab="${e.id}">${e.alarma?"Telemedicina y abrir":"Abrir"}</button>${e.alarma?`<button class="btn bq-mini" type="button" data-rrab2="${e.id}">Abrir sin telemedicina</button>`:""}<button class="btn bq-mini" type="button" data-rrh="${e.id}">${e.hecho?"Atendido ✓":"Marcar atendido"}</button><button class="btn bq-mini" type="button" data-rrdel="${e.id}">Quitar</button></div></div>`).join(""):`<p class="note-src">Todavía no hay pacientes registrados hoy.</p>`}
+   <div class="btns"><button class="btn" type="button" id="rr-copy">Copiar lista para Claude</button></div></section>`;
+  let PEND=[];
+  const ta=$("rr-txt");ta.oninput=()=>S.set("dn2_rr_txt",ta.value);wireMic($("rr-in"),ta,()=>S.set("dn2_rr_txt",ta.value));
+  const cards=()=>{$("rr-prev").hidden=!PEND.length;$("rr-cards").innerHTML=PEND.map((e,i)=>{const f=rrFalta(e),{existe}=rrPac(e);
+    const inp=(k,l,v,t)=>`<label class="bfl"><span>${l}</span><input data-rrf="${i}:${k}" value="${esc(v==null?"":v)}"${t?` type="${t}"`:""}></label>`;
+    return `<div class="rr-card${f.length?" rr-falta":""}"><p style="margin:0 0 6px"><b>${i+1}. ${esc(e.nom||"Sin nombre")}</b> ${existe?`<span class="pill low">Ya está en tu base</span>`:`<span class="pill mid">Nuevo en la base</span>`} ${e.alarma?`<span class="pill high">ALARMA</span>`:""}</p>
+     <div class="pgrid">${inp("nom","Nombre",e.nom)}${inp("tipo","Tipo",e.tipo)}${inp("doc","Documento",e.doc)}${inp("fn","Nacimiento",e.fn,"date")}${inp("edad","Edad (si no hay fecha)",e.edad!=null?e.edad+(e.edadU==="m"?" meses":e.edadU==="d"?" días":" años"):"")}${inp("sx","Sexo (F o M)",e.sx)}${inp("com","Comunidad",e.com)}
+      <label class="bfl"><span>Atención</span><select data-rrf="${i}:at"><option value="">—</option>${Object.entries(RR_AT).map(([k,t])=>`<option value="${k}"${e.at===k?" selected":""}>${esc(t)}</option>`).join("")}</select></label>${inp("det","Detalle",e.det)}</div>
+     <p style="margin:6px 0 0">Va a: <b>${esc(e.destT||"—")}</b>${e.sem!=null?" · "+gexSem(e.sem)+" semanas":""}</p>${f.length?`<p style="margin:4px 0 0;color:var(--miss)">Falta: ${esc(f.join(", "))}</p>`:""}${e.aviso.length?`<p class="note-src" style="margin:4px 0 0">${esc(e.aviso.join(" "))}</p>`:""}${e.nota?`<p class="note-src" style="margin:4px 0 0">Nota: ${esc(e.nota)}</p>`:""}</div>`}).join("");
+    document.querySelectorAll("[data-rrf]").forEach(el=>el.onchange=()=>{const[i,k]=el.dataset.rrf.split(":"),e=PEND[+i];let v=el.value.trim();
+      if(k==="edad"){const n=(v.match(/\d+/)||[])[0];if(n!=null){e.edad=+n;e.edadU=/mes/i.test(v)?"m":/d[ií]a/i.test(v)?"d":"a"}else delete e.edad}
+      else if(k==="sx")e.sx=/^f|mujer/i.test(v)?"F":/^m|hombre/i.test(v)?"M":"";else if(k==="tipo")e.tipo=rrTipo(v)||v.toUpperCase();else if(k==="doc")e.doc=rrDig(v);else e[k]=v;
+      if(k==="det"){const sm=rrU(v).match(/(\d{1,2})\s*SEMANA/);if(sm)e.sem=+sm[1]}rrDestino(e);cards()})};
+  const usar=txt=>{PEND=rrParse(txt);if(!PEND.length){$("rr-st").textContent="No encontré pacientes: empieza cada uno con «PACIENTE NUEVO» y termina con «FIN PACIENTE».";return}$("rr-st").textContent=`Encontré ${PEND.length} paciente${PEND.length===1?"":"s"}. Revisa y guarda.`;cards();$("rr-prev").scrollIntoView({behavior:"smooth"})};
+  $("rr-leer").onclick=()=>usar(ta.value);
+  $("rr-cl").onclick=async()=>{const t=ta.value.trim();if(!t){$("rr-st").textContent="Primero dicta o pega el texto.";return}
+    if(sample){$("rr-st").textContent="Claude está ordenando el dictado…";try{const r=await rrClaude(t);usar(r);$("rr-st").textContent+=" (ordenado con Claude)"}catch(e){$("rr-st").textContent="No se pudo conectar con Claude: lo leo sin internet.";usar(t)}return}
+    const p=rrPrompt(t);let ok=false;try{await navigator.clipboard.writeText(p);ok=true}catch(e){}
+    $("rr-clbox").hidden=false;$("rr-clmsg").textContent=(ok?"Copié el dictado con las instrucciones. ":"No pude copiar solo: selecciona y copia el dictado. ")+"Pégalo en el chat de Claude del proyecto SECRETARIA YURUPARI; cuando te responda, copia su respuesta y pégala aquí abajo.";if(!ok){ta.focus();ta.select()}};
+  $("rr-usar").onclick=()=>usar($("rr-resp").value);
+  $("rr-clr").onclick=()=>{ta.value="";S.del("dn2_rr_txt")};
+  $("rr-ok").onclick=()=>{const L2=rrGet();PEND.forEach(e=>{rrGuardarBase(e);L2.unshift(e)});rrSet(L2);S.del("dn2_rr_txt");PEND=[];rrOpen();$("rr-st").textContent="Guardados en la lista de hoy y en tu base."};
+  const byId=id=>rrGet().find(z=>z.id===id);
+  document.querySelectorAll("[data-rrab]").forEach(b=>b.onclick=()=>{const e=byId(b.dataset.rrab);if(e)rrAbrir(e)});
+  document.querySelectorAll("[data-rrab2]").forEach(b=>b.onclick=()=>{const e=byId(b.dataset.rrab2);if(e){e._telOk=1;rrAbrir(e)}});
+  document.querySelectorAll("[data-rrh]").forEach(b=>b.onclick=()=>{const L2=rrGet(),e=L2.find(z=>z.id===b.dataset.rrh);if(e){e.hecho=!e.hecho;rrSet(L2);rrOpen()}});
+  document.querySelectorAll("[data-rrdel]").forEach(b=>b.onclick=()=>{if(b.dataset.armed!=="1"){b.dataset.armed="1";b.textContent="¿Quitar? Toca otra vez";return}rrSet(rrGet().filter(z=>z.id!==b.dataset.rrdel));rrOpen()});
+  $("rr-copy").onclick=()=>{const t=["LISTA DE ATENCION "+hoy()+" — REGISTRO RAPIDO"].concat(ord.map((e,i)=>`${i+1}. ${e.nom||""} | ${[e.tipo,e.doc].filter(Boolean).join(" ")} | ${e.fn||(e.edad!=null?e.edad+e.edadU:"")} | ${e.sx||""} | ${e.com||""} | ${RR_AT[e.at]||"sin clasificar"} | ${e.destT||""}${e.sem!=null?" | "+gexSem(e.sem)+" sem":""}${e.alarma?" | ALARMA":""} | ${e.hecho?"atendido":"pendiente"}${e.nota?" | nota: "+e.nota:""}`)).join("\n");try{navigator.clipboard.writeText(t)}catch(x){}$("rr-st").textContent="Lista copiada: pégala en el chat del proyecto."};
+  $("rr-back").onclick=()=>{stopRec();home();window.scrollTo(0,0)};window.scrollTo(0,0)}
+/* botón en Mi día (arriba de todo) */
+fmtHome=(function(o){return function(){o();const c=$("md-cal");if(!c||$("md-rr"))return;const n=rrGet().filter(e=>e.f===hoy()&&!e.hecho).length;
+  c.insertAdjacentHTML("beforebegin",`<button type="button" class="btn primary" id="md-rr">Registro rápido por voz${n?` · ${n} por atender`:""}</button>`);$("md-rr").onclick=()=>rrOpen()}})(fmtHome);
+document.head.insertAdjacentHTML("beforeend",`<style>
+.rr-card{border:1px solid var(--line);border-radius:10px;padding:10px 12px;margin:8px 0;background:var(--surface)}.rr-card.rr-falta{border-color:var(--miss-line)}
+.rr-it{border-top:1px solid var(--line);padding:10px 0;display:flex;flex-direction:column;gap:6px}.rr-it.rr-hecho{opacity:.6}.rr-it.rr-al{border-left:4px solid var(--miss);padding-left:8px}
+.rr-it small{color:var(--muted)}
 </style>`);
 
 /* ---------- arranque ---------- */
