@@ -1973,7 +1973,7 @@ function wireMiDia(){const cb=$("md-cal");if(cb)cb.onclick=calOpen;
 function mdShow(t){const s=$("md-st");s.innerHTML="";const a=document.createElement("textarea");a.value=t;a.rows=7;a.readOnly=true;s.append("No se pudo copiar solo. Mantén presionado el texto y cópialo:",a);a.focus();a.select()}
 
 /* ---------- PANEL ---------- */
-const VERSION_APP="2026-10-25 v198";
+const VERSION_APP="2026-10-25 v199";
 function home(){
   stopRec();if(S.get(AT_KEY))atReiniciar();st.view="home";
   const rm=["precon","prenatal","parto","rn","ive"],rp=["pinf","inf","adol","juv","adul","vej"];
@@ -10245,7 +10245,8 @@ function gexCtx(P,o,W){const E=id=>(o[id]||[]).filter(x=>x.e==="h"),last=id=>E(i
   const h=last("hemo"),t=last("toxo");
   return{ed,sinEG:W==null,rhNeg:!!(h&&/-$/.test(h.r||"")),toxoNeg:!!(t&&/IGG- IGM-/.test(t.r||"")),sifPos:E("sif").some(x=>/^REACTIVA/.test(x.r||""))||!!o._sifPrev}}
 function gexEstado(x,W,o,c){const L=(o[x.id]||[]).slice().sort((a,b)=>a.f<b.f?-1:1),H=L.filter(z=>z.e==="h"),Pe=L.filter(z=>z.e==="e"&&!H.some(h=>h.f>=z.f)),lh=H.slice(-1)[0];
-  const due=extra=>({g:x.d==="p"?"hoy":"rem",txt:extra||""});
+  const Xs=L.filter(z=>z.e==="x"&&!H.some(h=>h.f>=z.f)),xp=Xs.length?"Pendiente desde el "+gexDM(Xs[0].f)+" (no se hizo en ese control). ":"";
+  const due=extra=>({g:x.d==="p"?"hoy":"rem",txt:xp+(extra||""),pend:!!Xs.length});
   if(x.si&&!x.si(c))return null;
   if(x.id==="cito"){if(c.ed!=null&&(c.ed<25||c.ed>65))return null;if(lh)return{g:"ok",txt:(lh.r||"Registrado")+" ("+gexDM(lh.f)+")"};return due(c.ed!=null&&c.ed>=30?"Le toca ADN-VPH (30 a 65 años), solo si no está al día.":"Citología (25 a 29 años), solo si no está al día.")}
   if(x.id==="sif"&&H.some(z=>/^REACTIVA/.test(z.r||"")))return{g:"ok",txt:"Reactiva el "+gexDM(H.find(z=>/^REACTIVA/.test(z.r||"")).f)+": ya no se repite; el seguimiento es con VDRL o RPR cada trimestre."};
@@ -10293,15 +10294,20 @@ function gexHTML(P){const G=gexCalc(P);if(!G.P["NOMBRE COMPLETO"]&&!G.P["DOCUMEN
    ${G.W==null||!/control prenatal/.test(G.src)?`<div class="frow" style="margin-top:6px"><label>Semanas de gestación hoy<input id="gex-w" type="number" step="0.1" min="4" max="42" inputmode="decimal" value="${G.W!=null?Math.round(G.W*10)/10:""}"></label></div>`:""}</div>
    ${GEX_GR.map(([k,t,cl])=>{const xs=by(k);if(!xs.length)return"";return `<details class="sec"${k==="hoy"||k==="rem"||k==="pas"?" open":""}><summary><span class="gex-t gex-${cl}">${esc(t)}</span><span class="cnt">${xs.length}</span></summary><ul class="gex-ul">${xs.map(z=>`<li><b>${esc(z.x.n)}</b>${z.txt?`<br><span>${esc(z.txt)}</span>`:""}<br><small class="note-src">${esc(z.x.ref)}</small>
      ${k==="ok"?"":`<div class="gex-act">${z.x.res?`<select data-gexr="${z.x.id}"><option value="">Resultado…</option>${z.x.res.map(r=>`<option>${esc(r)}</option>`).join("")}</select>`:`<input data-gexr="${z.x.id}" placeholder="Resultado (opcional)">`}<button class="btn bq-mini" type="button" data-gexh="${z.x.id}">Hecho / con resultado</button>${z.x.d==="r"&&k!=="pend"?`<button class="btn bq-mini" type="button" data-gexe="${z.x.id}">Enviado en la remisión</button>`:""}</div>`}</li>`).join("")}</ul></details>`}).join("")}
+   ${(()=>{const q=G.R.filter(z=>z.g==="hoy"||z.g==="rem");if(!q.length)return"";const cerr=G.o._cerrado===hoy();
+     return `<details class="sec" id="gex-qp" open><summary><span class="gex-t gex-high">Quedan pendientes de este control</span><span class="cnt">${q.length}</span></summary><div style="padding:8px 14px 12px"><p class="note-src" style="margin:0 0 6px">Lo que no marques como hecho o enviado queda pendiente al cerrar el control (también al guardar la atención) y vuelve a salir en el próximo, con la fecha.</p><ul class="mb-ul">${q.map(z=>`<li>${esc(z.x.n.split(" (")[0])} · ${z.x.d==="p"?"en el puesto":"en la remisión"}${z.pend?" · <b>ya venía pendiente</b>":""}</li>`).join("")}</ul>${cerr?`<p class="status">Control cerrado hoy: los pendientes quedaron guardados.</p>`:`<div class="btns"><button class="btn" type="button" id="gex-cerrar">Cerrar control: dejar pendientes</button></div>`}</div></details>`})()}
    <label class="sx-ck"><input type="checkbox" id="gex-sifp"${G.o._sifPrev?" checked":""}> Tuvo sífilis antes de este embarazo (seguimiento con VDRL)</label>
    <div class="btns"><button class="btn primary" type="button" id="gex-rem">Copiar para la orden de remisión</button><button class="btn" type="button" id="gex-nota">Copiar para la nota</button>${by("hoy").length?`<button class="btn" type="button" id="gex-pz">Ir a pruebas en el puesto</button>`:""}<button class="btn" type="button" id="gex-all">Todas las gestantes</button></div>
    <p class="status" id="gex-st" aria-live="polite"></p>
    <details class="sec"><summary><span>Historial de exámenes registrados</span></summary><div style="padding:8px 14px">${gexHist(G.o)}</div></details></div>`}
 function gexHist(o){const L=[];GEX.forEach(x=>(o[x.id]||[]).forEach((z,i)=>L.push({x,z,i})));if(!L.length)return `<p class="note-src">Sin registros todavía.</p>`;
-  L.sort((a,b)=>a.z.f<b.z.f?1:-1);return `<ul class="mb-ul">${L.map(({x,z,i})=>`<li>${gexDM(z.f)}${z.w!=null?" ("+gexSem(z.w)+" sem)":""} · ${esc(x.n)} · ${z.e==="e"?"enviado en la remisión":esc(z.r||"hecho")} <button class="btn bq-mini" type="button" data-gexdel="${x.id}:${i}">Borrar</button></li>`).join("")}</ul>`}
+  L.sort((a,b)=>a.z.f<b.z.f?1:-1);return `<ul class="mb-ul">${L.map(({x,z,i})=>`<li>${gexDM(z.f)}${z.w!=null?" ("+gexSem(z.w)+" sem)":""} · ${esc(x.n)} · ${z.e==="e"?"enviado en la remisión":z.e==="x"?"no se hizo: quedó pendiente":esc(z.r||"hecho")} <button class="btn bq-mini" type="button" data-gexdel="${x.id}:${i}">Borrar</button></li>`).join("")}</ul>`}
 function gexAdd(id,e,r,P){P=P||pac();const o=gexGet(P),{w}=gexW(P,o);(o[id]=o[id]||[]).push({f:hoy(),w:w==null?null:Math.round(w*10)/10,e,r:r||""});
   o._p={"NOMBRE COMPLETO":P["NOMBRE COMPLETO"]||"","TIPO":P["TIPO"]||"","DOCUMENTO ID.":P["DOCUMENTO ID."]||"","FECHA NACIMIENTO":P["FECHA NACIMIENTO"]||"","GENERO":P["GENERO"]||"F","EAPB NOMBRE":P["EAPB NOMBRE"]||"","PUEBLO":P["PUEBLO"]||"","ETNIA":P["ETNIA"]||"",__com:P.__com||"",__est:"ges"};
   if(w!=null)o._eg={f:hoy(),w:Math.round(w*10)/10};gexSet(o,P)}
+function gexCerrar(P){P=P||pac();if(!P["NOMBRE COMPLETO"]&&!P["DOCUMENTO ID."])return 0;const G=gexCalc(P),o=gexGet(P),{w}=gexW(P,o);let n=0;
+  G.R.filter(z=>z.g==="hoy"||z.g==="rem").forEach(z=>{const L=o[z.x.id]=o[z.x.id]||[];if(L.some(e=>e.f===hoy()))return;L.push({f:hoy(),w:w==null?null:Math.round(w*10)/10,e:"x",r:""});n++});
+  o._cerrado=hoy();gexSet(o,P);return n}
 function gexWire(redraw){const box=$("gex");if(!box)return;const P=pac();
   {const o=gexGet(P),{w}=gexW(P,o);if(w!=null&&(!o._eg||o._eg.f!==hoy())){o._eg={f:hoy(),w:Math.round(w*10)/10};if(!o._p)o._p={"NOMBRE COMPLETO":P["NOMBRE COMPLETO"]||"","TIPO":P["TIPO"]||"","DOCUMENTO ID.":P["DOCUMENTO ID."]||"","FECHA NACIMIENTO":P["FECHA NACIMIENTO"]||"","GENERO":"F",__com:P.__com||"",__est:"ges"};gexSet(o,P)}}
   const re=()=>{box.outerHTML=gexHTML(P);gexWire(redraw)};
@@ -10309,6 +10315,7 @@ function gexWire(redraw){const box=$("gex");if(!box)return;const P=pac();
   box.querySelectorAll("[data-gexh]").forEach(b=>b.onclick=()=>{const id=b.dataset.gexh,r=box.querySelector(`[data-gexr="${id}"]`);gexAdd(id,"h",r?r.value:"",P);re()});
   box.querySelectorAll("[data-gexe]").forEach(b=>b.onclick=()=>{gexAdd(b.dataset.gexe,"e","",P);re()});
   box.querySelectorAll("[data-gexdel]").forEach(b=>b.onclick=()=>{if(b.dataset.armed!=="1"){b.dataset.armed="1";b.textContent="¿Borrar? Toca otra vez";return}const[id,i]=b.dataset.gexdel.split(":"),o=gexGet(P);(o[id]||[]).splice(+i,1);gexSet(o,P);re()});
+  {const c=$("gex-cerrar");if(c)c.onclick=()=>{gexCerrar(P);re()}}
   $("gex-sifp").onchange=()=>{const o=gexGet(P);if($("gex-sifp").checked)o._sifPrev=1;else delete o._sifPrev;gexSet(o,P);re()};
   const cp=(t,m)=>{if(!t){$("gex-st").textContent="No hay nada pendiente para copiar.";return}try{navigator.clipboard.writeText(t).then(()=>$("gex-st").textContent=m,()=>$("gex-st").textContent=t)}catch(e){$("gex-st").textContent=t}};
   $("gex-rem").onclick=()=>cp(gexRemTxt(gexCalc(P)),"Copiado: pégalo en la orden de remisión.");
@@ -10511,6 +10518,8 @@ function rrDesdeEnlace(){let t=null;const h=location.hash||"";
     if(t){S.set("dn2_rr_txt",t);S.set("dn2_rr_link",String(Date.now()))}}
   const fl=+(S.get("dn2_rr_link")||0);if(!fl)return;if(Date.now()-fl>15*60*1000){S.del("dn2_rr_link");return}
   S.del("dn2_rr_link");rrOpen({link:true});const b=$("rr-leer");if(b){b.click();const s=$("rr-st");if(s)s.textContent="Llegaron desde el chat de Claude: "+s.textContent}}
+pacienteAtencion=(function(o){return function(mod){const r=o.apply(this,arguments);try{if(mod==="prenatal")gexCerrar(pac())}catch(e){}return r}})(pacienteAtencion);
+vnFinal=(function(o){return function(){o.apply(this,arguments);const b=$("vn-save");if(b&&VNS&&VNS.id==="prenat"&&!b.dataset.gexc){b.dataset.gexc=1;b.addEventListener("click",()=>{try{gexCerrar(pac())}catch(e){}})}}})(vnFinal);
 /* ---------- arranque ---------- */
 /* los borradores guardados con la versión anterior de los módulos se reubican una sola vez */
 Object.keys(OLD_LAB).forEach(id=>{if(!M[id]||S.get(key(id,"ivlab")))return;let a={};try{a=JSON.parse(S.get(key(id,"iv"))||"{}")||{}}catch(e){}

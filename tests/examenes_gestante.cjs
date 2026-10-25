@@ -29,6 +29,13 @@ const F=await p.evaluate(()=>{const F=[],ok=(c,m)=>{if(!c)F.push(m)};localStorag
  ok($('ruta-gex')&&/Hacer hoy en el puesto/.test($('ruta-gex').textContent),'sección en la guía');
  $('gex').querySelector('[data-gexr="vih"]').value='NO REACTIVA';$('gex').querySelector('[data-gexh="vih"]').click();ok(gexCalc(P).R.find(z=>z.x.id==='vih').g==='ok','marcar hecho');
  $('gex').querySelector('[data-gexe="hemog"]').click();ok(gexCalc(P).R.find(z=>z.x.id==='hemog').g==='pend','enviado en remisión');
+ /* cerrar control: lo no marcado queda pendiente */
+ ok($('gex-qp')&&/Quedan pendientes/.test($('gex-qp').textContent),'sección de pendientes al final');
+ const antes=gexCalc(P).R.filter(z=>z.g==='hoy'||z.g==='rem').length;$('gex-cerrar').click();
+ const o2=gexGet(P),nx=Object.keys(o2).filter(k=>k[0]!=='_').reduce((n,k)=>n+o2[k].filter(e=>e.e==='x').length,0);ok(nx===antes,'pendientes guardados: '+nx+' de '+antes);
+ ok(/Control cerrado hoy/.test($('gex-qp').textContent),'aviso de control cerrado');
+ o2.vih.forEach(e=>{if(e.f===hoy())e.f='2026-10-01'});Object.keys(o2).forEach(k=>{if(k[0]!=='_')o2[k].forEach(e=>{if(e.e==='x')e.f='2026-10-01'})});delete o2._cerrado;gexSet(o2,P);
+ ok(gexCalc(P).R.some(z=>z.pend&&/Pendiente desde el 01\/10/.test(z.txt)),'el próximo control dice pendiente desde');
  /* pruebas en el puesto → control */
  P=per('DORA','4',27);setW(P,12);pzOpen();$('pz-g').value='ges';$('pz-g').dispatchEvent(new Event('change'));const s=document.querySelector('[data-pzr="hbs"]');s.value='NO REACTIVA';s.dispatchEvent(new Event('change'));
  $('pz-hb').value='11.5';$('pz-hb').dispatchEvent(new Event('input'));$('pz-gex').click();G=gexCalc(P);ok(g(G,'ok').includes('hbs'),'hbs guardada desde pruebas');ok(!g(G,'hoy').includes('hbp'),'hb guardada');
