@@ -1973,7 +1973,7 @@ function wireMiDia(){const cb=$("md-cal");if(cb)cb.onclick=calOpen;
 function mdShow(t){const s=$("md-st");s.innerHTML="";const a=document.createElement("textarea");a.value=t;a.rows=7;a.readOnly=true;s.append("No se pudo copiar solo. Mantén presionado el texto y cópialo:",a);a.focus();a.select()}
 
 /* ---------- PANEL ---------- */
-const VERSION_APP="2026-10-25 v205";
+const VERSION_APP="2026-10-25 v206";
 function home(){
   stopRec();if(S.get(AT_KEY))atReiniciar();st.view="home";
   const rm=["precon","prenatal","parto","rn","ive"],rp=["pinf","inf","adol","juv","adul","vej"];
@@ -10540,6 +10540,7 @@ obsNota=(function(o){return function(f){f=f||hoy();let md=o.apply(this,arguments
    y se puede descargar la bitácora completa («App Rutas 3280 - Bitácora.md») para el vault.
    Al publicar una versión nueva se agrega aquí su línea (la más nueva primero). */
 const APP_CAMBIOS=[
+ [206,"2026-10-25","La cantidad de sangrado se escoge con una escala que se puede observar (manchado, escaso, como una menstruación, abundante, muy abundante) en vez de mililitros; igual para la salida de líquido."],
  [205,"2026-10-25","«Conducta según la Res. 3280» con página y cita en todas las rutas: primera infancia, infancia, adolescencia, juventud, adultez, vejez, preconcepcional, parto y puerperio y recién nacido; no se activa cuando la persona lo niega."],
  [204,"2026-10-25","Preguntas: los espacios ___ de cada respuesta se llenan con su casilla (calendario para fechas, cantidad con unidad, número de semanas, veces o gramos); «Conducta según la Res. 3280» con lo que hay que hacer, la sección y la página del PDF oficial y el texto de la norma; el dictado por voz ya no repite frases en Android."],
  [203,"2026-10-25","Datos de la persona: EAPB, régimen, capitado, teléfono, pertenencia étnica y pueblo que queden en blanco salen como «Pendiente» y con un aviso en Preguntas, Guía, Nota y Base hasta completarlos (N/A cuenta como respondido)."],
@@ -10646,15 +10647,17 @@ const CDT={prenatal:[
 const CDT_EDAD={prenatal:a=>a!=null&&a<19?{t:"Gestante adolescente",p:["Acompañamiento por salud mental y trabajo social durante la gestación.","Menor de 14 años: violencia sexual por ley (ficha 875 y ruta)."],c:[R3C("4.3.6.1.4","269","Las gestantes adolescentes deberán tener acompañamiento durante el resto de la gestación por el equipo de salud mental y trabajo social")],r:"Gestante adolescente: se canaliza a salud mental y trabajo social (Res. 3280, p. 269)."}:null};
 function ivBlankTipo(b,a){b=plano(b);a=plano(a);let m;
   if((m=a.match(/^\s*\)?\s*(semanas?|veces|dias|horas|meses|anos|g\b|gramos|kg|cm|mg|ml|cc|puntos|%)/)))return{t:"num",u:m[1]};
+  if(/(cantidad|volumen)\s*$/.test(b)&&/sangr|hemorrag|loquio|regla|menstru/.test(b))return{t:"sel",o:["manchado (gotas en la ropa interior)","escaso (menos que una menstruación)","como una menstruación","abundante (más que una menstruación, empapa toallas o la ropa)","muy abundante (empapa una toalla en una hora o menos, coágulos o moja la sábana)"]};
+  if(/(cantidad|volumen)\s*$/.test(b)&&/liquido|agua|flujo/.test(b))return{t:"sel",o:["escasa (humedece la ropa interior)","moderada (moja la ropa interior)","abundante (moja la ropa o escurre por las piernas)"]};
   if(/(cantidad|volumen)\s*$/.test(b))return{t:"numu"};
   if(/(se toman en|institucional en|atencion en|se programa para)\s*$/.test(b))return{t:"txt"};
   if(/(desde|hasta|el|fecha|del|diagnosticad[oa] en|tamizaje en|tamizaje de cuello uterino \(|ultimo tamizaje en)\s*\(?\s*$/.test(b)||/^\s*\)?\s*(,\s*)?con resultado/.test(a))return{t:"date"};
   return{t:"txt"}}
 function ivExtras(id,x,ta,save){const fb=$("iv-fill"),cb=$("iv-cdt");if(!fb||!cb)return;let ult=null;
-  const fill=()=>{const v=ta.value,L=[];const re=/_{2,}/g;let m;while((m=re.exec(v)))L.push({i:L.length,at:m.index,len:m[0].length,b:v.slice(Math.max(0,m.index-40),m.index),a:v.slice(m.index+m[0].length,m.index+m[0].length+25)});
+  const fill=()=>{const v=ta.value,L=[];const re=/_{2,}/g;let m;while((m=re.exec(v)))L.push({i:L.length,at:m.index,len:m[0].length,b:v.slice(Math.max(0,m.index-80),m.index),a:v.slice(m.index+m[0].length,m.index+m[0].length+25)});
     if(!L.length){fb.innerHTML="";return}
-    fb.innerHTML=`<div class="box" style="border:2px solid var(--accent);margin:6px 0"><h3>Completa los espacios</h3><p class="note-src" style="margin:0 0 6px">Escoge o escribe y se pone solo en la respuesta.</p>${L.map(z=>{const tp=ivBlankTipo(z.b,z.a),pw=(z.b.trim().match(/([A-Za-zÁÉÍÓÚÑáéíóúñ]+)\s*\(?$/)||[,""])[1],ctx=tp.t==="date"?(pw?pw.charAt(0).toUpperCase()+pw.slice(1)+" (fecha)":"Fecha"):tp.t==="numu"?"Cantidad":tp.t==="num"?"Número de "+tp.u:"…"+z.b.slice(-30).replace(/^\S*\s/,"")+" ▢ "+z.a.slice(0,18);
-      const inp=tp.t==="date"?`<input type="date" data-ivb="${z.i}" max="${hoy()}">`:tp.t==="num"?`<div style="display:flex;gap:6px;align-items:center"><input type="number" inputmode="decimal" step="any" data-ivb="${z.i}" style="max-width:120px"><span>${esc(tp.u)}</span></div>`:tp.t==="numu"?`<div style="display:flex;gap:6px;align-items:center"><input type="number" inputmode="decimal" step="any" data-ivb="${z.i}" data-ivu="${z.i}" style="max-width:110px"><select data-ivus="${z.i}"><option>ml</option><option>cc</option><option>toallas en el día</option><option>toallas por hora</option><option>manchado (gotas)</option></select></div>`:`<input data-ivb="${z.i}" placeholder="Escribe aquí">`;
+    fb.innerHTML=`<div class="box" style="border:2px solid var(--accent);margin:6px 0"><h3>Completa los espacios</h3><p class="note-src" style="margin:0 0 6px">Escoge o escribe y se pone solo en la respuesta.</p>${L.map(z=>{const tp=ivBlankTipo(z.b,z.a),pw=(z.b.trim().match(/([A-Za-zÁÉÍÓÚÑáéíóúñ]+)\s*\(?$/)||[,""])[1],ctx=tp.t==="date"?(pw?pw.charAt(0).toUpperCase()+pw.slice(1)+" (fecha)":"Fecha"):tp.t==="numu"||tp.t==="sel"?"Cantidad":tp.t==="num"?"Número de "+tp.u:"…"+z.b.slice(-30).replace(/^\S*\s/,"")+" ▢ "+z.a.slice(0,18);
+      const inp=tp.t==="date"?`<input type="date" data-ivb="${z.i}" max="${hoy()}">`:tp.t==="num"?`<div style="display:flex;gap:6px;align-items:center"><input type="number" inputmode="decimal" step="any" data-ivb="${z.i}" style="max-width:120px"><span>${esc(tp.u)}</span></div>`:tp.t==="numu"?`<div style="display:flex;gap:6px;align-items:center"><input type="number" inputmode="decimal" step="any" data-ivb="${z.i}" data-ivu="${z.i}" style="max-width:110px"><select data-ivus="${z.i}"><option>ml</option><option>cc</option><option>toallas en el día</option><option>toallas por hora</option><option>manchado (gotas)</option></select></div>`:tp.t==="sel"?`<select data-ivb="${z.i}"><option value="">Escoge…</option>${tp.o.map(o=>`<option>${esc(o)}</option>`).join("")}</select>`:`<input data-ivb="${z.i}" placeholder="Escribe aquí">`;
       return `<label class="bfl" style="margin:6px 0"><span style="font-size:.85rem">${esc(ctx)}</span>${inp}</label>`}).join("")}</div>`;
     fb.querySelectorAll("[data-ivb]").forEach(el=>{const put=()=>{let val=String(el.value||"").trim();if(!val)return;const i=+el.dataset.ivb;
       if(el.type==="date")val=val.split("-").reverse().join("/");if(el.dataset.ivu!=null){const u=fb.querySelector(`[data-ivus="${el.dataset.ivu}"]`);val=/manchado/.test(u.value)?"manchado (gotas)":val.replace(".",",")+" "+u.value}
