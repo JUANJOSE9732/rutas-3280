@@ -15,7 +15,11 @@ const F=await p.evaluate(async()=>{const F=[],ok=(c,m)=>{if(!c)F.push(m)};localS
  const v=$('iv-a').value;ok(/desde 22\/10\/2026, cantidad abundante \(más que una menstruación/.test(v),'texto llenado: '+v);ok(!/_{2,}/.test(v)&&!$('iv-fill').innerHTML,'sin espacios pendientes');
  ok(!$('iv-cdt').hidden&&/p\. 264/.test($('iv-cdt').textContent)&&/Sangrado o salida/.test($('iv-cdt').textContent),'conducta con página');
  $('iv-cdt').querySelector('[data-cdt]').click();ok(/Res\. 3280, 4\.3\.2, p\. 264/.test($('iv-a').value),'agregar conducta');
- ok(ivBlankTipo('nacer menor de 2.500 g (',' g).').t==='num'&&ivBlankTipo('parto pretérmino a las ',' semanas.').u==='semanas'&&ivBlankTipo('se toman en ',' (próxima').t==='txt','tipos de espacio');
+ ok(ivBlankTipo('nacer menor de 2.500 g (',' g).').t==='num'&&ivBlankTipo('parto pretérmino a las ',' semanas.').u==='semanas'&&ivBlankTipo('se toman en ',' (próxima').t==='sel','tipos de espacio');
+ const tc=ivBlankTipo('Refiere cefalea ',' con alteraciones visuales');ok(tc.t==='sel'&&tc.o.length>=5,'opciones de cefalea');
+ ok(ivBlankTipo('Tiene o tenía DIU (colocado en ____); ',' (retirado / aún lo tiene).').o.join()==='retirado,aún lo tiene','opciones desde el paréntesis');
+ ok(ivBlankTipo('Refiere antecedente de diabetes, diagnosticada en ',', en manejo').t==='mes','mes y año');
+ ok(ivBlankTipo('FC ',' lpm, FR').u==='lpm','unidad lpm');
  /* dictado: resultados acumulados de Android */
  const ta=document.createElement('textarea');ta.value='Inicio';document.body.append(ta);const root=document.createElement('div');root.innerHTML='<button class="mic"></button><span class="mic-st"></span><div class="mic-ok"></div>';
  return F});

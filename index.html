@@ -1973,7 +1973,7 @@ function wireMiDia(){const cb=$("md-cal");if(cb)cb.onclick=calOpen;
 function mdShow(t){const s=$("md-st");s.innerHTML="";const a=document.createElement("textarea");a.value=t;a.rows=7;a.readOnly=true;s.append("No se pudo copiar solo. Mantén presionado el texto y cópialo:",a);a.focus();a.select()}
 
 /* ---------- PANEL ---------- */
-const VERSION_APP="2026-10-25 v206";
+const VERSION_APP="2026-10-25 v207";
 function home(){
   stopRec();if(S.get(AT_KEY))atReiniciar();st.view="home";
   const rm=["precon","prenatal","parto","rn","ive"],rp=["pinf","inf","adol","juv","adul","vej"];
@@ -10540,6 +10540,7 @@ obsNota=(function(o){return function(f){f=f||hoy();let md=o.apply(this,arguments
    y se puede descargar la bitácora completa («App Rutas 3280 - Bitácora.md») para el vault.
    Al publicar una versión nueva se agrega aquí su línea (la más nueva primero). */
 const APP_CAMBIOS=[
+ [207,"2026-10-25","Los espacios de las respuestas traen opciones según el contexto (tipo de cefalea, flujo, alergia y reacción, consumo, antecedentes, medicamentos, resultados, grupo y Rh, dieta, apoyo, lengua…), con «Otro» para escribir, selección múltiple y mes y año; la conducta cambia según lo escogido (cefalea leve vs. de alarma, alergia grave a la penicilina, flujo anormal)."],
  [206,"2026-10-25","La cantidad de sangrado se escoge con una escala que se puede observar (manchado, escaso, como una menstruación, abundante, muy abundante) en vez de mililitros; igual para la salida de líquido."],
  [205,"2026-10-25","«Conducta según la Res. 3280» con página y cita en todas las rutas: primera infancia, infancia, adolescencia, juventud, adultez, vejez, preconcepcional, parto y puerperio y recién nacido; no se activa cuando la persona lo niega."],
  [204,"2026-10-25","Preguntas: los espacios ___ de cada respuesta se llenan con su casilla (calendario para fechas, cantidad con unidad, número de semanas, veces o gramos); «Conducta según la Res. 3280» con lo que hay que hacer, la sección y la página del PDF oficial y el texto de la norma; el dictado por voz ya no repite frases en Android."],
@@ -10654,16 +10655,29 @@ function ivBlankTipo(b,a){b=plano(b);a=plano(a);let m;
   if(/(desde|hasta|el|fecha|del|diagnosticad[oa] en|tamizaje en|tamizaje de cuello uterino \(|ultimo tamizaje en)\s*\(?\s*$/.test(b)||/^\s*\)?\s*(,\s*)?con resultado/.test(a))return{t:"date"};
   return{t:"txt"}}
 function ivExtras(id,x,ta,save){const fb=$("iv-fill"),cb=$("iv-cdt");if(!fb||!cb)return;let ult=null;
-  const fill=()=>{const v=ta.value,L=[];const re=/_{2,}/g;let m;while((m=re.exec(v)))L.push({i:L.length,at:m.index,len:m[0].length,b:v.slice(Math.max(0,m.index-80),m.index),a:v.slice(m.index+m[0].length,m.index+m[0].length+25)});
+  const fill=()=>{const v=ta.value,L=[];const re=/_{2,}/g;let m;while((m=re.exec(v)))L.push({i:L.length,at:m.index,len:m[0].length,b:v.slice(Math.max(0,m.index-80),m.index),a:v.slice(m.index+m[0].length,m.index+m[0].length+40)});
     if(!L.length){fb.innerHTML="";return}
-    fb.innerHTML=`<div class="box" style="border:2px solid var(--accent);margin:6px 0"><h3>Completa los espacios</h3><p class="note-src" style="margin:0 0 6px">Escoge o escribe y se pone solo en la respuesta.</p>${L.map(z=>{const tp=ivBlankTipo(z.b,z.a),pw=(z.b.trim().match(/([A-Za-zÁÉÍÓÚÑáéíóúñ]+)\s*\(?$/)||[,""])[1],ctx=tp.t==="date"?(pw?pw.charAt(0).toUpperCase()+pw.slice(1)+" (fecha)":"Fecha"):tp.t==="numu"||tp.t==="sel"?"Cantidad":tp.t==="num"?"Número de "+tp.u:"…"+z.b.slice(-30).replace(/^\S*\s/,"")+" ▢ "+z.a.slice(0,18);
-      const inp=tp.t==="date"?`<input type="date" data-ivb="${z.i}" max="${hoy()}">`:tp.t==="num"?`<div style="display:flex;gap:6px;align-items:center"><input type="number" inputmode="decimal" step="any" data-ivb="${z.i}" style="max-width:120px"><span>${esc(tp.u)}</span></div>`:tp.t==="numu"?`<div style="display:flex;gap:6px;align-items:center"><input type="number" inputmode="decimal" step="any" data-ivb="${z.i}" data-ivu="${z.i}" style="max-width:110px"><select data-ivus="${z.i}"><option>ml</option><option>cc</option><option>toallas en el día</option><option>toallas por hora</option><option>manchado (gotas)</option></select></div>`:tp.t==="sel"?`<select data-ivb="${z.i}"><option value="">Escoge…</option>${tp.o.map(o=>`<option>${esc(o)}</option>`).join("")}</select>`:`<input data-ivb="${z.i}" placeholder="Escribe aquí">`;
+    fb.innerHTML=`<div class="box" style="border:2px solid var(--accent);margin:6px 0"><h3>Completa los espacios</h3><p class="note-src" style="margin:0 0 6px">Escoge la opción y se pone sola en la respuesta. Si ninguna corresponde, escoge «Otro» y escríbelo.</p>${L.map(z=>{const tp=ivBlankTipo(z.b,z.a),pw=(z.b.trim().match(/([A-Za-zÁÉÍÓÚÑáéíóúñ]+)\s*\(?$/)||[,""])[1],
+      ctx=tp.l||(tp.t==="date"?(pw?pw.charAt(0).toUpperCase()+pw.slice(1)+" (fecha)":"Fecha"):tp.t==="mes"?(pw?pw.charAt(0).toUpperCase()+pw.slice(1)+" (mes y año)":"Mes y año"):tp.t==="numu"?"Cantidad":tp.t==="num"?"Número de "+tp.u:"…"+z.b.slice(-32).replace(/^\S*\s/,"")+" ▢ "+z.a.slice(0,18));
+      const otro=`<input data-ivo="${z.i}" placeholder="Escribe aquí y toca Enter" hidden style="margin-top:4px">`;
+      const inp=tp.t==="date"?`<input type="date" data-ivb="${z.i}" max="${hoy()}">`:tp.t==="mes"?`<input type="month" data-ivb="${z.i}" max="${hoy().slice(0,7)}">`
+       :tp.t==="num"?`<div style="display:flex;gap:6px;align-items:center"><input type="number" inputmode="decimal" step="any" data-ivb="${z.i}" style="max-width:120px"><span>${esc(tp.u)}</span></div>`
+       :tp.t==="numu"?`<div style="display:flex;gap:6px;align-items:center"><input type="number" inputmode="decimal" step="any" data-ivb="${z.i}" data-ivu="${z.i}" style="max-width:110px"><select data-ivus="${z.i}"><option>ml</option><option>cc</option><option>mg</option><option>g</option></select></div>`
+       :tp.t==="sel"?`<select data-ivb="${z.i}"><option value="">Escoge…</option>${tp.o.map(o=>`<option>${esc(o)}</option>`).join("")}<option value="__otro">Otro (escribir)</option></select>${otro}`
+       :tp.t==="multi"?`<div class="sugg" data-ivmw="${z.i}">${tp.o.map(o=>`<button type="button" aria-pressed="false" data-ivm="${esc(o)}">${esc(o)}</button>`).join("")}</div><div style="display:flex;gap:6px;margin-top:4px"><input data-ivmo="${z.i}" placeholder="Otro (opcional)"><button class="btn bq-mini" type="button" data-ivmb="${z.i}">Poner</button></div>`
+       :`<input data-ivb="${z.i}" placeholder="Escribe aquí y toca Enter">`;
       return `<label class="bfl" style="margin:6px 0"><span style="font-size:.85rem">${esc(ctx)}</span>${inp}</label>`}).join("")}</div>`;
+    const pone=(i,val)=>{val=String(val||"").trim();if(!val)return;let n=-1;ta.value=ta.value.replace(/_{2,}/g,mm=>(++n===i?val:mm));save();ult=ta.value;fill();cdt()};
     fb.querySelectorAll("[data-ivb]").forEach(el=>{const put=()=>{let val=String(el.value||"").trim();if(!val)return;const i=+el.dataset.ivb;
-      if(el.type==="date")val=val.split("-").reverse().join("/");if(el.dataset.ivu!=null){const u=fb.querySelector(`[data-ivus="${el.dataset.ivu}"]`);val=/manchado/.test(u.value)?"manchado (gotas)":val.replace(".",",")+" "+u.value}
-      let n=-1;ta.value=ta.value.replace(/_{2,}/g,mm=>(++n===i?val:mm));save();ult=ta.value;fill();cdt()};
+      if(val==="__otro"){const o=fb.querySelector(`[data-ivo="${i}"]`);o.hidden=false;o.focus();return}
+      if(el.type==="date")val=val.split("-").reverse().join("/");if(el.type==="month")val=val.split("-").reverse().join("/");
+      if(el.dataset.ivu!=null){const u=fb.querySelector(`[data-ivus="${el.dataset.ivu}"]`);val=val.replace(".",",")+" "+u.value}
+      pone(i,val)};
       el.addEventListener("change",put);el.addEventListener("keydown",ev=>{if(ev.key==="Enter"){ev.preventDefault();put()}})});
-    fb.querySelectorAll("[data-ivus]").forEach(s=>s.addEventListener("change",()=>{if(/manchado/.test(s.value)){const el=fb.querySelector(`[data-ivu="${s.dataset.ivus}"]`);el.value="0";el.dispatchEvent(new Event("change"))}}))};
+    fb.querySelectorAll("[data-ivo]").forEach(el=>{const put=()=>pone(+el.dataset.ivo,el.value);el.addEventListener("change",put);el.addEventListener("keydown",ev=>{if(ev.key==="Enter"){ev.preventDefault();put()}})});
+    fb.querySelectorAll("[data-ivm]").forEach(b=>b.onclick=()=>b.setAttribute("aria-pressed",b.getAttribute("aria-pressed")==="true"?"false":"true"));
+    fb.querySelectorAll("[data-ivmb]").forEach(b=>b.onclick=()=>{const i=+b.dataset.ivmb,w=fb.querySelector(`[data-ivmw="${i}"]`),xs=[...w.querySelectorAll('[aria-pressed="true"]')].map(z=>z.dataset.ivm),o=fb.querySelector(`[data-ivmo="${i}"]`).value.trim();if(o)xs.push(o);
+      if(!xs.length)return;pone(i,xs.length>1?xs.slice(0,-1).join(", ")+" y "+xs[xs.length-1]:xs[0])})};
   const cdt=()=>{const R=(CDT[id]||[]).filter(r=>cdtMatch(r,ta.value));let ed=null;try{const P=pac(),e=edadDe(P["FECHA NACIMIENTO"]);ed=e?e.y:(P.__edad?+P.__edad:null)}catch(e){}
     const ex=CDT_EDAD[id]&&/primer|ingreso|antecedente|psicosocial|apoyo/i.test(x.l)?CDT_EDAD[id](ed):null;if(ex)R.unshift(ex);
     if(!R.length){cb.hidden=true;cb.innerHTML="";return}cb.hidden=false;
@@ -10725,6 +10739,78 @@ Object.assign(CDT,{
   {re:/lactancia|mama|pecho|leche/,t:"Lactancia materna",p:["Iniciarla durante el contacto piel a piel y mantenerla a libre demanda."],c:[RC("Recién nacido","302","Se recomienda iniciar la lactancia materna durante el contacto piel a piel siempre que la madre esté en condiciones de llevarlo a cabo")],r:""},
   {re:/saturacion|oximetria|cardiopatia|bcg|vacuna/,t:"Tamizaje de cardiopatía y vacunas",p:["Pulsioximetría preductal y posductal a las 24 horas (y a las 48 si sigue); BCG antes del egreso."],c:[RC("Recién nacido","305","Realizar tamizaje de cardiopatía congénita: se debe realizar a las 24 horas de nacido (…) con pulso oximetría preductal"),RC("Recién nacido","305","Se debe aplicar una dosis de vacuna de BCG contra la tuberculosis antes del egreso hospitalario")],r:""}]});
 CDT.prenatal.forEach(r=>{if(/niega/.test(String(r.re)))r.neg=false});
+/* v207: opciones para cada espacio en blanco según el contexto (lo común primero, lo patológico después, «Otro») */
+const SIEMPRE_NO=["no reactiva","reactiva"];
+const BLK_OPC=[
+ [/cefalea\s*$/,"Tipo de cefalea",["leve y ocasional, que mejora con descanso o acetaminofén","frontal o en casco, tipo tensión","intensa y persistente, que no cede con analgésicos","pulsátil con náuseas o molestia a la luz (tipo migraña)","súbita y muy fuerte, la peor de su vida"]],
+ [/flujo vaginal\s*$/,"Tipo de flujo",["blanco, sin olor ni picor (fisiológico)","blanco grumoso con picor (sugiere hongos)","gris o amarillento con mal olor (sugiere vaginosis)","verde o amarillo espumoso con picor (sugiere tricomonas)","con sangre"]],
+ [/alergia a penicilina; reaccion:\s*$|; reaccion:\s*$/,"Reacción",["ronchas o picor en la piel (urticaria)","hinchazón de cara, labios u ojos","dificultad para respirar o silbido (anafilaxia)","desmayo o presión baja (anafilaxia)","no recuerda la reacción"]],
+ [/alergia a\s*$/,"Alergia a",["penicilina","sulfas","AINES (diclofenaco, ibuprofeno)","dipirona","mariscos o pescado","picadura de insectos"]],
+ [/consumo de\s*$/,"Consumo de",["chicha fermentada","licor (aguardiente, cerveza)","tabaco","rapé o mambe","marihuana","otras sustancias"]],
+ [/gestacion previa:\s*$/,"En gestación previa",["preeclampsia o eclampsia","hemorragia posparto","parto pretérmino","aborto","muerte perinatal","diabetes gestacional","cesárea"]],
+ [/familiar de preeclampsia \($/,"Quién",["madre","hermana","abuela"]],
+ [/familiar de\s*$/,"Antecedente familiar",["hipertensión arterial","diabetes","preeclampsia","cáncer","malformaciones congénitas","gemelos","enfermedad mental","tuberculosis"]],
+ [/alteracion del sueno:\s*$/,"Alteración del sueño",["le cuesta dormirse","se despierta varias veces en la noche","se despierta muy temprano y no vuelve a dormir","mucho sueño en el día","ronca o hace pausas al respirar"]],
+ [/(dieta basada en|farina y|dieta variada con)\s*$/,"Alimentos",["pescado","carne de monte","huevo","frutas (pupuña, asaí, piña)","verduras","plátano y yuca","mojojoy u otros insectos","ají y tucupí"],"multi"],
+ [/lesiones en piel \($/,"Lesiones en piel",["escabiosis (sarna)","micosis (hongos)","impétigo","úlcera que no sana","manchas sin sensibilidad"]],
+ [/embarazo: resultado\s*$/,"Resultado",["positiva","negativa"]],
+ [/(segunda prueba diferente:|vih|treponemica rapida|treponemica|postest)\s*$/,"Resultado",SIEMPRE_NO],
+ [/gota gruesa( mensual:)?\s*$/,"Malaria",["negativa","positiva para P. vivax","positiva para P. falciparum","mixta"]],
+ [/pareja:\s*$/,"Grupo y Rh de la pareja",["O Rh positivo","O Rh negativo","A Rh positivo","A Rh negativo","B Rh positivo","B Rh negativo","AB Rh positivo","AB Rh negativo","desconocido"]],
+ [/grupo sanguineo\s*$/,"Grupo",["O","A","B","AB"]],
+ [/cuello uterino \($/,"Prueba",["citología","ADN-VPH","VIA-VILI"]],
+ [/resultado anormal:\s*$/,"Resultado anormal",["ASC-US","lesión de bajo grado (LEI BG)","lesión de alto grado (LEI AG)","ADN-VPH positivo","VIA-VILI positivo"]],
+ [/molar en .{0,6}; seguimiento:\s*$|anormal: .{0,40}; seguimiento:\s*$/,"Seguimiento",["completo y normal","colposcopia realizada","pendiente","sin seguimiento"]],
+ [/(hipertension( arterial| cronica)?[^.]{0,40}en manejo con|antihipertensivo:)\s*$/,"Medicamento",["losartán","enalapril","amlodipino","nifedipino","hidroclorotiazida","sin tratamiento"]],
+ [/diabetes[^.]{0,40}en manejo con\s*$/,"Medicamento",["metformina","insulina","glibenclamida","dieta y ejercicio","sin tratamiento"]],
+ [/(epilepsia[^.]{0,20}en manejo con|anticonvulsivante:)\s*$/,"Medicamento",["ácido valproico","carbamazepina","fenitoína","levetiracetam","lamotrigina","sin tratamiento"]],
+ [/tiroides \($/,"Tipo",["hipotiroidismo","hipertiroidismo"]],
+ [/tiroides[^.]{0,30}en manejo con\s*$/,"Medicamento",["levotiroxina","metimazol","sin tratamiento"]],
+ [/asma, en manejo con\s*$/,"Medicamento",["salbutamol inhalado","beclometasona inhalada","sin tratamiento"]],
+ [/anemia, en manejo con\s*$/,"Medicamento",["sulfato ferroso","ácido fólico","sin tratamiento"]],
+ [/vih, en tratamiento con\s*$/,"Tratamiento",["antirretrovirales con buena adherencia","antirretrovirales con mala adherencia","sin tratamiento"]],
+ [/lupus, en manejo con\s*$/,"Medicamento",["hidroxicloroquina","prednisolona","sin tratamiento"]],
+ [/antecedente de enfermedad\s*$/,"Enfermedad",["cardiaca","renal"]],
+ [/trastorno mental:\s*$/,"Trastorno",["depresión","ansiedad","esquizofrenia","trastorno bipolar","consumo de sustancias"]],
+ [/enfermedad autoinmune:\s*$/,"Enfermedad",["lupus","artritis reumatoide","síndrome antifosfolípido"]],
+ [/enfermedad cardiaca:\s*$/,"Enfermedad",["cardiopatía congénita","valvulopatía (reumática)","arritmia","insuficiencia cardiaca"]],
+ [/malaria \($/,"Especie",["P. vivax","P. falciparum","mixta","no sabe"]],
+ [/muerte perinatal:\s*$/,"Tipo",["muerte fetal (mortinato)","muerte neonatal (primeros 28 días)"]],
+ [/ulceras o verrugas genitales:\s*$/,"Lesión",["úlcera dolorosa","úlcera indolora (chancro)","verrugas (condilomas)","ampollas (herpes)"]],
+ [/sintomas urinarios o flujo vaginal:\s*$/,"Síntomas",["ardor al orinar","orina muchas veces","flujo con mal olor","picor genital","dolor bajito"],"multi"],
+ [/(poco apoyo familiar|poco apoyo familiar o de la pareja):\s*$/,"Situación",["la pareja no la acompaña","vive sola","conflictos con la pareja o la familia","embarazo no aceptado por la familia","sin red de apoyo en la comunidad"]],
+ [/preocupacion o estres por\s*$/,"Preocupación",["el embarazo","dinero","la pareja","la salud del bebé","el traslado al albergue"]],
+ [/vive con\s*$/,"Vive con",["la pareja","la pareja y los hijos","sus padres","sola","familia extensa"]],
+ [/(acompanado\(a\) de|acudiente)\s*$/,"Acompañante",["la madre","el padre","la abuela","otro familiar"]],
+ [/al cuidado de\s*$/,"Al cuidado de",["la madre","el padre","la abuela","hermanos mayores","hogar comunitario"]],
+ [/interprete en lengua\s*$/,"Lengua",["cubeo","tukano","desano","wanano","piratapuyo","curripaco","siriano"]],
+ [/trabaja en\s*$/,"Trabaja en",["la chagra","pesca","labores del hogar","comercio","minería"]],
+ [/prioridad:\s*$/,"Prioridad",["urgente","prioritaria","programada"]],
+ [/se remite a\s*$/,"Se remite a",["medicina","ginecoobstetricia","odontología","psicología","nutrición","vacunación"]],
+ [/(signos generales de peligro \(aiepi\):|signo general de peligro \()\s*$/,"Signo de peligro",["no puede beber ni tomar el pecho","vomita todo","convulsiones","letárgico o inconsciente"],"multi"],
+ [/tanner\s*$/,"Tanner",["1","2","3","4","5"]],
+ [/clasificacion del riesgo:\s*$/,"Riesgo",["bajo","medio","alto"]],
+ [/atalah para la eg:\s*$/,"Atalah",["bajo peso","adecuado","sobrepeso","obesidad"]],
+ [/se toman en\s*$/,"Dónde",["la próxima brigada","el albergue (hogar materno)","el hospital San Antonio de Mitú"]],
+ [/(institucional en|casa de paso en)\s*$/,"Dónde",["hospital San Antonio de Mitú","albergue (hogar materno) de Mitú"]],
+ [/se desplaza en\s*$/,"Transporte",["bote o voladora","a pie","avioneta","bote y a pie"]],
+ [/metodo anticonceptivo\s*$/,"Método",["condón","anticonceptivo oral","inyectable mensual","inyectable trimestral","implante subdérmico","DIU"]],
+ [/(acido folico|sulfato ferroso|carbonato de calcio)\s*$/,"Lo recibe",["sí, todos los días","no","en forma irregular"]],
+ [/epigastralgia desde|fiebre desde|edema de cara, manos o pies desde|liquido por la vagina desde|movimientos fetales desde/,null,null,"date"],
+ [/(estado actual|resultado alterado):\s*$/,null,null,"txt"]];
+ivBlankTipo=(function(o){return function(b,a){const B=plano(b),A=plano(a);
+  for(const [re,l,op,t] of BLK_OPC){if(re.test(B)){if(t==="date"||t==="txt")return{t};return{t:t||"sel",o:op,l}}}
+  if(/^\s*\(([^)]{3,60})\)/.test(A)){const g=A.match(/^\s*\(([^)]{3,60})\)/)[1];if(/\//.test(g)&&!/semana|dia|mes|hora|ano/.test(g))return{t:"sel",o:a.match(/^\s*\(([^)]{3,60})\)/)[1].split("/").map(s=>s.trim()).filter(Boolean),l:"Escoge"}}
+  let m;if((m=A.match(/^\s*\)?\s*(lpm|rpm|°c|mmhg|anos|grado|hijos|parejas sexuales|abortos|dosis|deposiciones|horas|veces)/)))return{t:"num",u:m[1].replace("°c","°C").replace("mmhg","mmHg").replace("anos","años")};
+  if(/(diagnosticad[oa] en|tratada en|molar en|cirugia uterina: .{0,30} en|quirurgico: .{0,30} en|sifilis en|tuberculosis en|colocado en|la ultima en|trombosis: .{0,30} en|hospitalizado en|hace (menos|mas) de \d+ (meses|anos) \(|gestacion previa \(|placentaria \()\s*$/.test(B))return{t:"mes"};
+  if(/(se programa para|nueva cita en|seguimiento en|brigada a la comunidad \(|valoracion por (medicina|enfermeria) el|aplicada el)\s*$/.test(B))return{t:"date"};
+  return o(b,a)}})(ivBlankTipo);
+/* conducta según lo escogido */
+(function(){const C=CDT.prenatal,i=C.findIndex(r=>/dolor de cabeza\|cefalea/.test(String(r.re)));
+ if(i>=0)C[i].re=/(cefalea|dolor de cabeza)[^.]*(intensa|persistente|no cede|subita|peor|vision|visuales|luces|fosfenos|tinnitus|zumbido)|ve luces|vision borrosa|epigastr|boca del estomago|hinchazon|edema/;
+ C.splice(i+1,0,{re:/(cefalea|dolor de cabeza)[^.]*(leve|ocasional|mejora|tension)/,t:"Cefalea leve",p:["Toma la TA: si es normal y la cefalea es leve, acetaminofén, hidratación y descanso.","Explica que si se vuelve intensa, persistente o con visión borrosa o luces, debe consultar de inmediato (signo de alarma)."],c:[RC("4.3.6.1.2","266","cefaleas persistentes, edemas progresivos en cara o miembros superiores e inferiores, epigastralgia"),RC("4.3.6.1.5","270","signos de alarma por los que debe consultar oportunamente, tales como: hipertensión arterial, cefalea, trastornos visuales y auditivos")],r:"Cefalea leve con TA normal; se dan recomendaciones y signos de alarma (Res. 3280, p. 266 y 270)."});
+ C.push({re:/(anafilaxia|dificultad para respirar|hinchazon de cara)[^.]*|alergia a penicilina[^.]*(anafilaxia|respirar|hinchazon)/,t:"Alergia grave a la penicilina",p:["No apliques penicilina en el puesto.","Si necesita penicilina (sífilis): desensibilización; telemedicina y remisión prioritaria."],c:[RC("4.3.6.1.4","269","si hay historia de alergia a la penicilina o reacciones tipo l realice desensibilización con penicilina V potásica")],r:"Antecedente de reacción alérgica grave a la penicilina; si requiere tratamiento se remite para desensibilización (Res. 3280, p. 269)."});
+ C.push({re:/flujo[^.]*(hongos|vaginosis|tricomonas|mal olor|picor|con sangre)/,t:"Flujo vaginal anormal",p:["Infección cérvico vaginal: tratamiento con orden médica (telemedicina prioritaria).","Flujo con sangre: valoración médica inmediata."],c:[RC("4.3.6.1.2","266","sintomatología infecciosa urinaria o cérvico vaginal"),RC("4.3.6.1.5","270","amniorrea o leucorrea, o sintomatología urinaria")],r:"Flujo vaginal anormal; se consulta con medicina para tratamiento (Res. 3280, p. 266 y 270)."});})();
 /* ---------- arranque ---------- */
 /* los borradores guardados con la versión anterior de los módulos se reubican una sola vez */
 Object.keys(OLD_LAB).forEach(id=>{if(!M[id]||S.get(key(id,"ivlab")))return;let a={};try{a=JSON.parse(S.get(key(id,"iv"))||"{}")||{}}catch(e){}
