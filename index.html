@@ -1973,7 +1973,7 @@ function wireMiDia(){const cb=$("md-cal");if(cb)cb.onclick=calOpen;
 function mdShow(t){const s=$("md-st");s.innerHTML="";const a=document.createElement("textarea");a.value=t;a.rows=7;a.readOnly=true;s.append("No se pudo copiar solo. Mantén presionado el texto y cópialo:",a);a.focus();a.select()}
 
 /* ---------- PANEL ---------- */
-const VERSION_APP="2026-10-25 v202";
+const VERSION_APP="2026-10-25 v203";
 function home(){
   stopRec();if(S.get(AT_KEY))atReiniciar();st.view="home";
   const rm=["precon","prenatal","parto","rn","ive"],rp=["pinf","inf","adol","juv","adul","vej"];
@@ -2155,7 +2155,7 @@ function sugerir(){
 }
 
 /* ---------- MÓDULO ---------- */
-const ID_RM=["NOMBRE COMPLETO","TIPO","DOCUMENTO ID.","FECHA NACIMIENTO","GENERO","TELEFONO","ETNIA","PUEBLO","EAPB NOMBRE","RÉGIMEN"];
+const ID_RM=["NOMBRE COMPLETO","TIPO","DOCUMENTO ID.","FECHA NACIMIENTO","GENERO","TELEFONO","ETNIA","PUEBLO","EAPB NOMBRE","RÉGIMEN","CAPITADO"];
 function idCampos(id){return M[id].route==="rm"?ID_RM:ID_KEYS}
 function fnMal(fn,fe,id){if(!fn||fn==="N/A")return"";const e=edadDe(fn,fe||hoy());const rm=id&&M[id]&&M[id].route==="rm"&&id!=="rn";
   return !e?"es posterior a la fecha de la consulta":e.y>110?"da más de 110 años":rm&&e.y<9?"da una edad de "+(e.y?e.y+(e.y===1?" año":" años"):e.tm+(e.tm===1?" mes":" meses"))+": no corresponde a una consulta materna":""}
@@ -10536,6 +10536,7 @@ obsNota=(function(o){return function(f){f=f||hoy();let md=o.apply(this,arguments
    y se puede descargar la bitácora completa («App Rutas 3280 - Bitácora.md») para el vault.
    Al publicar una versión nueva se agrega aquí su línea (la más nueva primero). */
 const APP_CAMBIOS=[
+ [203,"2026-10-25","Datos de la persona: EAPB, régimen, capitado, teléfono, pertenencia étnica y pueblo que queden en blanco salen como «Pendiente» y con un aviso en Preguntas, Guía, Nota y Base hasta completarlos (N/A cuenta como respondido)."],
  [202,"2026-10-25","Guía de cada ruta en el orden de la consulta: primero la entrevista (anamnesis, antecedentes, psicosocial) y el examen con signos vitales; después «Exámenes y plan» (qué ordenas, exámenes de la gestante); botiquín y formatos al final."],
  [201,"2026-10-25","La nota de Obsidian lleva las mejoras de la app desde la última exportación; botón para descargar la bitácora completa de la app."],
  [200,"2026-10-25","La nota de Obsidian incluye el registro rápido del día y los exámenes de cada gestante."],
@@ -10575,6 +10576,19 @@ obsOpen=(function(o){return function(){o.apply(this,arguments);const marca=()=>S
   ["obs-dl","obs-cp"].forEach(id=>{const b=$(id);if(b)b.addEventListener("click",()=>setTimeout(marca,50))});
   const st0=$("obs-st");st0.insertAdjacentHTML("beforebegin",`<div class="btns"><button class="btn" type="button" id="obs-bit">Descargar bitácora de la app (.md)</button></div>`);
   $("obs-bit").onclick=async()=>{const r=await guardarArchivo("App Rutas 3280 - Bitácora.md",new Blob([appBitacora()],{type:"text/markdown"}));$("obs-st").textContent=r==="no"?"Descarga cancelada.":r==="err"?"No se pudo descargar.":"Descargada la bitácora (v"+appVer()+"). Guárdala en la carpeta Yurupari del vault y reemplaza la anterior."}}})(obsOpen);
+/* v203: datos de la persona que quedan en blanco = PENDIENTE (EAPB, régimen, capitado, teléfono, pertenencia étnica, pueblo).
+   En Datos se marcan «Pendiente» y en Preguntas, Guía, Nota y Base sale un aviso para completarlos. N/A cuenta como respondido. */
+const ID_REC=[["EAPB NOMBRE","EAPB"],["RÉGIMEN","Régimen (subsidiado, contributivo…)"],["CAPITADO","Capitado"],["TELEFONO","Teléfono"],["ETNIA","Pertenencia étnica"],["PUEBLO","Pueblo indígena"]];
+function idPend(id,P){P=P||pac();const ks=idCampos(id);return ID_REC.filter(([k])=>ks.includes(k)&&!(k==="PUEBLO"&&P["ETNIA"]!=="INDIGENA")&&!String(P[k]||"").trim()).map(([,l])=>l)}
+function idPendChips(id){const box=$("id-f");if(!box)return;const ks=idCampos(id);
+  const pinta=()=>{const et=(box.querySelector('[data-f="ETNIA"]')||{}).value;ID_REC.forEach(([k])=>{if(!ks.includes(k))return;const el=box.querySelector(`[data-f="${k}"]`);if(!el)return;const lab=el.closest("label")||el.parentElement;const sp=lab&&lab.querySelector("span");if(!sp)return;
+    let c=sp.querySelector(".idp");const vac=!String(el.value||"").trim()&&!el.dataset.na&&!(k==="PUEBLO"&&et!=="INDIGENA");
+    if(vac&&!c){sp.insertAdjacentHTML("beforeend",' <span class="idp bq-chip bq-amar">Pendiente</span>')}else if(!vac&&c)c.remove()})};
+  box.addEventListener("input",pinta);box.addEventListener("change",pinta);box.addEventListener("click",()=>setTimeout(pinta,30));pinta()}
+paneId=(function(o){return function(){o.apply(this,arguments);try{idPendChips(st.mod)}catch(e){}}})(paneId);
+renderMod=(function(o){return function(){o.apply(this,arguments);try{const id=st.mod;if(st.view!=="mod"||st.tab==="id"||!$("pane"))return;const f=idPend(id);if(!f.length||$("idp-box"))return;
+  $("pane").insertAdjacentHTML("afterbegin",`<div class="box warn" id="idp-box"><h3>Datos pendientes de la persona</h3><p style="margin:0 0 6px">${esc(f.join(" · "))}</p><p class="note-src" style="margin:0 0 6px">Quedaron en blanco. Pregúntalos antes de terminar o marca N/A si no aplica.</p><div class="btns"><button class="btn bq-mini" type="button" id="idp-go">Completar ahora</button></div></div>`);
+  $("idp-go").onclick=()=>{st.tab="id";S.set(key(id,"tab"),"id");renderMod();window.scrollTo(0,0)}}catch(e){}}})(renderMod);
 /* ---------- arranque ---------- */
 /* los borradores guardados con la versión anterior de los módulos se reubican una sola vez */
 Object.keys(OLD_LAB).forEach(id=>{if(!M[id]||S.get(key(id,"ivlab")))return;let a={};try{a=JSON.parse(S.get(key(id,"iv"))||"{}")||{}}catch(e){}
