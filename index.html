@@ -1973,7 +1973,7 @@ function wireMiDia(){const cb=$("md-cal");if(cb)cb.onclick=calOpen;
 function mdShow(t){const s=$("md-st");s.innerHTML="";const a=document.createElement("textarea");a.value=t;a.rows=7;a.readOnly=true;s.append("No se pudo copiar solo. Mantén presionado el texto y cópialo:",a);a.focus();a.select()}
 
 /* ---------- PANEL ---------- */
-const VERSION_APP="2026-10-25 v191";
+const VERSION_APP="2026-10-25 v187";
 function home(){
   stopRec();if(S.get(AT_KEY))atReiniciar();st.view="home";
   const rm=["precon","prenatal","parto","rn","ive"],rp=["pinf","inf","adol","juv","adul","vej"];
@@ -10188,6 +10188,173 @@ function obsOpen(){stopRec();st.view="obs";const f0=hoy();
 fmtHome=(function(o){return function(){o();const ref=$("md-sop");if(!ref||$("md-obs"))return;const u=S.get("dn2_obs_ult")||"";
   ref.insertAdjacentHTML("afterend",`<button type="button" class="btn" id="md-obs">Exportar a Obsidian${u===hoy()?" · ✓ hoy":""}</button>`);$("md-obs").onclick=()=>obsOpen()}})(fmtHome);
 OB.find(x=>x[0]==="d_evi")[2]+="; nota del día exportada a Obsidian";
+/* ===== v187: Exámenes de la gestante según la edad gestacional y la situación =====
+   Por cada gestante: qué se hace HOY en el puesto, qué va escrito en la REMISIÓN, qué está PENDIENTE de
+   resultado, qué ventana YA PASÓ y qué pedir en su lugar, qué toca MÁS ADELANTE (con fechas) y qué está AL DÍA.
+   Distingue ingreso temprano, ingreso en primer trimestre, ingreso tardío y muy tardío (Res. 3280, p. 265).
+   Base: Res. 3280 de 2018, 4.3.6.1.2 (p. 268) y 4.3.6.1.5 (p. 271); práctica del puesto: pruebas rápidas,
+   hemoglobina portátil, tira de orina, glucometría y PDR en el sitio; lo demás en la remisión al albergue. */
+const GEX=[
+ {id:"vih",n:"Prueba rápida de VIH (con asesoría y consentimiento)",d:"p",t:"tri",ref:"p. 268 y 271: ingreso, cada trimestre y parto",res:["NO REACTIVA","REACTIVA"]},
+ {id:"sif",n:"Prueba treponémica rápida para sífilis",d:"p",t:"tri",ref:"p. 268 y 271: ingreso y cada trimestre si es no reactiva; también en el parto",res:["NO REACTIVA","REACTIVA"]},
+ {id:"hbs",n:"Hepatitis B (HBsAg), prueba rápida",d:"p",t:"una",ref:"p. 268: ingreso",res:["NO REACTIVA","REACTIVA"]},
+ {id:"mal",n:"Malaria: prueba rápida (PDR)",d:"p",t:"mes",ref:"p. 271: gota gruesa mensual en zona endémica; en el puesto, PDR por no haber microscopio",res:["NEGATIVA","P. VIVAX","P. FALCIPARUM","MIXTA"]},
+ {id:"hbp",n:"Hemoglobina con aparato portátil",d:"p",t:"hb",ref:"Orientación del puesto para el hemograma del ingreso y de la semana 28 (p. 268 y 271)"},
+ {id:"tira",n:"Uroanálisis con tira (orientación mientras llega el urocultivo)",d:"p",t:"una",ref:"Práctica del puesto; no reemplaza el urocultivo"},
+ {id:"gluc",n:"Glucometría (orientación mientras llega la glicemia)",d:"p",t:"una",ref:"Práctica del puesto; no reemplaza la glicemia"},
+ {id:"cito",n:"Tamizaje de cuello uterino (citología 25 a 29 años; ADN-VPH 30 a 65)",d:"p",t:"cito",ref:"p. 268: solo si no está al día según la ruta de promoción y mantenimiento",res:["AL DIA POR ESQUEMA","TOMADA HOY"]},
+ {id:"hemo",n:"Hemoclasificación (grupo y Rh)",d:"r",t:"una",ref:"p. 268: ingreso; una sola vez",res:["O+","O-","A+","A-","B+","B-","AB+","AB-"]},
+ {id:"hemog",n:"Hemograma",d:"r",t:"hb",ref:"p. 268 y 271: ingreso y semana 28"},
+ {id:"uroc",n:"Urocultivo con antibiograma",d:"r",t:"una",ref:"p. 268: ingreso",res:["NEGATIVO","POSITIVO (100.000 UFC/ML O MAS)","CONTAMINADO: REPETIR"]},
+ {id:"glic",n:"Glicemia en ayunas",d:"r",t:"una",ref:"p. 268: ingreso"},
+ {id:"toxo",n:"IgG e IgM para toxoplasma",d:"r",t:"una",ref:"p. 268: si no se conoce su estado",res:["IGG+ IGM- (PROTEGIDA)","IGG- IGM- (SERONEGATIVA)","IGG+ IGM+ (AVIDEZ O IGA)","IGG- IGM+ (REPETIR IGG EN 2 SEMANAS)"]},
+ {id:"toxm",n:"IgM para toxoplasma mensual",d:"r",t:"mes",ref:"p. 268 y 271: mensual en la gestante seronegativa",si:c=>c.toxoNeg,res:["NEGATIVA","POSITIVA"]},
+ {id:"rub",n:"IgG para rubéola (si no está vacunada)",d:"r",t:"win",a:0,b:16,ref:"p. 268: antes de la semana 16"},
+ {id:"eco1",n:"Ecografía de 10+6 a 13+6 semanas (tamizaje de aneuploidías)",d:"r",t:"win",a:10.86,b:13.86,ref:"p. 268"},
+ {id:"eco2",n:"Ecografía de detalle anatómico",d:"r",t:"win",a:18,b:23.86,ref:"p. 271: semanas 18 a 23+6"},
+ {id:"ptog",n:"PTOG con 75 g de glucosa",d:"r",t:"win",a:24,b:28.86,ref:"p. 271: semanas 24 a 28"},
+ {id:"sgb",n:"Cultivo rectal y vaginal para estreptococo del grupo B",d:"r",t:"win",a:35,b:37.86,ref:"p. 271: semanas 35 a 37"},
+ {id:"vdrl",n:"VDRL o RPR con diluciones",d:"r",t:"tri",ref:"p. 271: cada trimestre en la sífilis gestacional",si:c=>c.sifPos},
+ {id:"coombs",n:"Coombs indirecto y grupo y Rh de la pareja",d:"r",t:"una",ref:"Gestante Rh negativo: lo define medicina",si:c=>c.rhNeg},
+ {id:"ecod",n:"Ecografía obstétrica para datar la gestación",d:"r",t:"una",ref:"Sin edad gestacional confiable",si:c=>c.sinEG}];
+const GEX_PASO={
+ rub:"Después de la semana 16 la norma ya no la pide. Si no está vacunada, triple viral después del parto (nunca en el embarazo).",
+ eco1:"La ventana de 10+6 a 13+6 ya pasó y no se recupera. Asegura la ecografía de detalle anatómico de las semanas 18 a 23+6.",
+ eco2:"La ventana de 18 a 23+6 ya pasó. Pide ecografía obstétrica lo antes posible (crecimiento, placenta, líquido y la anatomía que aún se pueda ver).",
+ ptog:"La ventana de 24 a 28 ya pasó. Consulta con medicina: suele pedirse la PTOG lo antes posible o una glicemia en ayunas. Escríbelo en la remisión.",
+ sgb:"La ventana de 35 a 37 ya pasó. En el parto el hospital decide el antibiótico según los factores de riesgo: escríbelo en la remisión."};
+const GEX_REM={rub:"",eco1:"ECOGRAFIA DE DETALLE ANATOMICO ENTRE LA SEMANA 18 Y 23+6 (NO SE REALIZO LA DE 11 A 14 SEMANAS)",eco2:"ECOGRAFIA OBSTETRICA LO ANTES POSIBLE (NO SE REALIZO LA DE DETALLE ANATOMICO EN LA VENTANA)",ptog:"PTOG 75 G O GLICEMIA EN AYUNAS SEGUN CRITERIO MEDICO (NO SE REALIZO ENTRE LA SEMANA 24 Y 28)",sgb:"SIN CULTIVO PARA ESTREPTOCOCO B: MANEJO INTRAPARTO SEGUN FACTORES DE RIESGO"};
+const GEX_GR=[["hoy","Hacer hoy en el puesto","high"],["rem","Escribir en la orden de remisión","mid"],["pend","Enviados: pendientes de resultado","mid"],["pas","Se pasó la ventana: qué hacer en su lugar","high"],["luego","Más adelante","low"],["ok","Al día","low"]];
+function gexKey(P){return "dn2_gex::"+pkey(P||pac())}
+function gexGet(P){try{return JSON.parse(S.get(gexKey(P))||"{}")||{}}catch(e){return{}}}
+function gexSnap(P){return{"NOMBRE COMPLETO":P["NOMBRE COMPLETO"]||"","TIPO":P["TIPO"]||"","DOCUMENTO ID.":P["DOCUMENTO ID."]||"","FECHA NACIMIENTO":P["FECHA NACIMIENTO"]||"","GENERO":P["GENERO"]||"F","EAPB NOMBRE":P["EAPB NOMBRE"]||"","PUEBLO":P["PUEBLO"]||"","ETNIA":P["ETNIA"]||"",__com:P.__com||"",__est:"ges"}}
+function gexSet(o,P){P=P||pac();if(P&&(P["NOMBRE COMPLETO"]||P["DOCUMENTO ID."]))o._p=gexSnap(P);S.set(gexKey(P),JSON.stringify(o))}
+const gexIso=(iso,n)=>{const d=pD(iso)||pD(hoy());d.setUTCDate(d.getUTCDate()+Math.round(n));return d.toISOString().slice(0,10)};
+const gexDM=iso=>iso?iso.slice(8,10)+"/"+iso.slice(5,7):"";
+const gexDias=(a,b)=>Math.round(((pD(b)||pD(hoy()))-(pD(a)||pD(hoy())))/864e5);
+const gexTri=w=>w==null?null:w<14?1:w<28?2:3;
+const gexSem=w=>{const s=Math.floor(w),d=Math.round((w-s)*7);return d?`${s}+${d}`:`${s}`};
+/* edad gestacional: la del módulo prenatal si está; si no, la escrita a mano o la proyectada desde la última vez */
+function gexW(P,o,noMod){o=o||gexGet(P);let w=null;try{if(!noMod&&pkey(P)===pkey(pac()))w=semPren()}catch(e){}
+  if(w!=null)return{w,src:"del control prenatal"};
+  if(o._egm&&o._egm.w!=null)return{w:+o._egm.w+gexDias(o._egm.f,hoy())/7,src:"escrita a mano el "+gexDM(o._egm.f)};
+  if(o._eg&&o._eg.w!=null)return{w:+o._eg.w+gexDias(o._eg.f,hoy())/7,src:"proyectada desde el "+gexDM(o._eg.f)};
+  return{w:null,src:""}}
+function gexCtx(P,o,W){const E=id=>(o[id]||[]).filter(x=>x.e==="h"),last=id=>E(id).slice(-1)[0];
+  const e=edadDe(P["FECHA NACIMIENTO"]),ed=e?e.y:(P.__edad?+P.__edad:null);
+  const h=last("hemo"),t=last("toxo");
+  return{ed,sinEG:W==null,rhNeg:!!(h&&/-$/.test(h.r||"")),toxoNeg:!!(t&&/IGG- IGM-/.test(t.r||"")),sifPos:E("sif").some(x=>/^REACTIVA/.test(x.r||""))||!!o._sifPrev}}
+function gexEstado(x,W,o,c){const L=(o[x.id]||[]).slice().sort((a,b)=>a.f<b.f?-1:1),H=L.filter(z=>z.e==="h"),Pe=L.filter(z=>z.e==="e"&&!H.some(h=>h.f>=z.f)),lh=H.slice(-1)[0];
+  const due=extra=>({g:x.d==="p"?"hoy":"rem",txt:extra||""});
+  if(x.si&&!x.si(c))return null;
+  if(x.id==="cito"){if(c.ed!=null&&(c.ed<25||c.ed>65))return null;if(lh)return{g:"ok",txt:(lh.r||"Registrado")+" ("+gexDM(lh.f)+")"};return due(c.ed!=null&&c.ed>=30?"Le toca ADN-VPH (30 a 65 años), solo si no está al día.":"Citología (25 a 29 años), solo si no está al día.")}
+  if(x.id==="sif"&&H.some(z=>/^REACTIVA/.test(z.r||"")))return{g:"ok",txt:"Reactiva el "+gexDM(H.find(z=>/^REACTIVA/.test(z.r||"")).f)+": ya no se repite; el seguimiento es con VDRL o RPR cada trimestre."};
+  if(x.t==="una"){if(lh)return{g:"ok",txt:(lh.r?lh.r+" · ":"")+gexDM(lh.f)};if(Pe.length)return{g:"pend",txt:"Enviado el "+gexDM(Pe[0].f)};return due()}
+  if(x.t==="tri"){const T=gexTri(W);if(W==null){if(lh)return{g:"ok",txt:"Última: "+gexDM(lh.f)+" · llena la edad gestacional para saber si toca este trimestre"};return due()}
+    const enT=H.filter(z=>gexTri(z.w)===T);const sig=T===1?"segundo trimestre (desde la semana 14, "+gexDM(gexIso(hoy(),(14-W)*7))+")":T===2?"tercer trimestre (desde la semana 28, "+gexDM(gexIso(hoy(),(28-W)*7))+")":"en el parto";
+    if(enT.length)return{g:"ok",txt:"Hecha este trimestre ("+gexDM(enT.slice(-1)[0].f)+(enT.slice(-1)[0].r?", "+enT.slice(-1)[0].r.toLowerCase():"")+"). Siguiente: "+sig+"."};
+    if(Pe.some(z=>gexTri(z.w)===T))return{g:"pend",txt:"Enviado el "+gexDM(Pe.slice(-1)[0].f)};
+    return due((T===1?"Primer":T===2?"Segundo":"Tercer")+" trimestre: no tiene la de este trimestre.")}
+  if(x.t==="mes"){if(lh){const dd=gexDias(lh.f,hoy());if(dd<28)return{g:"ok",txt:"Última "+gexDM(lh.f)+(lh.r?" ("+lh.r.toLowerCase()+")":"")+". Próxima desde el "+gexDM(gexIso(lh.f,30))+"."};return due("Última hace "+dd+" días: toca la del mes.")}
+    if(Pe.length&&gexDias(Pe[0].f,hoy())<35)return{g:"pend",txt:"Enviado el "+gexDM(Pe[0].f)};return due("Mensual.")}
+  if(x.t==="hb"){const h28=H.filter(z=>z.w!=null&&z.w>=27),ing=H.filter(z=>!(z.w!=null&&z.w>=27));
+    if(!H.length&&!(W!=null&&W>=27)){if(Pe.length)return{g:"pend",txt:"Enviado el "+gexDM(Pe[0].f)};return due("Ingreso.")}
+    if(W!=null&&W>=27){if(h28.length)return{g:"ok",txt:"Semana 28: "+(h28.slice(-1)[0].r||"registrado")+" ("+gexDM(h28.slice(-1)[0].f)+")"};if(Pe.some(z=>z.w!=null&&z.w>=27))return{g:"pend",txt:"Enviado el "+gexDM(Pe.slice(-1)[0].f)};return due(H.length?"Le toca el de la semana 28.":"No tiene ni el del ingreso: hazlo ya (vale como el de la semana 28).")}
+    return{g:"luego",txt:"Ingreso: "+(ing.slice(-1)[0].r||"registrado")+" ("+gexDM(ing.slice(-1)[0].f)+"). Siguiente en la semana 28 ("+gexDM(gexIso(hoy(),(28-W)*7))+")."}}
+  if(x.t==="win"){if(lh)return{g:"ok",txt:(lh.r?lh.r+" · ":"")+gexDM(lh.f)};if(Pe.length)return{g:"pend",txt:"Enviado el "+gexDM(Pe[0].f)+" (ventana hasta la semana "+gexSem(x.b)+")"};
+    if(W==null)return{g:"rem",txt:"Semanas "+gexSem(x.a)+" a "+gexSem(x.b)+": necesitas la edad gestacional para programarla."};
+    const ini=gexIso(hoy(),(x.a-W)*7),fin=gexIso(hoy(),(x.b-W)*7);
+    if(W<x.a)return{g:"luego",txt:"Semanas "+gexSem(x.a)+" a "+gexSem(x.b)+": del "+gexDM(ini)+" al "+gexDM(fin)+".",prox:x.a-W<=6,ini,fin};
+    if(W<=x.b){const q=Math.round((x.b-W)*7);return{g:"rem",txt:"Ventana abierta hasta el "+gexDM(fin)+(q<=14?" (quedan "+q+" días)":"")+".",fin}}
+    return{g:"pas",txt:GEX_PASO[x.id]||"Ya pasó la ventana."}}
+  return null}
+function gexCalc(P,oo,noMod){P=P||pac();const o=oo||gexGet(P),{w:W,src}=gexW(P,o,noMod),c=gexCtx(P,o,W),R=[];
+  GEX.forEach(x=>{const s=gexEstado(x,W,o,c);if(s)R.push(Object.assign({x},s))});
+  const hayAntes=Object.keys(o).some(k=>k[0]!=="_"&&(o[k]||[]).some(z=>z.f<hoy()));let tipo="";try{if(!noMod&&pkey(P)===pkey(pac())&&/primera/i.test(prenA("Tipo de consulta")))tipo="ing"}catch(e){}
+  const ing=tipo==="ing"||!hayAntes;
+  let sit="";if(W==null)sit="Sin edad gestacional: llénala en el control (FUM o ecografía) o escríbela abajo. Mientras tanto se pide ecografía para datar.";
+  else if(ing)sit=W<10?"Ingreso temprano (antes de la semana 10): es el ideal. Alcanza todas las ventanas.":W<14?"Ingreso en el primer trimestre: aún alcanza la ecografía de 10+6 a 13+6 si sale a tiempo."+(W>=12?" Remítela ya: la ventana cierra pronto.":""):W<26?"Ingreso tardío (después del primer trimestre): haz hoy todo lo del ingreso y revisa las ventanas que ya pasaron.":"Ingreso muy tardío (desde la semana 26): la norma pide hacer en este primer control todo lo de las consultas anteriores (Res. 3280, p. 265).";
+  else sit="Control de seguimiento.";
+  return{P,o,W,src,c,R,ing,sit}}
+function gexRemTxt(G){const r=G.R.filter(z=>z.g==="rem").map(z=>"- "+plano(z.x.n).toUpperCase()+(z.x.t==="win"&&z.fin?" (VENTANA HASTA EL "+gexDM(z.fin)+")":""));
+  G.R.filter(z=>z.g==="pas"&&GEX_REM[z.x.id]).forEach(z=>r.push("- "+GEX_REM[z.x.id]));
+  G.R.filter(z=>z.g==="luego"&&z.x.t==="win"&&z.x.d==="r").forEach(z=>r.push("- PROGRAMAR: "+plano(z.x.n).toUpperCase()+" DEL "+gexDM(z.ini)+" AL "+gexDM(z.fin)));
+  if(!r.length)return"";return `EXAMENES PARA LA ORDEN DE REMISION (GESTANTE DE ${G.W==null?"EDAD GESTACIONAL DESCONOCIDA":gexSem(G.W)+" SEMANAS"}):\n`+r.join("\n")}
+function gexNotaTxt(G){const hoyL=G.R.filter(z=>z.g==="hoy").map(z=>plano(z.x.n).toUpperCase()),rem=G.R.filter(z=>z.g==="rem").map(z=>plano(z.x.n).toUpperCase()),pen=G.R.filter(z=>z.g==="pend").map(z=>plano(z.x.n).toUpperCase()),pas=G.R.filter(z=>z.g==="pas").map(z=>plano(z.x.n).toUpperCase());
+  const L=[];if(G.W!=null)L.push(`GESTANTE DE ${gexSem(G.W)} SEMANAS. ${G.ing?"INGRESO AL CONTROL PRENATAL":"CONTROL DE SEGUIMIENTO"}.`);
+  if(hoyL.length)L.push("PRUEBAS PENDIENTES PARA REALIZAR EN EL PUESTO: "+hoyL.join("; ")+".");
+  if(rem.length)L.push("SE SOLICITAN EN ORDEN DE REMISION (NO DISPONIBLES EN LA ZONA): "+rem.join("; ")+".");
+  if(pen.length)L.push("PENDIENTES DE RESULTADO: "+pen.join("; ")+".");
+  if(pas.length)L.push("NO REALIZADOS EN SU VENTANA: "+pas.join("; ")+"; SE SOLICITA LO QUE CORRESPONDE EN SU LUGAR.");
+  return L.join(" ")}
+function gexHTML(P){const G=gexCalc(P);if(!G.P["NOMBRE COMPLETO"]&&!G.P["DOCUMENTO ID."])return `<div class="box"><p style="margin:0">Identifica a la gestante en el inicio para llevar su control de exámenes.</p></div>`;
+  const by=k=>G.R.filter(z=>z.g===k);
+  return `<div class="gex" id="gex"><div class="box ${G.W==null||G.ing&&G.W>=14?"warn":""}" style="margin:0 0 8px"><p style="margin:0"><b>${G.W==null?"Sin edad gestacional":gexSem(G.W)+" semanas · "+["","primer","segundo","tercer"][gexTri(G.W)]+" trimestre"}</b>${G.src?` <span class="note-src">(${esc(G.src)})</span>`:""}</p><p style="margin:4px 0 0">${esc(G.sit)}</p>
+   ${G.W==null||!/control prenatal/.test(G.src)?`<div class="frow" style="margin-top:6px"><label>Semanas de gestación hoy<input id="gex-w" type="number" step="0.1" min="4" max="42" inputmode="decimal" value="${G.W!=null?Math.round(G.W*10)/10:""}"></label></div>`:""}</div>
+   ${GEX_GR.map(([k,t,cl])=>{const xs=by(k);if(!xs.length)return"";return `<details class="sec"${k==="hoy"||k==="rem"||k==="pas"?" open":""}><summary><span class="gex-t gex-${cl}">${esc(t)}</span><span class="cnt">${xs.length}</span></summary><ul class="gex-ul">${xs.map(z=>`<li><b>${esc(z.x.n)}</b>${z.txt?`<br><span>${esc(z.txt)}</span>`:""}<br><small class="note-src">${esc(z.x.ref)}</small>
+     ${k==="ok"?"":`<div class="gex-act">${z.x.res?`<select data-gexr="${z.x.id}"><option value="">Resultado…</option>${z.x.res.map(r=>`<option>${esc(r)}</option>`).join("")}</select>`:`<input data-gexr="${z.x.id}" placeholder="Resultado (opcional)">`}<button class="btn bq-mini" type="button" data-gexh="${z.x.id}">Hecho / con resultado</button>${z.x.d==="r"&&k!=="pend"?`<button class="btn bq-mini" type="button" data-gexe="${z.x.id}">Enviado en la remisión</button>`:""}</div>`}</li>`).join("")}</ul></details>`}).join("")}
+   <label class="sx-ck"><input type="checkbox" id="gex-sifp"${G.o._sifPrev?" checked":""}> Tuvo sífilis antes de este embarazo (seguimiento con VDRL)</label>
+   <div class="btns"><button class="btn primary" type="button" id="gex-rem">Copiar para la orden de remisión</button><button class="btn" type="button" id="gex-nota">Copiar para la nota</button>${by("hoy").length?`<button class="btn" type="button" id="gex-pz">Ir a pruebas en el puesto</button>`:""}<button class="btn" type="button" id="gex-all">Todas las gestantes</button></div>
+   <p class="status" id="gex-st" aria-live="polite"></p>
+   <details class="sec"><summary><span>Historial de exámenes registrados</span></summary><div style="padding:8px 14px">${gexHist(G.o)}</div></details></div>`}
+function gexHist(o){const L=[];GEX.forEach(x=>(o[x.id]||[]).forEach((z,i)=>L.push({x,z,i})));if(!L.length)return `<p class="note-src">Sin registros todavía.</p>`;
+  L.sort((a,b)=>a.z.f<b.z.f?1:-1);return `<ul class="mb-ul">${L.map(({x,z,i})=>`<li>${gexDM(z.f)}${z.w!=null?" ("+gexSem(z.w)+" sem)":""} · ${esc(x.n)} · ${z.e==="e"?"enviado en la remisión":esc(z.r||"hecho")} <button class="btn bq-mini" type="button" data-gexdel="${x.id}:${i}">Borrar</button></li>`).join("")}</ul>`}
+function gexAdd(id,e,r,P){P=P||pac();const o=gexGet(P),{w}=gexW(P,o);(o[id]=o[id]||[]).push({f:hoy(),w:w==null?null:Math.round(w*10)/10,e,r:r||""});
+  o._p={"NOMBRE COMPLETO":P["NOMBRE COMPLETO"]||"","TIPO":P["TIPO"]||"","DOCUMENTO ID.":P["DOCUMENTO ID."]||"","FECHA NACIMIENTO":P["FECHA NACIMIENTO"]||"","GENERO":P["GENERO"]||"F","EAPB NOMBRE":P["EAPB NOMBRE"]||"","PUEBLO":P["PUEBLO"]||"","ETNIA":P["ETNIA"]||"",__com:P.__com||"",__est:"ges"};
+  if(w!=null)o._eg={f:hoy(),w:Math.round(w*10)/10};gexSet(o,P)}
+function gexWire(redraw){const box=$("gex");if(!box)return;const P=pac();
+  {const o=gexGet(P),{w}=gexW(P,o);if(w!=null&&(!o._eg||o._eg.f!==hoy())){o._eg={f:hoy(),w:Math.round(w*10)/10};if(!o._p)o._p={"NOMBRE COMPLETO":P["NOMBRE COMPLETO"]||"","TIPO":P["TIPO"]||"","DOCUMENTO ID.":P["DOCUMENTO ID."]||"","FECHA NACIMIENTO":P["FECHA NACIMIENTO"]||"","GENERO":"F",__com:P.__com||"",__est:"ges"};gexSet(o,P)}}
+  const re=()=>{box.outerHTML=gexHTML(P);gexWire(redraw)};
+  const wi=$("gex-w");if(wi)wi.onchange=()=>{const o=gexGet(P),v=parseFloat(String(wi.value).replace(",","."));if(v>0){o._egm={f:hoy(),w:v};o._eg={f:hoy(),w:v}}else delete o._egm;gexSet(o,P);re()};
+  box.querySelectorAll("[data-gexh]").forEach(b=>b.onclick=()=>{const id=b.dataset.gexh,r=box.querySelector(`[data-gexr="${id}"]`);gexAdd(id,"h",r?r.value:"",P);re()});
+  box.querySelectorAll("[data-gexe]").forEach(b=>b.onclick=()=>{gexAdd(b.dataset.gexe,"e","",P);re()});
+  box.querySelectorAll("[data-gexdel]").forEach(b=>b.onclick=()=>{if(b.dataset.armed!=="1"){b.dataset.armed="1";b.textContent="¿Borrar? Toca otra vez";return}const[id,i]=b.dataset.gexdel.split(":"),o=gexGet(P);(o[id]||[]).splice(+i,1);gexSet(o,P);re()});
+  $("gex-sifp").onchange=()=>{const o=gexGet(P);if($("gex-sifp").checked)o._sifPrev=1;else delete o._sifPrev;gexSet(o,P);re()};
+  const cp=(t,m)=>{if(!t){$("gex-st").textContent="No hay nada pendiente para copiar.";return}try{navigator.clipboard.writeText(t).then(()=>$("gex-st").textContent=m,()=>$("gex-st").textContent=t)}catch(e){$("gex-st").textContent=t}};
+  $("gex-rem").onclick=()=>cp(gexRemTxt(gexCalc(P)),"Copiado: pégalo en la orden de remisión.");
+  $("gex-nota").onclick=()=>cp(gexNotaTxt(gexCalc(P)),"Copiado: pégalo en la nota.");
+  const z=$("gex-pz");if(z)z.onclick=()=>{st.pzDe=redraw||null;pzOpen()};
+  $("gex-all").onclick=()=>gexLista(redraw)}
+/* lista de todas las gestantes con lo que les falta (para la secretaria) */
+function gexTodas(){return S.keys().filter(k=>k.startsWith("dn2_gex::")).map(k=>{let o={};try{o=JSON.parse(S.get(k)||"{}")}catch(e){}const P=o._p||{"NOMBRE COMPLETO":k.split("::")[1]};
+  const G=gexCalc(P,o,true);G.k=k;return G}).filter(G=>!G.o._fin)}
+function gexLista(de){stopRec();st.view="gexl";const L=gexTodas().sort((a,b)=>{const n=G=>G.R.filter(z=>["hoy","rem","pas"].includes(z.g)).length;return n(b)-n(a)});
+  $("app").innerHTML=`<div class="top"><button class="back" type="button" id="gexl-back">← ${de?"Prenatal":"Inicio"}</button><span class="tag pc">Gestantes</span></div>
+  <header><h1>Exámenes de mis gestantes</h1><p class="sub">Cada gestante con lo que le toca hoy en el puesto, lo que va en la remisión, lo que espera resultado y las ventanas que se pasaron. La edad gestacional se proyecta desde el último control.</p></header>
+  ${L.length?L.map((G,i)=>{const c=k=>G.R.filter(z=>z.g===k).length,pr=G.R.filter(z=>z.g==="luego"&&z.prox);
+   return `<details class="sec"><summary><span><b>${esc(G.P["NOMBRE COMPLETO"]||"Sin nombre")}</b><small style="color:var(--muted);font-weight:400"> · ${esc(G.P.__com||"")} · ${G.W==null?"sin EG":gexSem(G.W)+" sem"}</small></span><span class="cnt">${c("hoy")+c("rem")+c("pas")||"✓"}</span></summary><div style="padding:8px 14px 12px">
+    ${c("hoy")?`<p><b>Hoy en el puesto:</b> ${esc(G.R.filter(z=>z.g==="hoy").map(z=>z.x.n.split(" (")[0]).join("; "))}</p>`:""}
+    ${c("rem")?`<p><b>Para la remisión:</b> ${esc(G.R.filter(z=>z.g==="rem").map(z=>z.x.n.split(" (")[0]+(z.fin?" (hasta el "+gexDM(z.fin)+")":"")).join("; "))}</p>`:""}
+    ${c("pend")?`<p><b>Esperando resultado:</b> ${esc(G.R.filter(z=>z.g==="pend").map(z=>z.x.n.split(" (")[0]).join("; "))}</p>`:""}
+    ${c("pas")?`<p style="color:var(--miss)"><b>Se pasó la ventana:</b> ${esc(G.R.filter(z=>z.g==="pas").map(z=>z.x.n.split(" (")[0]).join("; "))}</p>`:""}
+    ${pr.length?`<p><b>Se abre pronto:</b> ${esc(pr.map(z=>z.x.n.split(" (")[0]+" desde el "+gexDM(z.ini)).join("; "))}</p>`:""}
+    <div class="btns"><button class="btn bq-mini" type="button" data-gexopen="${i}">Abrir su control</button><button class="btn bq-mini" type="button" data-gexfin="${i}">Ya terminó el embarazo</button></div></div></details>`}).join(""):`<p class="note-src">Todavía no hay gestantes con control de exámenes. Se crea solo cuando abres la Guía prenatal de una gestante o registras un examen.</p>`}
+  <div class="btns"><button class="btn" type="button" id="gexl-copy">Copiar resumen para Claude</button></div><p class="status" id="gexl-st"></p>`;
+  document.querySelectorAll("[data-gexopen]").forEach(b=>b.onclick=()=>{const G=L[+b.dataset.gexopen];setPac(G.P);S.set(key("prenatal","tab"),"guia");openMod("prenatal")});
+  document.querySelectorAll("[data-gexfin]").forEach(b=>b.onclick=()=>{if(b.dataset.armed!=="1"){b.dataset.armed="1";b.textContent="¿Seguro? Toca otra vez";return}const G=L[+b.dataset.gexfin],o=G.o;o._fin=hoy();S.set(G.k,JSON.stringify(o));gexLista(de)});
+  $("gexl-copy").onclick=()=>{const t=["EXAMENES DE GESTANTES — "+hoy()].concat(L.map(G=>`${G.P["NOMBRE COMPLETO"]||""} (${G.P.__com||""}, ${G.W==null?"sin EG":gexSem(G.W)+" sem"}): hoy ${G.R.filter(z=>z.g==="hoy").map(z=>z.x.id).join(",")||"-"}; remisión ${G.R.filter(z=>z.g==="rem").map(z=>z.x.id).join(",")||"-"}; pendientes ${G.R.filter(z=>z.g==="pend").map(z=>z.x.id).join(",")||"-"}; ventana pasada ${G.R.filter(z=>z.g==="pas").map(z=>z.x.id).join(",")||"-"}`)).join("\n");try{navigator.clipboard.writeText(t)}catch(e){}$("gexl-st").textContent="Resumen copiado."};
+  $("gexl-back").onclick=()=>{if(de){S.set(key("prenatal","tab"),"guia");openMod("prenatal")}else{home();window.scrollTo(0,0)}};window.scrollTo(0,0)}
+/* enganches: guía prenatal, pruebas en el puesto, nota prenatal por voz, Mi día */
+fmtRutaHTML=(function(o){return function(id){const h=o(id);if(id!=="prenatal")return h;return `<details class="sec" id="ruta-gex" open><summary><span>Exámenes de esta gestante: hoy, remisión y pendientes</span></summary><div style="padding:10px 14px 14px">${gexHTML()}</div></details>`+h}})(fmtRutaHTML);
+fmtRutaWire=(function(o){return function(id){o(id);if(id==="prenatal")gexWire("mod:prenatal")}})(fmtRutaWire);
+pzOpen=(function(o){return function(){o.apply(this,arguments);const f=$("pzr-fmt");if(!f||$("pz-gex"))return;
+  f.insertAdjacentHTML("afterend",`<div class="btns" id="pz-gexw"><button class="btn" type="button" id="pz-gex">Guardar en los exámenes de la gestante</button></div><p class="status" id="pz-gex-st"></p>`);
+  const vis=()=>{$("pz-gexw").hidden=$("pz-g").value!=="ges"};vis();$("pz-g").addEventListener("change",vis);
+  $("pz-gex").onclick=()=>{const P=pac();if(!P["NOMBRE COMPLETO"]&&!P["DOCUMENTO ID."]){$("pz-gex-st").textContent="Identifica primero a la gestante.";return}
+    const d=pzrGet(),r=d.r||{},n=[];[["vih","vih"],["sif","sif"],["hbs","hbs"],["mal","mal"]].forEach(([a,b])=>{if(r[a]&&r[a]!=="INVALIDA"){gexAdd(b,"h",r[a].replace(" (NO FALCIPARUM)",""),P);n.push(b)}});
+    const hb=$("pz-hb").value;if(hb){gexAdd("hbp","h",hb.replace(".",",")+" G/DL",P);n.push("hemoglobina")}
+    if([...document.querySelectorAll("[data-pzt]")].some(s=>s.value)){gexAdd("tira","h","REALIZADA",P);n.push("tira")}
+    $("pz-gex-st").textContent=n.length?"Guardado en su control de exámenes: "+n.join(", ")+".":"No hay resultados para guardar."}}})(pzOpen);
+vnFinal=(function(o){return function(){o.apply(this,arguments);if(!VNS||VNS.id!=="prenat"||$("vn-gex"))return;const t=$("vn-nota");if(!t)return;
+  t.insertAdjacentHTML("afterend",`<details class="sec" id="vn-gex"><summary><span>Exámenes de esta gestante</span></summary><div style="padding:10px 14px">${gexHTML()}</div></details>`);gexWire(null)}})(vnFinal);
+fmtHome=(function(o){return function(){o();const f=$("md-dir");if(!f||$("md-gex"))return;let n=0;try{n=gexTodas().filter(G=>G.R.some(z=>["hoy","rem","pas"].includes(z.g))).length}catch(e){}
+  f.insertAdjacentHTML("afterend",`<button type="button" class="btn" id="md-gex">Exámenes de gestantes${n?` · ${n} con pendientes`:""}</button>`);$("md-gex").onclick=()=>gexLista(null)}})(fmtHome);
+document.head.insertAdjacentHTML("beforeend",`<style>
+.gex-ul{list-style:none;margin:0;padding:6px 14px 10px}.gex-ul li{padding:8px 0;border-top:1px solid var(--line)}.gex-ul li:first-child{border-top:0}
+.gex-act{display:flex;flex-wrap:wrap;gap:6px;margin-top:6px}.gex-act select,.gex-act input{padding:5px 8px;font-size:.88rem;max-width:210px}
+.gex-t.gex-high{color:var(--miss)}.gex-t.gex-mid{color:var(--warn)}.gex-t.gex-low{color:var(--accent)}
+</style>`);
+
 /* ---------- arranque ---------- */
 /* los borradores guardados con la versión anterior de los módulos se reubican una sola vez */
 Object.keys(OLD_LAB).forEach(id=>{if(!M[id]||S.get(key(id,"ivlab")))return;let a={};try{a=JSON.parse(S.get(key(id,"iv"))||"{}")||{}}catch(e){}
