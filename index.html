@@ -1973,7 +1973,7 @@ function wireMiDia(){const cb=$("md-cal");if(cb)cb.onclick=calOpen;
 function mdShow(t){const s=$("md-st");s.innerHTML="";const a=document.createElement("textarea");a.value=t;a.rows=7;a.readOnly=true;s.append("No se pudo copiar solo. Mantén presionado el texto y cópialo:",a);a.focus();a.select()}
 
 /* ---------- PANEL ---------- */
-const VERSION_APP="2026-10-25 v207";
+const VERSION_APP="2026-10-25 v208";
 function home(){
   stopRec();if(S.get(AT_KEY))atReiniciar();st.view="home";
   const rm=["precon","prenatal","parto","rn","ive"],rp=["pinf","inf","adol","juv","adul","vej"];
@@ -10540,6 +10540,7 @@ obsNota=(function(o){return function(f){f=f||hoy();let md=o.apply(this,arguments
    y se puede descargar la bitácora completa («App Rutas 3280 - Bitácora.md») para el vault.
    Al publicar una versión nueva se agrega aquí su línea (la más nueva primero). */
 const APP_CAMBIOS=[
+ [208,"2026-10-25","Valoración de contracciones con listas (semanas, cuántas y en cuánto tiempo, duración, ritmo, dolor, si ceden, sangrado, líquido, movimientos, FCF) que clasifica en urgente, prioritaria o programada (amenaza de parto pretérmino, actividad aumentada, Braxton Hicks, trabajo de parto, pródromos, taquisistolia) y arma el texto para la nota."],
  [207,"2026-10-25","Los espacios de las respuestas traen opciones según el contexto (tipo de cefalea, flujo, alergia y reacción, consumo, antecedentes, medicamentos, resultados, grupo y Rh, dieta, apoyo, lengua…), con «Otro» para escribir, selección múltiple y mes y año; la conducta cambia según lo escogido (cefalea leve vs. de alarma, alergia grave a la penicilina, flujo anormal)."],
  [206,"2026-10-25","La cantidad de sangrado se escoge con una escala que se puede observar (manchado, escaso, como una menstruación, abundante, muy abundante) en vez de mililitros; igual para la salida de líquido."],
  [205,"2026-10-25","«Conducta según la Res. 3280» con página y cita en todas las rutas: primera infancia, infancia, adolescencia, juventud, adultez, vejez, preconcepcional, parto y puerperio y recién nacido; no se activa cuando la persona lo niega."],
@@ -10682,8 +10683,9 @@ function ivExtras(id,x,ta,save){const fb=$("iv-fill"),cb=$("iv-cdt");if(!fb||!cb
     const ex=CDT_EDAD[id]&&/primer|ingreso|antecedente|psicosocial|apoyo/i.test(x.l)?CDT_EDAD[id](ed):null;if(ex)R.unshift(ex);
     if(!R.length){cb.hidden=true;cb.innerHTML="";return}cb.hidden=false;
     cb.innerHTML=`<h3>Conducta según la Res. 3280</h3><p class="note-src" style="margin:0 0 6px">Sale de lo que quedó en la respuesta. Cada recomendación dice de dónde sale (sección y página del PDF oficial de la Res. 3280 de 2018). Tú decides.</p>`+
-     R.map((r,n)=>`<div class="an-ruta" style="padding:8px 10px;margin:6px 0"><b>${esc(r.t)}</b><ul class="mb-ul">${r.p.map(z=>`<li>${esc(z)}</li>`).join("")}</ul>${r.c.map(c=>`<small class="note-src" style="display:block;font-style:italic;margin-top:4px">Res. 3280 de 2018${c.sec?", "+esc(c.sec):""}, p. ${esc(c.pg)}: «${esc(c.q)}».</small>`).join("")}${r.r?`<div class="btns" style="margin-top:6px"><button class="btn bq-mini" type="button" data-cdt="${n}">${ta.value.includes(r.r)?"✓ En la respuesta":"Agregar a la respuesta"}</button></div>`:""}</div>`).join("");
-    cb.querySelectorAll("[data-cdt]").forEach(b=>b.onclick=()=>{const r=R[+b.dataset.cdt];if(!ta.value.includes(r.r)){ta.value=(ta.value.trim()?ta.value.trim()+" ":"")+r.r;save();ult=ta.value}b.textContent="✓ En la respuesta"})};
+     R.map((r,n)=>`<div class="an-ruta" style="padding:8px 10px;margin:6px 0"><b>${esc(r.t)}</b><ul class="mb-ul">${r.p.map(z=>`<li>${esc(z)}</li>`).join("")}</ul>${r.wid&&CWID[r.wid]?CWID[r.wid].html():""}${r.c.map(c=>`<small class="note-src" style="display:block;font-style:italic;margin-top:4px">Res. 3280 de 2018${c.sec?", "+esc(c.sec):""}, p. ${esc(c.pg)}: «${esc(c.q)}».</small>`).join("")}${r.r?`<div class="btns" style="margin-top:6px"><button class="btn bq-mini" type="button" data-cdt="${n}">${ta.value.includes(r.r)?"✓ En la respuesta":"Agregar a la respuesta"}</button></div>`:""}</div>`).join("");
+    cb.querySelectorAll("[data-cdt]").forEach(b=>b.onclick=()=>{const r=R[+b.dataset.cdt];if(!ta.value.includes(r.r)){ta.value=(ta.value.trim()?ta.value.trim()+" ":"")+r.r;save();ult=ta.value}b.textContent="✓ En la respuesta"});
+    cb.querySelectorAll("[data-cwid]").forEach(w=>{try{CWID[w.dataset.cwid].wire(w,ta,()=>{save();ult=ta.value})}catch(e){console.warn(e)}})};
   ta.addEventListener("input",()=>{ult=ta.value;fill();cdt()});
   document.querySelectorAll("[data-c],[data-gr],#cd-all,[data-cd],[data-ex],#ex-all").forEach(b=>b.addEventListener("click",()=>setTimeout(()=>{ult=ta.value;fill();cdt()},0)));
   const iv=setInterval(()=>{if(!ta.isConnected){clearInterval(iv);return}if(ta.value!==ult){ult=ta.value;fill();cdt()}},600);
@@ -10811,6 +10813,56 @@ ivBlankTipo=(function(o){return function(b,a){const B=plano(b),A=plano(a);
  C.splice(i+1,0,{re:/(cefalea|dolor de cabeza)[^.]*(leve|ocasional|mejora|tension)/,t:"Cefalea leve",p:["Toma la TA: si es normal y la cefalea es leve, acetaminofén, hidratación y descanso.","Explica que si se vuelve intensa, persistente o con visión borrosa o luces, debe consultar de inmediato (signo de alarma)."],c:[RC("4.3.6.1.2","266","cefaleas persistentes, edemas progresivos en cara o miembros superiores e inferiores, epigastralgia"),RC("4.3.6.1.5","270","signos de alarma por los que debe consultar oportunamente, tales como: hipertensión arterial, cefalea, trastornos visuales y auditivos")],r:"Cefalea leve con TA normal; se dan recomendaciones y signos de alarma (Res. 3280, p. 266 y 270)."});
  C.push({re:/(anafilaxia|dificultad para respirar|hinchazon de cara)[^.]*|alergia a penicilina[^.]*(anafilaxia|respirar|hinchazon)/,t:"Alergia grave a la penicilina",p:["No apliques penicilina en el puesto.","Si necesita penicilina (sífilis): desensibilización; telemedicina y remisión prioritaria."],c:[RC("4.3.6.1.4","269","si hay historia de alergia a la penicilina o reacciones tipo l realice desensibilización con penicilina V potásica")],r:"Antecedente de reacción alérgica grave a la penicilina; si requiere tratamiento se remite para desensibilización (Res. 3280, p. 269)."});
  C.push({re:/flujo[^.]*(hongos|vaginosis|tricomonas|mal olor|picor|con sangre)/,t:"Flujo vaginal anormal",p:["Infección cérvico vaginal: tratamiento con orden médica (telemedicina prioritaria).","Flujo con sangre: valoración médica inmediata."],c:[RC("4.3.6.1.2","266","sintomatología infecciosa urinaria o cérvico vaginal"),RC("4.3.6.1.5","270","amniorrea o leucorrea, o sintomatología urinaria")],r:"Flujo vaginal anormal; se consulta con medicina para tratamiento (Res. 3280, p. 266 y 270)."});})();
+/* v208: valoración de contracciones con listas desplegables y clasificación (urgente, prioritaria, programada).
+   La Res. 3280 no fija cifras (pide registrar frecuencia, duración e intensidad, p. 283); los umbrales son los de uso
+   clínico corriente para amenaza de parto pretérmino (4 o más en 20 minutos u 8 o más en 60 minutos, entre las
+   semanas 22 y 36+6), trabajo de parto (dinámica regular: 2 a 5 en 10 minutos de 30 a 60 segundos) y taquisistolia
+   (más de 5 en 10 minutos). Confirmar con el protocolo de la ESE. */
+const CWID={};
+function contrEG(){try{const w=semPren();if(w!=null)return w}catch(e){}try{const g=gexW(pac());if(g.w!=null)return g.w}catch(e){}return null}
+function contrK(){let k="";try{k=pkey(pac())}catch(e){}return "dn2_contr::"+k+"::"+hoy()}
+function contrGet(){try{return JSON.parse(S.get(contrK())||"{}")||{}}catch(e){return{}}}
+function contrCalc(v){const w=v.eg===""||v.eg==null?null:+v.eg,n=+v.n||0,win=+v.win||10,p10=n*10/win,p60=n*60/win,R={cls:"",niv:"",t:"",acc:[],nota:""};
+  const fl=v.fl||[],red=fl.filter(f=>/sangrado|liquido|movimientos|fcf/.test(plano(f)));
+  if(!n&&!fl.length){R.t="Escoge cuántas contracciones contaste y en cuánto tiempo.";return R}
+  const reg=v.reg==="regulares",dur=v.dur||"",fuerte=/fuerte/.test(v.dol||""),noCede=v.cede==="no";
+  if(red.length){R.niv="u";R.t="Contracciones con "+red.join(", ").toLowerCase()+": urgencia obstétrica.";R.acc.push("Telemedicina urgente y remisión inmediata; reposo en decúbito lateral izquierdo, signos vitales y FCF cada 15 minutos.")}
+  else if(p10>5){R.niv="u";R.t="Más de 5 contracciones en 10 minutos (taquisistolia).";R.acc.push("Telemedicina urgente y remisión inmediata; FCF cada 15 minutos.")}
+  else if(w!=null&&w<22){if(n){R.niv=fuerte||noCede?"u":"p";R.t="Dolor tipo contracción antes de la semana 22: posible amenaza de aborto.";R.acc.push(R.niv==="u"?"Telemedicina urgente y remisión.":"Telemedicina el mismo día; reposo relativo y signos de alarma (sangrado, dolor fuerte).")}}
+  else if(w==null||w<37){const apt=p60>=8||(reg&&p10>=2);
+    if(apt){R.niv="u";R.t=(w==null?"Sin edad gestacional: ":"Gestación de "+gexSem(w)+" semanas: ")+"actividad uterina de amenaza de parto pretérmino ("+Math.round(p60)+" o más por hora, "+(reg?"regulares":"irregulares")+").";
+      R.acc.push("Telemedicina urgente y remisión inmediata al hospital (no se maneja en el puesto); decúbito lateral izquierdo y FCF.","Si la remisión demora, deja constancia de la hora de cada gestión (acta de contingencia si no hay transporte).")}
+    else if(p60>=4||fuerte||noCede||reg){R.niv="p";R.t="Actividad uterina aumentada sin criterios de amenaza de parto pretérmino ("+Math.round(p60)+" por hora).";
+      R.acc.push("Reposo, hidratación y vaciar la vejiga; vuelve a contar durante 20 minutos dentro de 1 hora.","Si llega a 4 en 20 minutos (u 8 en una hora), aparecen sangrado o salida de líquido, o no ceden: urgente.","Telemedicina el mismo día y descarta infección urinaria (tira de orina).")}
+    else{R.niv="g";R.t="Contracciones aisladas, irregulares, sin dolor fuerte y que ceden con reposo: probables contracciones de Braxton Hicks (fisiológicas).";
+      R.acc.push("Educación: si se vuelven regulares, más de 4 en una hora, dolorosas, con sangrado, líquido o presión en la vagina, consultar de inmediato.")}}
+  else{if(reg&&p10>=2){R.niv="u";R.t="Gestación a término con dinámica uterina regular ("+Math.round(p10)+" en 10 minutos"+(dur?", "+dur:"")+"): probable trabajo de parto.";
+      R.acc.push("Activa el plan de parto: traslado urgente para parto institucional; si no hay transporte, prepárate para atender el parto en el puesto (kit de parto, oxitocina) y telemedicina.","FCF cada 30 minutos y signos vitales; registra la hora de inicio.")}
+    else{R.niv="p";R.t="Gestación a término con contracciones irregulares: pródromos o fase latente.";R.acc.push("Asegura el plan de parto y el traslado al albergue u hospital hoy si aún está en la comunidad.","Explica cuándo volver: contracciones regulares cada 5 minutos o menos, salida de líquido, sangrado o menos movimientos del bebé.")}}
+  R.cls={u:"high",p:"mid",g:"low"}[R.niv]||"";
+  const det=[n?n+" contracciones en "+win+" minutos":"",dur?"duración "+dur:"",v.reg||"",v.dol||"",v.cede==="si"?"ceden con reposo e hidratación":v.cede==="no"?"no ceden con reposo":"",fl.length?"acompañadas de "+fl.join(", ").toLowerCase():"sin sangrado ni salida de líquido"].filter(Boolean).join(", ");
+  R.nota="Se valora actividad uterina"+(w!=null?" en gestación de "+gexSem(w)+" semanas":"")+": "+det+". "+R.t+" Conducta: "+R.acc[0].replace(/\.$/,"")+".";return R}
+CWID.contr={html:()=>{const v=Object.assign({eg:contrEG()!=null?Math.round(contrEG()*10)/10:"",win:"10",n:""},contrGet()),sel=(k,ops,ph)=>`<select data-cw="${k}"><option value="">${esc(ph)}</option>${ops.map(o=>{const [val,lab]=Array.isArray(o)?o:[o,o];return `<option value="${esc(val)}"${String(v[k])===String(val)?" selected":""}>${esc(lab)}</option>`}).join("")}</select>`;
+  return `<div class="tool" data-cwid="contr" style="margin:8px 0;padding:10px 12px;gap:6px"><b>Valora las contracciones</b>
+   <div class="pgrid">
+    <label class="bfl"><span>Semanas de gestación</span><input data-cw="eg" type="number" inputmode="decimal" step="0.1" value="${esc(v.eg)}"></label>
+    <label class="bfl"><span>Contracciones contadas</span>${sel("n",[0,1,2,3,4,5,6,7,8,9,10,12,15].map(String),"Número")}</label>
+    <label class="bfl"><span>En cuánto tiempo</span>${sel("win",[["10","10 minutos"],["20","20 minutos"],["60","1 hora"]],"Tiempo")}</label>
+    <label class="bfl"><span>Duración de cada una</span>${sel("dur",["menos de 30 segundos","30 a 60 segundos","más de 60 segundos"],"Duración")}</label>
+    <label class="bfl"><span>Ritmo</span>${sel("reg",["irregulares","regulares"],"Ritmo")}</label>
+    <label class="bfl"><span>Dolor</span>${sel("dol",["sin dolor (solo endurecimiento)","con dolor leve","con dolor fuerte"],"Dolor")}</label>
+    <label class="bfl"><span>¿Ceden con reposo e hidratación?</span>${sel("cede",[["si","Sí"],["no","No"],["ne","No evaluado"]],"Escoge")}</label></div>
+   <div class="sugg">${["Sangrado","Salida de líquido","Presión en la vagina o pelvis","Dolor lumbar","Disminución de movimientos fetales","FCF fuera de 110 a 160"].map(f=>`<button type="button" data-cwf="${esc(f)}" aria-pressed="${(v.fl||[]).includes(f)}">${esc(f)}</button>`).join("")}</div>
+   <div data-cwr></div></div>`},
+ wire:(box,ta,saveTa)=>{const v=Object.assign({eg:contrEG()!=null?Math.round(contrEG()*10)/10:"",win:"10"},contrGet());
+  {const m=plano(ta.value).match(/(\d+)\s*veces en una hora/);if(m&&!contrGet().n){v.n=m[1];v.win="60";const s=box.querySelector('[data-cw="n"]');if(s&&![...s.options].some(o=>o.value===m[1]))s.insertAdjacentHTML("beforeend",`<option>${m[1]}</option>`);s.value=m[1];box.querySelector('[data-cw="win"]').value="60"}}
+  const pinta=()=>{S.set(contrK(),JSON.stringify(v));const R=contrCalc(v),N={u:"URGENTE",p:"PRIORITARIA",g:"PROGRAMADA (educación)"}[R.niv];
+    box.querySelector("[data-cwr]").innerHTML=R.t?`<div class="pz-r pz-${R.cls||"low"}">${N?`<p style="margin:0 0 4px"><b>Telemedicina: ${N}</b></p>`:""}<b>${esc(R.t)}</b>${R.acc.length?`<ul class="mb-ul">${R.acc.map(a=>`<li>${esc(a)}</li>`).join("")}</ul>`:""}${R.nota?`<div class="btns"><button class="btn bq-mini" type="button" data-cwadd>Agregar valoración a la respuesta</button></div>`:""}<small class="note-src" style="display:block;font-style:italic;margin-top:4px">La Res. 3280 pide registrar «la frecuencia, duración e intensidad de las contracciones uterinas» (4.7.5.2, p. 283) y orientar la consulta por «actividad uterina» como signo de alarma (p. 270); no fija cifras. Umbrales de uso clínico: amenaza de parto pretérmino 4 o más en 20 minutos u 8 o más en 60 minutos (semanas 22 a 36+6); trabajo de parto con dinámica regular; taquisistolia más de 5 en 10 minutos. Confírmalos con el protocolo de la ESE.</small></div>`:"";
+    const b=box.querySelector("[data-cwadd]");if(b)b.onclick=()=>{if(!ta.value.includes(R.nota)){ta.value=(ta.value.trim()?ta.value.trim()+" ":"")+R.nota;saveTa()}}};
+  box.querySelectorAll("[data-cw]").forEach(e=>{const f=()=>{v[e.dataset.cw]=e.value;pinta()};e.addEventListener("change",f);e.addEventListener("input",f)});
+  box.querySelectorAll("[data-cwf]").forEach(b=>b.onclick=()=>{const f=b.dataset.cwf;v.fl=v.fl||[];if(v.fl.includes(f))v.fl=v.fl.filter(x=>x!==f);else v.fl.push(f);b.setAttribute("aria-pressed",v.fl.includes(f));pinta()});
+  pinta()}};
+(function(){const r=CDT.prenatal.find(z=>/contraccion\|actividad uterina/.test(String(z.re)));if(r){r.wid="contr";r.p=["Cuenta las contracciones (mínimo 20 minutos), su duración y si son regulares; revisa FCF, sangrado y salida de líquido.","La valoración de abajo te dice si es urgente, prioritaria o programada."]}})();
 /* ---------- arranque ---------- */
 /* los borradores guardados con la versión anterior de los módulos se reubican una sola vez */
 Object.keys(OLD_LAB).forEach(id=>{if(!M[id]||S.get(key(id,"ivlab")))return;let a={};try{a=JSON.parse(S.get(key(id,"iv"))||"{}")||{}}catch(e){}
