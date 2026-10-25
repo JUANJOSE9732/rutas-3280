@@ -34,6 +34,7 @@ const F=await p.evaluate(()=>{const F=[],ok=(c,m)=>{if(!c)F.push(m)};localStorag
  rrOpen();rrAbrir(rrGet().find(e=>/PEDRO/.test(e.nom)));ok(st.view==='ev','evento');
  /* no duplica */
  rrParse('PACIENTE NUEVO NOMBRE Maria R DOCUMENTO CC 112054321 SEXO mujer COMUNIDAD Querari ATENCION ruta FIN PACIENTE').forEach(e=>ok(rrPac(e).existe,'reconoce que ya existe'));
+ const pq=rrParse('PACIENTE NUEVO NOMBRE Eva Lis DOCUMENTO CC 4 4 SEXO mujer COMUNIDAD Querari PUEBLO cubeo EAPB Mallamas TELEFONO 3 1 0 5 5 5 ATENCION ruta FIN PACIENTE')[0];const PP=rrPac(pq).P;ok(PP['PUEBLO']==='CUBEO'&&PP['EAPB NOMBRE']==='MALLAMAS'&&PP['TELEFONO']==='310555'&&PP['ETNIA']==='INDIGENA','pueblo, eapb y teléfono: '+JSON.stringify(PP));
  /* Claude por copiar y pegar */
  ok(/PACIENTE NUEVO/.test(rrPrompt('x'))&&/FIN PACIENTE/.test(rrPrompt('x')),'prompt');
  return F});

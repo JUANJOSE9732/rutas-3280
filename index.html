@@ -1973,7 +1973,7 @@ function wireMiDia(){const cb=$("md-cal");if(cb)cb.onclick=calOpen;
 function mdShow(t){const s=$("md-st");s.innerHTML="";const a=document.createElement("textarea");a.value=t;a.rows=7;a.readOnly=true;s.append("No se pudo copiar solo. Mantén presionado el texto y cópialo:",a);a.focus();a.select()}
 
 /* ---------- PANEL ---------- */
-const VERSION_APP="2026-10-25 v194";
+const VERSION_APP="2026-10-25 v195";
 function home(){
   stopRec();if(S.get(AT_KEY))atReiniciar();st.view="home";
   const rm=["precon","prenatal","parto","rn","ive"],rp=["pinf","inf","adol","juv","adul","vej"];
@@ -10364,7 +10364,7 @@ document.head.insertAdjacentHTML("beforeend",`<style>
    Cada paciente queda en la lista de atención del día, clasificado y listo para abrir donde va. */
 const RR_KEY="dn2_rr";
 const RR_AT={ruta:"Ruta PyM (curso de vida)",mat:"Materno perinatal",morb:"Morbilidad",ev:"Evento",proc:"Procedimiento"};
-const RR_LAB=["NOMBRE","DOCUMENTO","NACIMIENTO","FECHA DE NACIMIENTO","EDAD","SEXO","GENERO","COMUNIDAD","ATENCION","DETALLE","NOTA","ALARMA","CORRIJO"];
+const RR_LAB=["NOMBRE","DOCUMENTO","NACIMIENTO","FECHA DE NACIMIENTO","EDAD","SEXO","GENERO","COMUNIDAD","PUEBLO","EAPB","TELEFONO","ATENCION","DETALLE","NOTA","ALARMA","CORRIJO"];
 const RR_MES={ENERO:1,FEBRERO:2,MARZO:3,ABRIL:4,MAYO:5,JUNIO:6,JULIO:7,AGOSTO:8,SEPTIEMBRE:9,SETIEMBRE:9,OCTUBRE:10,NOVIEMBRE:11,DICIEMBRE:12};
 const RR_NUM={CERO:0,UNO:1,UN:1,DOS:2,TRES:3,CUATRO:4,CINCO:5,SEIS:6,SIETE:7,OCHO:8,NUEVE:9};
 const rrU=t=>String(t||"").toUpperCase().normalize("NFD").replace(/[̀-ͯ]/g,"");
@@ -10397,7 +10397,7 @@ function rrCampos(t,b){const lab=new RegExp("\\b("+RR_LAB.join("|")+")\\b[\\s:.,
   if(v.NACIMIENTO)e.fn=rrFecha(v.NACIMIENTO);
   if(v.EDAD){const n=(v.EDAD.match(/\d+/)||[])[0]||RR_NUM[(v.EDAD.match(/[A-Z]+/)||[""])[0]];if(n!=null){const u=/MES/.test(v.EDAD)?"m":/DIA/.test(v.EDAD)?"d":"a";e.edad=+n;e.edadU=u}}
   if(v.SEXO)e.sx=/MUJER|FEMEN|\bF\b/.test(v.SEXO)?"F":/HOMBRE|MASCUL|VARON|\bM\b/.test(v.SEXO)?"M":"";
-  if(v.COMUNIDAD)e.com=v.COMUNIDAD.trim();
+  if(v.COMUNIDAD)e.com=v.COMUNIDAD.trim();if(v.PUEBLO)e.pueblo=v.PUEBLO.trim();if(v.EAPB)e.eapb=v.EAPB.trim();if(v.TELEFONO){const tl=rrDig(v.TELEFONO);if(tl)e.tel=tl}
   e.at=rrAtencion(v.ATENCION||"")||rrAtencion(v.DETALLE||"");e.det=(v.DETALLE||"").trim();
   const sm=e.det.match(/(\d{1,2})\s*(?:\+\s*(\d))?\s*SEMANA/);if(sm)e.sem=+sm[1]+(sm[2]?+sm[2]/7:0);
   const fm=e.det.match(/(?:FUM|ULTIMA (?:REGLA|MENSTRUACION))\s*(.*)/);if(fm)e.fum=rrFecha(fm[1]);
@@ -10418,7 +10418,7 @@ function rrFalta(e){const f=[];if(!e.nom)f.push("nombre");if(!e.doc)f.push("docu
 function rrPac(e){const ps=pacientes();let k=null;if(e.doc)k=Object.keys(ps).find(z=>z.endsWith(":"+e.doc));if(!k&&e.nom)k=Object.keys(ps).find(z=>z==="N:"+rrU(e.nom));
   const base=k?Object.assign({},ps[k].ident):{};const P=Object.assign(base,{"NOMBRE COMPLETO":e.nom||base["NOMBRE COMPLETO"]||"","TIPO":e.tipo||base["TIPO"]||"","DOCUMENTO ID.":e.doc||base["DOCUMENTO ID."]||"","GENERO":e.sx||base["GENERO"]||""});
   if(e.fn)P["FECHA NACIMIENTO"]=e.fn;else if(e.edad!=null&&!P["FECHA NACIMIENTO"])P.__edad=String(Math.round(rrEdadA(e)*100)/100);
-  if(e.com)P.__com=e.com;if(e.at==="mat"&&e.dest&&e.dest.mod==="prenatal")P.__est="ges";if(e.dest&&e.dest.vn==="pospar")P.__est="pos";return{P,existe:!!k}}
+  if(e.com)P.__com=e.com;if(e.pueblo){P["PUEBLO"]=e.pueblo;if(!P["ETNIA"])P["ETNIA"]="INDIGENA"}if(e.eapb)P["EAPB NOMBRE"]=e.eapb;if(e.tel)P["TELEFONO"]=e.tel;if(e.at==="mat"&&e.dest&&e.dest.mod==="prenatal")P.__est="ges";if(e.dest&&e.dest.vn==="pospar")P.__est="pos";return{P,existe:!!k}}
 function rrGuardarBase(e){const {P}=rrPac(e),ps=pacientes(),k=pkey(P);let x=ps[k];if(!x){const n=Object.values(ps).reduce((m,y)=>Math.max(m,y.n||0),0)+1;x=ps[k]={n,creado:hoy(),ident:{},aten:[],pend:[]}}
   const id={};ID_KEYS.concat(["__com","__edad"]).forEach(z=>{if(P[z])id[z]=P[z]});Object.assign(x.ident,id);setPacientes(ps);return P}
 function rrAbrir(e){const P=rrGuardarBase(e);setPac(P);const d=e.dest||{};
@@ -10460,7 +10460,7 @@ function rrOpen(){stopRec();st.view="rr";const L=rrGet(),hoyL=L.filter(e=>e.f===
     return `<div class="rr-card${f.length?" rr-falta":""}"><p style="margin:0 0 6px"><b>${i+1}. ${esc(e.nom||"Sin nombre")}</b> ${existe?`<span class="pill low">Ya está en tu base</span>`:`<span class="pill mid">Nuevo en la base</span>`} ${e.alarma?`<span class="pill high">ALARMA</span>`:""}</p>
      <div class="pgrid">${inp("nom","Nombre",e.nom)}${inp("tipo","Tipo",e.tipo)}${inp("doc","Documento",e.doc)}${inp("fn","Nacimiento",e.fn,"date")}${inp("edad","Edad (si no hay fecha)",e.edad!=null?e.edad+(e.edadU==="m"?" meses":e.edadU==="d"?" días":" años"):"")}${inp("sx","Sexo (F o M)",e.sx)}${inp("com","Comunidad",e.com)}
       <label class="bfl"><span>Atención</span><select data-rrf="${i}:at"><option value="">—</option>${Object.entries(RR_AT).map(([k,t])=>`<option value="${k}"${e.at===k?" selected":""}>${esc(t)}</option>`).join("")}</select></label>${inp("det","Detalle",e.det)}</div>
-     <p style="margin:6px 0 0">Va a: <b>${esc(e.destT||"—")}</b>${e.sem!=null?" · "+gexSem(e.sem)+" semanas":""}</p>${f.length?`<p style="margin:4px 0 0;color:var(--miss)">Falta: ${esc(f.join(", "))}</p>`:""}${e.aviso.length?`<p class="note-src" style="margin:4px 0 0">${esc(e.aviso.join(" "))}</p>`:""}${e.nota?`<p class="note-src" style="margin:4px 0 0">Nota: ${esc(e.nota)}</p>`:""}</div>`}).join("");
+     <p style="margin:6px 0 0">Va a: <b>${esc(e.destT||"—")}</b>${e.sem!=null?" · "+gexSem(e.sem)+" semanas":""}</p>${f.length?`<p style="margin:4px 0 0;color:var(--miss)">Falta: ${esc(f.join(", "))}</p>`:""}${e.aviso.length?`<p class="note-src" style="margin:4px 0 0">${esc(e.aviso.join(" "))}</p>`:""}${[e.pueblo&&"Pueblo: "+e.pueblo,e.eapb&&"EAPB: "+e.eapb,e.tel&&"Teléfono: "+e.tel].filter(Boolean).length?`<p class="note-src" style="margin:4px 0 0">${esc([e.pueblo&&"Pueblo: "+e.pueblo,e.eapb&&"EAPB: "+e.eapb,e.tel&&"Teléfono: "+e.tel].filter(Boolean).join(" · "))}</p>`:""}${e.nota?`<p class="note-src" style="margin:4px 0 0">Nota: ${esc(e.nota)}</p>`:""}</div>`}).join("");
     document.querySelectorAll("[data-rrf]").forEach(el=>el.onchange=()=>{const[i,k]=el.dataset.rrf.split(":"),e=PEND[+i];let v=el.value.trim();
       if(k==="edad"){const n=(v.match(/\d+/)||[])[0];if(n!=null){e.edad=+n;e.edadU=/mes/i.test(v)?"m":/d[ií]a/i.test(v)?"d":"a"}else delete e.edad}
       else if(k==="sx")e.sx=/^f|mujer/i.test(v)?"F":/^m|hombre/i.test(v)?"M":"";else if(k==="tipo")e.tipo=rrTipo(v)||v.toUpperCase();else if(k==="doc")e.doc=rrDig(v);else e[k]=v;
