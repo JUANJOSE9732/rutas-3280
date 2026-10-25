@@ -1971,7 +1971,7 @@ function wireMiDia(){const cb=$("md-cal");if(cb)cb.onclick=calOpen;
 function mdShow(t){const s=$("md-st");s.innerHTML="";const a=document.createElement("textarea");a.value=t;a.rows=7;a.readOnly=true;s.append("No se pudo copiar solo. Mantén presionado el texto y cópialo:",a);a.focus();a.select()}
 
 /* ---------- PANEL ---------- */
-const VERSION_APP="2026-10-24 v185";
+const VERSION_APP="2026-10-24 v186";
 function home(){
   stopRec();if(S.get(AT_KEY))atReiniciar();st.view="home";
   const rm=["precon","prenatal","parto","rn","ive"],rp=["pinf","inf","adol","juv","adul","vej"];
@@ -9448,6 +9448,229 @@ mbHomeHTML=(function(o){return function(){return o.apply(this,arguments).replace
 document.head.insertAdjacentHTML("beforeend",`<style>
 .pzr-row{display:grid;grid-template-columns:1fr 110px;gap:8px;margin-top:10px}.pzr-row label{font-size:.85rem;color:var(--muted);display:flex;flex-direction:column;gap:2px}.pzr-row select,.pzr-row input{padding:6px 8px;font-size:.92rem}
 #pzr .bfl{margin-top:6px;font-size:.85rem}
+</style>`);
+
+/* ===== v186: Telemedicina, direccionamiento a rutas y mapa de obligaciones =====
+   - Clasifica la consulta por telemedicina: urgente, prioritaria o programada, según lo que encontraste.
+   - Dice a qué ruta direccionar y cómo hacerlo, paso a paso, con el texto para la nota.
+   - Junta los reportes de cada caso: formatos, fichas SIVIGILA (inmediata o semanal) y el soporte del contrato que alimentan.
+   - Registro de telemedicinas y remisiones del periodo (soportes 09 y 10).
+   - Mapa de las 18 obligaciones: qué formato y qué parte de la app alimenta cada soporte.
+   Criterios de oportunidad: signos de peligro AIEPI, signos de alarma de la gestante (Res. 3280) y guías de cada evento;
+   los tiempos los fija el protocolo de referencia de la ESE: confírmalos con la Subdirección Científica. */
+const TM_NIV={
+ u:{t:"Urgente",c:"high",cu:"Ya, mientras estabilizas",rem:"REMISION URGENTE",
+  s:["Estabiliza con el abordaje ABCDE y no la dejes sola.","Llama de inmediato a telemedicina y describe: edad, signos vitales, hallazgo y lo que ya hiciste.","Gestiona la remisión urgente (formato 33) y el traslado con la referencia de la ESE (aéreo o fluvial); anota la hora de cada llamada.","Si no hay transporte: acta de contingencia. Si no acepta: disentimiento de remisión firmado y sigue las indicaciones de telemedicina.","Reevalúa signos vitales cada 15 a 30 minutos hasta que salga."]},
+ p:{t:"Prioritaria",c:"mid",cu:"El mismo día (máximo 24 horas)",rem:"REMISION PRIORITARIA",
+  s:["Consulta por telemedicina hoy; si no hay conexión, a más tardar en 24 horas.","Inicia lo que el protocolo te permite con el botiquín y deja escrita la orden médica que te den (médico, hora, medicamento, dosis).","Remisión prioritaria si medicina la pide, o cita prioritaria en la próxima brigada.","Cita de control en la app para verificar que mejoró o que la atendieron."]},
+ g:{t:"Programada",c:"low",cu:"En la jornada de telemedicina de la semana (viernes en la mañana)",rem:"CITA PROGRAMADA",
+  s:["Agéndala para la jornada de telemedicina de la semana o para la próxima brigada.","Prepara el resumen: antecedentes, signos vitales, resultados y lo que necesitas que medicina defina.","Explica a la persona cuándo es y qué signos de alarma la harían volver antes."]}};
+const TM_GR={todos:"Cualquier persona",ges:"Gestante o puérpera",n5:"Niño de 2 meses a 5 años",rn:"Recién nacido o menor de 2 meses"};
+/* [id, grupo, nivel, texto, ruta, formatos, sivigila: "inm" inmediata / "sem" semanal] */
+const TM_CRIT=[
+ ["conc","todos","u","Alteración de la conciencia, convulsión o no responde","urg",[]],
+ ["resp","todos","u","Dificultad respiratoria grave o saturación menor de 90 %","urg",[]],
+ ["choq","todos","u","Signos de choque: piel fría, pulso débil, llenado capilar mayor de 2 segundos o presión baja","urg",[]],
+ ["sang","todos","u","Sangrado que no para o trauma grave","urg",[]],
+ ["anaf","todos","u","Anafilaxia (después de la adrenalina)","urg",[]],
+ ["ofid","todos","u","Mordedura de serpiente","zoo",["f100"],"sem"],
+ ["malc","todos","u","Malaria complicada o hemoglobina menor de 7 g/dl","inf",["f465","rdmal","rimal"],"inm"],
+ ["deng","todos","u","Dengue con signos de alarma (dolor abdominal, vómito persistente, sangrado, somnolencia)","inf",["~den"],"sem"],
+ ["hta3","todos","u","Presión de 180/110 o más, o presión alta con dolor en el pecho, déficit neurológico o dolor de cabeza muy fuerte","cv",[]],
+ ["glu","todos","u","Glucometría menor de 70 que no corrige, o mayor de 250 con vómito, deshidratación o somnolencia","cv",[]],
+ ["suic","todos","u","Intento de suicidio o ideas de suicidio con plan","smt",["f356"],"sem"],
+ ["vsex","todos","u","Violencia sexual en las últimas 72 horas (profilaxis de VIH, ITS y embarazo)","vio",["f875"],"sem"],
+ ["intox","todos","u","Intoxicación (plaguicidas, medicamentos, metanol, plantas)","urg",["f365"],"sem"],
+ ["prr","todos","p","Prueba rápida reactiva de VIH, sífilis o hepatitis B","inf",["civih","~vih","~sif","f340"],"sem"],
+ ["mal","todos","p","Malaria no complicada en gestante, menor de 5 años o mayor de 60","inf",["f465","rdmal","rimal","recet"],"sem"],
+ ["fieb","todos","p","Fiebre de más de 3 días sin causa clara y prueba de malaria negativa","inf",["rdmal"]],
+ ["hta2","todos","p","Presión de 160/100 o más sin síntomas (no gestante)","cv",[]],
+ ["anem","todos","p","Anemia moderada (hemoglobina de 7 a 9,9 g/dl)","nut",["recet"]],
+ ["atb","todos","p","Infección que necesita antibiótico con orden médica: neumonía sin signos de peligro, infección urinaria, celulitis, herida infectada","urg",["recet"]],
+ ["aptr","todos","p","Mordedura, arañazo o lamedura de perro, gato, murciélago, mono u otro mamífero","zoo",["f300"],"sem"],
+ ["viol","todos","p","Sospecha de violencia física, psicológica o negligencia, sin riesgo inmediato para la vida","vio",["f875"],"sem"],
+ ["smen","todos","p","Tamizaje de salud mental positivo (RQC, depresión, consumo) sin riesgo inmediato","smt",[]],
+ ["sr","todos","p","Tos de más de 15 días, o lesión de piel sospechosa de leishmaniasis o lepra","inf",["capt","~tb","~lei"],"sem"],
+ ["canc","todos","p","Sospecha de cáncer: masa en la mama, lesión en el cuello uterino, sangrado después de la menopausia","can",["rem"]],
+ ["cron","todos","g","Hipertensión o diabetes estables: control, laboratorios y renovación de la fórmula","cv",["recet"]],
+ ["v3280","todos","g","Valoración de la Res. 3280 que le toca a medicina (adultez, vejez, juventud según el esquema)","rpms",[]],
+ ["lab","todos","g","Resultados de exámenes para lectura y conducta","rpms",[]],
+ ["sens","todos","g","Agudeza visual menor de 20/50, alteración auditiva o del desarrollo sin riesgo inmediato","sen",[]],
+ ["seg","todos","g","Seguimiento de un caso ya remitido o de quien no aceptó la remisión","urg",["disrem"]],
+ ["bucal","todos","g","Caries, dolor dental sin infección, sangrado de encías","buc",[]],
+ ["g_sang","ges","u","Sangrado vaginal en el embarazo","rmp",["~mme"]],
+ ["g_pre","ges","u","Presión de 140/90 o más, o dolor de cabeza, visión borrosa o dolor en la boca del estómago","rmp",["~mme"]],
+ ["g_fie","ges","u","Fiebre en la gestante o en la puérpera","rmp",[]],
+ ["g_liq","ges","u","Salida de líquido o contracciones antes de las 37 semanas","rmp",[]],
+ ["g_mov","ges","u","El bebé no se mueve o la frecuencia cardiaca fetal está fuera de 110 a 160","rmp",[]],
+ ["g_par","ges","u","Trabajo de parto, o parto atendido en la comunidad","rmp",["cnv"]],
+ ["g_hpp","ges","u","Sangrado abundante después del parto o signos de infección del puerperio","rmp",["~mme"]],
+ ["g_ing","ges","p","Ingreso al PAMI: valoración médica, orden de exámenes y remisión al albergue","rmp",["carges","segges","rem","disrem"]],
+ ["g_itu","ges","p","Infección urinaria o bacteriuria en la gestante","rmp",["recet"]],
+ ["g_m14","ges","p","Embarazo en menor de 14 años (violencia sexual por ley)","vio",["f875"],"sem"],
+ ["g_vom","ges","p","Vómito persistente sin deshidratación, o anemia en la gestante","rmp",[]],
+ ["g_noa","ges","p","Gestante que no acepta el albergue: plan de controles en el puesto","rmp",["disrem","segges"]],
+ ["g_ctl","ges","g","Control de la gestante que sigue en la comunidad, sin signos de alarma","rmp",["segges"]],
+ ["n_pel","n5","u","Signo general de peligro: no puede beber ni mamar, vomita todo, convulsiones, letárgico","urg",[]],
+ ["n_tir","n5","u","Tiraje subcostal o estridor en reposo","urg",[]],
+ ["n_desg","n5","u","Deshidratación grave","urg",["f998"]],
+ ["n_dnts","n5","u","Desnutrición aguda severa con complicaciones (no come, edema, infección)","nut",["~dnt"],"sem"],
+ ["n_neu","n5","p","Respiración rápida sin tiraje (neumonía): antibiótico con orden médica","urg",["f995","recet"]],
+ ["n_desm","n5","p","Algún grado de deshidratación (plan B en el puesto)","urg",["f998","recet"]],
+ ["n_dnt","n5","p","Desnutrición aguda moderada o severa sin complicaciones","nut",["~dnt","car5"],"sem"],
+ ["n_disen","n5","p","Diarrea con sangre o de más de 14 días","urg",["f998"]],
+ ["n_des","n5","g","Alteración del desarrollo o del crecimiento sin riesgo inmediato; riesgo de desnutrición","rpms",["car5"]],
+ ["r_pel","rn","u","Cualquier signo de peligro: no mama, fiebre o frío, respira rápido, ictericia en las primeras 24 horas o hasta las plantas, ombligo con pus, convulsiones, letargia","rmp",[]],
+ ["r_peso","rn","u","Peso al nacer menor de 2.000 g","rmp",[]],
+ ["r_casa","rn","p","Nació en la casa: valoración, vacunas, tamizajes y certificado de nacido vivo","rmp",["cnv"]],
+ ["r_bpn","rn","p","Peso al nacer de 2.000 a 2.499 g","rmp",[]]];
+const SIV_TXT={inm:"Notificación inmediata: llama a epidemiología el mismo día y envía la ficha.",sem:"Notificación semanal: va en el reporte SIVIGILA del lunes."};
+/* rutas: título, cuándo, qué escribir en la remisión, quién más, texto para la nota, formatos, soportes */
+const DIR_RUTAS={
+ urg:{t:"Atención de urgencias y morbilidad",c:"Signos de peligro, infecciones que necesitan orden médica, trauma o intoxicación.",env:"Signos vitales con hora, hallazgos, lo que se hizo y a qué hora, respuesta al tratamiento y la orden de telemedicina.",otros:"Referencia de la ESE para el traslado.",nota:"SE DIRECCIONA A ATENCION DE URGENCIAS",f:["rem","disrem","recet"]},
+ rpms:{t:"Promoción y mantenimiento de la salud (cursos de vida)",c:"Valoraciones, tamizajes, vacunas, micronutrientes o educación que le faltan según la Res. 3280.",env:"Qué atenciones de la 3280 le faltan y cuáles se hicieron en el puesto.",otros:"Agenda en la app; EAPB en el informe mensual si requiere servicios fuera del puesto.",nota:"SE DIRECCIONA A RUTA DE PROMOCION Y MANTENIMIENTO DE LA SALUD PARA COMPLETAR ATENCIONES PENDIENTES",f:["rem"]},
+ rmp:{t:"Ruta materno perinatal",c:"Toda gestante desde el ingreso al PAMI; puérpera y recién nacido.",env:"Semanas, fecha probable de parto, riesgo (Herrera y Hurtado), resultados de las pruebas rápidas, hemoglobina y tira, y lo que falta: hemoclasificación, urocultivo, toxoplasma, rubéola, ecografías, PTOG, valoración médica.",otros:"Albergue cerca al hospital; EAPB.",nota:"SE DIRECCIONA A RUTA MATERNO PERINATAL: SE GESTIONA REMISION A ALBERGUE PARA CONTROL PRENATAL Y EXAMENES PENDIENTES",f:["carges","segges","rem","disrem"]},
+ cv:{t:"Riesgo cardiovascular y metabólico (programa de crónicos)",c:"Hipertensión, diabetes, obesidad, riesgo cardiovascular alto.",env:"Tres tomas de presión, glucometría, peso, talla, IMC, perímetro abdominal, tratamiento actual y adherencia; laboratorios: perfil lipídico, glicemia, creatinina, uroanálisis.",otros:"Programa de crónicos de la ESE; EAPB.",nota:"SE DIRECCIONA A RUTA DE RIESGO CARDIOVASCULAR Y METABOLICO",f:["rem","recet"]},
+ inf:{t:"Enfermedades infecciosas (malaria, dengue, leishmaniasis, TB, lepra, ITS, VIH, hepatitis)",c:"Evento confirmado o sospechoso, prueba rápida reactiva, sintomático respiratorio o de piel.",env:"Prueba y resultado con lote, fecha de inicio de síntomas, tratamiento iniciado y contactos.",otros:"Programa de la ESE (ETV, TB, VIH); epidemiología.",nota:"SE DIRECCIONA A RUTA DE ENFERMEDADES INFECCIOSAS Y SE NOTIFICA AL SIVIGILA",f:["rem","rdmal","capt"]},
+ zoo:{t:"Agresiones por animales y accidente ofídico",c:"Mordedura de serpiente o agresión por mamífero.",env:"Hora y lugar de la mordedura, animal, lavado de la herida, signos locales y sistémicos, vacunación previa.",otros:"Epidemiología; para rabia, el animal en observación con salud ambiental.",nota:"SE DIRECCIONA A RUTA DE ATENCION DE AGRESIONES POR ANIMALES",f:["rem","f100","f300"]},
+ smt:{t:"Salud mental y consumo de sustancias",c:"RQC o tamizaje positivo, depresión, consumo, ideas o intento de suicidio.",env:"Instrumento aplicado y resultado, riesgo de suicidio, red de apoyo.",otros:"Psicología de la ESE; acompañante permanente si hay riesgo.",nota:"SE DIRECCIONA A RUTA DE SALUD MENTAL",f:["rem","f356"]},
+ vio:{t:"Atención a víctimas de violencias",c:"Sospecha o relato de violencia física, psicológica, sexual o negligencia; embarazo en menor de 14 años.",env:"Relato textual sin juicios, lesiones, hora del hecho (violencia sexual: menos de 72 horas), medidas de protección.",otros:"Comisaría de familia o ICBF (obligatorio si es menor de edad), autoridad tradicional según el caso; la atención en salud no exige denuncia.",nota:"SE ACTIVA RUTA DE ATENCION INTEGRAL A VICTIMAS DE VIOLENCIAS Y SE NOTIFICA AL SIVIGILA",f:["rem","f875"]},
+ nut:{t:"Alteraciones nutricionales (desnutrición aguda, Res. 2350 de 2020)",c:"Desnutrición aguda moderada o severa, anemia, riesgo de desnutrición.",env:"Peso, talla, perímetro braquial, edema, puntaje Z, prueba de apetito, hemoglobina.",otros:"Programa de nutrición de la ESE; ICBF si hay vulneración.",nota:"SE DIRECCIONA A RUTA DE ALTERACIONES NUTRICIONALES",f:["rem","car5"]},
+ can:{t:"Detección y atención del cáncer",c:"Lesión sospechosa en el cuello uterino, masa en la mama, sangrado anormal, signos de cáncer infantil.",env:"Hallazgo exacto, fecha, tamizaje previo y resultado.",otros:"Colposcopia, ecografía o mamografía según la edad.",nota:"SE DIRECCIONA A RUTA DE DETECCION TEMPRANA Y ATENCION DEL CANCER",f:["rem","cito"]},
+ buc:{t:"Salud bucal",c:"Caries, infección dental, enfermedad de las encías, falta de valoración odontológica.",env:"Hallazgos de la boca y si hay dolor o infección.",otros:"Odontología de la ESE o brigada.",nota:"SE DIRECCIONA A RUTA DE SALUD BUCAL (ODONTOLOGIA)",f:["rem"]},
+ sen:{t:"Alteraciones visuales, auditivas y del desarrollo",c:"Agudeza visual menor de 20/50, alteración auditiva o del desarrollo.",env:"Resultado del tamizaje con el instrumento usado.",otros:"Optometría, audiología o pediatría.",nota:"SE DIRECCIONA A VALORACION ESPECIALIZADA POR ALTERACION SENSORIAL O DEL DESARROLLO",f:["rem"]}};
+const DIR_PASOS=[
+ ["Identifica","El hallazgo y la ruta a la que corresponde (la app te la sugiere)."],
+ ["Clasifica","La oportunidad: urgente, prioritaria o programada, y consulta por telemedicina según eso."],
+ ["Explica y concerta","A la persona y a su familia, en su lengua o con apoyo del promotor: por qué y adónde va. Si acepta, sigue; si no, disentimiento de remisión firmado y vuelve a ofrecerlo en cada contacto."],
+ ["Llena la remisión","Formato 33: datos completos con EAPB, resumen clínico, hallazgo, ruta a la que la direccionas, prioridad, médico y hora de telemedicina, y los exámenes que faltan."],
+ ["Registra","En la historia o Prosoft («SE DIRECCIONA A RUTA DE…») y en la base de datos, en «Observación de canalización». Guárdalo también en el registro de telemedicina y remisiones de esta pantalla."],
+ ["Notifica","Ficha SIVIGILA si es un evento de interés en salud pública: inmediata el mismo día o semanal en el reporte del lunes."],
+ ["Informa","Deja la persona en la lista de direccionados del informe mensual: la ESE la informa a la EAPB."],
+ ["Haz seguimiento","Cita de control en la app; verifica que la atendieron (llamada, radio o cuando regrese). Si no llegó, búsqueda activa y reofrece la ruta."]];
+/* soportes del contrato que alimenta cada formato */
+const FMT_SOP={hc:"03",ci:"03",civih:"03",ciimp:"03",cito:"03",disproc:"03",recet:"06",rimal:"06",pedido:"06",kardex:"07",invrf:"07",rem:"10",disrem:"10",capt:"05",carges:"05",segges:"05",car5:"05",busq:"05",encuesta:"05",actas:"11",concert:"01",perm:"02",calep:"12",rdmal:"12",cnv:"13",cdef:"13",avperi:"13",avmat:"13",avgen:"13",listrep:"17",sobre:"17"};
+FMT.forEach(f=>{if(/^f\d/.test(f.id))FMT_SOP[f.id]="12"});
+/* qué alimenta cada soporte: formatos + partes de la app */
+const OBL_APP={
+ "01":"Acta de concertación con el líder; Calendario (horario concertado).","02":"Firma mensual del líder.",
+ "03":"Notas por voz guardadas, consentimientos de cada atención (los marca cada nota).","04":"Base de datos de la app → Prosoft (Pacientes y registros).",
+ "05":"Ruta prenatal (caracterización y seguimiento), búsqueda activa por comunidad, encuestas.","06":"Botiquín (lo entregado va al recetario) y proyección de insumos.",
+ "07":"Botiquín del puesto: inventario con semáforo y formato de devolución.","08":"Registro diario de temperatura de la nevera y novedades.",
+ "09":"Registro de telemedicina de esta pantalla (médico, hora, conducta).","10":"Registro de remisiones de esta pantalla; disentimientos firmados.",
+ "11":"Educación grupal y vacunación: listas de asistencia.","12":"Fichas que marca cada caso (morbilidad, pruebas rápidas, situaciones) y reporte del lunes.",
+ "13":"Nacimientos y muertes en la comunidad (Formatos → ¿Qué pasó?).","14":"Reunión del viernes con auxiliares y promotores: acta.",
+ "15":"Acta cuando no hubo transporte, conexión o insumo para una remisión.","16":"Actividades PIC con listas y actas.",
+ "17":"Informe mensual con la lista de verificación.","18":"Actividad adicional o constancia de no realizada."};
+const TM_KEY="dn2_tele";
+function tmLog(){try{return JSON.parse(S.get(TM_KEY)||"[]")}catch(e){return[]}}
+function tmPer(){const e=mdPeriodo();return tmLog().filter(x=>x.fecha>=e[1]&&x.fecha<=e[0])}
+function tmNivDe(sel){return sel.some(c=>c[2]==="u")?"u":sel.some(c=>c[2]==="p")?"p":sel.length?"g":""}
+function tmGrupoAuto(c){if(c.es==="ges"||c.es==="pos")return"ges";if(c.m!=null&&c.m<2)return"rn";if(c.m!=null&&c.m<60)return"n5";return"todos"}
+function tmReglas(sel,rk){const F=[];sel.forEach(c=>(c[5]||[]).forEach(id=>F.push([id,c[3].split(":")[0].split(" (")[0]])));
+  const R=DIR_RUTAS[rk];if(R)R.f.forEach(id=>F.push([id,""]));return F}
+function tmNota(o){const N=TM_NIV[o.niv];if(!N)return"";const sel=TM_CRIT.filter(c=>o.c.includes(c[0])),R=DIR_RUTAS[o.ruta];
+  const L=[];L.push(`SE COMUNICA POR TELEMEDICINA (CONSULTA ${N.t.toUpperCase()})${o.med?" CON DR(A). "+o.med.toUpperCase():""}${o.hora?" A LAS "+o.hora:""} POR: ${sel.map(c=>c[3].toUpperCase()).join("; ")||"___"}.`);
+  L.push(`CONDUCTA INDICADA: ${o.cond?o.cond.toUpperCase():"___"}.`);
+  if(R)L.push(R.nota+".");
+  if(o.rem==="si")L.push(`SE DILIGENCIA FORMATO DE REMISION (${N.rem}) Y SE GESTIONA CON REFERENCIA DE LA ESE.`);
+  else if(o.rem==="no")L.push("PACIENTE NO ACEPTA LA REMISION: SE EXPLICAN RIESGOS, FIRMA DISENTIMIENTO Y SE DAN SIGNOS DE ALARMA. SE REOFRECERA EN CADA CONTROL.");
+  else if(o.rem==="tc")L.push("NO SE CONTO CON TRANSPORTE O CONEXION: SE DILIGENCIA ACTA DE CONTINGENCIA Y SE CONTINUA MANEJO SEGUN INDICACION MEDICA.");
+  const sv=[...new Set(sel.filter(c=>c[6]).map(c=>c[6]))];if(sv.length)L.push("SE NOTIFICA AL SIVIGILA"+(sv.includes("inm")?" DE FORMA INMEDIATA":"")+".");
+  L.push("SE EXPLICAN SIGNOS DE ALARMA Y SE AGENDA SEGUIMIENTO.");return L.join(" ")}
+function dirOpen(op){op=op||{};stopRec();st.view="dir";const C=ctxPer(),de=op.de||st.dirDe||null;st.dirDe=de;
+  let o;try{o=JSON.parse(S.get("dn2_dir")||"null")}catch(e){o=null}if(!o||op.nuevo)o={c:[],ruta:"",med:"",hora:"",cond:"",rem:""};
+  if(op.ruta&&DIR_RUTAS[op.ruta])o.ruta=op.ruta;if(op.c)op.c.forEach(x=>{if(!o.c.includes(x))o.c.push(x)});
+  const gAuto=tmGrupoAuto(C),bk=de&&String(de).startsWith("mod:")?(M[de.slice(4)]||{}).title||"Ruta":de==="vn"?"Nota por voz":de==="pz"?"Pruebas":de==="mb"?"Morbilidad":"Inicio";
+  $("app").innerHTML=`<div class="top"><button class="back" type="button" id="dir-back">← ${esc(bk)}</button><span class="tag pc">Telemedicina y rutas</span></div>
+  <header><h1>Telemedicina, remisión y rutas</h1><p class="sub">Marca lo que encontraste. La app te dice si la telemedicina es urgente, prioritaria o programada, a qué ruta direccionar y cómo, qué formatos y fichas llenar, a qué soporte del contrato van y te arma el texto para la nota.</p></header>
+  ${ctxCaja(C,"")}
+  ${op.motivo?`<div class="box"><p style="margin:0"><b>Viene de:</b> ${esc(op.motivo)}</p></div>`:""}
+  <section class="tool"><h3>1 · ¿Qué encontraste?</h3>${Object.entries(TM_GR).map(([g,t])=>{const xs=TM_CRIT.filter(c=>c[1]===g),n=xs.filter(c=>o.c.includes(c[0])).length;
+    return `<details class="sec"${g===gAuto||n?" open":""}><summary><span>${esc(t)}</span><span class="cnt">${n||""}</span></summary><div style="padding:6px 14px 10px">${["u","p","g"].map(nv=>{const ys=xs.filter(c=>c[2]===nv);return ys.length?`<p class="lab tm-${nv}" style="margin:8px 0 2px">${TM_NIV[nv].t}</p>${ys.map(c=>`<label class="sx-ck"><input type="checkbox" data-tmc="${c[0]}"${o.c.includes(c[0])?" checked":""}> ${esc(c[3])}</label>`).join("")}`:""}).join("")}</div></details>`}).join("")}
+   <div id="dir-niv"></div></section>
+  <section class="tool"><h3>2 · Ruta a la que direccionas</h3><select id="dir-ruta"><option value="">Escoge la ruta…</option>${Object.entries(DIR_RUTAS).map(([k,r])=>`<option value="${k}"${o.ruta===k?" selected":""}>${esc(r.t)}</option>`).join("")}</select><div id="dir-ruta-r"></div>
+   <details class="sec" style="margin-top:8px"><summary><span>Cómo se direcciona a una ruta, paso a paso</span></summary><ol class="mb-ul" style="padding:10px 14px 12px 32px">${DIR_PASOS.map(([a,b])=>`<li><b>${esc(a)}:</b> ${esc(b)}</li>`).join("")}</ol></details></section>
+  <section class="tool"><h3>3 · Reportes y formatos de este caso</h3><div id="dir-rep"></div></section>
+  <section class="tool"><h3>4 · Telemedicina y nota</h3>
+   <div class="frow"><label>Médico de telemedicina<input id="dir-med" value="${esc(o.med)}" autocomplete="off"></label><label>Hora<input id="dir-hora" type="time" value="${esc(o.hora)}"></label></div>
+   <label class="bfl">Conducta que indicó<textarea id="dir-cond" rows="2">${esc(o.cond)}</textarea></label>
+   <label class="bfl">Remisión<select id="dir-rem"><option value="">No requiere remisión</option><option value="si"${o.rem==="si"?" selected":""}>Sí, se remite</option><option value="no"${o.rem==="no"?" selected":""}>No acepta (disentimiento)</option><option value="tc"${o.rem==="tc"?" selected":""}>No hubo transporte o conexión (contingencia)</option></select></label>
+   <textarea id="dir-nota" rows="6" readonly style="width:100%;margin-top:8px;font-family:var(--f-data);font-size:.85rem"></textarea>
+   <div class="btns"><button class="btn primary" type="button" id="dir-copy">Copiar para la nota</button><button class="btn" type="button" id="dir-save">Guardar en el registro (soportes 09 y 10)</button><button class="btn" type="button" id="dir-new">Nuevo caso</button></div><p class="status" id="dir-st" aria-live="polite"></p></section>
+  <details class="sec" id="dir-logw"><summary><span>Telemedicinas y remisiones de este periodo</span><span class="cnt" id="dir-logn"></span></summary><div style="padding:8px 14px 12px" id="dir-log"></div></details>
+  <div class="btns"><button class="btn" type="button" id="dir-obl">Mapa de mis 18 obligaciones</button><button class="btn" type="button" id="dir-fmt">Todos los formatos</button></div>
+  <p class="foot">Criterios de oportunidad basados en los signos de peligro de AIEPI, los signos de alarma de la gestante (Res. 3280) y las guías de cada evento. Los tiempos de referencia y la clasificación final los define el protocolo de referencia y contrarreferencia de la ESE: confírmalos con la Subdirección Científica. La decisión clínica es tuya y del médico de telemedicina.</p>`;
+  const lee=()=>({c:[...document.querySelectorAll("[data-tmc]:checked")].map(i=>i.dataset.tmc),ruta:$("dir-ruta").value,med:$("dir-med").value.trim(),hora:$("dir-hora").value,cond:$("dir-cond").value.trim(),rem:$("dir-rem").value});
+  const pinta=(auto)=>{const v=lee(),sel=TM_CRIT.filter(c=>v.c.includes(c[0])),niv=tmNivDe(sel);v.niv=niv;
+    if(auto&&!v.ruta&&sel.length){const cnt={};sel.forEach(c=>cnt[c[4]]=(cnt[c[4]]||0)+(c[2]==="u"?3:c[2]==="p"?2:1));const r=Object.entries(cnt).sort((a,b)=>b[1]-a[1])[0][0];$("dir-ruta").value=r;v.ruta=r}
+    if(auto&&niv&&niv!=="g"&&!v.rem){$("dir-rem").value=niv==="u"?"si":"";v.rem=$("dir-rem").value}
+    S.set("dn2_dir",JSON.stringify(v));
+    const N=TM_NIV[niv];$("dir-niv").innerHTML=N?`<div class="pz-r pz-${N.c}"><b>Telemedicina ${N.t.toLowerCase()}: ${esc(N.cu)}</b><ul class="mb-ul">${N.s.map(x=>`<li>${esc(x)}</li>`).join("")}</ul></div>`:`<p class="note-src">Marca al menos un hallazgo.</p>`;
+    const R=DIR_RUTAS[v.ruta],rs=[...new Set(sel.map(c=>c[4]))].filter(k=>k!==v.ruta);
+    $("dir-ruta-r").innerHTML=R?`<dl class="mb-dl"><dt>Cuándo</dt><dd>${esc(R.c)}</dd><dt>Qué escribir en la remisión</dt><dd>${esc(R.env)}</dd><dt>A quién más</dt><dd>${esc(R.otros)}</dd><dt>Texto para la nota</dt><dd><code>${esc(R.nota)}.</code></dd></dl>${rs.length?`<p class="note-src">Lo que marcaste también toca: ${rs.map(k=>`<button class="btn bq-mini" type="button" data-dirr="${k}">${esc(DIR_RUTAS[k].t)}</button>`).join(" ")}</p>`:""}`:"";
+    document.querySelectorAll("[data-dirr]").forEach(b=>b.onclick=()=>{$("dir-ruta").value=b.dataset.dirr;pinta()});
+    const F=tmReglas(sel,v.ruta);if(v.rem==="no")F.push(["disrem","No aceptó la remisión"]);if(v.rem==="si")F.push(["rem",""]);
+    const sv=sel.filter(c=>c[6]);const sops=[...new Set(fmtUnir(F).map(x=>FMT_SOP[x[0]]).filter(Boolean).concat(niv?["09"]:[]).concat(v.rem==="si"||v.rem==="no"?["10"]:[]).concat(v.rem==="tc"?["15"]:[]))].sort();
+    $("dir-rep").innerHTML=(F.length?fmtLista(F,"Formatos"):`<p class="note-src">Sin formatos todavía.</p>`)+
+     (sv.length?`<div class="box ${sv.some(c=>c[6]==="inm")?"miss":"warn"}" style="margin-top:8px"><h3>SIVIGILA</h3><ul>${sv.map(c=>`<li><b>${esc(c[3].split(" (")[0])}:</b> ${esc(SIV_TXT[c[6]])}</li>`).join("")}</ul></div>`:"")+
+     (sops.length?`<p class="note-src" style="margin-top:8px">Esto alimenta los soportes del contrato: ${sops.map(s=>esc(MD_SOP.find(x=>x.startsWith(s))||s)).join(" · ")}.</p>`:"");
+    $("dir-nota").value=tmNota(v)};
+  const pintaLog=()=>{const L=tmPer();$("dir-logn").textContent=L.length||"";
+    $("dir-log").innerHTML=L.length?`<ul class="mb-ul">${L.map(x=>`<li><b>${esc(x.fecha)} ${esc(x.hora||"")}</b> · ${esc(x.pac||"Sin nombre")} · ${esc((TM_NIV[x.niv]||{}).t||"")} · ${esc((DIR_RUTAS[x.ruta]||{}).t||"")}${x.rem==="si"?" · remitido":x.rem==="no"?" · no aceptó":x.rem==="tc"?" · contingencia":""}</li>`).join("")}</ul><div class="btns"><button class="btn bq-mini" type="button" id="dir-logcp">Copiar el registro</button></div>`:`<p class="note-src">Aún no hay registros en este periodo.</p>`;
+    const b=$("dir-logcp");if(b)b.onclick=()=>{const t=["REGISTRO DE TELEMEDICINA Y REMISIONES — "+mdPeriodo()[2].toUpperCase(),"FECHA | HORA | PACIENTE | DOCUMENTO | COMUNIDAD | PRIORIDAD | MEDICO | MOTIVO | CONDUCTA | RUTA | REMISION"].concat(tmPer().map(x=>[x.fecha,x.hora,x.pac,x.doc,x.com,(TM_NIV[x.niv]||{}).t,x.med,x.mot,x.cond,(DIR_RUTAS[x.ruta]||{}).t,{si:"Remitido",no:"No aceptó",tc:"Contingencia"}[x.rem]||"No"].map(z=>z||"").join(" | "))).join("\n");try{navigator.clipboard.writeText(t)}catch(e){}$("dir-st").textContent="Registro copiado."}};
+  document.querySelectorAll("[data-tmc]").forEach(i=>i.onchange=()=>{const d=i.closest("details");if(d)d.querySelector(".cnt").textContent=d.querySelectorAll("[data-tmc]:checked").length||"";pinta(true)});
+  ["dir-ruta","dir-med","dir-hora","dir-cond","dir-rem"].forEach(id=>{$(id).oninput=()=>pinta();$(id).onchange=()=>pinta()});
+  $("dir-copy").onclick=()=>{const t=$("dir-nota").value;if(!t)return;try{navigator.clipboard.writeText(t).then(()=>$("dir-st").textContent="Copiado. Pégalo en la nota.")}catch(e){$("dir-nota").select()}};
+  $("dir-save").onclick=()=>{const v=lee(),sel=TM_CRIT.filter(c=>v.c.includes(c[0]));if(!sel.length){$("dir-st").textContent="Marca al menos un hallazgo.";return}
+    const P=pac(),L=tmLog();L.unshift({id:uid(),fecha:hoy(),hora:v.hora,pac:P["NOMBRE COMPLETO"]||"",doc:P["DOCUMENTO ID."]||"",com:P.__com||"",niv:tmNivDe(sel),med:v.med,mot:sel.map(c=>c[3]).join("; "),cond:v.cond,ruta:v.ruta,rem:v.rem});
+    S.set(TM_KEY,JSON.stringify(L.slice(0,500)));$("dir-st").textContent="Guardado en el registro de este periodo.";pintaLog()};
+  $("dir-new").onclick=()=>{S.del("dn2_dir");dirOpen({de,nuevo:true})};
+  $("dir-obl").onclick=()=>oblOpen("dir");$("dir-fmt").onclick=()=>{st.fmtDe=null;fmtOpen()};
+  $("dir-back").onclick=()=>{st.dirDe=null;if(de&&String(de).startsWith("mod:")){S.set(key(de.slice(4),"tab"),"guia");openMod(de.slice(4))}else if(de==="vn"&&VNS){vnRender()}else if(de==="pz")pzOpen();else if(de==="mb")mbOpen();else{home();window.scrollTo(0,0)}};
+  pinta(true);pintaLog();window.scrollTo(0,0)}
+function oblOpen(de){stopRec();st.view="obl";const e=mdPeriodo();let sk={};try{sk=JSON.parse(S.get("dn2_sop_"+e[0])||"{}")}catch(x){}
+  const T=tmPer(),cnt={"09":T.filter(x=>x.med||x.cond).length,"10":T.filter(x=>x.rem==="si"||x.rem==="no").length,"03":vnNotas().filter(x=>(x.fecha||"").slice(0,10)>=e[1]).length};
+  $("app").innerHTML=`<div class="top"><button class="back" type="button" id="obl-back">← ${de==="dir"?"Telemedicina y rutas":"Inicio"}</button><span class="tag pc">Obligaciones</span></div>
+  <header><h1>Mis 18 obligaciones</h1><p class="sub">Qué formatos y qué partes de la app alimentan cada soporte de la entrega del ${esc(e[2])}. La marca de «listo» es la misma de Mi día.</p></header>
+  ${MD_SOP.map(s=>{const n=s.slice(0,2),fs=FMT.filter(f=>FMT_SOP[f.id]===n);return `<details class="sec"><summary><span>${sk[n]?"✓ ":""}${esc(s)}</span>${cnt[n]?`<span class="cnt">${cnt[n]}</span>`:""}</summary><dl class="mb-dl"><dt>De dónde sale en la app</dt><dd>${esc(OBL_APP[n]||"")}</dd>${fs.length?`<dt>Formatos</dt><dd>${fs.map(f=>{const q=fmtCant(f.id);return esc(f.n)+(q<=0?` <span class="bq-chip bq-rojo">Sin existencias</span>`:"")}).join("<br>")}</dd>`:""}<dt>Si no hubo eventos</dt><dd>Constancia firmada de «no se presentaron eventos».</dd></dl></details>`}).join("")}
+  <div class="btns"><button class="btn" type="button" id="obl-dir">Telemedicina y rutas</button><button class="btn" type="button" id="obl-fmt">Formatos</button></div>`;
+  $("obl-back").onclick=()=>{if(de==="dir")dirOpen();else{home();window.scrollTo(0,0)}};$("obl-dir").onclick=()=>dirOpen({de:null});$("obl-fmt").onclick=()=>{st.fmtDe=null;fmtOpen()};window.scrollTo(0,0)}
+/* telemedicina en cada ficha de morbilidad */
+const MB_TM={grave:["u","Siempre urgente."],anafilaxia:["u","Urgente después de la adrenalina."],convulsion:["u","Urgente."],hpp:["u","Urgente."],preeclampsia:["u","Urgente."],
+ malaria:["p","Prioritaria en gestante, menor de 5 o mayor de 60; urgente si hay signos de malaria complicada o hemoglobina menor de 7."],dengue:["p","Prioritaria; urgente con signos de alarma o dengue grave."],
+ eda:["p","Prioritaria con algún grado de deshidratación o disentería; urgente si la deshidratación es grave."],ira:["p","Prioritaria si hay neumonía; urgente con tiraje, estridor o signos de peligro."],
+ dnt:["p","Prioritaria; urgente si hay complicaciones."],ofidico:["u","Urgente."],rabia:["p","Prioritaria, el mismo día, para la profilaxis."],leish:["g","Programada para confirmar y tratar."],
+ tb:["p","Prioritaria para baciloscopia o prueba molecular."],sifilis:["p","Prioritaria."],piel:["g","Programada; prioritaria si hay celulitis o fiebre."],itu:["p","Prioritaria: el antibiótico necesita orden médica; urgente en gestante con fiebre o dolor lumbar."],
+ parasitos:["g","Programada."],garganta:["g","Programada; prioritaria si hay placas con fiebre."],asma:["p","Prioritaria; urgente si no mejora con el salbutamol."],vaginal:["g","Programada."],
+ alergia:["g","Programada; urgente si hay anafilaxia."],dolor:["g","Programada; urgente si es dolor de pecho o abdomen agudo."],herida:["p","Prioritaria si necesita antibiótico o es extensa; urgente si hay sangrado que no para."],
+ hta:["g","Programada; prioritaria con 160/100 y urgente con 180/110 o síntomas."],dm:["g","Programada; urgente con glucometría menor de 70 que no corrige o mayor de 250 con síntomas."],gastritis:["g","Programada; urgente si hay sangrado digestivo."]};
+mbBQ=(function(o){return function(id,c){const t=MB_TM[id];return o(id,c)+(t?`<dt>Telemedicina</dt><dd><span class="pill ${TM_NIV[t[0]].c}">${TM_NIV[t[0]].t}</span> ${esc(t[1])} <button class="btn bq-mini" type="button" data-mbdir="${id}">Clasificar y direccionar</button></dd>`:"")}})(mbBQ);
+document.addEventListener("click",ev=>{const b=ev.target.closest&&ev.target.closest("[data-mbdir]");if(!b)return;const id=b.dataset.mbdir,m=MB.find(x=>x.id===id);
+  const rk={malaria:"inf",dengue:"inf",leish:"inf",tb:"inf",sifilis:"inf",ofidico:"zoo",rabia:"zoo",dnt:"nut",hta:"cv",dm:"cv",hpp:"rmp",preeclampsia:"rmp"}[id]||"urg";dirOpen({de:"mb",ruta:rk,motivo:m?m.t:""})});
+/* enganches: nota por voz, pruebas, análisis de la ruta, Mi día */
+vnFinal=(function(o){return function(){o.apply(this,arguments);const box=document.querySelector(".fmt-box");const t=($("vn-nota")||{}).value||"";if(!box||$("vn-dir"))return;
+  const pide=/TELEMEDICINA|REMISION|REMITE|SIGNOS DE ALARMA POSITIVOS/.test(t.toUpperCase());
+  box.insertAdjacentHTML("afterend",`<div class="btns"><button class="btn${pide?" primary":""}" type="button" id="vn-dir">Telemedicina, remisión y ruta</button></div>`);
+  $("vn-dir").onclick=()=>dirOpen({de:"vn",motivo:"Nota: "+VN[VNS.id].t})}})(vnFinal);
+pzOpen=(function(o){return function(){o.apply(this,arguments);const f=$("pzr-fmt");if(!f||$("pz-dir"))return;
+  f.insertAdjacentHTML("afterend",`<div class="btns"><button class="btn" type="button" id="pz-dir">Telemedicina, remisión y ruta</button></div>`);
+  $("pz-dir").onclick=()=>{const d=pzrGet(),r=d.r||{},c=[];if(["vih","sif","hbs"].some(k=>r[k]==="REACTIVA"))c.push("prr");if(r.mal&&!/NEGATIVA|INVALIDA/.test(r.mal))c.push(d.malsig?"malc":"mal");if(r.emb==="POSITIVA")c.push("g_ing");
+    dirOpen({de:"pz",c,motivo:"Pruebas en el puesto"})}}})(pzOpen);
+function dirRutaDe(t){const x=plano(t);return /matern|gestac|prenatal|embaraz|parto|puerper/.test(x)?"rmp":/cardiovasc|hipert|diabet|cronic|metabol/.test(x)?"cv":/mental|rqc|suicid|consumo|depres/.test(x)?"smt":/violenc|maltrat|abuso/.test(x)?"vio":/nutric|desnutr|anemia|peso/.test(x)?"nut":/cancer|colposc|mama|citolog/.test(x)?"can":/odont|bucal/.test(x)?"buc":/optom|visual|audit|desarroll/.test(x)?"sen":/malaria|tuberc|vih|sifil|infecc|dengue|leish/.test(x)?"inf":/mordedura|ofid|rabia/.test(x)?"zoo":/urgenc|inmediat|prioritari/.test(x)?"urg":"rpms"}
+anHTML=(function(o){return function(r){let h=o(r);if(!r||!r.rutas||!r.rutas.length)return h;let i=0;
+  return h.replace(/<div class="an-ruta">([\s\S]*?)<\/div>/g,(m,inner)=>`<div class="an-ruta">${inner}<button class="btn bq-mini" type="button" data-andir="${i++}">Cómo direccionar</button></div>`)}})(anHTML);
+anWire=(function(o){return function(id){o.apply(this,arguments);const r=anCargar(id);if(!r)return;document.querySelectorAll("[data-andir]").forEach(b=>b.onclick=()=>{const x=(r.rutas||[])[+b.dataset.andir];if(!x)return;
+  dirOpen({de:"mod:"+id,ruta:dirRutaDe(x.ruta+" "+(x.porque||"")),motivo:x.ruta+(x.porque?" · "+x.porque:"")})})}})(anWire);
+fmtHome=(function(o){return function(){o();const f=$("md-fmt");if(!f||$("md-dir"))return;const n=tmPer().length;
+  f.insertAdjacentHTML("afterend",`<button type="button" class="btn" id="md-dir">Telemedicina y rutas${n?` · ${n}`:""}</button><button type="button" class="btn" id="md-obl">Mis 18 obligaciones</button>`);
+  $("md-dir").onclick=()=>dirOpen({de:null});$("md-obl").onclick=()=>oblOpen()}})(fmtHome);
+/* la ruta de cada módulo también ofrece direccionar */
+fmtRutaHTML=(function(o){return function(id){const h=o(id);return h?h.replace('id="ruta-fmt-todo">Ver todos los formatos</button>','id="ruta-fmt-todo">Ver todos los formatos</button><button class="btn bq-mini" type="button" id="ruta-dir">Telemedicina y rutas</button>'):h}})(fmtRutaHTML);
+fmtRutaWire=(function(o){return function(id){o(id);const b=$("ruta-dir");if(b)b.onclick=()=>{S.set(key(id,"tab"),"guia");dirOpen({de:"mod:"+id,ruta:["prenatal","parto","rn","ive"].includes(id)?"rmp":"rpms"})}}})(fmtRutaWire);
+document.head.insertAdjacentHTML("beforeend",`<style>
+.tm-u{color:var(--miss)}.tm-p{color:var(--warn)}.tm-g{color:var(--accent)}
+.an-ruta .bq-mini{margin-top:6px;align-self:flex-start}
 </style>`);
 
 /* ---------- arranque ---------- */
