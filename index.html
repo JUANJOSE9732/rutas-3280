@@ -1973,7 +1973,7 @@ function wireMiDia(){const cb=$("md-cal");if(cb)cb.onclick=calOpen;
 function mdShow(t){const s=$("md-st");s.innerHTML="";const a=document.createElement("textarea");a.value=t;a.rows=7;a.readOnly=true;s.append("No se pudo copiar solo. Mantén presionado el texto y cópialo:",a);a.focus();a.select()}
 
 /* ---------- PANEL ---------- */
-const VERSION_APP="2026-10-25 v200";
+const VERSION_APP="2026-10-25 v201";
 function home(){
   stopRec();if(S.get(AT_KEY))atReiniciar();st.view="home";
   const rm=["precon","prenatal","parto","rn","ive"],rp=["pinf","inf","adol","juv","adul","vej"];
@@ -10532,6 +10532,48 @@ obsNota=(function(o){return function(f){f=f||hoy();let md=o.apply(this,arguments
       [["Hacer en el puesto","hoy"],["Para la remisión","rem"],["Esperando resultado","pend"],["Se pasó la ventana","pas"]].forEach(([t,k])=>{const a=c(k);if(a.length)X.push("- "+t+": "+obsCel(a.join("; ")))})});
     else X.push("Sin gestantes con control de exámenes.");}catch(x){}
   X.push("");return md.replace("\n## Comunidades","\n"+X.join("\n")+"\n## Comunidades")}})(obsNota);
+/* v201: cada exportación a Obsidian lleva las mejoras de la app desde la última exportación,
+   y se puede descargar la bitácora completa («App Rutas 3280 - Bitácora.md») para el vault.
+   Al publicar una versión nueva se agrega aquí su línea (la más nueva primero). */
+const APP_CAMBIOS=[
+ [201,"2026-10-25","La nota de Obsidian lleva las mejoras de la app desde la última exportación; botón para descargar la bitácora completa de la app."],
+ [200,"2026-10-25","La nota de Obsidian incluye el registro rápido del día y los exámenes de cada gestante."],
+ [199,"2026-10-25","Exámenes de la gestante: lo no marcado queda pendiente al cerrar el control y reaparece «Pendiente desde el dd/mm»."],
+ [198,"2026-10-25","Registro rápido de gestantes: semanas o FUM, primer control o seguimiento y dónde; revisa si ya está registrada y si las semanas cuadran."],
+ [197,"2026-10-25","Registro rápido: tras guardar, «Atender ahora» abre la atención sin volver a pedir datos."],
+ [196,"2026-10-25","Registro rápido: edad calculada sola con la fecha de nacimiento."],
+ [195,"2026-10-25","Registro rápido: recibe pueblo, EAPB y teléfono."],
+ [194,"2026-10-25","Enlace desde el chat de Claude que abre el registro rápido con los pacientes listos."],
+ [193,"2026-10-25","Registro rápido por voz: «PACIENTE NUEVO» … «FIN PACIENTE», lectura sin internet u ordenado por Claude, lista de atención del día."],
+ [192,"2026-10-25","Exámenes de la gestante según edad gestacional y situación (puesto, remisión, pendientes, ventana pasada, más adelante) y lista de gestantes."],
+ [191,"2026-10-24","Exportar la nota del día a Obsidian."],
+ [190,"2026-10-24","Cuenta de octubre entregada; periodo activo hasta el 20 de noviembre."],
+ [189,"2026-10-24","Soportes y evidencias de la cuenta de cobro (fotos o PDF, ZIP por soporte)."],
+ [188,"2026-10-24","Calendario de obligaciones: semana epidemiológica, SIVIGILA del lunes y envío de Prosoft."],
+ [187,"2026-10-24","Rutas por evento (14 situaciones) en orden y comunidades (concertación, educación, permanencia)."],
+ [186,"2026-10-24","Telemedicina urgente, prioritaria o programada; direccionamiento a 12 rutas; registro de telemedicinas y remisiones; mapa de las 18 obligaciones."],
+ [185,"2026-10-24","Pruebas rápidas en el puesto: VIH, sífilis, hepatitis B, malaria y embarazo, con conducta, formatos y nota."],
+ [184,"2026-10-24","Formatos y soportes: 42 formatos de sedes rurales, cuándo se usan y existencias."],
+ [183,"2026-10-22","Pruebas en el puesto: hemoglobina portátil y tira de orina."],
+ [182,"2026-10-21","Inventario del botiquín actualizado con la revisión física del 21/10."],
+ [181,"2026-10-21","36 casos de morbilidad para practicar."],
+ [180,"2026-10-20","Botiquín del puesto dentro de la Guía de cada ruta."],
+ [179,"2026-10-20","Botiquín del puesto con semáforo de vencimiento, posología e interacciones, integrado a morbilidad."]];
+function appVer(){const m=String(VERSION_APP).match(/v(\d+)/);return m?+m[1]:0}
+function appBitacora(){const L=["---","tags: [yurupari, app, bitacora]","version: v"+appVer(),"actualizada: "+hoy(),"---","# App Rutas 3280 — Bitácora","",
+  "> Repositorio JUANJOSE9732/rutas-3280 · https://juanjose9732.github.io/rutas-3280/ · Versión vigente: **v"+appVer()+"**","",
+  "## Flujo de un día","1. Mi día → Registro rápido por voz (o dictar en el chat de Claude y tocar el enlace).","2. «Atender ahora» abre cada paciente donde va: curso de vida, prenatal con sus exámenes, morbilidad, evento o procedimiento.","3. En la atención: Guía de la ruta (botiquín, formatos, telemedicina y rutas, exámenes de la gestante), pruebas en el puesto, nota por voz.","4. Cierre: guardar la atención; lo no hecho de la gestante queda pendiente; telemedicinas y remisiones a su registro.","5. Fin del día: Exportar a Obsidian, enviar la base a Google Sheet, copiar la lista para Claude.","",
+  "## Mejoras por versión"];APP_CAMBIOS.forEach(c=>L.push("- **v"+c[0]+"** ("+c[1]+"): "+c[2]));L.push("");return L.join("\n")}
+obsNota=(function(o){return function(f){let md=o.apply(this,arguments);const last=+(S.get("dn2_obs_ver")||0),nv=APP_CAMBIOS.filter(c=>c[0]>last),X=["## Mejoras de la app"];
+  X.push("Versión del día: **v"+appVer()+"** · bitácora completa: [[App Rutas 3280 - Bitácora]]");
+  if(!last)X.push("Primera exportación con bitácora: descarga la bitácora completa desde la pantalla de Obsidian de la app.");
+  else if(nv.length){X.push("Nuevo desde la última exportación (v"+last+"):");nv.forEach(c=>X.push("- v"+c[0]+" ("+c[1]+"): "+c[2]))}
+  else X.push("Sin cambios desde la última exportación.");
+  X.push("");return md.replace("\n## Notas","\n"+X.join("\n")+"\n## Notas")}})(obsNota);
+obsOpen=(function(o){return function(){o.apply(this,arguments);const marca=()=>S.set("dn2_obs_ver",String(appVer()));
+  ["obs-dl","obs-cp"].forEach(id=>{const b=$(id);if(b)b.addEventListener("click",()=>setTimeout(marca,50))});
+  const st0=$("obs-st");st0.insertAdjacentHTML("beforebegin",`<div class="btns"><button class="btn" type="button" id="obs-bit">Descargar bitácora de la app (.md)</button></div>`);
+  $("obs-bit").onclick=async()=>{const r=await guardarArchivo("App Rutas 3280 - Bitácora.md",new Blob([appBitacora()],{type:"text/markdown"}));$("obs-st").textContent=r==="no"?"Descarga cancelada.":r==="err"?"No se pudo descargar.":"Descargada la bitácora (v"+appVer()+"). Guárdala en la carpeta Yurupari del vault y reemplaza la anterior."}}})(obsOpen);
 /* ---------- arranque ---------- */
 /* los borradores guardados con la versión anterior de los módulos se reubican una sola vez */
 Object.keys(OLD_LAB).forEach(id=>{if(!M[id]||S.get(key(id,"ivlab")))return;let a={};try{a=JSON.parse(S.get(key(id,"iv"))||"{}")||{}}catch(e){}
