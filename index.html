@@ -1973,7 +1973,7 @@ function wireMiDia(){const cb=$("md-cal");if(cb)cb.onclick=calOpen;
 function mdShow(t){const s=$("md-st");s.innerHTML="";const a=document.createElement("textarea");a.value=t;a.rows=7;a.readOnly=true;s.append("No se pudo copiar solo. Mantén presionado el texto y cópialo:",a);a.focus();a.select()}
 
 /* ---------- PANEL ---------- */
-const VERSION_APP="2026-10-25 v209";
+const VERSION_APP="2026-10-25 v210";
 function home(){
   stopRec();if(S.get(AT_KEY))atReiniciar();st.view="home";
   const rm=["precon","prenatal","parto","rn","ive"],rp=["pinf","inf","adol","juv","adul","vej"];
@@ -10540,6 +10540,7 @@ obsNota=(function(o){return function(f){f=f||hoy();let md=o.apply(this,arguments
    y se puede descargar la bitácora completa («App Rutas 3280 - Bitácora.md») para el vault.
    Al publicar una versión nueva se agrega aquí su línea (la más nueva primero). */
 const APP_CAMBIOS=[
+ [210,"2026-10-25","Pregunta de exámenes del control prenatal integrada: separa lo que se hace en el puesto con resultado inmediato (se registra ahí mismo), lo que se remite (va en la orden de remisión), lo pendiente de resultado, lo que viene más adelante y lo que pasó su ventana; la respuesta se escribe sola sin repetir."],
  [209,"2026-10-25","Cuándo fue el último tamizaje de cuello uterino: lista (hace menos de 1 año a más de 5 años, no recuerda) o mes y año exactos; si no está al día, la conducta dice qué toca por edad (citología 1-3-3, ADN-VPH 1-5-5, Res. 3280 p. 171)."],
  [208,"2026-10-25","Valoración de contracciones con listas (semanas, cuántas y en cuánto tiempo, duración, ritmo, dolor, si ceden, sangrado, líquido, movimientos, FCF) que clasifica en urgente, prioritaria o programada (amenaza de parto pretérmino, actividad aumentada, Braxton Hicks, trabajo de parto, pródromos, taquisistolia) y arma el texto para la nota."],
  [207,"2026-10-25","Los espacios de las respuestas traen opciones según el contexto (tipo de cefalea, flujo, alergia y reacción, consumo, antecedentes, medicamentos, resultados, grupo y Rh, dieta, apoyo, lengua…), con «Otro» para escribir, selección múltiple y mes y año; la conducta cambia según lo escogido (cefalea leve vs. de alarma, alergia grave a la penicilina, flujo anormal)."],
@@ -10873,6 +10874,31 @@ CWID.contr={html:()=>{const v=Object.assign({eg:contrEG()!=null?Math.round(contr
   c:[RC("Cáncer de cuello uterino, 9.8","171","Para citología de cuello uterino en mujeres entre 25 y 29 años, citar para nueva prueba en 3 años, siguiendo el esquema 1-3-3. Para pruebas ADN VPH en mujeres entre 30 y 65 años, citar en 5 años, siguiendo el esquema 1-5-5"),RC("Cáncer de cuello uterino","168","Mujeres menores de 25 años, se realizará la tamización de oportunidad con citología, a partir del criterio y evaluación de antecedentes y factores de riesgo")],
   r:"Tamizaje de cuello uterino no al día; se realiza o se programa según la edad (Res. 3280, p. 171)."};
  ["prenatal","precon","juv","adul","adol"].forEach(k=>{if(CDT[k])CDT[k].push(Object.assign({},R))})})();
+/* v210: en la pregunta de exámenes de la gestante, una sola vista con el control de exámenes:
+   en el puesto con resultado inmediato · se remiten · pendientes de resultado · más adelante · ventana pasada.
+   Lo que se marca queda en «Exámenes de esta gestante» y la respuesta se escribe sola. */
+const EXS_PREF=/^(Pruebas en el puesto hoy|Se solicitan en orden de remisión|Pendientes de resultado|No realizados en su ventana|Se solicitan?):/;
+function exsTexto(G){const o=G.o,hoyH=[],hoyE=[];GEX.forEach(x=>(o[x.id]||[]).forEach(z=>{if(z.f!==hoy())return;const n=x.n.split(" (")[0].replace(/, prueba rápida$/,"");if(z.e==="h")hoyH.push(n+(z.r?": "+z.r.toLowerCase():""));if(z.e==="e")hoyE.push(n)}));
+  const pend=G.R.filter(z=>z.g==="pend"&&!hoyE.includes(z.x.n.split(" (")[0])).map(z=>z.x.n.split(" (")[0]+" ("+z.txt.toLowerCase()+")"),pas=G.R.filter(z=>z.g==="pas").map(z=>z.x.n.split(" (")[0]);
+  const L=[];if(hoyH.length)L.push("Pruebas en el puesto hoy: "+hoyH.join("; ")+".");if(hoyE.length)L.push("Se solicitan en orden de remisión (no disponibles en la zona): "+hoyE.join("; ")+".");
+  if(pend.length)L.push("Pendientes de resultado: "+pend.join("; ")+".");if(pas.length)L.push("No realizados en su ventana: "+pas.join("; ")+"; se solicita lo que corresponde en su lugar.");return L}
+function exsPanel(box,ta,save){const P=pac();if(!P["NOMBRE COMPLETO"]&&!P["DOCUMENTO ID."])return false;
+  const pinta=()=>{const G=gexCalc(P),by=k=>G.R.filter(z=>z.g===k);
+    const sec=(t,c,xs,body)=>xs.length?`<div style="margin:8px 0"><p class="lab gex-t gex-${c}" style="margin:0 0 4px">${esc(t)} <span class="cnt">${xs.length}</span></p>${body}</div>`:"";
+    box.innerHTML=`<h3>Exámenes de esta gestante</h3><p class="note-src" style="margin:0">${G.W==null?"Sin edad gestacional: escríbela en la pestaña de cálculos o en la Guía.":gexSem(G.W)+" semanas · "+esc(G.sit)} Lo que marques aquí queda en su control de exámenes y la respuesta se escribe sola.</p>
+     ${sec("En el puesto · resultado inmediato","high",by("hoy"),by("hoy").map(z=>`<div class="exs-it"><b>${esc(z.x.n)}</b>${z.txt?`<small class="note-src">${esc(z.txt)}</small>`:""}<div class="gex-act">${z.x.res?`<select data-exr="${z.x.id}"><option value="">Resultado…</option>${z.x.res.map(r=>`<option>${esc(r)}</option>`).join("")}</select>`:`<input data-exr="${z.x.id}" placeholder="Resultado">`}<button class="btn bq-mini" type="button" data-exh="${z.x.id}">Registrar</button></div></div>`).join("")+`<p class="note-src" style="margin:4px 0 0">Para pruebas rápidas con lote e interpretación usa también «Pruebas en el puesto».</p>`)}
+     ${sec("Se remiten · van en la orden de remisión","mid",by("rem"),by("rem").map(z=>`<div class="exs-it"><b>${esc(z.x.n)}</b>${z.txt?`<small class="note-src">${esc(z.txt)}</small>`:""}<div class="gex-act"><button class="btn bq-mini" type="button" data-exe="${z.x.id}">Enviar en la remisión</button></div></div>`).join("")+`<div class="btns"><button class="btn bq-mini" type="button" id="exs-eall">Enviar todos en la remisión</button></div>`)}
+     ${sec("Pendientes de resultado","mid",by("pend"),`<ul class="mb-ul">${by("pend").map(z=>`<li>${esc(z.x.n)} · ${esc(z.txt)}</li>`).join("")}</ul>`)}
+     ${sec("Se pasó la ventana","high",by("pas"),`<ul class="mb-ul">${by("pas").map(z=>`<li><b>${esc(z.x.n.split(" (")[0])}:</b> ${esc(z.txt)}</li>`).join("")}</ul>`)}
+     ${sec("Más adelante","low",by("luego"),`<ul class="mb-ul">${by("luego").map(z=>`<li>${esc(z.x.n.split(" (")[0])} · ${esc(z.txt)}</li>`).join("")}</ul>`)}
+     ${by("ok").length?`<p class="note-src" style="margin:6px 0 0">Al día: ${esc(by("ok").map(z=>z.x.n.split(" (")[0]).join(", "))}.</p>`:""}`;
+    box.querySelectorAll("[data-exh]").forEach(b=>b.onclick=()=>{const id=b.dataset.exh,r=box.querySelector(`[data-exr="${id}"]`);if(r&&!r.value){r.focus();return}gexAdd(id,"h",r?r.value:"",P);escribe();pinta()});
+    box.querySelectorAll("[data-exe]").forEach(b=>b.onclick=()=>{gexAdd(b.dataset.exe,"e","",P);escribe();pinta()});
+    const ea=$("exs-eall");if(ea)ea.onclick=()=>{gexCalc(P).R.filter(z=>z.g==="rem").forEach(z=>gexAdd(z.x.id,"e","",P));escribe();pinta()}};
+  const escribe=()=>{const keep=ta.value.split(/\n/).map(s=>s.trim()).filter(s=>s&&!EXS_PREF.test(s)),L=exsTexto(gexCalc(P));ta.value=keep.concat(L).join("\n");save()};
+  pinta();if(EXS_PREF.test(ta.value.split("\n")[0]||"")||!ta.value.trim()){}return true}
+ivExtras=(function(o){return function(id,x,ta,save){o.apply(this,arguments);try{if(id==="prenatal"&&x.sugEx){const box=$("exs");if(box&&exsPanel(box,ta,save))box.hidden=false}}catch(e){console.warn(e)}}})(ivExtras);
+document.head.insertAdjacentHTML("beforeend",`<style>.exs-it{border-top:1px solid var(--line);padding:6px 0;display:flex;flex-direction:column;gap:2px}</style>`);
 /* ---------- arranque ---------- */
 /* los borradores guardados con la versión anterior de los módulos se reubican una sola vez */
 Object.keys(OLD_LAB).forEach(id=>{if(!M[id]||S.get(key(id,"ivlab")))return;let a={};try{a=JSON.parse(S.get(key(id,"iv"))||"{}")||{}}catch(e){}
