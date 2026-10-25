@@ -25,6 +25,7 @@ const F=await p.evaluate(()=>{const F=[],ok=(c,m)=>{if(!c)F.push(m)};localStorag
  home();ok($('md-rr'),'botón en Mi día');$('md-rr').click();ok(st.view==='rr','abre');
  $('rr-txt').value=T;$('rr-leer').click();ok(document.querySelectorAll('.rr-card').length===6,'tarjetas');
  const ed=document.querySelector('[data-rrf="5:com"]');ed.value='Querarí';ed.dispatchEvent(new Event('change'));ok(!/comunidad/.test(document.querySelectorAll('.rr-card')[5].textContent.split('Falta:')[1]||''),'editar en la tarjeta');
+ ok(/años/.test(document.querySelectorAll('.rr-card')[0].querySelector('input[readonly]')?.value||''),'edad calculada por la fecha');
  $('rr-ok').click();ok(rrGet().length===6&&Object.keys(pacientes()).length===6,'guardados: '+rrGet().length+' / '+Object.keys(pacientes()).length);
  ok(document.querySelector('.rr-it.rr-al')&&/LUIS/.test(document.querySelector('.rr-it').textContent),'alarma primero');
  /* abrir: gestante → prenatal con semanas */
