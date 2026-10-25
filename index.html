@@ -1973,7 +1973,7 @@ function wireMiDia(){const cb=$("md-cal");if(cb)cb.onclick=calOpen;
 function mdShow(t){const s=$("md-st");s.innerHTML="";const a=document.createElement("textarea");a.value=t;a.rows=7;a.readOnly=true;s.append("No se pudo copiar solo. Mantén presionado el texto y cópialo:",a);a.focus();a.select()}
 
 /* ---------- PANEL ---------- */
-const VERSION_APP="2026-10-25 v208";
+const VERSION_APP="2026-10-25 v209";
 function home(){
   stopRec();if(S.get(AT_KEY))atReiniciar();st.view="home";
   const rm=["precon","prenatal","parto","rn","ive"],rp=["pinf","inf","adol","juv","adul","vej"];
@@ -10540,6 +10540,7 @@ obsNota=(function(o){return function(f){f=f||hoy();let md=o.apply(this,arguments
    y se puede descargar la bitácora completa («App Rutas 3280 - Bitácora.md») para el vault.
    Al publicar una versión nueva se agrega aquí su línea (la más nueva primero). */
 const APP_CAMBIOS=[
+ [209,"2026-10-25","Cuándo fue el último tamizaje de cuello uterino: lista (hace menos de 1 año a más de 5 años, no recuerda) o mes y año exactos; si no está al día, la conducta dice qué toca por edad (citología 1-3-3, ADN-VPH 1-5-5, Res. 3280 p. 171)."],
  [208,"2026-10-25","Valoración de contracciones con listas (semanas, cuántas y en cuánto tiempo, duración, ritmo, dolor, si ceden, sangrado, líquido, movimientos, FCF) que clasifica en urgente, prioritaria o programada (amenaza de parto pretérmino, actividad aumentada, Braxton Hicks, trabajo de parto, pródromos, taquisistolia) y arma el texto para la nota."],
  [207,"2026-10-25","Los espacios de las respuestas traen opciones según el contexto (tipo de cefalea, flujo, alergia y reacción, consumo, antecedentes, medicamentos, resultados, grupo y Rh, dieta, apoyo, lengua…), con «Otro» para escribir, selección múltiple y mes y año; la conducta cambia según lo escogido (cefalea leve vs. de alarma, alergia grave a la penicilina, flujo anormal)."],
  [206,"2026-10-25","La cantidad de sangrado se escoge con una escala que se puede observar (manchado, escaso, como una menstruación, abundante, muy abundante) en vez de mililitros; igual para la salida de líquido."],
@@ -10665,16 +10666,18 @@ function ivExtras(id,x,ta,save){const fb=$("iv-fill"),cb=$("iv-cdt");if(!fb||!cb
        :tp.t==="num"?`<div style="display:flex;gap:6px;align-items:center"><input type="number" inputmode="decimal" step="any" data-ivb="${z.i}" style="max-width:120px"><span>${esc(tp.u)}</span></div>`
        :tp.t==="numu"?`<div style="display:flex;gap:6px;align-items:center"><input type="number" inputmode="decimal" step="any" data-ivb="${z.i}" data-ivu="${z.i}" style="max-width:110px"><select data-ivus="${z.i}"><option>ml</option><option>cc</option><option>mg</option><option>g</option></select></div>`
        :tp.t==="sel"?`<select data-ivb="${z.i}"><option value="">Escoge…</option>${tp.o.map(o=>`<option>${esc(o)}</option>`).join("")}<option value="__otro">Otro (escribir)</option></select>${otro}`
-       :tp.t==="multi"?`<div class="sugg" data-ivmw="${z.i}">${tp.o.map(o=>`<button type="button" aria-pressed="false" data-ivm="${esc(o)}">${esc(o)}</button>`).join("")}</div><div style="display:flex;gap:6px;margin-top:4px"><input data-ivmo="${z.i}" placeholder="Otro (opcional)"><button class="btn bq-mini" type="button" data-ivmb="${z.i}">Poner</button></div>`
+       :tp.t==="selmes"?`<select data-ivb="${z.i}"><option value="">Escoge…</option>${tp.o.map(o=>`<option>${esc(o)}</option>`).join("")}<option value="__mes">Mes y año exactos</option><option value="__otro">Otro (escribir)</option></select><input type="month" data-ivbm="${z.i}" max="${hoy().slice(0,7)}" hidden style="margin-top:4px">${otro}`:tp.t==="multi"?`<div class="sugg" data-ivmw="${z.i}">${tp.o.map(o=>`<button type="button" aria-pressed="false" data-ivm="${esc(o)}">${esc(o)}</button>`).join("")}</div><div style="display:flex;gap:6px;margin-top:4px"><input data-ivmo="${z.i}" placeholder="Otro (opcional)"><button class="btn bq-mini" type="button" data-ivmb="${z.i}">Poner</button></div>`
        :`<input data-ivb="${z.i}" placeholder="Escribe aquí y toca Enter">`;
       return `<label class="bfl" style="margin:6px 0"><span style="font-size:.85rem">${esc(ctx)}</span>${inp}</label>`}).join("")}</div>`;
-    const pone=(i,val)=>{val=String(val||"").trim();if(!val)return;let n=-1;ta.value=ta.value.replace(/_{2,}/g,mm=>(++n===i?val:mm));save();ult=ta.value;fill();cdt()};
+    const pone=(i,val)=>{val=String(val||"").trim();if(!val)return;let n=-1;ta.value=ta.value.replace(/(\ben\s+)?_{2,}/g,(mm,p1)=>(++n===i?((p1&&/^(hace|no recuerda)/.test(val))?val:(p1||"")+val):mm));save();ult=ta.value;fill();cdt()};
     fb.querySelectorAll("[data-ivb]").forEach(el=>{const put=()=>{let val=String(el.value||"").trim();if(!val)return;const i=+el.dataset.ivb;
       if(val==="__otro"){const o=fb.querySelector(`[data-ivo="${i}"]`);o.hidden=false;o.focus();return}
+      if(val==="__mes"){const o=fb.querySelector(`[data-ivbm="${i}"]`);o.hidden=false;o.focus();return}
       if(el.type==="date")val=val.split("-").reverse().join("/");if(el.type==="month")val=val.split("-").reverse().join("/");
       if(el.dataset.ivu!=null){const u=fb.querySelector(`[data-ivus="${el.dataset.ivu}"]`);val=val.replace(".",",")+" "+u.value}
       pone(i,val)};
       el.addEventListener("change",put);el.addEventListener("keydown",ev=>{if(ev.key==="Enter"){ev.preventDefault();put()}})});
+    fb.querySelectorAll("[data-ivbm]").forEach(el=>el.addEventListener("change",()=>{if(el.value)pone(+el.dataset.ivbm,el.value.split("-").reverse().join("/"))}));
     fb.querySelectorAll("[data-ivo]").forEach(el=>{const put=()=>pone(+el.dataset.ivo,el.value);el.addEventListener("change",put);el.addEventListener("keydown",ev=>{if(ev.key==="Enter"){ev.preventDefault();put()}})});
     fb.querySelectorAll("[data-ivm]").forEach(b=>b.onclick=()=>b.setAttribute("aria-pressed",b.getAttribute("aria-pressed")==="true"?"false":"true"));
     fb.querySelectorAll("[data-ivmb]").forEach(b=>b.onclick=()=>{const i=+b.dataset.ivmb,w=fb.querySelector(`[data-ivmw="${i}"]`),xs=[...w.querySelectorAll('[aria-pressed="true"]')].map(z=>z.dataset.ivm),o=fb.querySelector(`[data-ivmo="${i}"]`).value.trim();if(o)xs.push(o);
@@ -10761,6 +10764,7 @@ const BLK_OPC=[
  [/pareja:\s*$/,"Grupo y Rh de la pareja",["O Rh positivo","O Rh negativo","A Rh positivo","A Rh negativo","B Rh positivo","B Rh negativo","AB Rh positivo","AB Rh negativo","desconocido"]],
  [/grupo sanguineo\s*$/,"Grupo",["O","A","B","AB"]],
  [/cuello uterino \($/,"Prueba",["citología","ADN-VPH","VIA-VILI"]],
+ [/(cuello uterino \([^)]{0,20}\) en|ultimo tamizaje en|tamizaje en)\s*$/,"Cuándo fue",["hace menos de 1 año","hace 1 año","hace 2 años","hace 3 años","hace 4 años","hace 5 años","hace más de 5 años","no recuerda la fecha"],"selmes"],
  [/resultado anormal:\s*$/,"Resultado anormal",["ASC-US","lesión de bajo grado (LEI BG)","lesión de alto grado (LEI AG)","ADN-VPH positivo","VIA-VILI positivo"]],
  [/molar en .{0,6}; seguimiento:\s*$|anormal: .{0,40}; seguimiento:\s*$/,"Seguimiento",["completo y normal","colposcopia realizada","pendiente","sin seguimiento"]],
  [/(hipertension( arterial| cronica)?[^.]{0,40}en manejo con|antihipertensivo:)\s*$/,"Medicamento",["losartán","enalapril","amlodipino","nifedipino","hidroclorotiazida","sin tratamiento"]],
@@ -10863,6 +10867,12 @@ CWID.contr={html:()=>{const v=Object.assign({eg:contrEG()!=null?Math.round(contr
   box.querySelectorAll("[data-cwf]").forEach(b=>b.onclick=()=>{const f=b.dataset.cwf;v.fl=v.fl||[];if(v.fl.includes(f))v.fl=v.fl.filter(x=>x!==f);else v.fl.push(f);b.setAttribute("aria-pressed",v.fl.includes(f));pinta()});
   pinta()}};
 (function(){const r=CDT.prenatal.find(z=>/contraccion\|actividad uterina/.test(String(z.re)));if(r){r.wid="contr";r.p=["Cuenta las contracciones (mínimo 20 minutos), su duración y si son regulares; revisa FCF, sangrado y salida de líquido.","La valoración de abajo te dice si es urgente, prioritaria o programada."]}})();
+/* v209: tamizaje de cuello uterino no al día (Res. 3280, 9.x, p. 168 y 171) */
+(function(){const R={re:/(tamizaje de cuello uterino|citologia|vph)[^.]*(hace (3|4|5) anos|hace mas de 5|no recuerda)|nunca[^.]*(citologia|tamizaje|vph)|(citologia|tamizaje|vph)[^.]*nunca/,neg:false,t:"Tamizaje de cuello uterino no al día",
+  p:["25 a 29 años: citología, esquema 1-3-3 (si la última fue hace 3 años o más, toca).","30 a 65 años: ADN-VPH, esquema 1-5-5 (en zona dispersa, 30 a 50 años: VIA-VILI 1-3-3 por personal certificado).","Menor de 25: solo de oportunidad si hay factores de riesgo (inicio antes de los 15, 3 o más hijos, múltiples compañeros).","Tómalo hoy si está en condiciones o prográmalo; en la gestante, una sola vez si no está al día."],
+  c:[RC("Cáncer de cuello uterino, 9.8","171","Para citología de cuello uterino en mujeres entre 25 y 29 años, citar para nueva prueba en 3 años, siguiendo el esquema 1-3-3. Para pruebas ADN VPH en mujeres entre 30 y 65 años, citar en 5 años, siguiendo el esquema 1-5-5"),RC("Cáncer de cuello uterino","168","Mujeres menores de 25 años, se realizará la tamización de oportunidad con citología, a partir del criterio y evaluación de antecedentes y factores de riesgo")],
+  r:"Tamizaje de cuello uterino no al día; se realiza o se programa según la edad (Res. 3280, p. 171)."};
+ ["prenatal","precon","juv","adul","adol"].forEach(k=>{if(CDT[k])CDT[k].push(Object.assign({},R))})})();
 /* ---------- arranque ---------- */
 /* los borradores guardados con la versión anterior de los módulos se reubican una sola vez */
 Object.keys(OLD_LAB).forEach(id=>{if(!M[id]||S.get(key(id,"ivlab")))return;let a={};try{a=JSON.parse(S.get(key(id,"iv"))||"{}")||{}}catch(e){}

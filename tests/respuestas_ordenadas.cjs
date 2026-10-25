@@ -20,8 +20,11 @@ const F=await p.evaluate(async()=>{const F=[],ok=(c,m)=>{if(!c)F.push(m)};localS
  ok(ivBlankTipo('Tiene o tenía DIU (colocado en ____); ',' (retirado / aún lo tiene).').o.join()==='retirado,aún lo tiene','opciones desde el paréntesis');
  ok(ivBlankTipo('Refiere antecedente de diabetes, diagnosticada en ',', en manejo').t==='mes','mes y año');
  ok(ivBlankTipo('FC ',' lpm, FR').u==='lpm','unidad lpm');
+ const tz=ivBlankTipo('Último tamizaje de cuello uterino (citología) en ',', resultado normal.');ok(tz.t==='selmes'&&tz.o.includes('hace 3 años'),'cuándo fue el tamizaje');
  /* dictado: resultados acumulados de Android */
  const ta=document.createElement('textarea');ta.value='Inicio';document.body.append(ta);const root=document.createElement('div');root.innerHTML='<button class="mic"></button><span class="mic-st"></span><div class="mic-ok"></div>';
+ $('iv-a').value='Último tamizaje de cuello uterino (citología) en ____, resultado normal.';$('iv-a').dispatchEvent(new Event('input'));
+ const sm=document.querySelector('#iv-fill select[data-ivb]');sm.value='hace 2 años';sm.dispatchEvent(new Event('change'));ok($('iv-a').value==='Último tamizaje de cuello uterino (citología) hace 2 años, resultado normal.','texto sin «en hace»: '+$('iv-a').value);
  return F});
 const all=F.concat(errs);if(all.length){console.log('FALLAS:\n'+all.join('\n'));process.exitCode=1}else console.log('respuestas_ordenadas: 0 fallos');
 await b.close()})();

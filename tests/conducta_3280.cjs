@@ -19,6 +19,8 @@ const F=await p.evaluate(()=>{const F=[],ok=(c,m)=>{if(!c)F.push(m)};
  const l=hit('prenatal','Refiere cefalea leve y ocasional, que mejora con descanso o acetaminofén con alteraciones.');ok(l.includes('Cefalea leve'),'cefalea leve: '+l);
  ok(hit('prenatal','Refiere cefalea intensa y persistente, que no cede con analgésicos.').includes('Síntomas de trastorno hipertensivo (preeclampsia)'),'cefalea intensa');
  ok(hit('prenatal','Refiere alergia a penicilina; reacción: dificultad para respirar o silbido (anafilaxia).').includes('Alergia grave a la penicilina'),'anafilaxia');
+ ok(hit('prenatal','Último tamizaje de cuello uterino (citología) en hace más de 5 años, resultado normal.').includes('Tamizaje de cuello uterino no al día'),'tamizaje vencido');
+ ok(!hit('prenatal','Último tamizaje de cuello uterino (citología) en hace 1 año, resultado normal.').includes('Tamizaje de cuello uterino no al día'),'tamizaje al día');
  return F});
 const all=F.concat(errs);if(all.length){console.log('FALLAS:\n'+all.join('\n'));process.exitCode=1}else console.log('conducta_3280: 0 fallos');
 await b.close()})();
