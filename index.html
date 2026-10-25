@@ -1971,7 +1971,7 @@ function wireMiDia(){const cb=$("md-cal");if(cb)cb.onclick=calOpen;
 function mdShow(t){const s=$("md-st");s.innerHTML="";const a=document.createElement("textarea");a.value=t;a.rows=7;a.readOnly=true;s.append("No se pudo copiar solo. Mantén presionado el texto y cópialo:",a);a.focus();a.select()}
 
 /* ---------- PANEL ---------- */
-const VERSION_APP="2026-10-25 v187";
+const VERSION_APP="2026-10-25 v188";
 function home(){
   stopRec();if(S.get(AT_KEY))atReiniciar();st.view="home";
   const rm=["precon","prenatal","parto","rn","ive"],rp=["pinf","inf","adol","juv","adul","vej"];
@@ -9944,6 +9944,93 @@ dirOpen=(function(o){return function(){o.apply(this,arguments);const f=$("dir-fm
 OBL_APP["01"]+=" Comunidades: acta al llegar a cada territorio.";OBL_APP["02"]+=" Comunidades: certificado por comunidad con fechas y resumen de actividades.";OBL_APP["11"]+=" Comunidades: educaciones con temas y asistentes.";
 respaldoObj=(function(o){return function(){const r=o.apply(this,arguments);r.comv=comVis();return r}})(respaldoObj);
 respaldoUnir=(function(o){return function(x){const r=o.apply(this,arguments);if(x&&Array.isArray(x.comv)){const m=new Map(comVis().map(v=>[v.id,v]));x.comv.forEach(v=>{if(v&&v.id&&!m.has(v.id))m.set(v.id,v)});comSet([...m.values()])}return r}})(respaldoUnir);
+
+/* ===== v188: Calendario de obligaciones rutinarias (semana epidemiológica, SIVIGILA, Prosoft) =====
+   - Semana epidemiológica del INS: domingo a sábado; la SE 1 empieza el domingo que cae el 4 de enero o justo antes.
+     2026 tiene 52 semanas (SE 1 = 4 al 10 de enero; SE 52 = 27 de diciembre al 2 de enero de 2027). 13 periodos de 4 semanas.
+   - Obligaciones diarias, semanales, por periodo epidemiológico y mensuales, con casillas que se reinician solas.
+   - SIVIGILA semanal: el lunes se notifica la semana que cerró el sábado (individuales, colectivas 995 y 998, o negativa).
+   - Prosoft: se registra a diario sin conexión y se envía una vez por semana cuando hay internet (día configurable).
+   - Mi día avisa la notificación y el envío pendientes de la semana anterior.
+   Lo marcado «confirma con la ESE» depende de la directriz de la Subdirección Científica o de epidemiología. */
+function seIni(y){const d=new Date(Date.UTC(y,0,4));d.setUTCDate(4-d.getUTCDay());return d}
+function seDe(iso){const[y,m,dd]=iso.split("-").map(Number),t=Date.UTC(y,m-1,dd);let a=y+1;while(seIni(a).getTime()>t)a--;
+  const n=Math.floor((t-seIni(a).getTime())/(7*864e5))+1,ini=new Date(seIni(a).getTime()+(n-1)*7*864e5),fin=new Date(ini.getTime()+6*864e5),f=x=>x.toISOString().slice(0,10);
+  return{a,n,ini:f(ini),fin:f(fin),per:Math.min(13,Math.ceil(n/4)),k:a+"-SE"+String(n).padStart(2,"0")}}
+function seAnt(iso){const s=seDe(iso),d=new Date(s.ini+"T00:00:00Z");d.setUTCDate(d.getUTCDate()-1);return seDe(d.toISOString().slice(0,10))}
+function seTxt(s){const m=x=>{const[,mm,dd]=x.split("-").map(Number);return dd+" de "+MD_MES[mm-1]};return `SE ${s.n} (${m(s.ini)} al ${m(s.fin)})`}
+const OB_DIAS=["domingo","lunes","martes","miércoles","jueves","viernes","sábado"];
+function obConf(){try{return Object.assign({prosoft:5},JSON.parse(S.get("dn2_obconf")||"{}"))}catch(e){return{prosoft:5}}}
+/* [id, frecuencia d/s/p/m, texto, soporte, día de la semana (s), detalle] */
+const OB=[
+ ["d_pro","d","Registrar en Prosoft, sin conexión, cada atención del mismo día","04",null,"Si no alcanzas en Prosoft, historia clínica manual y la pasas antes de cerrar el día."],
+ ["d_fir","d","Cada atención con su formato, consentimiento y firma o huella del usuario","03"],
+ ["d_nev","d","Temperatura de la nevera mañana y tarde (2 a 8 °C) y novedades de cadena de frío","08"],
+ ["d_mal","d","Registro diario de diagnóstico de malaria y consumo de insumos en tabletas","12"],
+ ["d_med","d","Medicamentos entregados: recetario y descuento del botiquín (kardex)","06"],
+ ["d_inm","d","Eventos de notificación inmediata: avisar a epidemiología el mismo día (muerte materna, perinatal o de menor de 5, malaria complicada, brote, sospecha de sarampión, rabia o parálisis flácida)","12"],
+ ["d_res","d","Residuos: separar en las bolsas por color y anotar la generación del día","",null,"Confirma con la ESE si la sede lleva el formato de generación de residuos."],
+ ["d_evi","d","Fotos de evidencia del día y respaldo de la app","17"],
+ ["s_siv","s","SIVIGILA semanal de la semana que cerró el sábado: fichas individuales, colectivas 995 (IRA) y 998 (EDA), o notificación negativa si no hubo casos","12",1,"Nunca dejes una semana sin notificar (silencio epidemiológico): si no hubo casos, se notifica en cero."],
+ ["s_pro","s","Enviar por internet las notas de Prosoft de la semana (sincronizar) y verificar que subieron","04","pro","Cambia el día abajo según cuándo tienes señal."],
+ ["s_esc","s","Escanear a PDF los formatos de la semana y guardarlos en la carpeta del mes","17",5],
+ ["s_reu","s","Reunión con auxiliares y promotores con acta y lista firmada","14",5],
+ ["s_tm","s","Jornada de telemedicina programada (casos de la semana)","09",5],
+ ["s_ven","s","Revisar lotes y vencimientos del botiquín y de las pruebas rápidas","07",5],
+ ["s_bus","s","Búsqueda activa en la comunidad: gestantes, menores de 5, sintomáticos e inasistentes","05",2],
+ ["s_seg","s","Seguimiento de remitidos y de tratamientos en curso (malaria, penicilina semanal, TB)","10",4],
+ ["s_col","s","Colectivas 995 y 998 contadas por grupo de edad a partir de las consultas de la semana","12",1],
+ ["p_sil","p","Revisar que ninguna semana del periodo quedó sin notificar","12",null,"Al cerrar cada periodo epidemiológico (cada 4 semanas)."],
+ ["p_bai","p","Búsqueda activa en los registros de eventos que no se notificaron (BAI)","12",null,"Confirma con epidemiología si la sede la hace o la hace el hospital."],
+ ["p_aju","p","Ajustes y clasificación final de casos con epidemiología (confirmados o descartados)","12"],
+ ["m_perm","m","Certificado de permanencia de cada comunidad, firmado por el líder","02"],
+ ["m_enc","m","Encuestas de satisfacción según la meta del mes","05"],
+ ["m_ped","m","Proyección y pedido de medicamentos e insumos; devolución de vencidos","06"],
+ ["m_inv","m","Inventario del puesto firmado","07"],
+ ["m_pai","m","Reporte mensual de vacunación (PAI) si vacunaste","",null,"Confirma con la ESE el formato y la fecha."],
+ ["m_ss","m","Pagar la seguridad social y guardar la planilla",""],
+ ["m_inf","m","Informe de actividades, lista de verificación y cuenta de cobro con los 18 soportes","17"]];
+const OB_FR={d:"Todos los días",s:"Cada semana",p:"Cada periodo epidemiológico (4 semanas)",m:"Cada mes, antes de la entrega"};
+function obKey(fr,iso){iso=iso||hoy();return fr==="d"?iso:fr==="s"?seDe(iso).k:fr==="p"?seDe(iso).a+"-P"+seDe(iso).per:mdPeriodo()[0]}
+function obChk(fr,iso){try{return JSON.parse(S.get("dn2_ob_"+obKey(fr,iso))||"{}")||{}}catch(e){return{}}}
+function obSetChk(fr,id,v,iso){const k="dn2_ob_"+obKey(fr,iso),o=obChk(fr,iso);if(v)o[id]=1;else delete o[id];S.set(k,JSON.stringify(o))}
+function obDia(x){return x[4]==="pro"?obConf().prosoft:x[4]}
+/* pendientes de la semana que ya cerró */
+function obIso(id){return id==="s_siv"?seAnt(hoy()).ini:undefined}
+function obPendAnt(){const a=seAnt(hoy()),c=obChk("s",a.ini),P=[];
+  if(!c.s_siv&&new Date().getDay()!==1)P.push(["s_siv","SIVIGILA de la "+seTxt(a)+" sin notificar"]);if(!c.s_pro)P.push(["s_pro","Envío de Prosoft de la "+seTxt(a)+" pendiente"]);return{se:a,P}}
+function obReporte(){const a=seAnt(hoy());return [`NOTIFICACION SEMANAL SIVIGILA — ${seTxt(a).toUpperCase()} — AÑO ${a.a}`,"UPGD: ESE HOSPITAL SAN ANTONIO · SEDE RURAL "+(S.get("dn2_ultcom")||"___"),
+  "EVENTOS INDIVIDUALES NOTIFICADOS: ___ (o NINGUNO)","COLECTIVA 995 IRA: consultas por IRA ___ / total de consultas ___ por grupo de edad","COLECTIVA 998 EDA: casos ___ por grupo de edad",
+  "SI NO HUBO CASOS: NOTIFICACION NEGATIVA (EN CERO)","RESPONSABLE: ___"].join("\n")}
+function obOpen(de){stopRec();st.view="obc";const h=hoy(),s=seDe(h),cf=obConf(),pa=obPendAnt();
+  const fila=(x,fr)=>{const c=obChk(fr,obIso(x[0]))[x[0]],dd=obDia(x);return `<li><input type="checkbox" id="ob-${x[0]}" data-ob="${x[0]}" data-fr="${fr}"${c?" checked":""}><label for="ob-${x[0]}"><span>${esc(x[2])}${dd!=null&&fr==="s"?` <small class="note-src">· ${OB_DIAS[dd]}</small>`:""}${x[0]==="s_siv"?` <small class="note-src">· ${esc(seTxt(seAnt(h)))}</small>`:""}${x[3]?` <small class="note-src">· soporte ${x[3]}</small>`:""}${x[5]?`<br><small class="note-src">${esc(x[5])}</small>`:""}</span></label></li>`};
+  $("app").innerHTML=`<div class="top"><button class="back" type="button" id="ob-back">← Inicio</button><span class="tag pc">Obligaciones</span></div>
+  <header><h1>Calendario de obligaciones</h1><p class="sub">Hoy es ${OB_DIAS[new Date().getDay()]} ${esc(h)}: <b>${esc(seTxt(s))}</b>, periodo epidemiológico ${s.per} de 13 del ${s.a}. Las casillas se reinician solas cada día, semana, periodo y mes.</p></header>
+  ${pa.P.length&&calEnCampo()?`<div class="box miss"><h3>Pendiente de la semana anterior</h3><ul>${pa.P.map(p=>`<li>${esc(p[1])} <button class="btn bq-mini" type="button" data-obant="${p[0]}">Ya lo hice</button></li>`).join("")}</ul></div>`:""}
+  ${Object.entries(OB_FR).map(([fr,t])=>{const xs=OB.filter(x=>x[1]===fr);return `<details class="sec"${fr==="d"||fr==="s"?" open":""}><summary><span>${esc(t)}</span><span class="cnt">${xs.filter(x=>obChk(fr,obIso(x[0]))[x[0]]).length} / ${xs.length}</span></summary><ul class="items">${xs.map(x=>fila(x,fr)).join("")}</ul></details>`}).join("")}
+  <section class="tool"><h3>Envío semanal de Prosoft</h3><label class="bfl">Día en que tienes internet para enviar<select id="ob-pd">${OB_DIAS.map((d,i)=>`<option value="${i}"${+cf.prosoft===i?" selected":""}>${d}</option>`).join("")}</select></label>
+   <p class="note-src">Prosoft se llena a diario sin conexión; el envío conjunto de la semana es tu soporte 04. Si no hubo señal, anótalo y envía apenas haya.</p></section>
+  <section class="tool"><h3>Texto para el reporte SIVIGILA del lunes</h3><textarea id="ob-rep" rows="7" readonly style="width:100%;font-family:var(--f-data);font-size:.85rem">${esc(obReporte())}</textarea>
+   <div class="btns"><button class="btn" type="button" id="ob-cp">Copiar</button><button class="btn" type="button" id="ob-ev">Eventos inmediatos y rutas</button></div><p class="status" id="ob-st" aria-live="polite"></p></section>
+  <details class="sec"><summary><span>Semanas epidemiológicas ${s.a}</span></summary><div style="padding:8px 14px 12px;max-height:300px;overflow:auto"><ul class="mb-ul">${Array.from({length:53},(_,i)=>{const d=new Date(seIni(s.a).getTime()+i*7*864e5).toISOString().slice(0,10),x=seDe(d);return x.a===s.a?`<li${x.n===s.n?' style="font-weight:700"':""}>${esc(seTxt(x))} · periodo ${x.per}</li>`:""}).join("")}</ul></div></details>
+  <p class="foot">Calendario epidemiológico del INS (domingo a sábado). Los plazos de notificación y los formatos que dicen «confirma» los fija la ESE y epidemiología.</p>`;
+  document.querySelectorAll("[data-ob]").forEach(i=>i.onchange=()=>{obSetChk(i.dataset.fr,i.dataset.ob,i.checked,obIso(i.dataset.ob));const d=i.closest("details");d.querySelector(".cnt").textContent=d.querySelectorAll("[data-ob]:checked").length+" / "+d.querySelectorAll("[data-ob]").length});
+  document.querySelectorAll("[data-obant]").forEach(b=>b.onclick=()=>{obSetChk("s",b.dataset.obant,true,pa.se.ini);obOpen(de)});
+  $("ob-pd").onchange=()=>{const c=obConf();c.prosoft=+$("ob-pd").value;S.set("dn2_obconf",JSON.stringify(c));obOpen(de)};
+  $("ob-cp").onclick=()=>{try{navigator.clipboard.writeText($("ob-rep").value).then(()=>$("ob-st").textContent="Copiado.")}catch(e){$("ob-rep").select()}};
+  $("ob-ev").onclick=()=>evOpen(null,null);$("ob-back").onclick=()=>{home();window.scrollTo(0,0)};window.scrollTo(0,0)}
+/* Mi día: semana epidemiológica, SIVIGILA, envío de Prosoft y pendientes */
+mdTareas=(function(o){return function(){let t=o.apply(this,arguments);if(!calEnCampo())return t;const d=new Date().getDay(),a=seAnt(hoy());
+  t=t.filter(x=>!/^Reportar SIVIGILA de la semana/.test(x));
+  if(d===1)t.unshift("SIVIGILA de la "+seTxt(a)+": individuales, colectivas 995 y 998, o notificación negativa (act. 12)");
+  if(d===obConf().prosoft)t.push("Enviar por internet las notas de Prosoft de la semana y verificar que subieron (act. 04)");
+  obPendAnt().P.forEach(p=>{if(!(d===1&&p[0]==="s_siv"))t.unshift("Pendiente: "+p[1])});return t}})(mdTareas);
+fmtHome=(function(o){return function(){o();const ref=$("md-com")||$("md-obl")||$("md-fmt");if(!ref||$("md-obc"))return;const s=seDe(hoy()),n=calEnCampo()?obPendAnt().P.length:0;
+  ref.insertAdjacentHTML("afterend",`<button type="button" class="btn${n?" primary":""}" id="md-obc">Obligaciones · ${esc("SE "+s.n)}${n?` · ${n} pendientes`:""}</button>`);$("md-obc").onclick=()=>obOpen()}})(fmtHome);
+OBL_APP["04"]+=" Obligaciones: registro diario sin conexión y envío semanal de Prosoft.";OBL_APP["12"]+=" Obligaciones: SIVIGILA semanal por semana epidemiológica.";
+wireMiDia=(function(o){return function(){o.apply(this,arguments);document.querySelectorAll("[data-mdt]").forEach(c=>{const t=c.dataset.mdt;
+  const id=/^SIVIGILA de la /.test(t)?"s_siv":/^Enviar por internet las notas de Prosoft/.test(t)?"s_pro":null;if(!id)return;
+  if(obChk("s",obIso(id))[id]&&!c.checked)c.checked=true;c.addEventListener("change",()=>obSetChk("s",id,c.checked,obIso(id)))})}})(wireMiDia);
 
 /* ---------- arranque ---------- */
 /* los borradores guardados con la versión anterior de los módulos se reubican una sola vez */
