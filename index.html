@@ -1973,7 +1973,7 @@ function wireMiDia(){const cb=$("md-cal");if(cb)cb.onclick=calOpen;
 function mdShow(t){const s=$("md-st");s.innerHTML="";const a=document.createElement("textarea");a.value=t;a.rows=7;a.readOnly=true;s.append("No se pudo copiar solo. Mantén presionado el texto y cópialo:",a);a.focus();a.select()}
 
 /* ---------- PANEL ---------- */
-const VERSION_APP="2026-10-25 v199";
+const VERSION_APP="2026-10-25 v200";
 function home(){
   stopRec();if(S.get(AT_KEY))atReiniciar();st.view="home";
   const rm=["precon","prenatal","parto","rn","ive"],rp=["pinf","inf","adol","juv","adul","vej"];
@@ -10520,6 +10520,18 @@ function rrDesdeEnlace(){let t=null;const h=location.hash||"";
   S.del("dn2_rr_link");rrOpen({link:true});const b=$("rr-leer");if(b){b.click();const s=$("rr-st");if(s)s.textContent="Llegaron desde el chat de Claude: "+s.textContent}}
 pacienteAtencion=(function(o){return function(mod){const r=o.apply(this,arguments);try{if(mod==="prenatal")gexCerrar(pac())}catch(e){}return r}})(pacienteAtencion);
 vnFinal=(function(o){return function(){o.apply(this,arguments);const b=$("vn-save");if(b&&VNS&&VNS.id==="prenat"&&!b.dataset.gexc){b.dataset.gexc=1;b.addEventListener("click",()=>{try{gexCerrar(pac())}catch(e){}})}}})(vnFinal);
+/* v200: Obsidian también lleva la lista del registro rápido y los exámenes pendientes de las gestantes */
+obsNota=(function(o){return function(f){f=f||hoy();let md=o.apply(this,arguments);const X=[];
+  try{const L=rrGet().filter(e=>e.f===f);X.push("## Registro rápido del día ("+L.length+")");
+    if(L.length){X.push("| # | Paciente | Documento | Edad | Comunidad | Atención | Va a | Estado |","|---|---|---|---|---|---|---|---|");
+      L.forEach((e,i)=>X.push("| "+(i+1)+" | "+[e.nom,[e.tipo,e.doc].filter(Boolean).join(" "),rrEdadTxt(e),e.com,(RR_AT[e.at]||"")+(e.alarma?" · ALARMA":""),e.destT+(e.sem!=null?" · "+gexSem(e.sem)+" sem":""),e.hecho?"atendido":"pendiente"].map(obsCel).join(" | ")+" |"))}
+    else X.push("Sin pacientes en el registro rápido.");}catch(x){}
+  try{const G=gexTodas();X.push("","## Gestantes: exámenes ("+G.length+")");
+    if(G.length)G.forEach(g=>{const c=k=>g.R.filter(z=>z.g===k).map(z=>z.x.n.split(" (")[0]+(z.pend?" (pendiente desde antes)":""));
+      X.push("### "+obsCel(g.P["NOMBRE COMPLETO"])+" — "+(g.W==null?"sin EG":gexSem(g.W)+" semanas")+(g.P.__com?" · "+g.P.__com:"")+(g.o._ctl&&g.o._ctl.lugar?" · controles en "+g.o._ctl.lugar:""));
+      [["Hacer en el puesto","hoy"],["Para la remisión","rem"],["Esperando resultado","pend"],["Se pasó la ventana","pas"]].forEach(([t,k])=>{const a=c(k);if(a.length)X.push("- "+t+": "+obsCel(a.join("; ")))})});
+    else X.push("Sin gestantes con control de exámenes.");}catch(x){}
+  X.push("");return md.replace("\n## Comunidades","\n"+X.join("\n")+"\n## Comunidades")}})(obsNota);
 /* ---------- arranque ---------- */
 /* los borradores guardados con la versión anterior de los módulos se reubican una sola vez */
 Object.keys(OLD_LAB).forEach(id=>{if(!M[id]||S.get(key(id,"ivlab")))return;let a={};try{a=JSON.parse(S.get(key(id,"iv"))||"{}")||{}}catch(e){}
