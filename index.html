@@ -1971,7 +1971,7 @@ function wireMiDia(){const cb=$("md-cal");if(cb)cb.onclick=calOpen;
 function mdShow(t){const s=$("md-st");s.innerHTML="";const a=document.createElement("textarea");a.value=t;a.rows=7;a.readOnly=true;s.append("No se pudo copiar solo. Mantén presionado el texto y cópialo:",a);a.focus();a.select()}
 
 /* ---------- PANEL ---------- */
-const VERSION_APP="2026-10-24 v186";
+const VERSION_APP="2026-10-25 v187";
 function home(){
   stopRec();if(S.get(AT_KEY))atReiniciar();st.view="home";
   const rm=["precon","prenatal","parto","rn","ive"],rp=["pinf","inf","adol","juv","adul","vej"];
@@ -9672,6 +9672,278 @@ document.head.insertAdjacentHTML("beforeend",`<style>
 .tm-u{color:var(--miss)}.tm-p{color:var(--warn)}.tm-g{color:var(--accent)}
 .an-ruta .bq-mini{margin-top:6px;align-self:flex-start}
 </style>`);
+
+/* ===== v187: Rutas por evento (qué hacer en orden) y comunidades visitadas =====
+   - Rutas por evento: 14 situaciones (accidente ofídico, malaria, gestante con sífilis, VIH o hepatitis B, EDA, IRA,
+     mordedura de animal, violencia, intento de suicidio, intoxicación, parto en la comunidad, muertes, sintomáticos,
+     remisión). Cada una en orden: evaluar → clasificar → actuar → telemedicina y remisión → registrar → reportar → seguir,
+     con casillas, los formatos (n.º de la lista de chequeo), texto para la nota y botón a Telemedicina y rutas.
+   - Comunidades: cada territorio al que llegas lleva su acta de concertación al llegar (soporte 01), las educaciones
+     grupales con acta de reunión y lista de asistencia (soporte 11) y el certificado de permanencia firmado por el
+     líder con las fechas del día que llegaste al día que saliste (soporte 02). Mi día avisa lo que falta.
+   Las dosis y esquemas se confirman con la guía vigente y la orden médica por telemedicina. */
+const EV_FASES=[["ev","Evaluar"],["cl","Clasificar"],["ac","Actuar"],["tm","Telemedicina y remisión"],["rg","Registrar"],["rp","Reportar"],["sg","Seguimiento"]];
+const EV=[
+ {id:"ofid",t:"Accidente ofídico (mordedura de serpiente)",tm:["ofid"],ruta:"zoo",p:{
+  ev:["Hora exacta de la mordedura, sitio y actividad que hacía","¿Vio o capturó la serpiente? Nombre común en la comunidad","Qué le hicieron antes: torniquete (cuánto tiempo), incisión, succión, rezos, emplastos, pócimas","Signos vitales, perímetro del miembro y avance del edema","Sangrado de encías, orina oscura o con sangre; ptosis, dificultad para tragar o hablar"],
+  cl:["Género probable: Bothrops o Lachesis (edema, dolor, sangrado) / Micrurus o coral (neurotóxico, poco local)","Gravedad: leve, moderado, grave o no envenenamiento"],
+  ac:["Reposo; inmovilizar el miembro a la altura del corazón y retirar anillos","NO torniquete, NO incisión, NO succión, NO hielo","Analgesia según protocolo; canalizar si hay con qué","Adrenalina lista para la reacción al suero (revisa el vencimiento)"],
+  tm:["Telemedicina inmediata (urgente)","Remisión urgente a Mitú para suero antiofídico; pedir el transporte de una vez"],
+  rg:["Historia clínica: causa externa «accidente ofídico», hora de la mordedura y de cada intervención","Referencia con las horas"],
+  rp:["Ficha 100 + datos básicos (si no se aplicó suero en el puesto, «¿Empleó suero?: No»)"],
+  sg:["Al regreso: herida, función del miembro, signos de infección","Educación en prevención: botas, linterna, no meter la mano en huecos (actividad 08 de la HC)"]},
+  f:[["hc",""],["rem",""],["f100",""],["disrem","Si no acepta la remisión"]]},
+ {id:"mal",t:"Malaria (prueba rápida)",tm:["mal"],ruta:"inf",p:{
+  ev:["Fiebre, escalofríos, dolor de cabeza: desde cuándo","¿Gestante? Edad y peso para la dosis","Desplazamientos en los últimos 15 días (autóctono o importado)","Signos de alarma: no tolera la vía oral, alteración de la conciencia, ictericia, sangrado, dificultad respiratoria, orina oscura, convulsiones"],
+  cl:["PDR: resultado y especie (en el puesto no hay microscopio)","¿Complicada? (signos de alarma o hemoglobina menor de 7)"],
+  ac:["No complicada: tratamiento según especie y guía del INS, primera dosis supervisada","Gestantes y menores de 6 meses: NO primaquina; el esquema cambia → consulta","Recetario por lo entregado (tabletas)"],
+  tm:["Prioritaria: gestante, menor de 5, mayor de 60","Urgente y remisión: malaria complicada o no tolera la vía oral"],
+  rg:["Historia clínica y recetario"],
+  rp:["Registro diario de diagnóstico (positivas y negativas)","Ficha 465 con su desprendible (trae sus datos básicos)","Registro diario de insumos en tabletas"],
+  sg:["Control al terminar el tratamiento","Búsqueda activa en convivientes (marcar «vigilancia activa»)"]},
+  f:[["hc",""],["recet",""],["rdmal",""],["f465",""],["rimal",""],["rem","Si es complicada"]]},
+ {id:"sif",t:"Gestante con prueba rápida de sífilis reactiva",tm:["prr","g_ing"],ruta:"rmp",p:{
+  ev:["Edad gestacional; sífilis o tratamiento previo; alergia a la penicilina; lesiones","Pareja o parejas sexuales"],
+  cl:["Sífilis gestacional: prueba treponémica rápida reactiva en gestante se maneja como caso"],
+  ac:["No esperar la confirmación: penicilina benzatínica con orden por telemedicina (esquema según estadio; duración desconocida = 3 dosis semanales)","Adrenalina y equipo de anafilaxia a mano; revisa el vencimiento de la penicilina","Tamizar y tratar a la pareja o parejas","Ofrecer VIH y hepatitis B si no se hicieron"],
+  tm:["Telemedicina prioritaria con la orden médica escrita (médico, hora, dosis)","Remisión al albergue como toda gestante; pedir VDRL o RPR basal y de seguimiento"],
+  rg:["Historia clínica: pruebas de tamizaje y medicamento aplicado","Seguimiento materno perinatal y caracterización como ALTO RIESGO"],
+  rp:["Ficha 750 sífilis gestacional (no está en tu lista: pedirla); mientras tanto avisar por radiofonía"],
+  sg:["Cada dosis en la fecha exacta (si se pasa, se reinicia según la guía)","Al nacer, evaluar también al recién nacido"]},
+  f:[["hc",""],["recet",""],["segges",""],["carges",""],["~sif","Gestante reactiva"],["rem","Albergue"],["disrem","Si no acepta"]]},
+ {id:"vhb",t:"Gestante con VIH o hepatitis B reactiva",tm:["prr","g_ing"],ruta:"rmp",p:{
+  ev:["Consentimiento de VIH firmado y asesoría pre-prueba antes de la prueba","Edad gestacional, síntomas, convivientes y pareja"],
+  cl:["Prueba presuntiva reactiva: necesita confirmación (VIH: segunda prueba de otro fabricante)"],
+  ac:["Asesoría post-prueba en privado; no se entrega por radio ni a terceros","Hepatitis B: planear parto institucional (vacuna e inmunoglobulina al recién nacido en las primeras 12 horas)"],
+  tm:["Telemedicina prioritaria y remisión para confirmación e inicio de manejo"],
+  rg:["Historia clínica, seguimiento materno y caracterización como alto riesgo"],
+  rp:["Hepatitis B: ficha 340 + datos básicos","VIH: ficha 850 (no está en tu lista: pedirla)"],
+  sg:["Tamizar a la pareja y a los convivientes; vacunar contra hepatitis B a los no inmunes"]},
+  f:[["civih",""],["hc",""],["segges",""],["carges",""],["f340","Hepatitis B"],["~vih","VIH"],["rem",""]]},
+ {id:"eda",t:"EDA (diarrea) en menor de 5 años",tm:["n_desm"],ruta:"urg",p:{
+  ev:["AIEPI: signos generales de peligro, estado de hidratación","Sangre en las heces, días de diarrea (más de 14)","Peso y talla: desnutrición"],
+  cl:["Sin deshidratación / algún grado / grave; disentería; persistente"],
+  ac:["Plan A, B o C con SRO según la clasificación","Zinc según la guía; seguir la lactancia y la alimentación"],
+  tm:["Remisión: deshidratación grave, no tolera la vía oral, signos de peligro o desnutrición"],
+  rg:["Historia clínica y recetario"],
+  rp:["Conteo semanal en la colectiva 998 (por grupo de edad)","Si son varios casos juntos (brote): avisar ya"],
+  sg:["Control en 2 días; educación en agua segura y lavado de manos"]},
+  f:[["hc",""],["recet",""],["f998",""],["rem","Si es grave"]]},
+ {id:"ira",t:"IRA en menor de 5 años",tm:["n_neu"],ruta:"urg",p:{
+  ev:["AIEPI: frecuencia respiratoria, tiraje, estridor, saturación si hay oxímetro","Signos generales de peligro"],
+  cl:["Resfriado / neumonía / neumonía grave"],
+  ac:["Manejo según la clasificación; antibiótico solo con orden por telemedicina"],
+  tm:["Prioritaria si hay neumonía; urgente y remisión con tiraje, estridor, signos de peligro o saturación baja"],
+  rg:["Historia clínica y recetario"],
+  rp:["Colectiva 995 cada semana (IRA frente al total de consultas, por grupo de edad)"],
+  sg:["Control en 2 días; signos de alarma a la familia"]},
+  f:[["hc",""],["recet",""],["f995",""],["rem","Si es grave"]]},
+ {id:"aptr",t:"Mordedura o arañazo de perro, gato, murciélago u otro mamífero",tm:["aptr"],ruta:"zoo",p:{
+  ev:["Tipo de exposición (lamedura, arañazo, mordedura), sitio y profundidad","Animal: ¿se puede observar? ¿vacunado?"],
+  cl:["Exposición leve o grave según el protocolo de rabia"],
+  ac:["Lavar la herida 10 a 15 minutos con agua y jabón abundante"],
+  tm:["Telemedicina prioritaria el mismo día para definir vacuna o suero antirrábico; remisión"],
+  rg:["Historia clínica y referencia"],
+  rp:["Ficha 300 APTR (SIN EXISTENCIAS: pedirla ya)"],
+  sg:["Observación del animal con salud ambiental; completar el esquema de vacuna"]},
+  f:[["hc",""],["f300",""],["rem",""]]},
+ {id:"vio",t:"Sospecha de violencia (física, sexual, psicológica, negligencia)",tm:["viol"],ruta:"vio",p:{
+  ev:["Atender en privado; proteger primero; no confrontar al agresor","Relato textual sin juicios, lesiones y hora del hecho"],
+  cl:["Violencia sexual en las últimas 72 horas = URGENCIA","Embarazo en menor de 14 años = violencia sexual por ley"],
+  ac:["Violencia sexual: profilaxis de VIH y hepatitis B, anticoncepción de emergencia, orientación IVE y salud mental"],
+  tm:["Telemedicina y remisión a la ruta de atención a víctimas"],
+  rg:["Historia clínica con causa externa de sospecha; referencia"],
+  rp:["Ficha 875 + datos básicos (se notifica la SOSPECHA)","Informe a autoridades según el caso (Comisaría, ICBF, Policía, Fiscalía)"],
+  sg:["Seguimiento en la próxima visita; medidas de protección"]},
+  f:[["hc",""],["f875",""],["rem",""],["ci","Procedimientos y profilaxis"]]},
+ {id:"suic",t:"Intento de suicidio",tm:["suic"],ruta:"smt",p:{
+  ev:["Mecanismo; si fue intoxicación: sustancia, hora y envase","Riesgo actual, plan, red de apoyo"],
+  cl:["Riesgo inmediato: no dejar sola a la persona"],
+  ac:["Acompañante permanente; la familia retira los medios de riesgo"],
+  tm:["Telemedicina urgente y remisión a salud mental o urgencias"],
+  rg:["Historia clínica con causa externa «lesión autoinfligida»; referencia"],
+  rp:["Ficha 356 + datos básicos (la intoxicación va en la sección de la 356)","Si hay violencia detrás: también la ficha 875"],
+  sg:["Seguimiento en la siguiente visita"]},
+  f:[["hc",""],["f356",""],["rem",""]]},
+ {id:"intox",t:"Intoxicación (plaguicida, medicamento, químico)",tm:["intox"],ruta:"urg",p:{
+  ev:["Sustancia: guardar el envase o la etiqueta","Hora, vía, cantidad aproximada, signos vitales","¿Hay más personas con lo mismo?"],
+  cl:["Gravedad según los signos; varios casos juntos = brote"],
+  ac:["Retirar de la exposición; descontaminar piel y ropa si fue dérmica","No inducir el vómito sin indicación"],
+  tm:["Telemedicina inmediata y remisión con el envase"],
+  rg:["Historia clínica y referencia"],
+  rp:["Ficha 365 + datos básicos (si fue intento de suicidio, va en la 356)","Brote: avisar a vigilancia de inmediato"],
+  sg:["Educación en almacenamiento de químicos lejos de los niños"]},
+  f:[["hc",""],["f365",""],["rem",""]]},
+ {id:"parto",t:"Parto en la comunidad o recién nacido",tm:["g_par"],ruta:"rmp",p:{
+  ev:["Madre: sangrado, signos vitales, placenta completa","Recién nacido: respiración, Apgar si lo presenciaste, temperatura, peso y talla"],
+  cl:["Signos de peligro del recién nacido o hemorragia posparto"],
+  ac:["Contacto piel a piel, lactancia, abrigo","Hemorragia: manejo y remisión urgente"],
+  tm:["Telemedicina para la valoración; remisión si hay complicaciones"],
+  rg:["Historia clínica del parto y del recién nacido","Actualizar seguimiento materno y caracterización con la fecha del parto"],
+  rp:["Certificado de nacido vivo + antecedente para el Registro Civil"],
+  sg:["Vacunas y tamizajes del recién nacido; control posparto"]},
+  f:[["hc",""],["cnv",""],["segges",""],["carges",""],["rem","Si hay complicaciones"]]},
+ {id:"muerte",t:"Muerte en la comunidad",tm:[],ruta:"",p:{
+  ev:["¿Quién murió? Mujer embarazada o hasta 1 año posparto / feto o recién nacido hasta 28 días / menor de 5 años / otra","¿Fue natural? Si es violenta o dudosa → Medicina Legal, no certifiques la causa"],
+  cl:["Materna → 550 · Perinatal o neonatal → 560 · Menor de 5 por IRA, EDA o desnutrición → 591 · Otra → solo autopsia y certificado"],
+  ac:["Avisar a vigilancia de la ESE por radiofonía (la materna es inmediata)"],
+  tm:["Telemedicina con el médico para la causa probable"],
+  rg:["Autopsia verbal: de gestantes (materna o fetal) o general","Certificado de defunción (casilla 52 si certifica enfermería) + antecedente para el Registro Civil"],
+  rp:["Ficha que corresponda + datos básicos","Si hay recién nacido vivo: certificado de nacido vivo"],
+  sg:["Actualizar caracterización y seguimiento de la gestante si aplica; acompañar a la familia"]},
+  f:[["avmat","Muerte materna"],["avperi","Muerte fetal o neonatal"],["avgen","Otras muertes"],["cdef",""],["f550","Materna"],["f591","Menor de 5 por IRA, EDA o desnutrición"]]},
+ {id:"sr",t:"Sintomático respiratorio o de piel y nervio (TB, lepra)",tm:["sr"],ruta:"inf",p:{
+  ev:["Tos de más de 15 días; manchas con pérdida de sensibilidad; adormecimiento o pérdida de fuerza en manos o pies"],
+  cl:["Sintomático respiratorio, de piel, de sistema nervioso periférico o contacto"],
+  ac:["Tres muestras de baciloscopia con instrucciones; enviar con fecha"],
+  tm:["Prioritaria para la prueba; si sale positiva, remisión para el tratamiento"],
+  rg:["Historia clínica: «sintomático» en datos 4505 y sección de baciloscopias"],
+  rp:["Captación de sintomáticos (con las 3 muestras y la fecha de envío)","Si sale positivo: notificar (ficha 813 TB o 450 lepra; no están en tu lista)"],
+  sg:["Captar a los convivientes como contactos"]},
+  f:[["hc",""],["capt",""],["~tb","Si sale positivo"]]},
+ {id:"rem",t:"Cualquier paciente que necesita remisión",tm:[],ruta:"urg",p:{
+  ev:["Hallazgo y oportunidad: urgente, prioritaria o programada"],
+  cl:["Ruta a la que se direcciona"],
+  ac:["Explicar a la persona y a su familia, en su lengua o con el promotor"],
+  tm:["Telemedicina: anotar médico y hora","Formato de remisión completo, con tratamientos y horas"],
+  rg:["«SE DIRECCIONA A RUTA DE…» en la historia o Prosoft"],
+  rp:["Si no acepta: disentimiento de remisión con riesgos concretos, firma y huella"],
+  sg:["Volver a ofrecer la remisión en cada control; verificar que lo atendieron"]},
+  f:[["rem",""],["disrem","Si no acepta"]]}];
+function evGet(id){try{return JSON.parse(S.get("dn2_ev_"+id)||"{}")||{}}catch(e){return{}}}
+function evNota(E,ck){const pick=["ac","tm"].flatMap(k=>(E.p[k]||[]).map((s,i)=>ck[k+i]?s:null).filter(Boolean));
+  return `ATENCION POR ${E.t.toUpperCase()}.`+(pick.length?" SE REALIZA: "+pick.map(s=>s.toUpperCase()).join("; ")+".":"")+" SE DILIGENCIAN FORMATOS Y FICHAS CORRESPONDIENTES. SE DAN SIGNOS DE ALARMA Y SE AGENDA SEGUIMIENTO."}
+function evOpen(id,de){stopRec();st.view="ev";st.evDe=de===undefined?st.evDe:de;
+  if(!id){$("app").innerHTML=`<div class="top"><button class="back" type="button" id="ev-back">← Inicio</button><span class="tag pc">Rutas por evento</span></div>
+   <header><h1>¿Qué pasó? Qué hacer en orden</h1><p class="sub">Escoge el evento. Te digo en orden qué evaluar, cómo clasificar, qué hacer, cuándo llamar a telemedicina o remitir, qué registrar, qué reportar y el seguimiento, con los formatos y su número de la lista.</p></header>
+   <div class="md-mods" style="display:flex;flex-direction:column;gap:8px">${EV.map(E=>`<button type="button" class="btn" style="text-align:left" data-ev="${E.id}">${esc(E.t)}${Object.keys(evGet(E.id).ck||{}).length?" · en curso":""}</button>`).join("")}</div>
+   <p class="foot">Las dosis y esquemas se confirman con la guía vigente y la orden médica por telemedicina.</p>`;
+   document.querySelectorAll("[data-ev]").forEach(b=>b.onclick=()=>evOpen(b.dataset.ev));
+   $("ev-back").onclick=()=>{home();window.scrollTo(0,0)};window.scrollTo(0,0);return}
+  const E=EV.find(x=>x.id===id);if(!E){evOpen();return}
+  const o=evGet(id),ck=o.ck||{};let n=0;
+  $("app").innerHTML=`<div class="top"><button class="back" type="button" id="ev-back">← Eventos</button><span class="tag pc">Rutas por evento</span></div>
+  <header><h1>${esc(E.t)}</h1><p class="sub">Ve marcando lo que haces. Queda guardado hasta que toques «Nuevo caso».</p></header>
+  ${EV_FASES.map(([k,t],fi)=>{const xs=E.p[k]||[];if(!xs.length)return"";return `<details class="sec"${fi<4?" open":""}><summary><span>${fi+1} · ${esc(t)}</span><span class="cnt">${xs.filter((_,i)=>ck[k+i]).length} / ${xs.length}</span></summary><ul class="items">${xs.map((s,i)=>`<li><input type="checkbox" id="ev-${k}${i}" data-evk="${k}${i}"${ck[k+i]?" checked":""}><label for="ev-${k}${i}"><span>${esc(s)}</span></label></li>`).join("")}</ul></details>`}).join("")}
+  <section class="tool"><h3>Formatos de este evento</h3>${fmtLista(E.f,"Llena y firma")}</section>
+  <section class="tool"><h3>Texto para la nota</h3><textarea id="ev-nota" rows="4" readonly style="width:100%;font-family:var(--f-data);font-size:.85rem"></textarea>
+   <div class="btns"><button class="btn primary" type="button" id="ev-copy">Copiar</button>${E.tm.length||E.ruta?`<button class="btn" type="button" id="ev-dir">Telemedicina y rutas</button>`:""}<button class="btn" type="button" id="ev-new">Nuevo caso</button></div>
+   <p class="status" id="ev-st" aria-live="polite"></p></section>
+  <p class="foot">Guía de bolsillo: no reemplaza el criterio clínico ni los protocolos de la ESE. Dosis y esquemas, con la guía vigente y la orden médica.</p>`;
+  const pinta=()=>{$("ev-nota").value=evNota(E,ck)};pinta();
+  document.querySelectorAll("[data-evk]").forEach(c=>c.onchange=()=>{if(c.checked)ck[c.dataset.evk]=1;else delete ck[c.dataset.evk];o.ck=ck;o.t=o.t||new Date().toISOString();S.set("dn2_ev_"+id,JSON.stringify(o));
+    const d=c.closest("details");d.querySelector(".cnt").textContent=d.querySelectorAll("[data-evk]:checked").length+" / "+d.querySelectorAll("[data-evk]").length;pinta()});
+  $("ev-copy").onclick=()=>{const t=$("ev-nota").value;try{navigator.clipboard.writeText(t).then(()=>$("ev-st").textContent="Copiado. Pégalo en la nota.")}catch(e){$("ev-nota").select()}};
+  $("ev-new").onclick=()=>{S.del("dn2_ev_"+id);evOpen(id)};
+  const bd=$("ev-dir");if(bd)bd.onclick=()=>dirOpen({de:null,nuevo:true,c:E.tm,ruta:E.ruta||undefined,motivo:E.t});
+  $("ev-back").onclick=()=>evOpen();window.scrollTo(0,0)}
+
+/* ---------- Comunidades: concertación, educación y permanencia ---------- */
+const COMV_KEY="dn2_comv";
+const COM_TEMAS=["Prevención de EDA: agua segura y lavado de manos","IRA: signos de alarma en niños","Malaria: toldillo y consulta temprana","Signos de alarma en la gestante y control prenatal","Lactancia materna","Vacunación","Salud sexual y reproductiva y planificación familiar","Prevención de la violencia intrafamiliar","Accidente ofídico: prevención y qué no hacer","Enfermedades desatendidas: geohelmintos, escabiosis, tungiasis, pediculosis","Deberes y derechos en salud","Salud bucal","Manejo de basuras y saneamiento de la vivienda","Consumo de alcohol, tabaco y sustancias","Salud mental y convivencia"];
+const COM_OBJ="Prestar los servicios de salud de la ESE Hospital San Antonio en la comunidad: atención de promoción y mantenimiento por curso de vida (Res. 3280), ruta materno perinatal, vacunación, tamizajes (malaria, VIH, sífilis, hepatitis B, citología, agudeza visual), atención de morbilidad con apoyo de telemedicina y remisión cuando se requiera, búsqueda activa de gestantes, menores de 5 años y sintomáticos, y educación en salud a la comunidad.";
+function comVis(){try{return JSON.parse(S.get(COMV_KEY)||"[]")||[]}catch(e){return[]}}
+function comSet(L){S.set(COMV_KEY,JSON.stringify(L))}
+function comFin(v){return v.finR||v.fin||""}
+function comActiva(v){return !(v.perm&&v.perm.ok)&&v.ini&&v.ini<=hoy()}
+function comFalta(v){const F=[],h=hoy(),f=comFin(v);
+  if(!(v.conc&&v.conc.ok))F.push(["01","Acta de concertación con el líder (al llegar)"]);
+  if(!(v.edus||[]).length)F.push(["11","Educación grupal con acta de reunión y lista de asistencia"]);
+  if(!(v.perm&&v.perm.ok)){if(f&&h>=f)F.push(["02","Certificado de permanencia firmado por el líder (ya debía salir el "+f+")"]);else if(f&&Math.round((calD(f)-calD(h))/864e5)<=2)F.push(["02","Certificado de permanencia: sale el "+f+", pídelo antes de irte"]);else F.push(["02","Certificado de permanencia al salir"])}
+  return F}
+function comStats(v){const a=v.ini,b=comFin(v)||hoy(),C=String(v.com||"").toUpperCase();
+  const R=registrosTodos().filter(r=>String(r.comunidad||"").toUpperCase()===C&&(()=>{const f=((r.datos&&r.datos.FECHA_REGISTRO)||r.fecha||"").slice(0,10);return f>=a&&f<=b})());
+  const T=(typeof tmLog==="function"?tmLog():[]).filter(x=>String(x.com||"").toUpperCase()===C&&x.fecha>=a&&x.fecha<=b);
+  const E=v.edus||[];return{at:R.length,ed:E.length,as:E.reduce((s,e)=>s+(+e.asist||0),0),tm:T.length,rem:T.filter(x=>x.rem==="si").length,temas:[...new Set(E.flatMap(e=>e.temas||[]).filter(Boolean))]}}
+function comResumen(v){const s=comStats(v),L=[];
+  L.push("Atenciones de enfermería: "+s.at+" (promoción y mantenimiento Res. 3280, ruta materno perinatal y morbilidad).");
+  if(s.ed)L.push("Educación grupal: "+s.ed+" sesión(es), "+s.as+" asistentes"+(s.temas.length?" ("+s.temas.join("; ")+")":"")+".");
+  if(s.tm)L.push("Telemedicinas: "+s.tm+(s.rem?"; remisiones: "+s.rem:"")+".");
+  L.push("Tamizajes, vacunación, búsqueda activa y entrega de medicamentos según necesidad.");return L.join(" ")}
+function comEquipo(){return S.get("dn2_comeq")||"JUAN JOSE MARIN POSADA | ENFERMERO PROFESIONAL"}
+function comOpen(vid){stopRec();st.view="com";const L=comVis();
+  if(!vid){const act=L.filter(comActiva),otras=L.filter(v=>!comActiva(v));
+    const fila=v=>{const F=comFalta(v),s=comStats(v);return `<button type="button" class="agi" data-cv="${v.id}" style="text-align:left;width:100%"><div style="flex:1;min-width:0"><b>${esc(v.com||"(sin nombre)")}</b> <small>${esc(v.zona||"")}</small><br><small>${esc(v.ini||"?")} → ${esc(comFin(v)||"?")} · ${s.at} atenciones · ${s.ed} educaciones</small>${F.length?`<br><small style="color:var(--miss)">Falta: ${F.map(x=>x[0]).join(", ")}</small>`:`<br><small style="color:var(--accent)">Soportes 01, 02 y 11 completos</small>`}</div></button>`};
+    $("app").innerHTML=`<div class="top"><button class="back" type="button" id="com-back">← Inicio</button><span class="tag pc">Comunidades</span></div>
+    <header><h1>Comunidades y territorios</h1><p class="sub">Cada vez que llegas a un territorio: acta de concertación con el líder (soporte 01). Cada educación: acta de reunión con lista de asistencia (soporte 11). Antes de salir: certificado de permanencia firmado por el líder con las fechas (soporte 02).</p></header>
+    <div class="btns"><button class="btn primary" type="button" id="com-new">Llegué a una comunidad nueva</button>${L.length?`<button class="btn" type="button" id="com-cp">Copiar registro para el informe</button>`:""}</div>
+    ${act.length?`<p class="lab" style="margin:12px 0 6px">Donde estás ahora</p>${act.map(fila).join("")}`:""}
+    ${otras.length?`<p class="lab" style="margin:12px 0 6px">Visitas cerradas</p>${otras.map(fila).join("")}`:""}
+    ${L.length?"":`<p class="note-src">Aún no hay comunidades. Toca «Llegué a una comunidad nueva» al llegar al territorio.</p>`}
+    <p class="status" id="com-st" aria-live="polite"></p>`;
+    $("com-new").onclick=()=>{const L=comVis(),u=L[0]||{},v={id:uid(),com:(S.get("dn2_ultcom")||"").toUpperCase(),zona:u.zona||"",mun:u.mun||"MITÚ",ini:hoy(),fin:"",lider:"",lcc:"",rol:"CAPITÁN",eq:u.eq||comEquipo(),conc:{ok:false,obj:COM_OBJ,lugar:"",hora:""},edus:[],perm:{ok:false,fecha:""}};L.unshift(v);comSet(L);comOpen(v.id)};
+    const cp=$("com-cp");if(cp)cp.onclick=()=>{const t=["REGISTRO DE COMUNIDADES VISITADAS — "+mdPeriodo()[2].toUpperCase(),"COMUNIDAD | ZONA | LLEGADA | SALIDA | LIDER | CONCERTACION (01) | EDUCACIONES Y ASISTENTES (11) | PERMANENCIA (02) | ATENCIONES"].concat(comVis().map(v=>{const s=comStats(v);return [v.com,v.zona,v.ini,comFin(v),v.lider,v.conc&&v.conc.ok?"SI "+(v.conc.fecha||v.ini):"NO",s.ed+" / "+s.as,v.perm&&v.perm.ok?"SI "+(v.perm.fecha||""):"NO",s.at].join(" | ")})).join("\n");
+      try{navigator.clipboard.writeText(t).then(()=>$("com-st").textContent="Copiado.")}catch(e){$("com-st").textContent=t}};
+    document.querySelectorAll("[data-cv]").forEach(b=>b.onclick=()=>comOpen(b.dataset.cv));
+    $("com-back").onclick=()=>{home();window.scrollTo(0,0)};window.scrollTo(0,0);return}
+  const v=L.find(x=>x.id===vid);if(!v){comOpen();return}
+  const save=()=>{const L2=comVis(),i=L2.findIndex(x=>x.id===v.id);if(i>=0)L2[i]=v;else L2.unshift(v);comSet(L2)};
+  const F=comFalta(v);
+  $("app").innerHTML=`<div class="top"><button class="back" type="button" id="com-back">← Comunidades</button><span class="tag pc">Comunidades</span></div>
+  <header><h1>${esc(v.com||"Comunidad nueva")}</h1><p class="sub">Soportes de esta visita: 01 concertación · 11 educación · 02 permanencia.</p></header>
+  ${F.length?`<div class="box warn"><h3>Te falta en esta comunidad</h3><ul>${F.map(x=>`<li><b>${x[0]}</b> · ${esc(x[1])}</li>`).join("")}</ul></div>`:`<div class="box"><p style="margin:0">Soportes 01, 02 y 11 completos para esta comunidad.</p></div>`}
+  <section class="tool"><h3>Datos de la visita</h3><div class="bgrid">
+   <label class="bfl">Comunidad<input id="cv-com" value="${esc(v.com)}" list="dl-__com" autocomplete="off"></label>
+   <label class="bfl">Zona o territorio<input id="cv-zona" value="${esc(v.zona)}"></label>
+   <label class="bfl">Municipio o área no municipalizada<input id="cv-mun" value="${esc(v.mun)}"></label>
+   <label class="bfl">Llegada<input id="cv-ini" type="date" value="${esc(v.ini)}"></label>
+   <label class="bfl">Salida programada<input id="cv-fin" type="date" value="${esc(v.fin)}"></label>
+   <label class="bfl">Salida real<input id="cv-finR" type="date" value="${esc(v.finR||"")}"></label>
+   <label class="bfl">Líder (autoridad tradicional o capitán)<input id="cv-lider" value="${esc(v.lider)}"></label>
+   <label class="bfl">Cédula del líder<input id="cv-lcc" value="${esc(v.lcc)}" inputmode="numeric"></label>
+   <label class="bfl">Rol<input id="cv-rol" value="${esc(v.rol)}"></label></div>
+   <label class="bfl">Equipo (una persona por línea: NOMBRE | PERFIL; hasta 8)<textarea id="cv-eq" rows="3">${esc((v.eq||"").split("\n").join("\n"))}</textarea></label></section>
+  <section class="tool"><h3>1 · Al llegar: acta de concertación (soporte 01) · formato n.º 28</h3>
+   <div class="frow"><label class="bfl">Fecha y hora<input id="cc-hora" type="time" value="${esc(v.conc.hora||"")}"></label><label class="bfl">Lugar<input id="cc-lugar" value="${esc(v.conc.lugar||"")}"></label></div>
+   <label class="bfl">Lugar de atención<input id="cc-lat" value="${esc(v.conc.lat||"")}" placeholder="Puesto de salud, maloca, escuela"></label>
+   <label class="bfl">Objetivo que se le explica al líder (cópialo en el acta)<textarea id="cc-obj" rows="4">${esc(v.conc.obj||COM_OBJ)}</textarea></label>
+   <label class="sx-ck"><input type="checkbox" id="cc-ok"${v.conc.ok?" checked":""}> <span>Acta de concertación llena y firmada</span></label></section>
+  <section class="tool"><h3>2 · Educaciones y reuniones (soporte 11) · formato n.º 27</h3>
+   <div id="ed-list"></div>
+   <details class="sec"><summary><span>Registrar una educación o reunión</span></summary><div style="padding:8px 14px 12px">
+    <div class="frow"><label class="bfl">Fecha<input id="ed-f" type="date" value="${hoy()}"></label><label class="bfl">Hora inicio<input id="ed-hi" type="time"></label><label class="bfl">Hora final<input id="ed-hf" type="time"></label></div>
+    <label class="bfl">Lugar<input id="ed-lug" value="${esc(v.conc.lat||"")}"></label>
+    ${[1,2,3].map(i=>`<label class="bfl">Tema ${i}<input id="ed-t${i}" list="ed-temas"></label>`).join("")}<datalist id="ed-temas">${COM_TEMAS.map(t=>`<option value="${esc(t)}">`).join("")}</datalist>
+    <label class="bfl">Total asistentes (igual al número de la lista)<input id="ed-as" type="number" min="0" inputmode="numeric"></label>
+    <label class="bfl">Conclusiones y compromisos<textarea id="ed-comp" rows="2" placeholder="Qué se comprometen, quién y para cuándo"></textarea></label>
+    <div class="btns"><button class="btn primary" type="button" id="ed-add">Guardar educación</button></div></div></details></section>
+  <section class="tool"><h3>3 · Antes de salir: certificado de permanencia (soporte 02) · formato n.º 18</h3>
+   <p class="note-src">Permanecieron del <b id="pm-a">${esc(v.ini||"?")}</b> al <b id="pm-b">${esc(comFin(v)||"?")}</b>. Resumen de actividades para escribir en el certificado:</p>
+   <textarea id="pm-res" rows="4" readonly style="width:100%;font-family:var(--f-data);font-size:.85rem"></textarea>
+   <div class="btns"><button class="btn" type="button" id="pm-copy">Copiar resumen</button></div>
+   <div class="frow"><label class="bfl">Fecha de firma<input id="pm-f" type="date" value="${esc(v.perm.fecha||"")}"></label></div>
+   <label class="sx-ck"><input type="checkbox" id="pm-ok"${v.perm.ok?" checked":""}> <span>Certificado de permanencia firmado por el líder (con nombre, cédula y rol)</span></label>
+   <p class="note-src">Las fechas y el equipo deben ser iguales en el acta de concertación, el certificado y tus historias clínicas.</p></section>
+  <div class="btns"><button class="btn" type="button" id="cv-del">Borrar esta visita</button></div>
+  <p class="status" id="cv-st" aria-live="polite"></p>`;
+  const pintaEd=()=>{const E=v.edus||[];$("ed-list").innerHTML=E.length?`<ul class="mb-ul">${E.map((e,i)=>`<li><b>${esc(e.fecha)}</b> ${esc([e.hi,e.hf].filter(Boolean).join("–"))} · ${esc((e.temas||[]).join("; "))} · ${+e.asist||0} asistentes <button class="btn bq-mini" type="button" data-edx="${i}">Quitar</button></li>`).join("")}</ul>`:`<p class="note-src">Sin educaciones registradas en esta visita.</p>`;
+    document.querySelectorAll("[data-edx]").forEach(b=>b.onclick=()=>{v.edus.splice(+b.dataset.edx,1);save();comOpen(v.id)});
+    $("pm-res").value=comResumen(v)};
+  const leer=()=>{v.com=$("cv-com").value.trim().toUpperCase();v.zona=$("cv-zona").value.trim().toUpperCase();v.mun=$("cv-mun").value.trim().toUpperCase();v.ini=$("cv-ini").value;v.fin=$("cv-fin").value;v.finR=$("cv-finR").value;
+    v.lider=$("cv-lider").value.trim().toUpperCase();v.lcc=$("cv-lcc").value.trim();v.rol=$("cv-rol").value.trim().toUpperCase();v.eq=$("cv-eq").value.trim();if(v.eq)S.set("dn2_comeq",v.eq);
+    v.conc.hora=$("cc-hora").value;v.conc.lugar=$("cc-lugar").value.trim();v.conc.lat=$("cc-lat").value.trim();v.conc.obj=$("cc-obj").value;v.conc.ok=$("cc-ok").checked;if(v.conc.ok&&!v.conc.fecha)v.conc.fecha=hoy();
+    v.perm.fecha=$("pm-f").value;v.perm.ok=$("pm-ok").checked;if(v.perm.ok&&!v.perm.fecha){v.perm.fecha=hoy();$("pm-f").value=v.perm.fecha}if(v.perm.ok&&!v.finR){v.finR=v.perm.fecha;$("cv-finR").value=v.finR}
+    if(v.com){S.set("dn2_ultcom",v.com);try{addHist("__com",v.com)}catch(e){}}save();$("pm-a").textContent=v.ini||"?";$("pm-b").textContent=comFin(v)||"?";pintaEd();$("cv-st").textContent="Guardado."};
+  ["cv-com","cv-zona","cv-mun","cv-ini","cv-fin","cv-finR","cv-lider","cv-lcc","cv-rol","cv-eq","cc-hora","cc-lugar","cc-lat","cc-obj","cc-ok","pm-f","pm-ok"].forEach(id=>$(id).onchange=leer);
+  $("ed-add").onclick=()=>{const temas=[1,2,3].map(i=>$("ed-t"+i).value.trim()).filter(Boolean);if(!temas.length){$("cv-st").textContent="Escribe al menos un tema.";return}
+    v.edus=v.edus||[];v.edus.push({id:uid(),fecha:$("ed-f").value||hoy(),hi:$("ed-hi").value,hf:$("ed-hf").value,lugar:$("ed-lug").value.trim(),temas,asist:Math.max(0,+$("ed-as").value||0),comp:$("ed-comp").value.trim()});save();comOpen(v.id)};
+  $("pm-copy").onclick=()=>{const t=$("pm-res").value;try{navigator.clipboard.writeText(t).then(()=>$("cv-st").textContent="Resumen copiado.")}catch(e){$("pm-res").select()}};
+  $("cv-del").onclick=()=>{if(!confirm("¿Borrar esta visita y sus educaciones?"))return;comSet(comVis().filter(x=>x.id!==v.id));comOpen()};
+  $("com-back").onclick=()=>comOpen();pintaEd();window.scrollTo(0,0)}
+/* Mi día: tareas por comunidad y botones */
+mdTareas=(function(o){return function(){const t=o.apply(this,arguments);
+  comVis().filter(comActiva).forEach(v=>comFalta(v).forEach(([n,x])=>{if(n==="02"&&/al salir$/.test(x))return;t.push(x+" · "+(v.com||"comunidad")+" (act. "+n+")")}));return t}})(mdTareas);
+fmtHome=(function(o){return function(){o();const ref=$("md-obl")||$("md-fmt");if(!ref||$("md-ev"))return;
+  const pend=comVis().filter(comActiva).reduce((s,v)=>s+comFalta(v).filter(x=>!(x[0]==="02"&&/al salir$/.test(x[1]))).length,0);
+  ref.insertAdjacentHTML("afterend",`<button type="button" class="btn" id="md-ev">¿Qué pasó? Rutas por evento</button><button type="button" class="btn${pend?" primary":""}" id="md-com">Comunidades${pend?` · ${pend} pendientes`:""}</button>`);
+  $("md-ev").onclick=()=>evOpen(null,null);$("md-com").onclick=()=>comOpen()}})(fmtHome);
+/* desde Telemedicina y rutas */
+dirOpen=(function(o){return function(){o.apply(this,arguments);const f=$("dir-fmt");if(!f||$("dir-ev"))return;
+  f.insertAdjacentHTML("afterend",`<button class="btn" type="button" id="dir-ev">Qué hacer en orden (rutas por evento)</button>`);$("dir-ev").onclick=()=>evOpen(null,null)}})(dirOpen);
+/* el mapa de obligaciones y el respaldo incluyen las comunidades */
+OBL_APP["01"]+=" Comunidades: acta al llegar a cada territorio.";OBL_APP["02"]+=" Comunidades: certificado por comunidad con fechas y resumen de actividades.";OBL_APP["11"]+=" Comunidades: educaciones con temas y asistentes.";
+respaldoObj=(function(o){return function(){const r=o.apply(this,arguments);r.comv=comVis();return r}})(respaldoObj);
+respaldoUnir=(function(o){return function(x){const r=o.apply(this,arguments);if(x&&Array.isArray(x.comv)){const m=new Map(comVis().map(v=>[v.id,v]));x.comv.forEach(v=>{if(v&&v.id&&!m.has(v.id))m.set(v.id,v)});comSet([...m.values()])}return r}})(respaldoUnir);
 
 /* ---------- arranque ---------- */
 /* los borradores guardados con la versión anterior de los módulos se reubican una sola vez */
