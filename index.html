@@ -1973,7 +1973,7 @@ function wireMiDia(){const cb=$("md-cal");if(cb)cb.onclick=calOpen;
 function mdShow(t){const s=$("md-st");s.innerHTML="";const a=document.createElement("textarea");a.value=t;a.rows=7;a.readOnly=true;s.append("No se pudo copiar solo. Mantén presionado el texto y cópialo:",a);a.focus();a.select()}
 
 /* ---------- PANEL ---------- */
-const VERSION_APP="2026-10-25 v203";
+const VERSION_APP="2026-10-25 v204";
 function home(){
   stopRec();if(S.get(AT_KEY))atReiniciar();st.view="home";
   const rm=["precon","prenatal","parto","rn","ive"],rp=["pinf","inf","adol","juv","adul","vej"];
@@ -2422,8 +2422,10 @@ function wireMic(root,ta,onChange){
   if(!SR)return;const b=root.querySelector(".mic"),s=root.querySelector(".mic-st"),ok=root.querySelector(".mic-ok");
   const start=()=>{stopRec();const r=new SR();REC=r;recOn=true;r.lang="es-CO";r.continuous=true;r.interimResults=true;
     let base=ta.value.trim();
-    r.onresult=e=>{let fin="",tmp="";for(let k=e.resultIndex;k<e.results.length;k++){const t=e.results[k][0].transcript;if(e.results[k].isFinal)fin+=t;else tmp+=t}
-      if(fin){base=(base?base+" ":"")+fin.trim();ta.value=base;onChange&&onChange()}s.textContent=tmp?"… "+tmp:"Escuchando"};
+    r.onresult=e=>{/* v204: en Android cada resultado final repite el anterior («desde», «desde el 22», «desde el 22 de octubre»): se reconstruye la sesión completa y se quedan solo las frases nuevas */
+      const F=[];let tmp="";for(let k=0;k<e.results.length;k++){const t=String(e.results[k][0].transcript||"").trim();if(!t)continue;
+        if(e.results[k].isFinal){const L=F[F.length-1],lt=L?L.toLowerCase():"",tt=t.toLowerCase();if(L&&tt.startsWith(lt))F[F.length-1]=t;else if(L&&lt.startsWith(tt)){}else F.push(t)}else tmp=t}
+      const j=F.join(" ");if(j&&j!==r._j){r._j=j;ta.value=(base?base+" ":"")+j;onChange&&onChange()}s.textContent=tmp?"… "+tmp:"Escuchando"};
     r.onerror=e=>{if(e.error==="not-allowed"||e.error==="service-not-allowed"){recOn=false;s.textContent="El micrófono no está permitido aquí. Usa la versión instalada desde GitHub y acepta el permiso del micrófono."}else if(e.error==="network"){recOn=false;s.textContent="Sin internet no se puede transcribir. Dicta con el teclado o toca una opción."}else if(e.error==="no-speech"){s.textContent="No se oye nada. Acerca el celular a quien habla."}};
     r.onend=()=>{if(recOn&&REC===r){try{base=ta.value.trim();r.start()}catch(e){}}else{b.textContent="Dictar por voz";b.classList.remove("on");if(!/permitido|internet/.test(s.textContent))s.textContent=""}};
     try{r.start();b.textContent="■ Detener";b.classList.add("on");s.textContent="Escuchando"}catch(e){s.textContent="No se pudo iniciar el micrófono."}};
@@ -4808,7 +4810,9 @@ function paneEntr(){
     ${x.widget?WIDGET[x.widget].html(id):""}
     <label for="iv-a" class="lab" style="margin:0">${x.widget?"Observaciones (opcional)":x.sistemas?"Otras observaciones del examen (opcional)":x.campos?(/vitales/.test(x.campos)?"Observaciones, o dicta los valores (por ejemplo: «tensión 120 sobre 80, frecuencia cardiaca 78, temperatura 36,5»)":"Observaciones (opcional), o dicta los valores"):x.t==="do"?"Hallazgo: toca una opción o dicta lo que encontraste":"Respuesta: toca una opción o dicta lo que respondió"}</label>
     <textarea id="iv-a" style="min-height:${x.campos||x.sistemas||x.widget?70:120}px">${esc(x.campos||x.sistemas||x.widget?(S.get(key(id,"cvo"+i))||""):(a[i]||(x.def?(typeof x.def==="function"?x.def(l=>{const k=q.findIndex(z=>z.l===l);return k<0?"":(a[k]||"")}):x.def).replace(/\{\+(\d+)\}/g,(_,n)=>fMas(S.get(key(id,"fecha"))||hoy(),+n)):"")))}</textarea>
+    <div id="iv-fill"></div>
     <div id="iv-mic">${micUI()}</div>
+    <div class="guia" id="iv-cdt" hidden></div>
     <div class="box warn" id="iv-al" ${al?"":"hidden"}><h3>Atención</h3><p style="margin:0" id="iv-alt">${esc(al)}</p></div>
     <div class="navrow"><button class="btn" id="iv-prev" ${i===0?"disabled":""} aria-label="Anterior">←</button><button class="btn primary" id="iv-next">${i===q.length-1?"Terminar preguntas":"Siguiente pregunta →"}</button></div>
     <div class="linkrow"><button class="lnk" id="iv-skip">Saltar esta pregunta</button><button class="lnk" id="iv-reset">Reiniciar preguntas</button>${CASO_EJ[id]?'<button class="lnk" id="iv-caso">Cargar caso de ejemplo completo</button>':""}</div>
@@ -4855,7 +4859,7 @@ function paneEntr(){
   const guia=()=>{const box=$("iv-g");if(!box||!ta.isConnected)return;const lbls=[...document.querySelectorAll("[data-c]")].filter(b=>ta.value.includes(b.dataset.c)).map(b=>b.textContent);let G=lbls.map(l=>GUIA[id+"::"+x.l+"|"+l]||(id==="precon"?GUIA[x.l+"|"+l]||GUIA[l]:null)).filter(Boolean);if(x.pauta)G.unshift(x.pauta);G=G.filter((g,i,arr)=>arr.findIndex(z=>z.t===g.t)===i);if(!G.length){box.hidden=true;box.innerHTML="";return}
     box.innerHTML=G.map((g,n)=>`<h3>${esc(g.t)}</h3><ul>${g.p.map(z=>z.startsWith("• ")?`<li style="list-style:circle;margin-left:18px">${esc(z.slice(2))}</li>`:`<li>${esc(z)}</li>`).join("")}</ul>${g.r?`<div class="btns"><button class="btn" type="button" data-gr="${n}">${ta.value.includes(g.r)?"✓ Registrado en la respuesta":(g.b||"Registrar que se educó")}</button></div>`:""}`).join('<hr style="border:0;border-top:1px solid var(--line);margin:6px 0">');box.hidden=false;
     box.querySelectorAll("[data-gr]").forEach(bt=>bt.onclick=()=>{const g=G[+bt.dataset.gr];if(!ta.value.includes(g.r)){ta.value=ta.value.trim()+" "+g.r;save()}bt.textContent="✓ Registrado en la respuesta"})};
-  ta.addEventListener("input",guia);setTimeout(guia,0);
+  ta.addEventListener("input",guia);setTimeout(guia,0);try{ivExtras(id,x,ta,save)}catch(e){console.warn(e)}
   document.querySelectorAll("[data-c]").forEach(b=>b.addEventListener("click",()=>setTimeout(guia,0)));
   document.querySelectorAll("[data-c]").forEach(b=>b.onclick=()=>{const c=b.dataset.c;if(x.campos){const f=cvDesdeTexto(x.campos,c);if(Object.keys(f).length&&!cvObs(c)){Object.assign(cv,f);cvPinta();save();return}}const v=x.def?"":ta.value.trim();ta.value=v?(/[.;:]$/.test(v)?v+" ":v+". ")+c:c;save();ta.focus();const m=/_+/.exec(c);if(m){const off=ta.value.length-c.length+m.index;ta.setSelectionRange(off,off+m[0].length)}});
   const salta=(n,d)=>{while(n>=0&&n<q.length&&!ivAplica(id,n))n+=d;return Math.max(0,n)};
@@ -10536,6 +10540,7 @@ obsNota=(function(o){return function(f){f=f||hoy();let md=o.apply(this,arguments
    y se puede descargar la bitácora completa («App Rutas 3280 - Bitácora.md») para el vault.
    Al publicar una versión nueva se agrega aquí su línea (la más nueva primero). */
 const APP_CAMBIOS=[
+ [204,"2026-10-25","Preguntas: los espacios ___ de cada respuesta se llenan con su casilla (calendario para fechas, cantidad con unidad, número de semanas, veces o gramos); «Conducta según la Res. 3280» con lo que hay que hacer, la sección y la página del PDF oficial y el texto de la norma; el dictado por voz ya no repite frases en Android."],
  [203,"2026-10-25","Datos de la persona: EAPB, régimen, capitado, teléfono, pertenencia étnica y pueblo que queden en blanco salen como «Pendiente» y con un aviso en Preguntas, Guía, Nota y Base hasta completarlos (N/A cuenta como respondido)."],
  [202,"2026-10-25","Guía de cada ruta en el orden de la consulta: primero la entrevista (anamnesis, antecedentes, psicosocial) y el examen con signos vitales; después «Exámenes y plan» (qué ordenas, exámenes de la gestante); botiquín y formatos al final."],
  [201,"2026-10-25","La nota de Obsidian lleva las mejoras de la app desde la última exportación; botón para descargar la bitácora completa de la app."],
@@ -10589,6 +10594,82 @@ paneId=(function(o){return function(){o.apply(this,arguments);try{idPendChips(st
 renderMod=(function(o){return function(){o.apply(this,arguments);try{const id=st.mod;if(st.view!=="mod"||st.tab==="id"||!$("pane"))return;const f=idPend(id);if(!f.length||$("idp-box"))return;
   $("pane").insertAdjacentHTML("afterbegin",`<div class="box warn" id="idp-box"><h3>Datos pendientes de la persona</h3><p style="margin:0 0 6px">${esc(f.join(" · "))}</p><p class="note-src" style="margin:0 0 6px">Quedaron en blanco. Pregúntalos antes de terminar o marca N/A si no aplica.</p><div class="btns"><button class="btn bq-mini" type="button" id="idp-go">Completar ahora</button></div></div>`);
   $("idp-go").onclick=()=>{st.tab="id";S.set(key(id,"tab"),"id");renderMod();window.scrollTo(0,0)}}catch(e){}}})(renderMod);
+/* ===== v204: respuestas ordenadas y conducta con la página de la Res. 3280 =====
+   1) «Completa los espacios»: cada ___ de una respuesta se llena con su casilla (calendario para fechas,
+      número con unidad para cantidades, número para semanas, veces, días, gramos) y se escribe solo.
+   2) «Conducta según la Res. 3280»: según lo que quedó en la respuesta, qué hacer y de dónde sale,
+      con la sección y la página del PDF oficial de la Res. 3280 de 2018 (texto entre comillas). */
+const R3C=(sec,pg,q)=>({sec,pg,q});
+const CDT={prenatal:[
+ {re:/sangrado|salida de liquido|amniorrea|perdida de liquido/,t:"Sangrado o salida de líquido en la gestación",
+  p:["Es un signo de alarma: valoración médica inmediata (telemedicina urgente y remisión).","Toma TA, FC, temperatura y frecuencia cardiaca fetal; describe cantidad, color y desde cuándo.","Si es abundante o con dolor fuerte: remisión urgente; canaliza vena si puedes."],
+  c:[R3C("4.3.2","264","el profesional de enfermería deberá remitir a valoración médica inmediata a la gestante en la cual identifique factores de riesgo biopsicosocial, enfermedades asociadas y propias de la gestación"),R3C("4.3.6.1.5","270","signos de alarma por los que debe consultar oportunamente, tales como: … sangrado genital, amniorrea o leucorrea")],
+  r:"Se identifica signo de alarma; se remite a valoración médica inmediata (Res. 3280, 4.3.2, p. 264)."},
+ {re:/dolor de cabeza|cefalea|ve luces|luces|zumbido|vision borrosa|epigastr|boca del estomago|hinchazon|edema/,t:"Síntomas de trastorno hipertensivo (preeclampsia)",
+  p:["Toma la TA ya, en reposo y repítela.","TA de 140/90 o más después de la semana 20 (dos tomas) o 160/110 en una sola toma: llevarla a servicio hospitalario el mismo día.","Tira de orina para proteínas y telemedicina urgente."],
+  c:[R3C("4.3.6.1.5","271","Tensión arterial … mayor o igual a 140/90 en dos tomas separadas por 4 horas después de la semana 20 de gestación, o mayor o igual a 160/110 en una sola toma; deberá ser llevada a un servicio hospitalario para el estudio inmediato de afectación de órgano blanco"),R3C("4.3.6.1.2","266","cefaleas persistentes, edemas progresivos en cara o miembros superiores e inferiores, epigastralgia")],
+  r:"Se toma tensión arterial y se valora por síntomas de trastorno hipertensivo; se remite según cifras (Res. 3280, 4.3.6.1.5, p. 271)."},
+ {re:/fiebre|ardor al orinar|sintomas urinarios|flujo|leucorrea/,t:"Fiebre, síntomas urinarios o flujo",
+  p:["Fiebre en zona endémica: prueba de malaria (PDR) antes de tratar.","Tira de orina y urocultivo en la remisión; la infección urinaria en la gestante necesita orden médica (telemedicina prioritaria).","Fiebre alta, dolor lumbar o mal estado: urgente."],
+  c:[R3C("4.3.6.1.2","266","sintomatología infecciosa urinaria o cérvico vaginal"),R3C("4.3.6.1.2","268","En zonas endémicas de malaria realizar tamizaje con gota gruesa"),R3C("4.3.2","264","deberá remitir a valoración médica inmediata a la gestante en la cual identifique … enfermedades asociadas y propias de la gestación")],
+  r:"Se valora fiebre o síntomas urinarios o vaginales; se toma prueba de malaria y tira de orina y se consulta con medicina (Res. 3280, p. 264 y 266)."},
+ {re:/contraccion|actividad uterina|dolor bajito|endurece/,t:"Contracciones o actividad uterina",
+  p:["Antes de la semana 37: posible amenaza de parto pretérmino; telemedicina urgente y remisión.","Cuenta contracciones en 10 minutos, revisa FCF y si sale líquido o sangre."],
+  c:[R3C("4.3.6.1.5","270","signos de alarma … disminución marcada o ausencia de movimientos fetales, actividad uterina, sangrado genital"),R3C("4.3.2","264","remitir a valoración médica inmediata")],
+  r:"Refiere actividad uterina; se valora y se remite a valoración médica inmediata (Res. 3280, p. 264 y 270)."},
+ {re:/no se mueve|no lo siente mover|disminucion de (los )?movimientos|menos movimientos|ausencia de movimientos/,t:"Disminución de movimientos fetales",
+  p:["Ausculta la frecuencia cardiaca fetal (110 a 160).","Telemedicina urgente y remisión."],
+  c:[R3C("4.3.6.1.5","270","disminución marcada o ausencia de movimientos fetales")],r:"Refiere disminución de movimientos fetales; se ausculta FCF y se remite a valoración médica inmediata (Res. 3280, p. 270)."},
+ {re:/violencia|maltrat|la golpea|abuso|la obliga/,t:"Riesgo de violencia",
+  p:["Valora el riesgo en privado y activa la ruta de atención a víctimas; notifica en la ficha 875.","Si es menor de 14 años, siempre es violencia sexual."],
+  c:[R3C("4.3.6.1.5","270","Hacer énfasis en la identificación de factores de riesgo para violencia"),R3C("4.3.6.1.2","266","violencia intrafamiliar, abuso sexual, explotación sexual")],r:"Se identifica riesgo de violencia; se activa la ruta de atención a víctimas y se notifica al SIVIGILA (Res. 3280, p. 266 y 270)."},
+ {re:/triste|deprimid|sin esperanza|poco interes|necesita ayuda: si|llanto/,t:"Riesgo de depresión",
+  p:["Si responde sí a las preguntas de depresión: valoración por medicina y salud mental.","Si hay ideas de hacerse daño: urgente."],
+  c:[R3C("4.3.6.1.2","267","Identificar riesgo de depresión post parto utilizando las siguientes preguntas"),R3C("4.3.6.1.4","269","Si la mujer tiene o se sospecha que tiene una enfermedad mental grave, se debe garantizar su atención en un servicio especializado de salud mental")],r:"Tamizaje de depresión positivo; se remite a valoración por medicina y salud mental (Res. 3280, p. 267 y 269)."},
+ {re:/alcohol|chicha|tabaco|fuma|sustancia|marihuana|coca/,t:"Consumo de alcohol, tabaco u otras sustancias",
+  p:["Informa los riesgos para ella y el bebé y ofrece una intervención breve.","Si el consumo es habitual: remisión a salud mental."],
+  c:[R3C("4.3.6.1.2","267","Indagar a todas las mujeres embarazadas sobre el uso de alcohol y sustancias psicoactivas")],r:"Se indaga consumo de sustancias; se informan riesgos y se brinda intervención breve (Res. 3280, p. 267)."},
+ {re:/treponemica[^.]*reactiva|sifilis[^.]*reactiva|reactiva para sifilis/,t:"Prueba treponémica rápida reactiva",
+  p:["Penicilina benzatínica 2.400.000 UI IM en el mismo momento, sin prueba de alergia (si no hay antecedente de reacción).","Si hay alergia: desensibilización (remisión). VDRL con diluciones en la remisión; tratar a la pareja."],
+  c:[R3C("4.3.6.1.4","269","se debe aplicar una dosis de penicilina benzatínica de 2.400.000 UI IM aplicada en el mismo momento de conocer el resultado de la prueba treponémica rápida")],r:"Prueba treponémica rápida reactiva: se aplica penicilina benzatínica 2.400.000 UI IM en el mismo momento (Res. 3280, 4.3.6.1.4, p. 269)."},
+ {re:/hemoglobina|hb /,t:"Hemoglobina y hierro",
+  p:["Hierro de rutina a toda gestante; no se requiere si la Hb es mayor de 14 g/dl.","Hb menor de 11: anemia; dosis de tratamiento por medicina y hemograma en la remisión."],
+  c:[R3C("4.3.6.1.4","269","suplemento de hierro de forma rutinaria a todas las mujeres gestantes de curso normal. Las gestantes con valores de hemoglobina (Hb) superiores a 14 g/dL no requieren dicha suplementación")],r:""},
+ {re:/imc|ganancia|bajo peso|sobrepeso|obesidad/,t:"Estado nutricional y ganancia de peso",
+  p:["Meta de ganancia según el IMC inicial: < 20: 12 a 18 kg; 20 a 24,9: 10 a 13 kg; 25 a 29,9: 7 a 10 kg; 30 o más: 6 a 7 kg.","Ganancia inadecuada a la semana 28: equipo multidisciplinario."],
+  c:[R3C("4.3.6.1.2","267","Se debe registrar el índice de masa corporal (IMC) y con base en este establecer las metas de ganancia de peso"),R3C("4.3.6.1.5","271","la gestante con inadecuada ganancia a las 28 semanas debe continuar su control a cargo de un equipo multidisciplinario especializado")],r:""},
+ {re:/^niega\b|niega sangrado|niega signos|sin signos de alarma|niega sintomas/,t:"Sin signos de alarma",
+  p:["Explícale los signos de alarma para consultar de inmediato y regístralo."],
+  c:[R3C("4.3.6.1.5","270","Orientar sobre los signos de alarma por los que debe consultar oportunamente, tales como: hipertensión arterial, cefalea, trastornos visuales y auditivos, epigastralgia, edemas, disminución marcada o ausencia de movimientos fetales, actividad uterina, sangrado genital, amniorrea o leucorrea, o sintomatología urinaria y tos")],
+  r:"Se orienta sobre signos de alarma por los que debe consultar oportunamente (Res. 3280, 4.3.6.1.5, p. 270)."}]};
+const CDT_EDAD={prenatal:a=>a!=null&&a<19?{t:"Gestante adolescente",p:["Acompañamiento por salud mental y trabajo social durante la gestación.","Menor de 14 años: violencia sexual por ley (ficha 875 y ruta)."],c:[R3C("4.3.6.1.4","269","Las gestantes adolescentes deberán tener acompañamiento durante el resto de la gestación por el equipo de salud mental y trabajo social")],r:"Gestante adolescente: se canaliza a salud mental y trabajo social (Res. 3280, p. 269)."}:null};
+function ivBlankTipo(b,a){b=plano(b);a=plano(a);let m;
+  if((m=a.match(/^\s*\)?\s*(semanas?|veces|dias|horas|meses|anos|g\b|gramos|kg|cm|mg|ml|cc|puntos|%)/)))return{t:"num",u:m[1]};
+  if(/(cantidad|volumen)\s*$/.test(b))return{t:"numu"};
+  if(/(se toman en|institucional en|atencion en|se programa para)\s*$/.test(b))return{t:"txt"};
+  if(/(desde|hasta|el|fecha|del|diagnosticad[oa] en|tamizaje en|tamizaje de cuello uterino \(|ultimo tamizaje en)\s*\(?\s*$/.test(b)||/^\s*\)?\s*(,\s*)?con resultado/.test(a))return{t:"date"};
+  return{t:"txt"}}
+function ivExtras(id,x,ta,save){const fb=$("iv-fill"),cb=$("iv-cdt");if(!fb||!cb)return;let ult=null;
+  const fill=()=>{const v=ta.value,L=[];const re=/_{2,}/g;let m;while((m=re.exec(v)))L.push({i:L.length,at:m.index,len:m[0].length,b:v.slice(Math.max(0,m.index-40),m.index),a:v.slice(m.index+m[0].length,m.index+m[0].length+25)});
+    if(!L.length){fb.innerHTML="";return}
+    fb.innerHTML=`<div class="box" style="border:2px solid var(--accent);margin:6px 0"><h3>Completa los espacios</h3><p class="note-src" style="margin:0 0 6px">Escoge o escribe y se pone solo en la respuesta.</p>${L.map(z=>{const tp=ivBlankTipo(z.b,z.a),pw=(z.b.trim().match(/([A-Za-zÁÉÍÓÚÑáéíóúñ]+)\s*\(?$/)||[,""])[1],ctx=tp.t==="date"?(pw?pw.charAt(0).toUpperCase()+pw.slice(1)+" (fecha)":"Fecha"):tp.t==="numu"?"Cantidad":tp.t==="num"?"Número de "+tp.u:"…"+z.b.slice(-30).replace(/^\S*\s/,"")+" ▢ "+z.a.slice(0,18);
+      const inp=tp.t==="date"?`<input type="date" data-ivb="${z.i}" max="${hoy()}">`:tp.t==="num"?`<div style="display:flex;gap:6px;align-items:center"><input type="number" inputmode="decimal" step="any" data-ivb="${z.i}" style="max-width:120px"><span>${esc(tp.u)}</span></div>`:tp.t==="numu"?`<div style="display:flex;gap:6px;align-items:center"><input type="number" inputmode="decimal" step="any" data-ivb="${z.i}" data-ivu="${z.i}" style="max-width:110px"><select data-ivus="${z.i}"><option>ml</option><option>cc</option><option>toallas en el día</option><option>toallas por hora</option><option>manchado (gotas)</option></select></div>`:`<input data-ivb="${z.i}" placeholder="Escribe aquí">`;
+      return `<label class="bfl" style="margin:6px 0"><span style="font-size:.85rem">${esc(ctx)}</span>${inp}</label>`}).join("")}</div>`;
+    fb.querySelectorAll("[data-ivb]").forEach(el=>{const put=()=>{let val=String(el.value||"").trim();if(!val)return;const i=+el.dataset.ivb;
+      if(el.type==="date")val=val.split("-").reverse().join("/");if(el.dataset.ivu!=null){const u=fb.querySelector(`[data-ivus="${el.dataset.ivu}"]`);val=/manchado/.test(u.value)?"manchado (gotas)":val.replace(".",",")+" "+u.value}
+      let n=-1;ta.value=ta.value.replace(/_{2,}/g,mm=>(++n===i?val:mm));save();ult=ta.value;fill();cdt()};
+      el.addEventListener("change",put);el.addEventListener("keydown",ev=>{if(ev.key==="Enter"){ev.preventDefault();put()}})});
+    fb.querySelectorAll("[data-ivus]").forEach(s=>s.addEventListener("change",()=>{if(/manchado/.test(s.value)){const el=fb.querySelector(`[data-ivu="${s.dataset.ivus}"]`);el.value="0";el.dispatchEvent(new Event("change"))}}))};
+  const cdt=()=>{const R=(CDT[id]||[]).filter(r=>r.re.test(plano(ta.value)));let ed=null;try{const P=pac(),e=edadDe(P["FECHA NACIMIENTO"]);ed=e?e.y:(P.__edad?+P.__edad:null)}catch(e){}
+    const ex=CDT_EDAD[id]&&/primer|ingreso|antecedente|psicosocial|apoyo/i.test(x.l)?CDT_EDAD[id](ed):null;if(ex)R.unshift(ex);
+    if(!R.length){cb.hidden=true;cb.innerHTML="";return}cb.hidden=false;
+    cb.innerHTML=`<h3>Conducta según la Res. 3280</h3><p class="note-src" style="margin:0 0 6px">Sale de lo que quedó en la respuesta. Cada recomendación dice de dónde sale (sección y página del PDF oficial de la Res. 3280 de 2018). Tú decides.</p>`+
+     R.map((r,n)=>`<div class="an-ruta" style="padding:8px 10px;margin:6px 0"><b>${esc(r.t)}</b><ul class="mb-ul">${r.p.map(z=>`<li>${esc(z)}</li>`).join("")}</ul>${r.c.map(c=>`<small class="note-src" style="display:block;font-style:italic;margin-top:4px">Res. 3280 de 2018, ${esc(c.sec)}, p. ${esc(c.pg)}: «${esc(c.q)}».</small>`).join("")}${r.r?`<div class="btns" style="margin-top:6px"><button class="btn bq-mini" type="button" data-cdt="${n}">${ta.value.includes(r.r)?"✓ En la respuesta":"Agregar a la respuesta"}</button></div>`:""}</div>`).join("");
+    cb.querySelectorAll("[data-cdt]").forEach(b=>b.onclick=()=>{const r=R[+b.dataset.cdt];if(!ta.value.includes(r.r)){ta.value=(ta.value.trim()?ta.value.trim()+" ":"")+r.r;save();ult=ta.value}b.textContent="✓ En la respuesta"})};
+  ta.addEventListener("input",()=>{ult=ta.value;fill();cdt()});
+  document.querySelectorAll("[data-c],[data-gr],#cd-all,[data-cd],[data-ex],#ex-all").forEach(b=>b.addEventListener("click",()=>setTimeout(()=>{ult=ta.value;fill();cdt()},0)));
+  const iv=setInterval(()=>{if(!ta.isConnected){clearInterval(iv);return}if(ta.value!==ult){ult=ta.value;fill();cdt()}},600);
+  ult=ta.value;fill();cdt()}
 /* ---------- arranque ---------- */
 /* los borradores guardados con la versión anterior de los módulos se reubican una sola vez */
 Object.keys(OLD_LAB).forEach(id=>{if(!M[id]||S.get(key(id,"ivlab")))return;let a={};try{a=JSON.parse(S.get(key(id,"iv"))||"{}")||{}}catch(e){}
