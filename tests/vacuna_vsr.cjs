@@ -1,0 +1,16 @@
+const { chromium } = require('playwright');
+(async()=>{const b=await chromium.launch({executablePath:'/opt/pw-browsers/chromium'});const p=await b.newPage();const errs=[];p.on('pageerror',e=>errs.push(e.message));
+await p.goto('file://'+process.cwd()+'/index.html');let f=0;const ok=(c,m)=>{if(!c){f++;console.log('FALLO',m)}};
+const r=await p.evaluate(()=>{localStorage.clear();const fn=new Date();fn.setFullYear(fn.getFullYear()-25);
+ const P={'NOMBRE COMPLETO':'ANA LOPEZ RUIZ','TIPO':'CC','DOCUMENTO ID.':'1006543210','GENERO':'F','FECHA NACIMIENTO':fn.toISOString().slice(0,10),__com:'Q',__est:'ges'};setPac(P);
+ const o=gexGet(P);o._egm={f:hoy(),w:30};gexSet(o,P);
+ const set=w=>{S.set(key('prenatal','eg_ecof'),hoy());S.set(key('prenatal','eg_ecos'),String(w));S.set(key('prenatal','eg_ecod'),'0')};
+ set(30);S.set(vacKey(),JSON.stringify({flug:1,tdap:1}));
+ const q=ivFor('prenatal'),a={},k=q.findIndex(z=>z.l==='Vacunas del embarazo');a[k]='Registrado.';S.set(key('prenatal','iv'),JSON.stringify(a));
+ const w30=semPren(),e30=vacEstado('prenatal').find(z=>z.k==='vsr'),ev=evFinal('prenatal').pend.map(z=>z.t).join(' || ');
+ set(20);const e20=vacEstado('prenatal').find(z=>z.k==='vsr');set(38);const e38=vacEstado('prenatal').find(z=>z.k==='vsr');
+ openMod('prenatal');st.tab='entr';S.set(key('prenatal','ivi'),String(k));set(30);renderMod();
+ return{w30,e30,e20,e38,ev,html:document.getElementById('pane').innerHTML.includes('VSR')}});
+ok(r.e30&&r.e30.le,'vsr le a las 30 ('+r.w30+')');ok(r.e20&&r.e20.fut&&!r.e20.le,'vsr futuro a las 20');ok(r.e38&&r.e38.pas,'vsr pasada a las 38');
+ok(/VSR/.test(r.ev)&&!/Influenza/.test(r.ev),'evaluador '+r.ev);ok(r.html,'widget muestra VSR');
+ok(!errs.length,errs.join(';'));console.log('vacuna_vsr: '+f+' fallos');await b.close();process.exit(f?1:0)})();

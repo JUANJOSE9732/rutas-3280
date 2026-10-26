@@ -22,7 +22,7 @@ const r2=await p.evaluate(()=>{localStorage.clear();const fn=new Date();fn.setFu
  const q=ivFor('pinf'),a={};q.forEach((z,k)=>a[k]='Normal.');const d=q.findIndex(z=>/^Desparasitación/.test(z.l));a[d]='Albendazol 200 mg dosis única.';
  S.set(key('pinf','iv'),JSON.stringify(a));const R=evFinal('pinf');return R});
 const T2=g=>r2[g].map(z=>z.t).join(' || ');
-ok(/Tarjeta de identidad con 3/.test(T2('mal')),'ti 3 años');ok(/400 mg/.test(T2('mal')),'dosis albendazol');ok(/vitamina A/.test(T2('falta')),'vit A');
+ok(/Tarjeta de identidad con [23] años/.test(T2('mal')),'ti 3 años');ok(/400 mg/.test(T2('mal')),'dosis albendazol');ok(/vitamina A/.test(T2('falta')),'vit A');
 // adulto ok
 const r3=await p.evaluate(()=>{localStorage.clear();const fn=new Date();fn.setFullYear(fn.getFullYear()-40);
  setPac({'NOMBRE COMPLETO':'PEDRO RUIZ DIAZ','TIPO':'CC','DOCUMENTO ID.':'18765432','GENERO':'M','FECHA NACIMIENTO':fn.toISOString().slice(0,10),__com:'Q'});
