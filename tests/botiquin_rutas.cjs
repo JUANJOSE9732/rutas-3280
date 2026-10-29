@@ -12,7 +12,7 @@ const F=await p.evaluate(()=>{const F=[],ok=(c,m)=>{if(!c)F.push(m)};localStorag
  Object.keys(RUTA_BQ).forEach(k=>{localStorage.clear();pers(k==='vej'?'M':'F',k==='pinf'?2:k==='inf'?8:k==='adol'?15:k==='vej'?70:k==='rn'?0:k==='adul'?40:25);
   S.set(key(k,'tab'),'guia');openMod(k);if(st.tab!=='guia'){st.tab='guia';renderMod()}
   const box=$('ruta-bq');ok(box,k+': no aparece el botiquín en la Guía (pestaña '+st.tab+')');if(!box)return;
-  ok(box.querySelectorAll('li').length===RUTA_BQ[k].m.length,k+': lista incompleta')});
+  ok(box.querySelectorAll('ul.mb-ul:not(.bq-ins) > li').length===RUTA_BQ[k].m.length,k+': lista incompleta');ok(box.querySelectorAll('ul.bq-ins > li').length===RUTA_INS[k].m.length,k+': insumos incompletos')});
  /* prenatal: avisos de gestante aunque no esté marcada */
  localStorage.clear();pers('F',25);ok(rutaCtx('prenatal').es==='ges','prenatal no se toma como gestante');
  ok(/Gestante: contraindicado/.test(bqListaHTML({m:[['enala','x']]},rutaCtx('prenatal'))),'aviso de enalapril en prenatal');

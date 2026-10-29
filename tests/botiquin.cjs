@@ -8,6 +8,7 @@ await p.goto('file://'+require('path').join(__dirname,'..','index.html'));
 const F=await p.evaluate(()=>{const F=[],ok=(c,m)=>{if(!c)F.push(m)};localStorage.clear();
  /* datos completos */
  const ids=new Set();BQ.forEach(m=>{ok(!ids.has(m.id),'id repetido '+m.id);ids.add(m.id);
+  if(m.ins){['n','p','u','g'].forEach(k=>ok(m[k],m.id+': falta '+k));ok(MBF[m.f[0]],m.id+': fuente');ok(bqEstado(m).k==='conf',m.id+': no queda por confirmar');return}
   if(m.ne)return;['n','c','p','u','ef','ci','it','em','op','g'].forEach(k=>ok(m[k],m.id+': falta '+k));ok(m.pa||m.pn,m.id+': sin posología');
   ok(m.f&&MBF[m.f[0]],m.id+': fuente desconocida');ok(!m.v||/^\d{4}-\d{2}$/.test(m.v),m.id+': fecha mal');
   (m.kg||[]).forEach((e,i)=>ok(bqCalc(m,i,10,{a:5})!=='',m.id+': calculadora vacía'))});
@@ -15,7 +16,14 @@ const F=await p.evaluate(()=>{const F=[],ok=(c,m)=>{if(!c)F.push(m)};localStorag
  ['aciclo','nista','fluco','tini','adren','peni','sertra','lope'].forEach(id=>ok(bqGet(id),'falta '+id));
  /* mapeo: todo id existe y todo medicamento entregado aparece en alguna morbilidad */
  Object.entries(MB_BQ).forEach(([k,x])=>{ok(MB.find(z=>z.id===k),'morbilidad inexistente '+k);(x.m||[]).concat((x.no||[]).map(z=>[z])).forEach(([id])=>ok(bqGet(id),k+': medicamento inexistente '+id))});
- const usados=new Set(Object.values(MB_BQ).flatMap(x=>(x.m||[]).map(z=>z[0])));
+ const usados=new Set(Object.values(MB_BQ).concat(Object.values(MB_INS)).flatMap(x=>(x.m||[]).map(z=>z[0])));
+ /* v213: nutrición e insumos */
+ ['mnp','ftlc','i_espec','i_prvih','i_hcue','i_clamp','i_foley','i_camP','i_glu'].forEach(id=>ok(bqGet(id),'falta '+id));
+ ok(BQ.filter(m=>m.ins).length>=85,'insumos: '+BQ.filter(m=>m.ins).length);
+ Object.entries(MB_INS).forEach(([k,x])=>{ok(MB.find(z=>z.id===k),'morbilidad inexistente '+k);(x.m||[]).concat((x.no||[]).map(z=>[z])).forEach(([id])=>ok(bqGet(id),k+': insumo inexistente '+id))});
+ Object.entries(RUTA_INS).forEach(([k,x])=>{ok(M[k],'ruta inexistente '+k);(x.m||[]).forEach(([id])=>ok(bqGet(id),k+': insumo inexistente '+id))});
+ ok(/4 sobre/.test(bqCalc(bqGet('ftlc'),0,10,{a:2})),'FTLC 10 kg: '+bqCalc(bqGet('ftlc'),0,10,{a:2}));
+ S.set(BQ_KEY,JSON.stringify({mnp:{ent:1000,lote:'X1',v:'2028-01'}}));ok(bqEstado(bqGet('mnp')).k==='verde','al anotar lo que llegó sale del por confirmar');localStorage.clear();
  const sueltos=BQ.filter(m=>!m.ne&&!usados.has(m.id)&&!bqRutas(m.id).length).map(m=>m.id);
  /* semáforo */
  const e=id=>bqEstado(bqGet(id)).k;ok(e('peni')==='rojo','penicilina 12/2026 en rojo: '+e('peni'));ok(e('medroxi')==='verde'&&e('omep')==='verde','medroxi y omeprazol entregados');

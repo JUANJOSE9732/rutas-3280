@@ -1974,7 +1974,7 @@ function wireMiDia(){const cb=$("md-cal");if(cb)cb.onclick=calOpen;
 function mdShow(t){const s=$("md-st");s.innerHTML="";const a=document.createElement("textarea");a.value=t;a.rows=7;a.readOnly=true;s.append("No se pudo copiar solo. Mantén presionado el texto y cópialo:",a);a.focus();a.select()}
 
 /* ---------- PANEL ---------- */
-const VERSION_APP="2026-10-25 v212";
+const VERSION_APP="2026-10-29 v213";
 function home(){
   stopRec();if(S.get(AT_KEY))atReiniciar();st.view="home";
   const rm=["precon","prenatal","parto","rn","ive"],rp=["pinf","inf","adol","juv","adul","vej"];
@@ -3230,7 +3230,7 @@ const PI_DYN={
  vac:()=>{const m=edadMesesMod("pinf");if(m==null)return"";const E=[[0,"recién nacido: BCG y hepatitis B"],[2,"2 meses: primera dosis de pentavalente o hexavalente, polio, rotavirus y neumococo"],[4,"4 meses: segunda dosis de las mismas"],[6,"6 meses: tercera dosis de pentavalente o hexavalente y polio; influenza (y segunda dosis al mes)"],[12,"12 meses: triple viral, varicela, neumococo (refuerzo), hepatitis A"],[18,"18 meses: refuerzos de DPT y polio, triple viral (refuerzo) y fiebre amarilla"],[60,"5 años: refuerzos de DPT, polio y varicela"]];
    const deb=E.filter(e=>e[0]<=m);const ul=deb[deb.length-1][1];return "Con "+edadTxtM(m)+" ya debería tener las vacunas hasta las de "+(ul.startsWith("recién")?"recién nacido (BCG y hepatitis B)":"los "+ul.split(":")[0]+" ("+ul.split(": ")[1]+")")+". Revisa el carné; lo que falte se aplica hoy o se deja pendiente. (Edades orientativas: confirma con el esquema PAI vigente.)"},
  bucal:()=>{const m=edadMesesMod("pinf");if(m==null)return"";const L=[];if(m>=6)L.push("odontología una vez al año (desde los 6 meses)");if(m>=12)L.push("barniz de flúor y profilaxis cada 6 meses (desde el año)");if(m>=36)L.push("sellantes según criterio de odontología (desde los 3 años)");return L.length?"Con "+edadTxtM(m)+" le corresponde: "+L.join("; ")+". Si no lo tiene, remite y déjalo pendiente.":"Antes de los 6 meses: limpieza de encías con gasa húmeda; la primera consulta de odontología es a los 6 meses."},
- mnp:()=>{const m=edadMesesMod("pinf");if(m==null)return"";return m<6?"Todavía no: los micronutrientes en polvo se inician a los 6 meses.":m<24?"Con "+edadTxtM(m)+" le corresponde la fortificación casera: 1 sobre al día por 60 días, un ciclo cada 6 meses (6, 12 y 18 meses; 240 sobres entre los 6 y 23 meses).":"Desde los 2 años ya no son sobres: pasa a hierro y vitamina A dos veces al año."},
+ mnp:()=>{const m=edadMesesMod("pinf");if(m==null)return"";return m<6?"Todavía no: los micronutrientes en polvo se inician a los 6 meses.":m<24?"Con "+edadTxtM(m)+" le corresponde la fortificación casera (Vitamix15 del botiquín): 1 sobre al día por 60 días, un ciclo cada 6 meses (6, 12 y 18 meses; 240 sobres entre los 6 y 23 meses).":"Desde los 2 años ya no son sobres: pasa a hierro y vitamina A dos veces al año."},
  sup:()=>{const m=edadMesesMod("pinf");if(m==null)return"";return m<24?"Todavía no: desde los 24 meses.":m<60?"Con "+edadTxtM(m)+" le corresponde, 2 veces al año: hierro (fumarato ferroso o hierro polimaltosa) 3 mg/kg/día y vitamina A 200.000 UI en una sola toma (p. 113).":"Fuera del rango de 24 a 59 meses."},
  desp:()=>{const m=edadMesesMod("pinf");if(m==null)return"";return m<12?"Todavía no: la desparasitación empieza al año.":m<24?"Con "+edadTxtM(m)+": albendazol 200 mg vía oral, dosis única, 2 veces al año, junto con la suplementación (p. 113).":"Con "+edadTxtM(m)+": albendazol 400 mg vía oral, dosis única, 2 veces al año, junto con la suplementación (p. 113)."},
  hb:()=>""
@@ -3249,7 +3249,7 @@ Object.assign(IVX,{
  "pinf::Familia: familiograma, red de apoyo, cuidado":{c:["Adecuada|Familia con red de apoyo; cuidado adecuado; sin señales de riesgo.","Riesgo social|Se identifica riesgo social (pobre red de apoyo, consumo de alcohol o violencia en el hogar); se remite a trabajo social.","Sospecha de maltrato|Se identifican señales de maltrato o negligencia; se activa la ruta de violencia y se notifica."],
   pauta:{t:"Qué indagar",p:["Quién cuida al niño o niña y quién lo apoya.","Violencia en el hogar, consumo de alcohol, abandono.","Lesiones sin explicación, retraso en consultar, descuido: activa la ruta y notifica."],r:"",b:""}},
  "pinf::Vacunación según esquema PAI":{dyn:PI_DYN.vac,c:["Aplicadas|Se aplican las vacunas que corresponden según la edad; se registran en el carné y en PAIWEB.","Al día|Esquema al día; no requiere vacunas hoy.","Pendiente|Vacunas pendientes por falta de biológico; se programan para la próxima brigada."],pauta:{t:"Qué saber",p:["Registra en el carné y en PAIWEB.","Explica reacciones esperadas: fiebre baja y dolor donde se aplicó."],r:"",b:""}},
- "pinf::Micronutrientes en polvo (fortificación casera) en las edades del cuadro de la 3280":{dyn:PI_DYN.mnp,c:["Entregados|Se entregan 60 sobres de micronutrientes en polvo (1 sobre al día por 60 días) y se explica su uso.","Ya recibió|Ya recibió el ciclo de micronutrientes en polvo de esta edad.","No aplica|No aplica por edad."],
+ "pinf::Micronutrientes en polvo (fortificación casera) en las edades del cuadro de la 3280":{dyn:PI_DYN.mnp,c:["Entregados|Se entregan 60 sobres de micronutrientes en polvo (Vitamix15 Nutrea; 1 sobre al día por 60 días) y se explica su uso.","Ya recibió|Ya recibió el ciclo de micronutrientes en polvo de esta edad.","No aplica|No aplica por edad."],
   pauta:{t:"Cómo se usan (p. 197)",p:["1 sobre al día por 60 días seguidos; luego descanso de 4 meses y otro ciclo.","Entre los 6 y los 23 meses: 240 sobres en total.","Mezclar con una porción de comida espesa, tibia, la primera que coma; no en líquidos ni comida caliente."],r:"",b:""}},
  "pinf::Micronutrientes dos veces al año desde los 2 años":{dyn:PI_DYN.sup,c:["Entregados|Se suministra hierro 3 mg/kg/día y vitamina A 200.000 UI en una toma (dosis semestral).","Ya recibió|Ya recibió la suplementación de este semestre.","No aplica|No aplica por edad."],pauta:{t:"Qué saber (p. 113)",p:["De los 24 a los 59 meses: hierro 3 mg/kg/día y vitamina A 200.000 UI, 2 veces al año.","Junto con la desparasitación."],r:"",b:""}},
  "pinf::Desparasitación desde el año, dos veces al año":{dyn:PI_DYN.desp,c:["Albendazol 200 mg|Se administra albendazol 200 mg vía oral, dosis única (12 a 23 meses).","Albendazol 400 mg|Se administra albendazol 400 mg vía oral, dosis única (2 a 4 años).","Ya recibió|Ya recibió la desparasitación de este semestre.","No aplica|No aplica por edad (menor de 1 año)."],pauta:{t:"Esquema (p. 113)",p:["12 a 23 meses: albendazol 200 mg; 24 meses a 4 años: 400 mg; dosis única, 2 veces al año.","Lavado de manos, agua hervida, calzado."],r:"",b:""}},
@@ -3399,7 +3399,7 @@ IVX["pinf::Barniz de flúor y profilaxis semestral desde el año"].cf=()=>{const
   return ["Adecuada|Consume la dieta familiar, variada, con frutas, verduras y proteína; sin paquetes ni bebidas azucaradas.","Inadecuada|Alimentación poco variada o con paquetes y bebidas azucaradas; se dan pautas y se valora en 1 mes."]});
  set("Micronutrientes en polvo (fortificación casera) en las edades del cuadro de la 3280",()=>{const m=mP();
   if(m!=null&&(m<6||m>=24))return [m<6?"No aplica|No aplica: menor de 6 meses; los micronutrientes en polvo inician a los 6 meses.":"No aplica|No aplica: mayor de 2 años; pasa a suplementación con hierro y vitamina A."];
-  return ["Entregados|Se entregan 60 sobres de micronutrientes en polvo (1 sobre al día por 60 días) y se explica su uso.","Ya recibió|Ya recibió el ciclo de micronutrientes en polvo de esta edad.","En descanso|Terminó un ciclo hace menos de 4 meses; está en el periodo de descanso, el siguiente ciclo se entrega en el próximo control."]});
+  return ["Entregados|Se entregan 60 sobres de micronutrientes en polvo (Vitamix15 Nutrea; 1 sobre al día por 60 días) y se explica su uso.","Ya recibió|Ya recibió el ciclo de micronutrientes en polvo de esta edad.","En descanso|Terminó un ciclo hace menos de 4 meses; está en el periodo de descanso, el siguiente ciclo se entrega en el próximo control."]});
  set("Micronutrientes dos veces al año desde los 2 años",()=>{const m=mP();
   if(m!=null&&(m<24||m>=60))return [m<24?"No aplica|No aplica: menor de 2 años (recibe micronutrientes en polvo).":"No aplica|No aplica: mayor de 59 meses."];
   return ["Entregados|Se suministra hierro 3 mg/kg/día y vitamina A 200.000 UI en una toma (dosis semestral).","Ya recibió|Ya recibió la suplementación de este semestre."]});
@@ -6739,7 +6739,7 @@ Object.assign(VN,{
 
  micro:{g:"Atenciones separadas",t:"Micronutrientes y desparasitación",who:"Primera infancia, sin valoración integral",idSiempre:1,qs:[
   {k:"meses",q:"Edad en meses",def:(v,P)=>{const c=ctxPer();return c.m!=null?String(c.m):""},c:()=>ctxPer().m==null},
-  {k:"sumi",q:"Qué se entrega hoy",def:v=>{const m=vnNums(VN_U(v.meses||String(ctxPer().m||"")))[0],o=[];if(!Number.isFinite(m))return"";if(m>=6&&m<24)o.push("MICRONUTRIENTES EN POLVO PARA FORTIFICACION CASERA");if(m>=24&&m<72)o.push("SUPLEMENTACION CON MICRONUTRIENTES (VITAMINA A)");if(m>=12&&m<72)o.push(m<24?"ALBENDAZOL 200 MG DOSIS UNICA":"ALBENDAZOL 400 MG DOSIS UNICA");return o.join("; ")||"NO LE CORRESPONDE POR EDAD"}},
+  {k:"sumi",q:"Qué se entrega hoy",def:v=>{const m=vnNums(VN_U(v.meses||String(ctxPer().m||"")))[0],o=[];if(!Number.isFinite(m))return"";if(m>=6&&m<24)o.push("MICRONUTRIENTES EN POLVO PARA FORTIFICACION CASERA (VITAMIX15)");if(m>=24&&m<72)o.push("SUPLEMENTACION CON MICRONUTRIENTES (VITAMINA A)");if(m>=12&&m<72)o.push(m<24?"ALBENDAZOL 200 MG DOSIS UNICA":"ALBENDAZOL 400 MG DOSIS UNICA");return o.join("; ")||"NO LE CORRESPONDE POR EDAD"}},
   {k:"ultima",q:"¿Cuándo recibió por última vez micronutrientes o albendazol?",def:"HACE MAS DE 6 MESES O NUNCA",o:["HACE MAS DE 6 MESES O NUNCA","HACE MENOS DE 6 MESES"]},
   {k:"sint",q:"¿Está enfermo hoy (fiebre, diarrea, vómito)?",def:"NO",o:["NO","SI"]},
   Q.extra],
@@ -8612,23 +8612,23 @@ MB_BQ.piel.m.push(["nista","Candidiasis oral (algodoncillo)."],["aciclo","Herpes
 MB.find(x=>x.id==="piel").ss.push(["Herpes zóster: ampollas en banda en un solo lado del cuerpo, con dolor quemante. Candidiasis oral: placas blancas que no se quitan al raspar.","fmo",""]);
 
 /* ---------- Inventario: correcciones guardadas en el celular, semáforo y avisos ---------- */
-const BQ_KEY="dn2_bq_inv",BQ_SEM={venc:"Vencido",rojo:"Vence en 3 meses o menos",amar:"Vence en 6 meses o menos",verde:"Vigente",sinf:"Sin lote o vencimiento",sin:"No entregado"};
+const BQ_KEY="dn2_bq_inv",BQ_SEM={venc:"Vencido",rojo:"Vence en 3 meses o menos",amar:"Vence en 6 meses o menos",verde:"Vigente",sinf:"Sin lote o vencimiento",sin:"No entregado",conf:"Por confirmar con el acta"};
 function bqEd(){try{return JSON.parse(S.get(BQ_KEY)||"{}")||{}}catch(e){return{}}}
 function bqGet(id){const b=BQ.find(x=>x.id===id);if(!b)return null;const e=bqEd()[id];return e?Object.assign({},b,e,{_ed:1}):b}
 function bqFin(v){if(!/^\d{4}-\d{2}$/.test(v||""))return null;const[a,m]=v.split("-").map(Number);return new Date(Date.UTC(a,m,0))}
-function bqEstado(m){if(m.ne||!(+m.ent))return{k:"sin",d:null};const f=bqFin(m.v);if(!f)return{k:"sinf",d:null};
+function bqEstado(m){if(m.pc&&!m.ne&&!(+m.ent))return{k:"conf",d:null};if(m.ne||!(+m.ent))return{k:"sin",d:null};const f=bqFin(m.v);if(!f)return{k:"sinf",d:null};
   const d=Math.round((f-pD(hoy()))/86400000);return{k:d<0?"venc":d<=90?"rojo":d<=180?"amar":"verde",d}}
 function bqMes(v){const f=bqFin(v);return f?String(f.getUTCMonth()+1).padStart(2,"0")+"/"+f.getUTCFullYear():"sin fecha"}
-function bqChip(m){const e=bqEstado(m);const t=e.k==="sin"?"No entregado":e.k==="sinf"?"Sin vencimiento":(e.k==="venc"?"Vencido ":"Vence ")+bqMes(m.v)+(e.k==="rojo"||e.k==="amar"?` · ${e.d} días`:"");
+function bqChip(m){const e=bqEstado(m);const t=e.k==="conf"?"Por confirmar":e.k==="sin"?"No entregado":e.k==="sinf"?"Sin vencimiento":(e.k==="venc"?"Vencido ":"Vence ")+bqMes(m.v)+(e.k==="rojo"||e.k==="amar"?` · ${e.d} días`:"");
   return `<span class="bq-chip bq-${e.k}">${esc(t)}</span>`}
-const BQ_UNI=[[/^tableta/i,"tabletas"],[/^c[aá]psula/i,"cápsulas"],[/^ampolla/i,"ampollas"],[/^sobre/i,"sobres"],[/^bolsa/i,"bolsas"],[/^inhalador/i,"inhaladores"],[/^crema/i,"tubos"],[/^unidad/i,"unidades"],[/^óvulo/i,"óvulos"]];
-function bqCant(m){if(m.ne||!(+m.ent))return"no entregado";const u=(BQ_UNI.find(([r])=>r.test(m.p))||[0,"frascos"])[1];return `${m.ent} ${u}`}
+const BQ_UNI=[[/^tableta/i,"tabletas"],[/^c[aá]psula/i,"cápsulas"],[/^ampolla/i,"ampollas"],[/^sobre/i,"sobres"],[/^bolsa/i,"bolsas"],[/^inhalador/i,"inhaladores"],[/^crema/i,"tubos"],[/^unidad/i,"unidades"],[/^óvulo/i,"óvulos"],[/^par/i,"pares"],[/^caja/i,"cajas"],[/^gal/i,"galones"],[/^rollo/i,"rollos"],[/^kit/i,"kits"]];
+function bqCant(m){if(m.pc&&!m.ne&&!(+m.ent))return"por confirmar";if(m.ne||!(+m.ent))return"no entregado";const u=(BQ_UNI.find(([r])=>r.test(m.p))||[0,"frascos"])[1];return `${m.ent} ${u}`}
 function bqAvisos(m,c){const o=[],f=c&&c.sx==="F";if(!c)return o;
   if(f&&c.es==="ges"&&m.ges==="no")o.push("Gestante: contraindicado. "+(m.em||""));else if(f&&c.es==="ges"&&m.ges==="evitar")o.push("Gestante: evitar salvo orden médica. "+(m.em||""));
   if(f&&c.es==="pos"&&m.em&&/lactancia|amamantar/i.test(m.em))o.push("Puérpera que lacta: "+m.em);
   if(c.a!=null&&m.minA&&c.a<m.minA)o.push(`Tiene ${c.m<24?c.m+" meses":Math.floor(c.a)+" años"}: no se recomienda en menores de ${m.minA} años.`);
   return o}
-function bqUsos(id){return Object.keys(MB_BQ).filter(k=>(MB_BQ[k].m||[]).some(z=>z[0]===id)).map(k=>MB.find(x=>x.id===k)).filter(Boolean)}
+function bqUsos(id){return [...new Set(Object.keys(MB_BQ).concat(Object.keys(MB_INS)))].filter(k=>[MB_BQ[k],MB_INS[k]].some(x=>x&&(x.m||[]).some(z=>z[0]===id))).map(k=>MB.find(x=>x.id===k)).filter(Boolean)}
 function bqNum(x){return x.toLocaleString("es-CO",{maximumFractionDigits:x<1?2:1})}
 function bqCalc(m,i,kg,c){const e=m.kg[i];if(!kg||!(kg>0))return"";if(e.min&&kg<e.min)return`<b>No usar:</b> pesa menos de ${e.min} kg.`;
   let mx=e.max;if(e.maxN&&c&&c.a!=null&&c.a<12)mx=e.maxN;let lo=e.mg[0]*kg,hi=e.mg[1]*kg,tope=false;if(mx!=null){if(hi>mx){hi=mx;tope=true}if(lo>mx)lo=mx}
@@ -8644,16 +8644,16 @@ function bqFicha(m,c){if(m.ne)return `<dl class="mb-dl"><dt>Para qué</dt><dd>${
   return `<dl class="mb-dl">
    <dt>Inventario</dt><dd>${esc(bqCant(m))} de ${m.sol} pedidos · lote ${esc(m.lote||"sin anotar")} ${bqChip(m)}${m.io?`<small class="qt-c" style="color:var(--warn)">${esc(m.io)}</small>`:""}${m._ed?`<small class="qt-c">Corregido en este celular.</small>`:""}</dd>
    ${av.length?`<dt class="mb-al">Para esta persona</dt><dd>${mbUL(av.map(t=>[t,"",""])).replace(/<small class="qt-c">[^<]*<\/small>/g,"")}</dd>`:""}
-   ${row("Para qué",m.u)}${row("Posología en adultos",m.pa)}${row("Posología en niños",m.pn)}
+   ${row("Para qué",m.u)}${row(m.ins?"Cómo se usa":"Posología en adultos",m.pa)}${row("Posología en niños",m.pn)}
    ${m.kg?`<dt>Calcular por peso</dt><dd><label class="bq-kg">Peso <input type="number" inputmode="decimal" min="0" step="0.1" class="bq-w" data-bq="${m.id}" placeholder="kg"></label>${m.kg.map((e,i)=>`<div class="bq-res"><span class="note-src">${esc(e.t)}:</span> <span data-bqr="${m.id}:${i}">escribe el peso</span></div>`).join("")}</dd>`:""}
-   ${row("Efectos secundarios",m.ef)}${row("Contraindicaciones",m.ci,"mb-al")}${row("Interacciones",m.it)}${row("Embarazo y lactancia",m.em)}${row("Opciones si no hay o no sirve",m.op)}
+   ${row("Efectos secundarios",m.ef)}${row(m.ins?"Ojo":"Contraindicaciones",m.ci,"mb-al")}${row("Interacciones",m.it)}${row("Embarazo y lactancia",m.em)}${row("Opciones si no hay o no sirve",m.op)}
    ${m.ord?`<dt>Quién lo indica</dt><dd>Por orden médica (telemedicina) o protocolo de la ESE.</dd>`:""}
    ${bqRutas(m.id).length?`<dt>En las rutas</dt><dd><div class="btns">${bqRutas(m.id).map(k=>`<button class="btn bq-mini" type="button" data-modgo="${k}">${esc(M[k].title)}</button>`).join("")}</div></dd>`:""}
    ${us.length?`<dt>Se usa en la morbilidad</dt><dd><div class="btns">${us.map(x=>`<button class="btn bq-mini" type="button" data-mbgo="${x.id}">${esc(x.t)}</button>`).join("")}</div></dd>`:""}
-   <dt>Fuente</dt><dd><small class="qt-c" style="margin:0">${esc(mbCita(F[0],F[1]==="página por verificar"?"":F[1]))}</small></dd>
+   <dt>Fuente</dt><dd><small class="qt-c" style="margin:0">${esc(m.ins?MBF[F[0]]:mbCita(F[0],F[1]==="página por verificar"?"":F[1]))}</small></dd>
    <dt>Corregir inventario</dt><dd><div class="bq-fix"><label>Cantidad<input type="number" min="0" data-fx="ent" value="${esc(m.ent)}"></label><label>Lote<input data-fx="lote" value="${esc(m.lote)}"></label><label>Vence<input type="month" data-fx="v" value="${esc(m.v)}"></label></div>
     <div class="btns" style="margin-top:6px"><button class="btn bq-mini" type="button" data-fxsave="${m.id}">Guardar corrección</button>${m._ed?`<button class="btn bq-mini" type="button" data-fxdel="${m.id}">Volver a lo del acta</button>`:""}</div></dd></dl>`}
-function bqResumen(){const n={venc:0,rojo:0,amar:0,verde:0,sinf:0,sin:0};BQ.forEach(b=>n[bqEstado(bqGet(b.id)).k]++);return n}
+function bqResumen(){const n={venc:0,rojo:0,amar:0,verde:0,sinf:0,sin:0,conf:0};BQ.forEach(b=>n[bqEstado(bqGet(b.id)).k]++);return n}
 let BQ_PESO="";
 function bqWireFichas(root,c,volver){root.querySelectorAll(".bq-w").forEach(inp=>{const m=bqGet(inp.dataset.bq);const pinta=()=>{BQ_PESO=inp.value;const kg=parseFloat(String(inp.value).replace(",","."));m.kg.forEach((e,i)=>{const t=root.querySelector(`[data-bqr="${m.id}:${i}"]`);if(t)t.innerHTML=bqCalc(m,i,kg,c)||"escribe el peso"})};
    if(BQ_PESO&&!inp.value)inp.value=BQ_PESO;inp.oninput=pinta;pinta()});
@@ -8663,21 +8663,21 @@ function bqWireFichas(root,c,volver){root.querySelectorAll(".bq-w").forEach(inp=
   root.querySelectorAll("[data-mbgo]").forEach(b=>b.onclick=()=>mbOpen(b.dataset.mbgo));
   root.querySelectorAll("[data-modgo]").forEach(b=>b.onclick=()=>{S.set(key(b.dataset.modgo,"tab"),"guia");st.bqDe=null;openMod(b.dataset.modgo)})}
 function bqOpen(foco,filtro){stopRec();st.view="bq";const C=ctxPer();filtro=filtro||"todos";const n=bqResumen();
-  const F=[["todos","Todos"],["alerta",`Vencidos o por vencer (${n.venc+n.rojo+n.amar})`],["sinf",`Sin lote o vencimiento (${n.sinf})`],["sin",`No entregados (${n.sin})`]];
+  const F=[["todos","Todos"],["alerta",`Vencidos o por vencer (${n.venc+n.rojo+n.amar})`],["sinf",`Sin lote o vencimiento (${n.sinf})`],["sin",`No entregados (${n.sin})`],["conf",`Por confirmar (${n.conf})`],["med","Solo medicamentos"],["ins","Solo insumos"]];
   $("app").innerHTML=`<div class="top"><button class="back" type="button" id="bq-back">← ${st.bqDe?(String(st.bqDe).startsWith("mod:")?esc((M[st.bqDe.slice(4)]||{}).title||"Ruta"):"Morbilidad"):"Inicio"}</button><span class="tag pc">Botiquín</span></div>
-  <header><h1>Botiquín del puesto</h1><p class="sub">Medicamentos entregados en la solicitud a almacén del ${BQ_FECHA} (sede Yurupari). Cada ficha trae posología, efectos secundarios, contraindicaciones, interacciones, embarazo y lactancia, opciones y en qué morbilidades se usa. El semáforo se calcula con la fecha de hoy.</p></header>
+  <header><h1>Botiquín del puesto</h1><p class="sub">Medicamentos entregados en la solicitud a almacén del ${BQ_FECHA} (sede Yurupari), más la nutrición (Vitamix15, FTLC) y los insumos médico-quirúrgicos y de laboratorio de la proyección de solicitud, que quedan «por confirmar» hasta que anotes lo que llegó. Cada ficha trae posología, efectos secundarios, contraindicaciones, interacciones, embarazo y lactancia, opciones y en qué morbilidades se usa. El semáforo se calcula con la fecha de hoy.</p></header>
   ${ctxCaja(C,"Las fichas avisan si el medicamento no conviene por edad, embarazo o lactancia.")}
-  <div class="bq-sem">${["venc","rojo","amar","verde","sinf","sin"].map(k=>`<span class="bq-chip bq-${k}">${n[k]} · ${esc(BQ_SEM[k])}</span>`).join("")}</div>
+  <div class="bq-sem">${["venc","rojo","amar","verde","sinf","sin","conf"].map(k=>`<span class="bq-chip bq-${k}">${n[k]} · ${esc(BQ_SEM[k])}</span>`).join("")}</div>
   ${n.venc+n.rojo?`<div class="box miss"><h3>Revisar ya</h3><ul>${BQ.map(b=>bqGet(b.id)).filter(m=>["venc","rojo"].includes(bqEstado(m).k)).map(m=>`<li><b>${esc(m.n)}</b> (${esc(bqCant(m))}): ${bqEstado(m).k==="venc"?"vencido según el acta":"vence en "+bqEstado(m).d+" días"}. ${esc(m.io||"")}</li>`).join("")}</ul></div>`:""}
   <div class="btns" id="bq-f">${F.map(([k,t])=>`<button class="btn bq-mini${k===filtro?" primary":""}" type="button" data-bqf="${k}">${esc(t)}</button>`).join("")}</div>
-  <input id="bq-q" placeholder="Buscar: amoxicilina, fiebre, gestante, tos…" autocomplete="off">
+  <input id="bq-q" placeholder="Buscar: amoxicilina, espéculo, prueba de VIH, fiebre…" autocomplete="off">
   <div id="bq-list"></div>
   <p class="foot">Posologías de referencia de las guías citadas y del Formulario modelo de la OMS. Los medicamentos se administran por orden médica (telemedicina) o protocolo de la ESE, y siempre se confirman con la etiqueta del producto. Las correcciones de cantidad, lote y vencimiento quedan solo en este celular.</p>`;
   const pinta=()=>{const q=plano($("bq-q").value);
-    const L=BQ.map(b=>bqGet(b.id)).filter(m=>{const k=bqEstado(m).k;if(filtro==="alerta"&&!["venc","rojo","amar"].includes(k))return false;if(filtro==="sinf"&&k!=="sinf")return false;if(filtro==="sin"&&k!=="sin")return false;
+    const L=BQ.map(b=>bqGet(b.id)).filter(m=>{const k=bqEstado(m).k;if(filtro==="alerta"&&!["venc","rojo","amar"].includes(k))return false;if(filtro==="sinf"&&k!=="sinf")return false;if(filtro==="sin"&&k!=="sin")return false;if(filtro==="conf"&&k!=="conf")return false;if(filtro==="ins"&&!m.ins)return false;if(filtro==="med"&&m.ins)return false;
       return !q||plano([m.n,m.c,m.g,m.u,m.pa,m.pn,...bqUsos(m.id).map(x=>x.t)].join(" ")).includes(q)});
     const gs=[...new Set(L.map(m=>m.g))];
-    $("bq-list").innerHTML=gs.map(g=>`<p class="lab" style="margin:12px 0 6px">${esc(g)}</p>${L.filter(m=>m.g===g).map(m=>{const av=bqAvisos(m,C).length;return `<details class="sec mb" data-bqd="${m.id}"><summary><span>${esc(m.n)}${m.c?` <small style="color:var(--muted);font-weight:400">${esc(m.c)}</small>`:""}${av?' <small style="color:var(--miss)">· ojo con esta persona</small>':""}</span>${bqChip(m)}</summary>${bqFicha(m,C)}</details>`}).join("")}`).join("")||`<p class="note-src">No encontré ese medicamento.</p>`;
+    $("bq-list").innerHTML=gs.map(g=>`<p class="lab" style="margin:12px 0 6px">${esc(g)}</p>${L.filter(m=>m.g===g).map(m=>{const av=bqAvisos(m,C).length;return `<details class="sec mb" data-bqd="${m.id}"><summary><span>${esc(m.n)}${m.c?` <small style="color:var(--muted);font-weight:400">${esc(m.c)}</small>`:""}${av?' <small style="color:var(--miss)">· ojo con esta persona</small>':""}</span>${bqChip(m)}</summary>${bqFicha(m,C)}</details>`}).join("")}`).join("")||`<p class="note-src">No encontré ese medicamento o insumo.</p>`;
     bqWireFichas($("bq-list"),C,id=>bqOpen(id,filtro))};
   $("bq-q").oninput=pinta;pinta();
   document.querySelectorAll("[data-bqf]").forEach(b=>b.onclick=()=>bqOpen(null,b.dataset.bqf));
@@ -8789,7 +8789,7 @@ function rutaBQWire(id){const box=$("ruta-bq");if(!box)return;
 /* las fichas de morbilidad usan la misma lista */
 function mbBQ(id,c){const x=MB_BQ[id];if(!x)return"";return `<dt style="color:var(--accent)">Del botiquín del puesto</dt><dd>${bqListaHTML(x,c).replace("No usar en este grupo:","No usar en esta condición:")}</dd>`}
 /* en la ficha del botiquín: en qué rutas se usa */
-function bqRutas(id){return Object.keys(RUTA_BQ).filter(k=>M[k]&&(RUTA_BQ[k].m||[]).some(z=>z[0]===id))}
+function bqRutas(id){return Object.keys(M).filter(k=>[RUTA_BQ[k],RUTA_INS[k]].some(x=>x&&(x.m||[]).some(z=>z[0]===id)))}
 
 /* ======================= v181: CASOS PARA PRACTICAR (MORBILIDAD) =======================
    Cada caso se apoya solo en la ficha de morbilidad de la app (MB) y cita la misma guía y página.
@@ -11012,7 +11012,7 @@ function evFinal(id){
   /* 7. Micronutrientes y desparasitación en primera infancia */
   if(id==="pinf"&&e){const tm=e.tm,L=q.map((z,k)=>({k,l:z.l,v:(a[k]||"").trim()})).filter(z=>/micronutr|desparasit|medicamentos y micronutrientes/i.test(z.l)),t2=plano(L.map(z=>z.v).join(" ")),k0=(L[0]||{}).k;
     const si=re=>re.test(t2)&&!new RegExp("no (se )?(da|entrega|recibe|aplica)[^.]{0,30}"+re.source).test(t2);
-    if(tm>=6&&tm<=23){if(!si(/micronutrientes en polvo|polvo|chispitas/))add("falta","Micronutrientes en polvo (fortificación casera) de 6 a 23 meses, un ciclo cada 6 meses (Res. 3280, p. 113)","q"+k0);else add("ok","Micronutrientes en polvo acordes a la edad")}
+    if(tm>=6&&tm<=23){if(!si(/micronutrientes en polvo|polvo|chispitas|vitamix/))add("falta","Micronutrientes en polvo (fortificación casera) de 6 a 23 meses, un ciclo cada 6 meses (Res. 3280, p. 113)","q"+k0);else add("ok","Micronutrientes en polvo acordes a la edad")}
     if(tm>=24&&tm<=59){const fal=[];if(!si(/vitamina a/))fal.push("vitamina A 200.000 UI dosis única 2 veces al año");if(!si(/hierro|ferros|polimaltosa/))fal.push("hierro 3 mg/kg/día 2 veces al año"+(v["PESO"]?" (con "+v["PESO"]+" kg: "+Math.round(3*v["PESO"])+" mg/día de hierro elemental)":""));
       if(fal.length)add("falta","Suplementación de 24 a 59 meses (Res. 3280, p. 113): "+fal.join("; "),"q"+k0);else add("ok","Vitamina A y hierro acordes a la edad")}
     if(tm>=12&&tm<=59){const dosis=tm<24?"200":"400";if(!si(/albendazol|desparasit/))add("falta","Desparasitación: albendazol "+dosis+" mg dosis única, 2 veces al año (Res. 3280, p. 113)","q"+k0);
@@ -11055,6 +11055,202 @@ paneEntr=(function(o){return function(){o.apply(this,arguments);try{const id=st.
 /* los borradores guardados con la versión anterior de los módulos se reubican una sola vez */
 Object.keys(OLD_LAB).forEach(id=>{if(!M[id]||S.get(key(id,"ivlab")))return;let a={};try{a=JSON.parse(S.get(key(id,"iv"))||"{}")||{}}catch(e){}
   S.set(key(id,"ivlab"),JSON.stringify(Object.keys(a).length?OLD_LAB[id]:ivFor(id).map(z=>z.l)));ivAns(id)});
+/* ======================= v213: nutrición e insumos de la solicitud a almacén en el botiquín =======================
+   Fuente: «Proyección de solicitud de medicamentos e insumos – enfermero puntos fijos» (FORM.NUTRICION,
+   FORM.MEDICO QUIRURGICO y FORM.LABORATORIOCLINICO, con sus observaciones). No hay acta de entrega de estos
+   ítems: quedan «Por confirmar» hasta que se anote en el celular la cantidad, el lote y el vencimiento.
+   ins:1 = insumo (ficha simplificada); pc:1 = por confirmar con el acta. */
+Object.assign(MBF,{
+ sol:"Solicitud a almacén de la ESE Hospital San Antonio (proyección de medicamentos e insumos, enfermero de puntos fijos)",
+ mnp:"OMS, Guideline: use of multiple micronutrient powders for point-of-use fortification of foods consumed by infants and young children aged 6–23 months and children aged 2–12 years (2016)",
+ aiepi:"OPS/Minsalud, Atención Integrada a las Enfermedades Prevalentes de la Infancia (AIEPI), cuadros de procedimientos"});
+BQ.push(
+{id:"mnp",n:"Micronutrientes en polvo (Vitamix15 Nutrea)",c:"Sobre de 1 g con 15 vitaminas y minerales (hierro, zinc, vitamina A, ácido fólico, entre otros)",p:"Sobre",sol:1000,ent:0,lote:"",v:"",pc:1,g:"Nutrición",
+ io:"Pedidos en el FORM.NUTRICION. Confirma con el acta cuántos llegaron, el lote y el vencimiento.",
+ u:"Fortificación casera de la comida de niños y niñas de 6 a 23 meses para prevenir la anemia y la deficiencia de micronutrientes (Res. 3280).",
+ pn:"6 a 23 meses: 1 sobre al día por 60 días seguidos (se entregan 60 sobres), luego 4 meses de descanso y otro ciclo; un ciclo cada 6 meses (6, 12 y 18 meses). Mezclar todo el sobre con 2 cucharadas de la comida espesa y tibia que el niño va a comer primero; que se la coma en los 30 minutos siguientes.",
+ pa:"No aplica en adultos.",
+ ef:"Heces oscuras o verdosas, estreñimiento o diarrea leve en los primeros días. Si la comida queda caliente o reposa, cambia de color y sabor.",
+ ci:"Menores de 6 meses (lactancia materna exclusiva) y mayores de 2 años (pasan a hierro y vitamina A). Niño con desnutrición aguda que recibe FTLC. Niño en tratamiento de anemia con sulfato ferroso. Malaria activa: tratarla primero; en zona de malaria se entregan junto con el diagnóstico y la prevención de la malaria (OMS).",
+ it:"Sulfato ferroso (no darlos juntos: se duplica el hierro). FTLC (ya viene fortificada).",
+ em:"No aplica.",
+ op:"Si no hay sobres: alimentos ricos en hierro (hígado, sangre, carnes, pescado, hojas verdes) y seguir con la lactancia materna. No mezclar en líquidos, en el tetero ni en comida caliente.",
+ f:["mnp",""]},
+{id:"ftlc",n:"Fórmula terapéutica lista para el consumo (FTLC)",c:"Sobre de 92 g (unas 500 kcal); lleva maní",p:"Sobre",sol:30,ent:0,lote:"",v:"",pc:1,g:"Nutrición",
+ io:"Pedidos en el FORM.NUTRICION. Confirma con el acta cuántos llegaron, el lote y el vencimiento.",
+ u:"Tratamiento de la desnutrición aguda en menores de 5 años sin complicaciones que pasa la prueba de apetito, según la Res. 2350 de 2020 y la orden médica.",
+ pn:"Antes de iniciar: prueba de apetito con agua segura y el cuidador presente. Dosis de referencia: unas 200 kcal/kg al día (unos 0,4 sobres por kg al día) repartidas en 5 a 8 tomas; confirma la cantidad en la tabla del lineamiento. Dar primero el pecho y después la FTLC, con agua segura para tomar.",
+ pa:"No aplica en adultos.",
+ ef:"Diarrea o vómito en los primeros días si se da muy rápido; sed (ofrecer agua).",
+ ci:"Complicaciones médicas, edema grave, no pasa la prueba de apetito o menor de 6 meses: remisión para manejo hospitalario. Alergia al maní.",
+ it:"No dar sulfato ferroso aparte ni micronutrientes en polvo: la FTLC ya trae hierro y micronutrientes.",
+ em:"No aplica.",
+ op:"Remisión para manejo intrahospitalario. No reemplazar con otros alimentos ni compartir el sobre con la familia.",
+ f:["dnt","página por verificar"],ord:1,
+ kg:[{t:"Sobres al día (200 kcal/kg)",mg:[200,200],cada:"al día, en 5 a 8 tomas (confirma con la tabla de la Res. 2350)",tot:1,u:"kcal",mgu:500,un:"sobre"}]});
+/* insumos: [id, nombre, presentación, cantidad pedida, grupo, para qué, cómo se usa, ojo, opciones] */
+[
+ /* vías y líquidos */
+ ["i_cat16","Catéter intravenoso n.º 16 x 32 mm","Unidad",5,"Insumos: vías y líquidos","Vena gruesa para pasar líquidos rápido: hemorragia posparto, choque, trauma.","Dos venas gruesas (16 o 18) en la hemorragia; fijar bien antes del traslado.","Duele más: en venas pequeñas usa uno más delgado.",""],
+ ["i_cat18","Catéter intravenoso n.º 18 x 32 mm","Unidad",5,"Insumos: vías y líquidos","Adultos y gestantes que necesitan líquidos rápidos o transfusión en el hospital: hemorragia, choque, dengue grave, preeclampsia.","Primera elección en la gestante o el adulto grave antes de remitir.","",""],
+ ["i_cat20","Catéter intravenoso n.º 20 x 32 mm","Unidad",5,"Insumos: vías y líquidos","Adultos estables y adolescentes: mantener una vena, antibiótico IV antes de remitir, sulfato de magnesio.","","",""],
+ ["i_cat22","Catéter intravenoso n.º 22 x 25 mm","Unidad",5,"Insumos: vías y líquidos","Niños grandes, adultos mayores y venas finas.","","",""],
+ ["i_cat24","Catéter intravenoso n.º 24 x 19 mm","Unidad",5,"Insumos: vías y líquidos","Recién nacidos y lactantes.","","Vena difícil en un niño grave: no pierdas tiempo; telemedicina y remisión, SRO por sonda si no hay vena y está consciente (plan C de AIEPI).",""],
+ ["i_tapon","Tapón heparinizado (L-Lock)","Unidad",5,"Insumos: vías y líquidos","Dejar la vena permeable sin goteo durante el traslado o entre dosis.","Lavar con 3 a 5 ml de solución salina antes y después de cada medicamento.","",""],
+ ["i_macro","Equipo de macrogoteo","Unidad",10,"Insumos: vías y líquidos","Líquidos en adultos y bolos rápidos (hemorragia, choque, dengue con signos de alarma).","20 gotas = 1 ml: gotas por minuto = ml por hora ÷ 3.","",""],
+ ["i_micro","Equipo de microgoteo","Unidad",10,"Insumos: vías y líquidos","Niños y goteos que deben ser exactos: sulfato de magnesio de mantenimiento, líquidos por kg.","60 microgotas = 1 ml: microgotas por minuto = ml por hora.","",""],
+ ["i_buret","Buretrol (cámara volumétrica)","Unidad",5,"Insumos: vías y líquidos","Líquidos en niños medidos por kg y mezclas exactas (sulfato de magnesio) para no pasar de más.","Cargar solo el volumen de 1 hora en la cámara.","",""],
+ ["i_j1","Jeringa de 1 ml 27G x 1/2","Unidad",20,"Insumos: vías y líquidos","Dosis pequeñas y exactas: adrenalina en la anafilaxia (0,01 ml/kg), dosis por peso en niños, intradérmica.","","",""],
+ ["i_j3","Jeringa de 3 ml 23G x 1","Unidad",30,"Insumos: vías y líquidos","Inyecciones intramusculares: medroxiprogesterona, dexametasona, diclofenaco, gentamicina.","","",""],
+ ["i_j5","Jeringa de 5 ml 21G x 1 1/2","Caja",1,"Insumos: vías y líquidos","Penicilina benzatínica (la aguja 21G deja pasar la suspensión espesa), lidocaína para suturas o implante.","","",""],
+ ["i_j10","Jeringa de 10 ml 21G x 1 1/2","Caja",1,"Insumos: vías y líquidos","Diluir y pasar medicamentos IV lentos (ácido tranexámico, sulfato de magnesio de carga), lavado de heridas a presión.","","",""],
+ ["i_ag21","Aguja hipodérmica 21G x 1 1/2","Unidad",10,"Insumos: vías y líquidos","Cargar medicamentos de la ampolla e inyección intramuscular profunda en adultos.","","",""],
+ /* curación y procedimientos */
+ ["i_gasa","Gasa estéril 10 x 10 cm","Caja",3,"Insumos: curación y procedimientos","Curaciones, suturas, inserción y retiro de implante, parto.","","",""],
+ ["i_algo","Algodón en torundas","Bolsa x 500 g",2,"Insumos: curación y procedimientos","Antisepsia de la piel antes de inyecciones y presión después de la punción.","","No dejar fibras de algodón dentro de una herida abierta: ahí usa gasa.",""],
+ ["i_aplic","Aplicador con algodón","Unidad",20,"Insumos: curación y procedimientos","Tomar muestras de flujo, limpiar el oído externo con cuidado, aplicar medicamentos en lesiones pequeñas.","","",""],
+ ["i_bajal","Baja lenguas","Unidad",50,"Insumos: curación y procedimientos","Examen de la garganta y la boca; férula de un dedo en una urgencia.","","",""],
+ ["i_bist15","Cuchilla de bisturí n.º 15","Unidad",10,"Insumos: curación y procedimientos","Procedimientos pequeños y precisos: retiro del implante subdérmico, drenaje de abscesos, desbridamiento.","Con mango de bisturí estéril; descartar en el guardián.","",""],
+ ["i_bist20","Cuchilla de bisturí n.º 20","Unidad",10,"Insumos: curación y procedimientos","Cortes más grandes: desbridamiento amplio, cortar material de curación.","Con mango de bisturí estéril; descartar en el guardián.","",""],
+ ["i_pro2","Prolene 2-0","Unidad",10,"Insumos: curación y procedimientos","Suturas en zonas de mucha tensión (cuero cabelludo, planta del pie, espalda).","Retiro de puntos: cuero cabelludo a los 7 a 10 días, planta y espalda a los 10 a 14.","No absorbible: no sirve para desgarros del periné ni mucosas (allí se usa sutura absorbible).",""],
+ ["i_pro3","Prolene 3-0","Unidad",10,"Insumos: curación y procedimientos","Suturas de tronco, brazos y piernas.","Retiro de puntos: tronco a los 7 a 10 días, extremidades a los 10 a 14.","No absorbible: no para el periné ni la boca. Herida por mordedura de animal: lavar y no cerrar de inmediato (telemedicina).",""],
+ ["i_pro4","Prolene 4-0","Unidad",10,"Insumos: curación y procedimientos","Suturas finas: cara, manos, dedos y niños.","Retiro de puntos: cara a los 5 días, manos a los 7 a 10.","No absorbible: no para el periné ni la boca.",""],
+ ["i_espa","Esparadrapo hospitalario 2\"","Rollo",3,"Insumos: curación y procedimientos","Fijar catéteres, sondas y apósitos.","","",""],
+ ["i_mp1","Micropore 1\"","Rollo",2,"Insumos: curación y procedimientos","Fijar apósitos en piel sensible, curaciones de cara y niños.","","",""],
+ ["i_mp05","Micropore 1/2\"","Rollo",2,"Insumos: curación y procedimientos","Cerrar heridas pequeñas con tiras (aproximar bordes) y fijar el catéter del recién nacido.","","",""],
+ ["i_vasel","Vaselina x 450 g","Frasco",1,"Insumos: curación y procedimientos","Gasa vaselinada para quemaduras y heridas que se pegan; piel seca o agrietada.","","No lubricar sondas ni condones de látex con vaselina: los daña. Para la sonda usa lubricante a base de agua o lidocaína en gel.",""],
+ ["i_venalg","Venda de algodón 5 x 5","Unidad",10,"Insumos: curación y procedimientos","Almohadillar debajo de la férula de yeso o en una inmovilización.","","",""],
+ ["i_vengas","Venda de gasa 5 x 5","Unidad",10,"Insumos: curación y procedimientos","Sostener apósitos y curaciones sin apretar.","","",""],
+ ["i_venyes","Venda de yeso 5 x 5","Unidad",10,"Insumos: curación y procedimientos","Férula para inmovilizar una fractura o un esguince grave mientras se remite.","Siempre con algodón debajo; revisar dedos (color, calor, movimiento) a los 15 minutos.","Nunca yeso circular cerrado en el puesto: si se hincha puede cortar la circulación.",""],
+ ["i_venela","Venda elástica 5 x 5","Unidad",10,"Insumos: curación y procedimientos","Esguinces y contusiones; sostener férulas.","Vendar de la parte de abajo hacia arriba sin apretar.","Accidente ofídico: nunca vendaje compresivo ni torniquete.",""],
+ ["i_compr","Compresa quirúrgica 45 x 45 no estéril","Unidad",10,"Insumos: parto y recién nacido","Secar y abrigar al recién nacido; estimar el sangrado en el posparto; campo limpio.","Una compresa empapada equivale más o menos a 100 ml de sangre.","",""],
+ ["i_collar","Collar de Thomas talla M","Unidad",1,"Insumos: vía aérea y reanimación","Inmovilizar el cuello en caídas de altura, golpes en la cabeza o accidentes, mientras se remite.","Colocar con el cuello alineado, entre dos personas.","",""],
+ ["i_gluta","Glutaraldehído (galón)","Galón",1,"Insumos: protección y antisepsia","Desinfección de alto nivel del instrumental que no es desechable (pinzas, espéculos metálicos, mangos de bisturí).","Lavar primero con agua y jabón, sumergir por completo el tiempo que diga la etiqueta y enjuagar con agua estéril o hervida.","Tóxico: con guantes, gafas y buena ventilación; tapado y rotulado con la fecha de activación. No es para la piel.",""],
+ ["i_ypesp","Yodopovidona espuma x 120 ml","Frasco",3,"Insumos: protección y antisepsia","Lavado de la piel antes de procedimientos y lavado de heridas sucias.","","Alergia al yodo. Evitar en recién nacidos en áreas grandes.",""],
+ ["i_ypsol","Yodopovidona solución x 120 ml","Frasco",3,"Insumos: protección y antisepsia","Antisepsia de la piel antes del implante, la sutura, la sonda vesical o un drenaje; después del lavado con agua y jabón en la mordedura.","Dejar secar antes de cortar o puncionar.","Alergia al yodo. No en mucosas del recién nacido.",""],
+ ["i_alcoh","Toallas con alcohol isopropílico al 70 %","Caja x 100",2,"Insumos: protección y antisepsia","Antisepsia de la piel antes de inyecciones y punciones del dedo; desinfectar tapones y ampollas.","Dejar secar antes de puncionar (si no, arde y daña la muestra).","",""],
+ ["i_guaL","Guantes desechables talla L","Caja x 100",5,"Insumos: protección y antisepsia","Examen, toma de muestras, curaciones limpias.","","",""],
+ ["i_guaM","Guantes desechables talla M","Caja x 100",5,"Insumos: protección y antisepsia","Examen, toma de muestras, curaciones limpias.","","",""],
+ ["i_ge7","Guantes estériles n.º 7","Par",25,"Insumos: protección y antisepsia","Procedimientos estériles: parto, sutura, implante, sonda vesical.","","",""],
+ ["i_ge8","Guantes estériles n.º 8","Par",25,"Insumos: protección y antisepsia","Procedimientos estériles: parto, sutura, implante, sonda vesical.","","",""],
+ /* ginecología */
+ ["i_espec","Espéculo desechable","Unidad",10,"Insumos: citología y ginecología","Citología (toma de la muestra del cuello uterino), examen del flujo vaginal y del sangrado, inspección del cuello.","Tibio y lubricado solo con agua; explicar antes y pedir el consentimiento.","",""],
+ ["i_kitcit","Kit para citología","Unidad",50,"Insumos: citología y ginecología","Toma de la citología del cuello uterino.","Rotular la lámina antes de tomar la muestra; extender en una sola dirección.","",""],
+ ["i_fix","Fijador para citología (Fixcell)","Frasco x 120 ml",1,"Insumos: citología y ginecología","Fijar la lámina de la citología de inmediato para que la muestra sirva.","Aplicar a unos 20 cm en los primeros segundos después de extender.","",""],
+ ["i_gel","Gel conductor x 240 ml","Frasco",1,"Insumos: parto y recién nacido","Escuchar la frecuencia cardiaca fetal con el doppler.","","",""],
+ /* parto y RN */
+ ["i_clamp","Clamp umbilical","Unidad",5,"Insumos: parto y recién nacido","Pinzar el cordón en el parto (pinzamiento tardío: 1 a 3 minutos o cuando deje de latir, si el bebé está bien).","","",""],
+ ["i_pera","Pera de succión","Unidad",5,"Insumos: parto y recién nacido","Aspirar boca y luego nariz si las secreciones tapan la vía aérea (no de rutina); secreción nasal del lactante.","Primero la boca y después la nariz, con suavidad.","",""],
+ /* vía aérea y reanimación */
+ ["i_ambuA","Resucitador adulto reutilizable","Unidad",2,"Insumos: vía aérea y reanimación","Ventilar con bolsa y máscara al adulto que no respira o respira mal mientras se remite.","Sellar bien la máscara (técnica C-E) y ventilar 10 veces por minuto; limpiar y desinfectar después de usarlo.","",""],
+ ["i_ambuP","Resucitador pediátrico reutilizable","Unidad",2,"Insumos: vía aérea y reanimación","Reanimación del recién nacido que no respira al minuto de oro y de niños.","Recién nacido: 40 a 60 ventilaciones por minuto con máscara del tamaño correcto; confirmar que el pecho sube.","Confirma que tenga máscara neonatal.",""],
+ ["i_tet35","Tubo endotraqueal 3.5 con balón","Unidad",1,"Insumos: vía aérea y reanimación","Intubación del recién nacido o lactante por personal entrenado.","","En el puesto lo primero es ventilar bien con bolsa y máscara.",""],
+ ["i_tet7","Tubo endotraqueal 7.0 sin balón","Unidad",1,"Insumos: vía aérea y reanimación","Intubación del adulto por personal entrenado.","","En el puesto lo primero es ventilar bien con bolsa y máscara.",""],
+ ["i_tet8","Tubo endotraqueal 8.0 sin balón","Unidad",1,"Insumos: vía aérea y reanimación","Intubación del adulto por personal entrenado.","","En el puesto lo primero es ventilar bien con bolsa y máscara.",""],
+ ["i_camA","Inhalocámara adulto","Unidad",10,"Insumos: vía aérea y reanimación","Salbutamol, ipratropio y beclometasona en adultos.","Una inhalación a la vez, 5 a 10 respiraciones por cada una; se entrega al paciente.","",""],
+ ["i_camP","Inhalocámara pediátrica","Unidad",10,"Insumos: vía aérea y reanimación","Salbutamol y beclometasona en niños (con máscara en los menores de 4 años).","Una inhalación a la vez, 5 a 10 respiraciones por cada una; se entrega al cuidador.","",""],
+ /* sondas */
+ ["i_foley","Sonda Foley de 2 vías n.º 18","Unidad",1,"Insumos: sondas","Retención urinaria; medir la orina en la preeclampsia severa con sulfato de magnesio, la hemorragia posparto y el choque.","Técnica estéril; inflar el balón con agua estéril solo cuando salga orina.","Con sulfato de magnesio, si la orina baja de 30 ml por hora, no seguir la dosis de mantenimiento sin orden médica.",""],
+ ["i_cysto","Bolsa recolectora Cystoflo x 2.000 ml","Unidad",1,"Insumos: sondas","Conectar a la sonda Foley y medir la orina por hora.","Siempre por debajo de la vejiga.","",""],
+ ["i_nel12","Sonda Nelaton n.º 12","Unidad",2,"Insumos: sondas","Vaciar la vejiga una sola vez o tomar orina estéril en quien no puede recoger la muestra.","","",""],
+ ["i_nel16","Sonda Nelaton n.º 16","Unidad",2,"Insumos: sondas","Vaciar la vejiga una sola vez en el adulto.","","",""],
+ ["i_sng6","Sonda nasogástrica n.º 6","Unidad",2,"Insumos: sondas","Recién nacido: descomprimir el estómago o alimentar por orden médica.","Medir de la nariz al lóbulo de la oreja y al punto medio entre el apéndice xifoides y el ombligo.","",""],
+ ["i_sng10","Sonda nasogástrica n.º 10","Unidad",2,"Insumos: sondas","Lactantes: SRO por sonda si no puede tomar y no hay vena (plan C de AIEPI); alimentación en la desnutrición grave por orden médica.","","",""],
+ ["i_sng12","Sonda nasogástrica n.º 12","Unidad",2,"Insumos: sondas","Niños pequeños: SRO por sonda o descompresión del estómago.","","",""],
+ ["i_sng14","Sonda nasogástrica n.º 14","Unidad",2,"Insumos: sondas","Niños grandes y adolescentes: descompresión, intoxicación por orden médica.","","",""],
+ ["i_sng16","Sonda nasogástrica n.º 16","Unidad",2,"Insumos: sondas","Adultos: vómito persistente con distensión, paciente inconsciente antes de remitir.","","",""],
+ ["i_sng18","Sonda nasogástrica n.º 18","Unidad",2,"Insumos: sondas","Adultos: descompresión del estómago.","","",""],
+ /* oídos */
+ ["i_cono","Cono para otoscopio","Unidad",100,"Insumos: curación y procedimientos","Otoscopia: otitis media, cuerpo extraño, cera.","Un cono por paciente o lavarlo y desinfectarlo entre pacientes.","",""],
+ /* laboratorio: pruebas rápidas */
+ ["i_prvih","Prueba rápida de VIH","Caja x 30",5,"Insumos de laboratorio: pruebas rápidas","Tamizaje de VIH: gestante en cada trimestre, ITS, tuberculosis, violencia sexual, a demanda.","Con asesoría y consentimiento; si es reactiva, segunda prueba de otro fabricante (Pruebas en el puesto).","",""],
+ ["i_prsif","Prueba rápida de sífilis (treponémica)","Caja x 30",5,"Insumos de laboratorio: pruebas rápidas","Sífilis en gestantes (cada trimestre y en el parto), ITS, violencia sexual.","Gestante reactiva: penicilina benzatínica el mismo día (con adrenalina a mano) y ruta de sífilis gestacional.","",""],
+ ["i_prhb","Prueba rápida de hepatitis B (HBsAg)","Caja x 30",5,"Insumos de laboratorio: pruebas rápidas","Gestante en el primer control, ITS, violencia sexual, contactos.","","",""],
+ ["i_prhc","Prueba rápida de hepatitis C (HCV)","Caja x 30",5,"Insumos de laboratorio: pruebas rápidas","Tamizaje de hepatitis C (adultos de 50 años o más una vez en la vida, riesgo, ITS).","","",""],
+ ["i_prden","Prueba rápida de dengue dúo (NS1 + IgM/IgG)","Caja x 30",2,"Insumos de laboratorio: pruebas rápidas","Fiebre con sospecha de dengue: NS1 en los primeros 5 días; IgM desde el 5.º día.","Siempre con gota gruesa o PDR de malaria en la misma fiebre.","Una prueba negativa no descarta el dengue: maneja según los signos de alarma.",""],
+ ["i_prlep","Prueba rápida de leptospira","Caja x 30",1,"Insumos de laboratorio: pruebas rápidas","Fiebre con dolor en las pantorrillas, ojos rojos o ictericia después de contacto con agua o barro.","","Una prueba negativa en los primeros días no la descarta.",""],
+ ["i_hcg","Prueba de embarazo (HCG cualitativa)","Caja x 30",3,"Insumos de laboratorio: pruebas rápidas","Confirmar el embarazo para el ingreso al PAMI; antes de iniciar un método de planificación o un medicamento que daña al feto; IVE.","","",""],
+ ["i_tiro","Tiras de orina de 10 parámetros","Frasco x 100",2,"Insumos de laboratorio: pruebas rápidas","Uroanálisis en el puesto: infección urinaria (nitritos y leucocitos), proteína en la gestante con presión alta, glucosa y cetonas en la diabetes, sangre en el accidente ofídico.","Orina fresca del chorro medio; leer en el tiempo que dice el frasco.","",""],
+ ["i_mission","Tiras Mission","Caja x 25",5,"Insumos de laboratorio: muestras y equipos","Tiras del medidor Mission del puesto.","","Confirma para qué equipo son (hemoglobina, glucosa o perfil de lípidos) y corrige el nombre si hace falta.",""],
+ ["i_hcue","Microcuvetas HemoCue","Caja x 200",3,"Insumos de laboratorio: muestras y equipos","Hemoglobina en el puesto: gestantes, niños con palidez o en control, desnutrición, malaria, sangrado.","Tercera gota de sangre capilar, sin exprimir el dedo.","",""],
+ ["i_glu","Tiras de glucómetro Vivacheck","Unidad",100,"Insumos de laboratorio: muestras y equipos","Glucometría: todo paciente inconsciente o que convulsiona, diabetes, recién nacido de riesgo, desnutrición grave, malaria grave.","","Menos de 70 mg/dl (menos de 45 en el recién nacido): hipoglicemia, tratarla ya.",""],
+ ["i_crea","Tiras de creatinina Xpress","Unidad",100,"Insumos de laboratorio: muestras y equipos","Creatinina en el puesto para hipertensos y diabéticos (riesgo de enfermedad renal) y antes de ajustar medicamentos.","","",""],
+ ["i_soh","Prueba de sangre oculta en heces","Unidad",2,"Insumos de laboratorio: pruebas rápidas","Tamizaje de cáncer de colon de los 50 a los 75 años cada 2 años (Res. 3280); sangrado digestivo oculto con anemia.","","El paquete de 250 se pidió como «cantidad 2»: confirma si son pruebas o cajas.",""],
+ /* laboratorio: muestras */
+ ["i_lanc","Lancetas para sangre capilar","Caja x 200",8,"Insumos de laboratorio: muestras y equipos","Hemoglobina, glucometría, creatinina, pruebas rápidas de sangre y PDR de malaria.","Puncionar el lado de la yema del dedo; en el lactante, el talón por los lados.","",""],
+ ["i_lam","Láminas portaobjetos","Caja x 100",1,"Insumos de laboratorio: muestras y equipos","Citología; extendidos que pida el programa (esputo o linfa para lepra) para enviar al laboratorio.","Rotular con lápiz en la parte esmerilada.","",""],
+ ["i_fbk","Frasco recolector de baciloscopia","Unidad",30,"Insumos de laboratorio: muestras y equipos","Esputo del sintomático respiratorio (tos de 2 semanas o más): 2 o 3 muestras, una al amanecer.","Esputo profundo, no saliva, al aire libre; rotular y enviar en la cadena del programa.","",""],
+ ["i_for","Frasco recolector de orina 35 cc","Unidad",100,"Insumos de laboratorio: muestras y equipos","Orina para la tira en el puesto y muestra para urocultivo en la remisión.","","",""],
+ ["i_orina","Recolector de orina (frasco, pedido médico-quirúrgico)","Unidad",100,"Insumos de laboratorio: muestras y equipos","Orina para la tira en el puesto y muestra para urocultivo en la remisión.","","",""],
+ ["i_copro","Recolector coprológico","Unidad",25,"Insumos de laboratorio: muestras y equipos","Heces para coprológico o sangre oculta: diarrea con sangre, parasitosis, tamizaje de colon.","","",""],
+ ["i_mech","Mechero de alcohol","Unidad",1,"Insumos de laboratorio: muestras y equipos","Fijar extendidos con calor cuando el programa lo pida; zona limpia para procedimientos.","","Lejos de material inflamable; apagar después de usar.",""],
+ ["i_mecha","Mecha para mechero","Unidad",1,"Insumos de laboratorio: muestras y equipos","Repuesto del mechero.","","",""],
+ ["i_alcind","Alcohol industrial para mechero","Unidad",1,"Insumos de laboratorio: muestras y equipos","Combustible del mechero (no es para la piel).","","No usar en la piel ni en heridas.",""]
+].forEach(([id,n,p,sol,g,u,pa,ci,op])=>BQ.push({id,n,c:"",p,sol,ent:0,lote:"",v:"",pc:1,ins:1,g,u,pa,ci,op,
+  io:"Pedido en la solicitud a almacén. Confirma con el acta cuántos llegaron, el lote y el vencimiento.",f:["sol",""]}));
+
+/* ---------- en qué rutas y morbilidades se usa cada insumo ---------- */
+const RUTA_INS={
+ precon:{m:[["i_hcg","Descartar embarazo antes de un método o de un medicamento que dañe al feto."],["i_prvih","VIH con asesoría."],["i_prsif","Sífilis."],["i_prhb","Hepatitis B."],["i_hcue","Hemoglobina: corregir la anemia antes del embarazo."],["i_lanc","Punción del dedo."],["i_glu","Glucometría si hay diabetes o riesgo."]]},
+ prenatal:{m:[["i_hcg","Confirmar el embarazo al ingreso al PAMI."],["i_prvih","VIH en cada trimestre, con asesoría."],["i_prsif","Sífilis en cada trimestre."],["i_prhb","Hepatitis B en el primer control."],["i_hcue","Hemoglobina al ingreso y en los controles."],["i_lanc","Punción del dedo."],["i_tiro","Tira de orina en cada control (proteína, nitritos, leucocitos)."],["i_for","Orina para la tira y el urocultivo de la remisión."],["i_gel","Frecuencia cardiaca fetal con doppler."],["i_espec","Solo si hay sangrado, flujo o para la citología."],["i_j5","Penicilina benzatínica si la prueba de sífilis es reactiva."]]},
+ parto:{m:[["i_ge7","Atención del parto."],["i_ge8","Atención del parto."],["i_clamp","Pinzamiento del cordón."],["i_compr","Secar al bebé y estimar el sangrado (una empapada ≈ 100 ml)."],["i_gasa","Revisión del periné y limpieza."],["i_cat18","Vena gruesa si hay hemorragia o preeclampsia."],["i_cat16","Segunda vena gruesa en la hemorragia."],["i_macro","Cristaloides en bolos."],["i_micro","Sulfato de magnesio de mantenimiento."],["i_j10","Ácido tranexámico y carga de sulfato de magnesio."],["i_foley","Medir la orina con sulfato de magnesio o en la hemorragia."],["i_cysto","Bolsa para la Foley."],["i_ambuP","Reanimación del recién nacido."],["i_pera","Solo si las secreciones tapan la vía aérea del bebé."],["i_ypsol","Antisepsia antes de reparar o de la sonda."]],
+  falta:"No hay sutura absorbible (catgut crómico o poliglactina) para los desgarros del periné: el Prolene no sirve allí. Tampoco campo estéril de parto ni equipo de parto."},
+ rn:{m:[["i_clamp","Cordón."],["i_compr","Secar y abrigar en el minuto de oro."],["i_ambuP","Ventilación con bolsa y máscara si no respira (confirma la máscara neonatal)."],["i_pera","Solo si las secreciones tapan la vía aérea."],["i_glu","Glucometría en el recién nacido de riesgo (hijo de diabética, bajo peso, hipotermia)."],["i_lanc","Punción del talón por los lados."],["i_cat24","Vena en el recién nacido."],["i_micro","Líquidos exactos."],["i_sng6","Descompresión o alimentación por orden médica."],["i_tet35","Solo personal entrenado."]]},
+ ive:{m:[["i_hcg","Confirmar el embarazo."],["i_prvih","VIH con asesoría."],["i_prsif","Sífilis."],["i_espec","Examen si hay sangrado."]]},
+ pinf:{m:[["i_hcue","Hemoglobina si hay palidez o según el control."],["i_lanc","Punción del dedo o del talón."],["i_cono","Otoscopia."],["i_bajal","Examen de la boca y la garganta."],["i_camP","Si tiene sibilancias y usa salbutamol."]]},
+ inf:{m:[["i_hcue","Hemoglobina."],["i_lanc","Punción del dedo."],["i_cono","Otoscopia."],["i_bajal","Garganta."],["i_copro","Coprológico si hay diarrea con sangre o parásitos."],["i_camP","Asma."]]},
+ adol:{m:[["i_hcg","Antes de iniciar un método de planificación."],["i_prvih","VIH con asesoría."],["i_prsif","Sífilis."],["i_prhb","Hepatitis B."],["i_hcue","Hemoglobina (sangrado menstrual abundante, palidez)."],["i_lanc","Punción del dedo."],["i_ypsol","Antisepsia para el implante."],["i_j3","Medroxiprogesterona."]]},
+ juv:{m:[["i_espec","Citología desde los 25 años."],["i_kitcit","Citología."],["i_fix","Fijar la lámina."],["i_lam","Lámina de la citología."],["i_hcg","Antes de un método de planificación."],["i_prvih","VIH."],["i_prsif","Sífilis."],["i_prhb","Hepatitis B."],["i_prhc","Hepatitis C si hay riesgo."],["i_glu","Glucometría si hay riesgo."]]},
+ adul:{m:[["i_espec","Citología."],["i_kitcit","Citología de 25 a 65 años según el esquema."],["i_fix","Fijar la lámina."],["i_lam","Lámina de la citología."],["i_soh","Sangre oculta en heces de 50 a 75 años cada 2 años."],["i_copro","Muestra para la sangre oculta."],["i_glu","Glucemia en el riesgo cardiovascular."],["i_crea","Creatinina en hipertensos y diabéticos."],["i_tiro","Proteína y glucosa en orina."],["i_prhc","Hepatitis C una vez desde los 50 años."],["i_prvih","VIH."],["i_prsif","Sífilis."],["i_mission","Si son de perfil de lípidos o glucosa."]]},
+ vej:{m:[["i_glu","Glucemia."],["i_crea","Creatinina antes de ajustar medicamentos."],["i_tiro","Proteína y glucosa en orina."],["i_soh","Sangre oculta en heces hasta los 75 años."],["i_copro","Muestra para la sangre oculta."],["i_prhc","Hepatitis C si no se ha hecho."],["i_cono","Otoscopia (cera y audición)."],["i_camA","Si usa inhaladores."],["i_nel16","Retención urinaria (hombre mayor con próstata grande): vaciar y remitir."]]},
+ proc:{m:[["i_ypsol","Antisepsia de la piel."],["i_ge7","Procedimiento estéril."],["i_ge8","Procedimiento estéril."],["i_gasa","Campo y curación."],["i_bist15","Retiro del implante y drenaje de abscesos."],["i_j5","Lidocaína para el implante."],["i_j3","Medroxiprogesterona."],["i_pro4","Suturas finas."],["i_pro3","Suturas de tronco y extremidades."],["i_espa","Fijar el apósito."],["i_mp1","Apósito del implante."],["i_alcoh","Antisepsia antes de inyecciones."],["i_espec","Citología."],["i_kitcit","Citología."],["i_fix","Fijar la citología."],["i_gluta","Desinfección del instrumental no desechable."],["i_guaL","Examen y curaciones limpias."],["i_guaM","Examen y curaciones limpias."],["i_algo","Presión después de la inyección."],["i_ag21","Cargar medicamentos e inyección IM profunda."],["i_mp05","Fijar o aproximar bordes pequeños."]]}};
+const MB_INS={
+ grave:{m:[["i_cat18","Vena gruesa en adultos."],["i_cat22","Niños grandes."],["i_cat24","Lactantes."],["i_macro","Bolos en adultos."],["i_buret","Bolos medidos en niños."],["i_glu","Glucometría a todo paciente grave."],["i_lanc","Punción del dedo."],["i_ambuA","Si no respira o respira mal (adulto)."],["i_ambuP","Si no respira o respira mal (niño)."],["i_foley","Medir la orina por hora."],["i_cysto","Bolsa para la Foley."],["i_collar","Trauma: inmovilizar el cuello."],["i_sng16","Vómito con distensión o inconsciente."],["i_tet7","Solo personal entrenado."],["i_tet8","Solo personal entrenado."],["i_tapon","Dejar la vena lista para el traslado."],["i_ag21","Cargar los medicamentos."],["i_sng14","Niño grande inconsciente o con vómito y distensión."],["i_sng18","Adulto con vómito y distensión."]]},
+ anafilaxia:{m:[["i_j1","Adrenalina 0,01 ml/kg exacta."],["i_cat18","Vena para líquidos."],["i_macro","Bolos de cristaloides."],["i_ambuA","Si deja de respirar."]]},
+ convulsion:{m:[["i_glu","Descartar hipoglicemia en toda convulsión."],["i_lanc","Punción del dedo."],["i_pera","Aspirar secreciones de la boca después de la crisis."],["i_cat20","Vena (magnesio en la gestante)."],["i_micro","Sulfato de magnesio de mantenimiento."]]},
+ hpp:{m:[["i_cat16","Primera vena gruesa."],["i_cat18","Segunda vena gruesa."],["i_macro","Cristaloides tibios en bolos."],["i_j10","Ácido tranexámico IV lento."],["i_compr","Estimar el sangrado (una empapada ≈ 100 ml)."],["i_foley","Vaciar la vejiga ayuda a que el útero se contraiga."],["i_cysto","Medir la orina."],["i_hcue","Hemoglobina."],["i_ge8","Masaje bimanual y revisión."]]},
+ preeclampsia:{m:[["i_tiro","Proteína en la orina."],["i_cat18","Vena."],["i_j10","Carga de sulfato de magnesio."],["i_micro","Mantenimiento exacto del sulfato de magnesio."],["i_buret","Mezcla exacta del magnesio."],["i_foley","Orina de 30 ml por hora o más con el magnesio."],["i_cysto","Medir la orina por hora."]]},
+ malaria:{m:[["i_lanc","PDR de malaria."],["i_hcue","Hemoglobina (anemia por malaria)."],["i_glu","Glucometría en la malaria grave."]],falta:"Las pruebas de diagnóstico rápido de malaria (PDR) no están en esta solicitud: llegan por el programa de ETV."},
+ dengue:{m:[["i_prden","NS1 en los primeros 5 días; IgM desde el 5.º."],["i_lanc","Punción del dedo."],["i_hcue","Hemoglobina: si sube, hay hemoconcentración."],["i_cat20","Vena si hay signos de alarma."],["i_macro","Cristaloides."],["i_prlep","Fiebre con dolor de pantorrillas, ojos rojos o ictericia después de contacto con agua o barro: pensar en leptospira."]]},
+ eda:{m:[["i_copro","Diarrea con sangre o que dura más de 14 días."],["i_sng10","SRO por sonda si no puede tomar y no hay vena (plan C de AIEPI)."],["i_buret","Líquidos IV medidos por kg (plan C)."],["i_cat24","Vena en lactantes."],["i_sng12","SRO por sonda en niños pequeños (plan C)."]]},
+ ira:{m:[["i_pera","Destapar la nariz del lactante antes de comer."],["i_bajal","Examen de la garganta."]]},
+ dnt:{m:[["i_hcue","Hemoglobina."],["i_lanc","Punción del dedo."],["i_glu","Hipoglicemia en la desnutrición grave."],["i_sng10","Alimentación por sonda solo por orden médica."]]},
+ ofidico:{m:[["i_cat18","Vena."],["i_macro","Líquidos."],["i_tiro","Sangre en la orina (envenenamiento por Bothrops)."],["i_j1","Adrenalina a mano antes del antiveneno."]],no:["i_venela"],op:"Nada de torniquete, vendaje compresivo, cortar ni chupar la mordedura."},
+ rabia:{m:[["i_ypsol","Después de lavar con agua y jabón por 15 minutos."],["i_gasa","Cubrir la herida."],["i_ge7","Lavado de la herida."]],op:"No cerrar con puntos la herida por mordedura (o solo aproximar si es muy grande, por orden médica)."},
+ tb:{m:[["i_fbk","2 o 3 muestras de esputo, una al amanecer."],["i_lam","Si el programa pide el extendido."],["i_prvih","VIH a toda persona con tuberculosis."],["i_mech","Fijar el extendido con calor, si el programa lo pide."],["i_mecha","Repuesto del mechero."],["i_alcind","Combustible del mechero."]]},
+ sifilis:{m:[["i_prsif","Prueba treponémica."],["i_prvih","VIH al mismo tiempo."],["i_prhb","Hepatitis B."],["i_j5","Penicilina benzatínica."]]},
+ piel:{m:[["i_bist15","Drenaje de abscesos."],["i_ypesp","Lavado de lesiones infectadas."],["i_gasa","Curación."]]},
+ itu:{m:[["i_tiro","Nitritos y leucocitos."],["i_for","Orina del chorro medio."],["i_nel12","Muestra por sonda si no puede recogerla."],["i_hcg","Descartar embarazo antes de escoger el antibiótico."],["i_orina","Orina del chorro medio."]]},
+ parasitos:{m:[["i_copro","Coprológico."],["i_hcue","Hemoglobina."]]},
+ garganta:{m:[["i_bajal","Ver amígdalas y placas."],["i_cono","Otoscopia en la otitis."]]},
+ asma:{m:[["i_camA","Salbutamol con inhalocámara en adultos."],["i_camP","Salbutamol con inhalocámara en niños."]]},
+ vaginal:{m:[["i_espec","Ver el flujo y el cuello."],["i_aplic","Muestra del flujo."],["i_hcg","Descartar embarazo."],["i_prvih","VIH."],["i_prsif","Sífilis."]]},
+ herida:{m:[["i_ypesp","Lavado de la herida sucia."],["i_ypsol","Antisepsia de la piel alrededor."],["i_j10","Lavado a presión con solución salina."],["i_ge7","Sutura estéril."],["i_pro4","Cara, manos y niños."],["i_pro3","Tronco y extremidades."],["i_pro2","Zonas de mucha tensión."],["i_bist15","Desbridamiento."],["i_gasa","Apósito."],["i_vengas","Sostener el apósito."],["i_vasel","Gasa vaselinada en quemaduras."],["i_venalg","Debajo de la férula."],["i_venyes","Férula si hay fractura."],["i_venela","Esguince."],["i_collar","Trauma de cuello."],["i_bist20","Desbridamiento amplio."],["i_mp05","Tiras para aproximar bordes en heridas pequeñas."]]},
+ hta:{m:[["i_crea","Creatinina."],["i_tiro","Proteína en la orina."],["i_glu","Glucemia."]]},
+ dm:{m:[["i_glu","Glucometría."],["i_lanc","Punción del dedo."],["i_crea","Creatinina."],["i_tiro","Glucosa, cetonas y proteína en la orina."]]},
+ gastritis:{m:[["i_hcue","Hemoglobina si hay sangrado digestivo."],["i_soh","Sangre oculta si hay anemia sin causa."]]}};
+
+/* Vitamix y FTLC dentro de las listas de medicamentos */
+RUTA_BQ.pinf.m.push(["mnp","6 a 23 meses: 1 sobre al día por 60 días, un ciclo cada 6 meses; mezclado con 2 cucharadas de comida espesa y tibia."],["ftlc","Solo con desnutrición aguda sin complicaciones, por orden médica (Res. 2350)."]);
+RUTA_BQ.pinf.falta="No se entregó el albendazol (desparasitación dos veces al año desde el año).";
+MB_BQ.dnt.m.push(["ftlc","Sin complicaciones y con prueba de apetito positiva: unas 200 kcal/kg al día, por orden médica."]);
+MB_BQ.dnt.no=(MB_BQ.dnt.no||[]).concat("mnp");
+MB_BQ.dnt.falta="El albendazol no se entregó.";
+MB_BQ.dnt.op="No dar hierro aparte ni micronutrientes en polvo si recibe FTLC.";
+
+function insListaHTML(x,c){const li=([mid,rol])=>{const m=bqGet(mid);if(!m)return"";
+  return `<li><b>${esc(m.n)}</b> ${bqChip(m)}${bqEstado(m).k==="conf"?"":` <span class="note-src">· ${esc(bqCant(m))}</span>`}<br>${esc(rol)}${m.ci?`<small class="qt-c" style="color:var(--warn)">${esc(m.ci)}</small>`:""}<button type="button" class="btn bq-mini" data-bqgo="${m.id}" style="margin-top:4px;display:block">Ficha del insumo</button></li>`};
+  return `<ul class="mb-ul bq-ins">${(x.m||[]).map(li).join("")}</ul>
+   ${x.no&&x.no.length?`<p class="note-src" style="margin:6px 0 0"><b style="color:var(--miss)">No usar:</b> ${x.no.map(z=>{const m=bqGet(z);return m?esc(m.n):""}).filter(Boolean).join(", ")}.</p>`:""}
+   ${x.op?`<p class="note-src" style="margin:6px 0 0"><b>Ojo:</b> ${esc(x.op)}</p>`:""}
+   ${x.falta?`<p class="note-src" style="margin:6px 0 0"><b style="color:var(--warn)">No está en la solicitud:</b> ${esc(x.falta)}</p>`:""}`}
+rutaBQHTML=(o=>function(id){let h=o(id);const y=RUTA_INS[id];if(!h||!y)return h;
+  h=h.replace("<span>Del botiquín para esta ruta</span>","<span>Del botiquín e insumos para esta ruta</span>").replace("</span></summary>",` · ${y.m.length} insumos</span></summary>`);
+  return h.replace(`<div class="btns" style="margin-top:8px"><button class="btn bq-mini" type="button" id="ruta-bq-todo">`,
+   `<p class="lab" style="margin:12px 0 4px">Insumos para esta ruta</p>${insListaHTML(y,rutaCtx(id))}<div class="btns" style="margin-top:8px"><button class="btn bq-mini" type="button" id="ruta-bq-todo">`)})(rutaBQHTML);
+mbBQ=(o=>function(id,c){const y=MB_INS[id];return o(id,c)+(y?`<dt style="color:var(--accent)">Insumos del puesto</dt><dd>${insListaHTML(y,c)}</dd>`:"")})(mbBQ);
+document.head.insertAdjacentHTML("beforeend",`<style>.bq-conf{background:transparent;color:var(--warn);border-color:var(--warn);border-style:dashed}</style>`);
+
 home();sync(false);try{rrDesdeEnlace()}catch(e){}
 (async()=>{try{sample=window.claude?await window.claude.use("sample"):null}catch(e){sample=null}
   if(sample&&st.view==="mod"&&st.tab==="nota"){const g=$("go"),h=$("offHint");if(g)g.textContent="Organizar nota";if(h)h.hidden=true}})();
