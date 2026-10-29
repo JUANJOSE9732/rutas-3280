@@ -8,7 +8,7 @@ await p.goto('file://'+require('path').join(__dirname,'..','index.html'));
 const F=await p.evaluate(()=>{const F=[],ok=(c,m)=>{if(!c)F.push(m)};localStorage.clear();
  /* datos completos */
  const ids=new Set();BQ.forEach(m=>{ok(!ids.has(m.id),'id repetido '+m.id);ids.add(m.id);
-  if(m.ins){['n','p','u','g'].forEach(k=>ok(m[k],m.id+': falta '+k));ok(MBF[m.f[0]],m.id+': fuente');ok(bqEstado(m).k==='conf',m.id+': no queda por confirmar');return}
+  if(m.ins){['n','p','u','g'].forEach(k=>ok(m[k],m.id+': falta '+k));ok(MBF[m.f[0]],m.id+': fuente');ok(bqEstado(m).k!=='conf',m.id+': sigue por confirmar');return}
   if(m.ne)return;['n','c','p','u','ef','ci','it','em','op','g'].forEach(k=>ok(m[k],m.id+': falta '+k));ok(m.pa||m.pn,m.id+': sin posología');
   ok(m.f&&MBF[m.f[0]],m.id+': fuente desconocida');ok(!m.v||/^\d{4}-\d{2}$/.test(m.v),m.id+': fecha mal');
   (m.kg||[]).forEach((e,i)=>ok(bqCalc(m,i,10,{a:5})!=='',m.id+': calculadora vacía'))});
@@ -25,9 +25,14 @@ const F=await p.evaluate(()=>{const F=[],ok=(c,m)=>{if(!c)F.push(m)};localStorag
  ok(/4 sobre/.test(bqCalc(bqGet('ftlc'),0,10,{a:2})),'FTLC 10 kg: '+bqCalc(bqGet('ftlc'),0,10,{a:2}));
  S.set(BQ_KEY,JSON.stringify({mnp:{ent:1000,lote:'X1',v:'2028-01'}}));ok(bqEstado(bqGet('mnp')).k==='verde','al anotar lo que llegó sale del por confirmar');localStorage.clear();
  const sueltos=BQ.filter(m=>!m.ne&&!usados.has(m.id)&&!bqRutas(m.id).length).map(m=>m.id);
+ /* v214: acta del 28/10/2026 */
+ ok(bqCant(bqGet('albe_s'))==='48 frascos'&&bqCant(bqGet('lope'))==='84 tabletas'&&bqCant(bqGet('aciclo'))==='50 tabletas','cantidades del acta');
+ ['label','lora_t','ssn100','i_kitcit','i_hcue','i_tet7'].forEach(id=>ok(bqEstado(bqGet(id)).k==='sin',id+' debería estar no entregado'));
+ ok(bqCant(bqGet('i_glu'))==='2 cajas'&&bqCant(bqGet('i_prvih'))==='1 caja'&&bqCant(bqGet('i_pera'))==='1 unidad','unidades en singular y plural');
+ ok(/mensual/.test(bqGet('medroxi').n)&&bqGet('i_cond')&&bqResumen().conf===0,'medroxi mensual, preservativos y nada por confirmar');
  /* semáforo */
  const e=id=>bqEstado(bqGet(id)).k;ok(e('peni')==='rojo','penicilina 12/2026 en rojo: '+e('peni'));ok(e('medroxi')==='verde'&&e('omep')==='verde','medroxi y omeprazol entregados');
- ok(['rojo','venc'].includes(e('adren')),'adrenalina en rojo: '+e('adren'));ok(e('acet_t')==='verde','acetaminofén verde');ok(e('bisaco')==='sinf','bisacodilo sin fecha');ok(e('ibu')==='sin','ibuprofeno no entregado');
+ ok(['rojo','venc'].includes(e('adren')),'adrenalina en rojo: '+e('adren'));ok(e('acet_t')==='verde','acetaminofén verde');ok(e('i_mech')==='sinf','mechero sin fecha');ok(e('bisaco')==='verde','bisacodilo con lote del acta');ok(e('ibu')==='sin','ibuprofeno no entregado');
  /* corrección del inventario */
  S.set(BQ_KEY,JSON.stringify({peni:{ent:3,lote:'263012005',v:'2026-02'}}));ok(e('peni')==='venc','la corrección no se aplica');localStorage.clear();
  /* calculadora */
