@@ -15,6 +15,7 @@ const F=await p.evaluate(()=>{const F=[],ok=(c,m)=>{if(!c)F.push(m)};localStorag
  const d1=calPlanDia('2026-11-03').map(e=>e.t);ok(d1.some(t=>/Caracterización de gestantes/.test(t)),'caracterización día 1');
  ok(d1.includes('Atención de pacientes')&&d1.some(t=>/administrativo/.test(t)),'horario real');
  ok(!JSON.stringify(MD_PLAN).match(/Adultez|Adolescencia|curso de vida/),'sin cursos de vida');
+ ok(!(()=>{hoy=()=>'2026-11-02';return obSemCuenta()})(),'el lunes de llegada no cuenta SIVIGILA');ok((()=>{hoy=()=>'2026-11-09';return obSemCuenta()})(),'el lunes siguiente sí');
  const x=calConf();x.salida='';S.set('dn2_cal_conf',JSON.stringify(x));ok(calConf().salida==='','cambiar fecha borra la llegada');
  return F});
 console.log(F.length||errs.length?'FALLAS: '+F.concat(errs).join(' | '):'OK llegada_comunidad');await b.close();process.exit(F.length||errs.length?1:0)})();

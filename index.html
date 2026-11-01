@@ -1990,7 +1990,7 @@ function wireMiDia(){const cb=$("md-cal");if(cb)cb.onclick=calOpen;
 function mdShow(t){const s=$("md-st");s.innerHTML="";const a=document.createElement("textarea");a.value=t;a.rows=7;a.readOnly=true;s.append("No se pudo copiar solo. Mantén presionado el texto y cópialo:",a);a.focus();a.select()}
 
 /* ---------- PANEL ---------- */
-const VERSION_APP="2026-10-31 v215";
+const VERSION_APP="2026-10-31 v216";
 function home(){
   stopRec();if(S.get(AT_KEY))atReiniciar();st.view="home";
   const rm=["precon","prenatal","parto","rn","ive"],rp=["pinf","inf","adol","juv","adul","vej"];
@@ -10031,7 +10031,9 @@ function obSetChk(fr,id,v,iso){const k="dn2_ob_"+obKey(fr,iso),o=obChk(fr,iso);i
 function obDia(x){return x[4]==="pro"?obConf().prosoft:x[4]}
 /* pendientes de la semana que ya cerró */
 function obIso(id){return id==="s_siv"?seAnt(hoy()).ini:undefined}
-function obPendAnt(){const a=seAnt(hoy()),c=obChk("s",a.ini),P=[];
+/* la semana que cerró solo cuenta si terminó después de la llegada a la comunidad (la primera es la del lunes siguiente) */
+function obSemCuenta(){const s=calConf().salida,a=seAnt(hoy());return !!s&&a.fin>=s}
+function obPendAnt(){const a=seAnt(hoy()),c=obChk("s",a.ini),P=[];if(!obSemCuenta())return{se:a,P};
   if(!c.s_siv&&new Date().getDay()!==1)P.push(["s_siv","SIVIGILA de la "+seTxt(a)+" sin notificar"]);if(!c.s_pro)P.push(["s_pro","Envío de Prosoft de la "+seTxt(a)+" pendiente"]);return{se:a,P}}
 function obReporte(){const a=seAnt(hoy());return [`NOTIFICACION SEMANAL SIVIGILA — ${seTxt(a).toUpperCase()} — AÑO ${a.a}`,"UPGD: ESE HOSPITAL SAN ANTONIO · SEDE RURAL "+(S.get("dn2_ultcom")||"___"),
   "EVENTOS INDIVIDUALES NOTIFICADOS: ___ (o NINGUNO)","COLECTIVA 995 IRA: consultas por IRA ___ / total de consultas ___ por grupo de edad","COLECTIVA 998 EDA: casos ___ por grupo de edad",
@@ -10056,7 +10058,7 @@ function obOpen(de){stopRec();st.view="obc";const h=hoy(),s=seDe(h),cf=obConf(),
 /* Mi día: semana epidemiológica, SIVIGILA, envío de Prosoft y pendientes */
 mdTareas=(function(o){return function(){let t=o.apply(this,arguments);if(!calEnCampo())return t;const d=new Date().getDay(),a=seAnt(hoy());
   t=t.filter(x=>!/^Reportar SIVIGILA de la semana/.test(x));
-  if(d===1)t.unshift("SIVIGILA de la "+seTxt(a)+": individuales, colectivas 995 y 998, o notificación negativa (act. 12)");
+  if(d===1&&obSemCuenta())t.unshift("SIVIGILA de la "+seTxt(a)+": individuales, colectivas 995 y 998, o notificación negativa (act. 12)");
   if(d===obConf().prosoft)t.push("Enviar por internet las notas de Prosoft de la semana y verificar que subieron (act. 04)");
   obPendAnt().P.forEach(p=>{if(!(d===1&&p[0]==="s_siv"))t.unshift("Pendiente: "+p[1])});return t}})(mdTareas);
 fmtHome=(function(o){return function(){o();const ref=$("md-com")||$("md-obl")||$("md-fmt");if(!ref||$("md-obc"))return;const s=seDe(hoy()),n=calEnCampo()?obPendAnt().P.length:0;
@@ -10569,6 +10571,7 @@ obsNota=(function(o){return function(f){f=f||hoy();let md=o.apply(this,arguments
    y se puede descargar la bitácora completa («App Rutas 3280 - Bitácora.md») para el vault.
    Al publicar una versión nueva se agrega aquí su línea (la más nueva primero). */
 const APP_CAMBIOS=[
+ [216,"2026-10-31","El primer reporte SIVIGILA y el primer envío de Prosoft son del lunes siguiente a la llegada (9/11), no del día de llegada."],
  [215,"2026-10-31","Llegada a la comunidad el 2/11/2026 en el calendario y Mi día, con los formatos de ingreso por día; horario real: mañana atención de pacientes con actividades puntuales, tarde trabajo administrativo, urgencias y eventualidades."],
  [214,"2026-10-29","Botiquín con el acta de entrega del 28/10/2026: cantidades, lotes y vencimientos de medicamentos, nutrición (300 sobres de Vitamix15 y 10 de FTLC) e insumos médico-quirúrgicos y de laboratorio (ya no quedan por confirmar); albendazol en suspensión (48 frascos) en las rutas de desparasitación; la medroxiprogesterona entregada es el inyectable mensual con estradiol; loratadina en tableta, labetalol y SSN de 100 ml quedan como no entregados; preservativos agregados."],
  [213,"2026-10-29","Botiquín con la nutrición y los insumos de la proyección de solicitud a almacén: micronutrientes en polvo (Vitamix15 Nutrea, 6 a 23 meses) y FTLC (desnutrición aguda, calculadora de sobres por peso), más 85 insumos médico-quirúrgicos y de laboratorio con para qué, cómo se usa y cuidados. Quedan «Por confirmar» hasta anotar cantidad, lote y vencimiento; filtros de solo medicamentos o solo insumos; cada ruta y cada morbilidad muestran sus insumos; la conducta y la evaluación final reconocen «Vitamix»."],
