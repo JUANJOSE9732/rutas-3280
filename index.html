@@ -1436,15 +1436,30 @@ const CAL_FIN="2026-12-31",CAL_H0=6,CAL_H1=19,CAL_HPX=46;
 const CAL_DIAS=["Dom","Lun","Mar","Mié","Jue","Vie","Sáb"];
 let CAL={vista:null,ref:null,form:null};
 function calJ(k,d){try{return JSON.parse(S.get(k)||"null")||d}catch(e){return d}}
-function calConf(){return calJ("dn2_cal_conf",{})}
+const CAL_LLEGADA="2026-11-02";
+/* formatos y pasos al ingresar a una comunidad: [días desde la llegada, tarea, tipo, nota] */
+const CAL_INGRESO=[
+ [-2,"Conseguir formatos sin existencia: kardex (23), búsqueda activa familiar (29), caracterización de menores de 5 (39)","adm","Sin ellos esas actividades quedan sin soporte para la entrega del 20 de noviembre."],
+ [-1,"Revisar carpeta de formatos de ingreso: acta de concertación (28), acta de reunión y asistencia (27), inventario de elementos, insumos de malaria (38), caracterización de gestantes (26), sintomáticos (32), certificado de permanencia (18)","adm","Llevar también los textos de educación de citología e higiene de manos."],
+ [0,"Acta de concertación con el capitán (formato 28)","com","Horario: mañana atención de pacientes; tarde trabajo administrativo, urgencias y eventualidades. Actividades puntuales, permiso de fotos, firma del capitán (soporte 01)."],
+ [0,"Reunión comunitaria de presentación con acta y lista de asistencia (formato 27)","com","Educación: cáncer de cuello uterino y citología, higiene de manos (soporte 11)."],
+ [0,"Inventario de elementos del puesto al recibirlo","adm","Equipos, muebles y elementos con su estado, para que no te cobren faltantes ajenos."],
+ [0,"Abrir el registro diario de insumos de malaria (formato 38) con el saldo que llevas","adm","Pruebas rápidas y antimaláricos."],
+ [0,"Tener a mano la captación de sintomáticos (formato 32)","adm","Tos de más de 15 días, lesiones de piel o pérdida de sensibilidad."],
+ [1,"Censo o listado de familias con el promotor y el capitán","busq","Para saber a quién buscar: gestantes, menores de 5, mujeres para citología."],
+ [1,"Caracterización de gestantes (formato 26)","busq","Listado de todas las gestantes encontradas, con su riesgo (soporte 05)."],
+ [2,"Completar caracterización de gestantes y empezar el listado de menores de 5","busq","Con el censo del promotor."]];
+function calConf(){const c=calJ("dn2_cal_conf",{});if(!("salida" in c))c.salida=CAL_LLEGADA;return c}
+function calIngreso(f){const s=calConf().salida;if(!s)return[];const n=Math.round((calD(f)-calD(s))/864e5);return CAL_INGRESO.filter(x=>x[0]===n)}
 function calEnCampo(){const s=calConf().salida;return !!s&&hoy()>=s}
 function calISO(d){return d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0")}
 function calD(iso){const[y,m,d]=iso.split("-").map(Number);return new Date(y,m-1,d)}
 function calAdd(iso,n){const d=calD(iso);d.setDate(d.getDate()+n);return calISO(d)}
 function calMin(h){if(!h)return null;const[a,b]=h.split(":").map(Number);return a*60+(b||0)}
 function calPlanDia(f){const o=[],dow=calD(f).getDay(),c=calConf();
-  if(c.salida&&f===c.salida)o.push({t:"Salida a comunidad",tipo:"ent",nota:"Viaje al punto de atención asignado."});
-  if(c.salida&&f>=c.salida&&f<=CAL_FIN){const P=MD_PLAN[dow],pmT={1:"reg",2:"busq",3:"com",4:"busq",5:"adm"};
+  if(c.salida&&f===c.salida)o.push({t:"Llegada a la comunidad",tipo:"ent",nota:"Buscar al capitán o la autoridad tradicional antes de atender."});
+  calIngreso(f).forEach(x=>o.push({t:x[1],tipo:x[2],nota:x[3]}));
+  if(c.salida&&f>c.salida&&f<=CAL_FIN){const P=MD_PLAN[dow],pmT={1:"reg",2:"adm",3:"adm",4:"adm",5:"adm"};
     if(dow>=1&&dow<=5){o.push({t:"Apertura del punto",tipo:"adm",hi:"07:00",hf:"07:30",nota:"Insumos, nevera y temperatura; confirmar citados con el promotor (act. 08 · 14)."});
       o.push({t:P.am,tipo:"prog",hi:"07:30",hf:"12:00",nota:P.amd});
       o.push({t:P.pm,tipo:pmT[dow],hi:"14:00",hf:"16:00",nota:[P.pmd,P.pmr].filter(Boolean).join(" · ")});
@@ -1469,7 +1484,7 @@ function calOpen(){stopRec();if(!CAL.vista)CAL.vista=window.innerWidth<640?"dia"
 function calRender(){st.view="cal";const c=calConf();
   $("app").innerHTML=`<div class="top"><button class="back" type="button" id="cal-back">← Inicio</button><span class="tag pc">Calendario</span></div>
   <header><h1>Cronograma</h1><p class="sub">Actividades proyectadas del contrato, tus controles y lo que vayas programando.</p></header>
-  ${c.salida?`<p class="note-src" style="margin:0">Salida a comunidad: <b>${esc(c.salida.split("-").reverse().join("/"))}</b> · <button class="lnk" type="button" id="cal-sal">Cambiar</button></p>`:`<div class="box warn"><h3>Modo preparación</h3><p style="margin:0 0 8px">El horario de campo se proyecta desde el día en que salgas a comunidad. Escribe la fecha cuando la tengas confirmada.</p><div class="btns"><input type="date" id="cal-sal-in" style="flex:1 1 160px"><button class="btn primary" type="button" id="cal-sal-ok">Guardar fecha</button></div></div>`}
+  ${c.salida?`<p class="note-src" style="margin:0">Llegada a la comunidad: <b>${esc(c.salida.split("-").reverse().join("/"))}</b> · <button class="lnk" type="button" id="cal-sal">Cambiar</button></p>`:`<div class="box warn"><h3>Modo preparación</h3><p style="margin:0 0 8px">El horario de campo se proyecta desde el día en que salgas a comunidad. Escribe la fecha cuando la tengas confirmada.</p><div class="btns"><input type="date" id="cal-sal-in" style="flex:1 1 160px"><button class="btn primary" type="button" id="cal-sal-ok">Guardar fecha</button></div></div>`}
   <div class="cal-bar">
    <div class="cal-nav"><button class="btn" type="button" id="cal-prev" aria-label="Anterior">‹</button><button class="btn" type="button" id="cal-hoy">Hoy</button><button class="btn" type="button" id="cal-next" aria-label="Siguiente">›</button><b class="cal-lab">${esc(calEtiq())}</b></div>
    <div class="cal-seg" role="group" aria-label="Vista">${[["dia","Día"],["semana","Semana"],["mes","Mes"]].map(([v,l])=>`<button type="button" data-cv="${v}" aria-pressed="${CAL.vista===v}">${l}</button>`).join("")}</div>
@@ -1480,7 +1495,7 @@ function calRender(){st.view="cal";const c=calConf();
   <div class="cal-ley">${Object.entries(CAL_TIPOS).map(([k,v])=>`<span><i class="ev-${k}"></i>${esc(v)}</span>`).join("")}</div>
   <p class="foot">Lo proyectado sale del plan de acción y de las fechas de entrega; tócalo para marcarlo hecho, moverlo o quitarlo. Tus actividades y cambios se guardan en este aparato.</p>`;
   $("cal-back").onclick=()=>{home();window.scrollTo(0,0)};
-  if($("cal-sal"))$("cal-sal").onclick=()=>{const x=calConf();delete x.salida;S.set("dn2_cal_conf",JSON.stringify(x));calRender()};
+  if($("cal-sal"))$("cal-sal").onclick=()=>{const x=calConf();x.salida="";S.set("dn2_cal_conf",JSON.stringify(x));calRender()};
   if($("cal-sal-ok"))$("cal-sal-ok").onclick=()=>{const v=$("cal-sal-in").value;if(!v)return;const x=calConf();x.salida=v;S.set("dn2_cal_conf",JSON.stringify(x));CAL.ref=v;calRender()};
   const paso={dia:1,semana:7,mes:0};
   $("cal-prev").onclick=()=>{if(CAL.vista==="mes"){const d=calD(CAL.ref);d.setDate(1);d.setMonth(d.getMonth()-1);CAL.ref=calISO(d)}else CAL.ref=calAdd(CAL.ref,-paso[CAL.vista]);calRender()};
@@ -1910,13 +1925,13 @@ VN.morb={g:"Morbilidad",t:"Consulta de morbilidad",who:"Enfermedad general, preg
 
 /* ---------- MI DÍA: secretaria diaria del contrato 1785 ---------- */
 const MD_PLAN={
- 1:{am:"Primera infancia e infancia (0–11)",amd:"Valoración integral C y D, agudeza visual, educación PAI y lactancia",mods:["pinf","inf"],pm:"SIVIGILA de la semana epidemiológica",pmd:"Notificación semanal y revisión de nacidos vivos y defunciones",pmr:"act. 12 · 13"},
- 2:{am:"Adolescencia y juventud (12–28)",amd:"Valoración, planificación, asesoría VIH, preconcepcional",mods:["adol","juv","precon"],pm:"Búsqueda activa casa a casa",pmd:"Menores de 5 con esquema o control pendiente y gestantes no captadas",pmr:"act. 05 · 14"},
- 3:{am:"Salud de la mujer y gestantes",amd:"Citología, tamizaje de mama, DIU e implante, captación y control de gestantes",mods:["prenatal","proc","adul"],pm:"Educación grupal y PIC",pmd:"Charla en escuela, maloca o casa comunal; actividades PIC programadas",pmr:"act. 11 · 16"},
- 4:{am:"Adultez y vejez (29+)",amd:"Valoración integral, riesgo cardiovascular, sintomáticos respiratorios, agudeza visual",mods:["adul","vej"],pm:"Búsqueda activa de inasistentes",pmd:"Mujeres sin citología al día, adultos sin valoración, tos de más de 15 días",pmr:"act. 03 · 05 · 14"},
- 5:{am:"Consulta abierta y telemedicina",amd:"No programados, interconsultas, telexperticia, referencias, controles pendientes",mods:[],pm:"Medicamentos, bases y escaneo",pmd:"Kardex e inventario, bases al día, escanear los formatos de la semana",pmr:"act. 05 · 07 · 08 · 17"},
- 6:{am:"Jornada concertada",amd:"Solo si se acordó con el líder: salida a comunidad de influencia o recuperar citas perdidas (act. 01 · 02 · 16)",mods:[],pm:"Descanso",pmd:"",pmr:""},
- 0:{am:"Descanso",amd:"Si tienes un rato, revisa qué soportes faltan para la entrega",mods:[],pm:"Descanso",pmd:"",pmr:""}};
+ 1:{am:"Atención de pacientes",amd:"Actividades puntuales: citología, examen clínico de mama, planificación, gestantes (ingreso y control con pruebas rápidas), agudeza visual, malaria con prueba rápida, revisión del carné de vacunas con remisión si está incompleto, consulta por enfermedad con telemedicina",mods:["proc","prenatal"],pm:"Trabajo administrativo · urgencias y eventualidades",pmd:"SIVIGILA de la semana epidemiológica; nacidos vivos y defunciones",pmr:"act. 12 · 13"},
+ 2:{am:"Atención de pacientes",amd:"Actividades puntuales: citología, examen clínico de mama, planificación, gestantes (ingreso y control con pruebas rápidas), agudeza visual, malaria con prueba rápida, revisión del carné de vacunas con remisión si está incompleto, consulta por enfermedad con telemedicina",mods:["proc","prenatal"],pm:"Trabajo administrativo · urgencias y eventualidades",pmd:"Bases, caracterización de gestantes y encuestas de satisfacción",pmr:"act. 05"},
+ 3:{am:"Atención de pacientes",amd:"Actividades puntuales: citología, examen clínico de mama, planificación, gestantes (ingreso y control con pruebas rápidas), agudeza visual, malaria con prueba rápida, revisión del carné de vacunas con remisión si está incompleto, consulta por enfermedad con telemedicina",mods:["proc","prenatal"],pm:"Trabajo administrativo · urgencias y eventualidades",pmd:"Actas de educación y PIC con listas de asistencia",pmr:"act. 11 · 16"},
+ 4:{am:"Atención de pacientes",amd:"Actividades puntuales: citología, examen clínico de mama, planificación, gestantes (ingreso y control con pruebas rápidas), agudeza visual, malaria con prueba rápida, revisión del carné de vacunas con remisión si está incompleto, consulta por enfermedad con telemedicina",mods:["proc","prenatal"],pm:"Trabajo administrativo · urgencias y eventualidades",pmd:"Prosoft al día, referencias y telemedicinas",pmr:"act. 04 · 09 · 10"},
+ 5:{am:"Atención de pacientes",amd:"Actividades puntuales: citología, examen clínico de mama, planificación, gestantes (ingreso y control con pruebas rápidas), agudeza visual, malaria con prueba rápida, revisión del carné de vacunas con remisión si está incompleto, consulta por enfermedad con telemedicina",mods:["proc","prenatal"],pm:"Trabajo administrativo · urgencias y eventualidades",pmd:"Kardex e inventario, escaneo de la semana y reunión con promotores",pmr:"act. 07 · 08 · 14 · 17"},
+ 6:{am:"Jornada concertada",amd:"Solo si se acordó con el capitán (act. 01 · 02 · 16)",mods:[],pm:"Descanso",pmd:"Urgencias y eventualidades",pmr:""},
+ 0:{am:"Descanso",amd:"Urgencias y eventualidades. Si tienes un rato, revisa qué soportes faltan para la entrega",mods:[],pm:"Descanso",pmd:"",pmr:""}};
 /* [entrega, inicio del periodo, nombre, entregada]: la de octubre ya se entregó; lo que se haga desde el 24 de octubre va a noviembre */
 const MD_ENT=[["2026-10-30","2026-10-01","30 de octubre","2026-10-24"],["2026-11-20","2026-10-24","20 de noviembre"],["2026-12-20","2026-11-21","20 de diciembre"]];
 const MD_SOP=["01 Acta de concertación y lista de asistencia","02 Certificado de permanencia firmado por el líder","03 Registro diario de atenciones y consentimientos","04 Listado de atenciones de Prosoft","05 Encuestas, caracterización de gestantes, búsqueda de menores de 5, bases","06 Proyección de insumos y formatos de dispensación","07 Inventario en Excel firmado","08 Registro de temperatura y novedades","09 Registro de interconsulta y telemedicina","10 Referencias o constancia de no remisiones","11 Listas de asistencia de educación PAI","12 Fichas SIVIGILA y reporte semanal","13 Nacidos vivos y defunciones, o constancia","14 Seguimiento a auxiliares y promotores","15 Acta de contingencia, o constancia","16 Listas y actas PIC","17 Informe mensual firmado","18 Actividad adicional, o constancia"];
@@ -1926,6 +1941,7 @@ function mdEntregada(e){if(e[3])return true;try{return (JSON.parse(S.get("dn2_en
 function mdPeriodo(){const h=hoy();return MD_ENT.find(e=>e[0]>=h&&!mdEntregada(e))||MD_ENT[MD_ENT.length-1]}
 function mdDias(){const e=mdPeriodo();return Math.round((mdFecha(e[0])-mdFecha(hoy()))/86400000)}
 function mdTareas(){const d=new Date().getDay(),r=mdDias(),t=[];
+  calIngreso(hoy()).forEach(x=>t.push(x[1]));
   if(!calEnCampo())t.push("Avanzar en la lista «Antes de salir» del plan de acción","Confirmar fecha de salida, comunidad y transporte con la ESE");
   if(d>=1&&d<=5&&calEnCampo()){t.push("Abrir el punto: insumos, nevera y temperatura anotada (act. 08)","Confirmar con el promotor los citados de hoy (act. 14)","Cada atención con su formato firmado o con huella del usuario","Todo registrado en Prosoft antes de cerrar (act. 04)","Fotos de evidencia del día guardadas (act. 17)")}
   if(d===1&&calEnCampo())t.push("Reportar SIVIGILA de la semana, aunque sea notificación negativa (act. 12)");
@@ -1965,7 +1981,7 @@ function mdResumen(){const n=new Date(),e=mdPeriodo(),st=mdStats(),T=mdTareas(),
   if(T.length){L.push("Tareas hechas: "+T.filter(x=>tk[x]).length+" / "+T.length);const p=T.filter(x=>!tk[x]);if(p.length)L.push("Tareas pendientes: "+p.join("; "))}
   const fs=MD_SOP.filter(x=>!sk[x.slice(0,2)]);L.push("Soportes listos: "+(18-fs.length)+" / 18");if(fs.length)L.push("Soportes que faltan: "+fs.map(x=>x.slice(0,2)).join(", "));
   return L.join("\n")}
-function mdPrepHTML(){const s=calConf().salida,n=s?Math.round((calD(s)-calD(hoy()))/864e5):null;return `<div class="md-b now"><p class="lab">Modo preparación</p><b>${s?(n===1?"Falta 1 día para salir a comunidad":"Faltan "+n+" días para salir a comunidad"):"Aún sin fecha de salida a comunidad"}</b><small>Formatos en blanco, medicamentos e insumos con acta, inventario inicial, equipos, contactos del líder y el promotor, Prosoft probado. ${s?"":"Pon la fecha de salida en el calendario para proyectar el horario de campo."}</small></div>`}
+function mdPrepHTML(){const s=calConf().salida,n=s?Math.round((calD(s)-calD(hoy()))/864e5):null;return `<div class="md-b now"><p class="lab">Modo preparación</p><b>${s?(n===1?"Falta 1 día para llegar a la comunidad":"Faltan "+n+" días para llegar a la comunidad"):"Aún sin fecha de llegada a la comunidad"}</b><small>Formatos en blanco, medicamentos e insumos con acta, inventario inicial, equipos, contactos del líder y el promotor, Prosoft probado. ${s?"":"Pon la fecha de salida en el calendario para proyectar el horario de campo."}</small></div>`}
 function wireMiDia(){const cb=$("md-cal");if(cb)cb.onclick=calOpen;
   document.querySelectorAll("[data-mdt]").forEach(c=>c.onchange=()=>{const k="dn2_midia_"+hoy(),o=mdGet(k);if(c.checked)o[c.dataset.mdt]=1;else delete o[c.dataset.mdt];S.set(k,JSON.stringify(o));const T=mdTareas();$("md-tc").textContent=T.filter(x=>o[x]).length+" / "+T.length});
   document.querySelectorAll("[data-mds]").forEach(c=>c.onchange=()=>{const k="dn2_sop_"+mdPeriodo()[0],o=mdGet(k);if(c.checked)o[c.dataset.mds]=1;else delete o[c.dataset.mds];S.set(k,JSON.stringify(o));const n=MD_SOP.filter(x=>o[x.slice(0,2)]).length;$("md-sc").textContent=n+" / 18";document.querySelectorAll(".md-stats .chip").forEach(ch=>{if(ch.firstChild&&ch.firstChild.textContent==="Soportes")ch.lastChild.textContent=n+" / 18"})});
@@ -1974,7 +1990,7 @@ function wireMiDia(){const cb=$("md-cal");if(cb)cb.onclick=calOpen;
 function mdShow(t){const s=$("md-st");s.innerHTML="";const a=document.createElement("textarea");a.value=t;a.rows=7;a.readOnly=true;s.append("No se pudo copiar solo. Mantén presionado el texto y cópialo:",a);a.focus();a.select()}
 
 /* ---------- PANEL ---------- */
-const VERSION_APP="2026-10-29 v214";
+const VERSION_APP="2026-10-31 v215";
 function home(){
   stopRec();if(S.get(AT_KEY))atReiniciar();st.view="home";
   const rm=["precon","prenatal","parto","rn","ive"],rp=["pinf","inf","adol","juv","adul","vej"];
@@ -10553,6 +10569,7 @@ obsNota=(function(o){return function(f){f=f||hoy();let md=o.apply(this,arguments
    y se puede descargar la bitácora completa («App Rutas 3280 - Bitácora.md») para el vault.
    Al publicar una versión nueva se agrega aquí su línea (la más nueva primero). */
 const APP_CAMBIOS=[
+ [215,"2026-10-31","Llegada a la comunidad el 2/11/2026 en el calendario y Mi día, con los formatos de ingreso por día; horario real: mañana atención de pacientes con actividades puntuales, tarde trabajo administrativo, urgencias y eventualidades."],
  [214,"2026-10-29","Botiquín con el acta de entrega del 28/10/2026: cantidades, lotes y vencimientos de medicamentos, nutrición (300 sobres de Vitamix15 y 10 de FTLC) e insumos médico-quirúrgicos y de laboratorio (ya no quedan por confirmar); albendazol en suspensión (48 frascos) en las rutas de desparasitación; la medroxiprogesterona entregada es el inyectable mensual con estradiol; loratadina en tableta, labetalol y SSN de 100 ml quedan como no entregados; preservativos agregados."],
  [213,"2026-10-29","Botiquín con la nutrición y los insumos de la proyección de solicitud a almacén: micronutrientes en polvo (Vitamix15 Nutrea, 6 a 23 meses) y FTLC (desnutrición aguda, calculadora de sobres por peso), más 85 insumos médico-quirúrgicos y de laboratorio con para qué, cómo se usa y cuidados. Quedan «Por confirmar» hasta anotar cantidad, lote y vencimiento; filtros de solo medicamentos o solo insumos; cada ruta y cada morbilidad muestran sus insumos; la conducta y la evaluación final reconocen «Vitamix»."],
  [212,"2026-10-25","Vacuna contra el virus sincitial respiratorio (VSR) en la gestante, semanas 28 a 36 (PAI desde noviembre de 2025), en el cuadro de vacunas; influenza desde la 14, Tdap desde la 26 y VSR solo aparecen como debidas en su semana; la evaluación final avisa las vacunas que tocan y no están marcadas."],
